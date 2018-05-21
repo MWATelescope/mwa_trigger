@@ -1,0 +1,4 @@
+*.xml
+.idea
+twistd.log*
+twistd.pid

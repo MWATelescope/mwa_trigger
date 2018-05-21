@@ -8,6 +8,7 @@
    nearly the same time.
 """
 
+import ConfigParser
 import logging
 import sys
 import traceback
@@ -15,12 +16,29 @@ import warnings
 
 import Pyro4
 
+CPPATH = ['/usr/local/etc/trigger.conf', './trigger.conf']   # Path list to look for configuration file
+
 logging.basicConfig()
 DEFAULTLOGGER = logging.getLogger()
 
-Pyro4.config.NS_HOST = 'localhost'
-Pyro4.config.NS_PORT = 9090
-# Pyro4.config.SERIALIZER = 'pickle'   # TODO - uncomment this on site, where we have an ancient Pyro4 install
+############## Point to a running Pyro nameserver #####################
+# If not on site, start one before running this code, using pyro_nameserver.py
+CP = ConfigParser.SafeConfigParser()
+CP.read(CPPATH)
+
+if CP.has_option(section='pyro', option='ns_host'):
+  Pyro4.config.NS_HOST = CP.get(section='default', option='ns_host')
+else:
+  Pyro4.config.NS_HOST = 'localhost'
+
+if CP.has_option(section='pyro', option='ns_port'):
+  Pyro4.config.NS_PORT = int(CP.get(section='default', option='ns_port'))
+else:
+  Pyro4.config.NS_PORT = 9090
+
+if Pyro4.config.NS_HOST in ['helios', 'mwa-db']:
+  Pyro4.config.SERIALIZER = 'pickle'   # We must be on site, where we have an ancient Pyro4 install and nameserver running
+
 Pyro4.config.COMMTIMEOUT = 10.0
 
 sys.excepthook = Pyro4.util.excepthook
@@ -46,7 +64,7 @@ def PyroTransmit(event='', logger=DEFAULTLOGGER):
   """
   try:
     client = initPyro()   # Create a client proxy object
-  except:
+  except Pyro4.errors.PyroError:
     logger.exception('Exception in initPyro()')
     return False
 
@@ -57,7 +75,7 @@ def PyroTransmit(event='', logger=DEFAULTLOGGER):
   except (Pyro4.errors.ConnectionClosedError, Pyro4.errors.TimeoutError, Pyro4.errors.ProtocolError):
     logger.error('Communication exception in PyroTransmit')
     return False
-  except:
+  except Pyro4.errors.PyroError:
     logger.error('Other exception in PyroTransmitLoop: %s', traceback.format_exc())
     return False
 

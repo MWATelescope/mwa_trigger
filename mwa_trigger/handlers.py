@@ -102,7 +102,6 @@ class TriggerEvent(object):
         :param time_min: Total length of observation time, in minutes.
         :param project_id: The project ID requesting the triggered observation
         :param secure_key: The password specific to that project ID
-        :param logger: An optional logger object to use instead of the default logger.
         :return: The full results dictionary returned by the triggerservice API (see triggerservice.trigger)
         """
         if time_min < 2:

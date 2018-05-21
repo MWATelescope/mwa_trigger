@@ -15,7 +15,7 @@ import Queue
 
 import Pyro4
 
-import fermi_swift
+from mwa_trigger import fermi_swift
 
 EVENTHANDLERS = [fermi_swift.processevent]    # One or more handler functions - all will be called in turn on each XML event.
 
@@ -56,20 +56,25 @@ DEFAULTLOGGER.addHandler(filehandler)
 ##############
 
 ############## Point to a running Pyro nameserver #####################
-# If not on site, start one before running this code, using "python -m Pyro4.naming --host=localhost --port=9090 --nobc"
+# If not on site, start one before running this code, using pyro_nameserver.py
 CP = ConfigParser.SafeConfigParser()
 CP.read(CPPATH)
 
 if CP.has_option(section='pyro', option='ns_host'):
   Pyro4.config.NS_HOST = CP.get(section='default', option='ns_host')
 else:
-  'localhost'
+  Pyro4.config.NS_HOST = 'localhost'
 
 if CP.has_option(section='pyro', option='ns_port'):
   Pyro4.config.NS_PORT = int(CP.get(section='default', option='ns_port'))
 else:
   Pyro4.config.NS_PORT = 9090
 
+if Pyro4.config.NS_HOST in ['helios', 'mwa-db']:
+  Pyro4.config.SERIALIZER = 'pickle'   # We must be on site, where we have an ancient Pyro4 install and nameserver running
+
+
+############### Main event handler - receives VOEvent objects by RPC and queues them for processing #################
 
 class VOEventHandler(object):
   """Implements Pyro4 methods that can be called remotely via RPC, to process VO event XML strings.
@@ -112,12 +117,12 @@ class VOEventHandler(object):
       if ns is not None:
         try:
           ns._pyroRelease()
-        except:
+        except Pyro4.errors.PyroError:
           pass
 
       try:
         ns = Pyro4.locateNS()
-      except:
+      except Pyro4.errors.PyroError:
         self.logger.error("Can't locate Pyro nameserver - waiting 10 sec to retry")
         if not EXITING:
           time.sleep(10)
@@ -139,14 +144,14 @@ class VOEventHandler(object):
           # also need to register in name server because it's not there yet.
           uri = PYRO_DAEMON.register(self)
           ns.register("VOEventHandler", uri)
-        except:
+        except (Pyro4.errors.PyroError, socket.error):
           if not EXITING:
             self.logger.error("Exception in VOEventHandler Pyro4 startup. Retrying in 10 sec: %s" % (traceback.format_exc(),))
             time.sleep(10)
           else:
             self.logger.error("Exception in VOEventHandler, EXITING is true, shutting down: %s" % (traceback.format_exc(),))
           continue
-      except:
+      except Exception:
         if not EXITING:
           self.logger.error("Exception in VOEventHandler Pyro4 start. Retrying in 10 sec: %s" % (traceback.format_exc(),))
           time.sleep(10)
@@ -158,7 +163,7 @@ class VOEventHandler(object):
         try:
           ns._pyroRelease()
           PYRO_DAEMON.requestLoop()
-        except:
+        except Exception:
           if not EXITING:
             self.logger.error("Exception in VOEventHandler Pyro4 server. Restarting in 10 sec: %s" % (traceback.format_exc(),))
             time.sleep(10)
@@ -169,7 +174,7 @@ class VOEventHandler(object):
     PYRO_DAEMON.close()
 
 
-def QueueWorker(logger=DEFAULTLOGGER):
+def QueueWorker():
   """Worker thread to process incoming message packets in the EventQueue. It is spawned on startup, and run continuously,
      blocking on EventQueue.get() if there's nothing to process. When an item is 'put' on the queue, the EventQueue.get()
      returns and the event is processed.
@@ -177,7 +182,7 @@ def QueueWorker(logger=DEFAULTLOGGER):
   global EXITING
   while not EXITING:
     eventxml = EventQueue.get()
-    logger.info("Processing event, current queue size is %d" % EventQueue.qsize())
+    DEFAULTLOGGER.info("Processing event, current queue size is %d" % EventQueue.qsize())
     for hfunc in EVENTHANDLERS:
       handled = hfunc(event=eventxml)
       if handled:   # One of the handlers accepted this event

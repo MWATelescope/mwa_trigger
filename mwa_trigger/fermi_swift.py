@@ -101,7 +101,7 @@ def is_grb(v):
 def handle_grb(v):
     log.debug("processing GRB {0}".format(v.attrib['ivorn']))
 
-    trigger = False
+    # trigger = False
 
     if 'SWIFT' in v.attrib['ivorn']:
         log.debug("SWIFT GRB trigger detected")

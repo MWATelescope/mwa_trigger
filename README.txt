@@ -4,6 +4,7 @@ VOEvent trigger framework for MWA observations. This repository is made up of:
 /README.txt - this file
 /setup.py - package file
 /trigger.conf.example - sample configuration file
+/python_requirements.txt - requirements file to set up a virtual python environment
 /mwa_trigger/
     __init__.py - package file
     triggerservice.py - library containing wrapper code to generate a triggered MWA observation.
@@ -30,7 +31,7 @@ To get a trigger handler running, you will need to:
 
 - If the trigger handler will not be running on-site, then in one terminal window, run:
 
-      python -m Pyro4.naming --host=localhost --port=9090 --nobc
+      pyro_nameserver.py
 
   This will start a Pyro 'Name service' daemon, allowing push_voevent.py to find the network details
   it needs to contact the voevent_handler.py daemon. If the handler is running on site, this step isn't
