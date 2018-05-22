@@ -206,7 +206,7 @@ if __name__ == '__main__':
   pyro_thread.start()
 
   # Start a background thread to process incoming events from the queue, one by one.
-  queue_thread = threading.Thread(target=QueueWorker, name='QueueDaemon', kwargs={'logger':DEFAULTLOGGER})
+  queue_thread = threading.Thread(target=QueueWorker, name='QueueDaemon')
   queue_thread.daemon = True
   queue_thread.start()
 
