@@ -11,5 +11,5 @@ setup(
   author_email='Andrew.Williams@curtin.edu.au',
   description='Code to parse VOEvents and generate triggered MWA observations',
   scripts=['push_voevent.py', 'pyro_nameserver.py', 'voevent_handler.py'],
-  install_requires=["numpy", "astropy", 'Pyro4']
+  install_requires=["numpy", "astropy", 'Pyro4', 'Twisted', 'Comet']
 )

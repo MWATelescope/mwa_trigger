@@ -27,12 +27,12 @@ CP = ConfigParser.SafeConfigParser()
 CP.read(CPPATH)
 
 if CP.has_option(section='pyro', option='ns_host'):
-  Pyro4.config.NS_HOST = CP.get(section='default', option='ns_host')
+  Pyro4.config.NS_HOST = CP.get(section='pyro', option='ns_host')
 else:
   Pyro4.config.NS_HOST = 'localhost'
 
 if CP.has_option(section='pyro', option='ns_port'):
-  Pyro4.config.NS_PORT = int(CP.get(section='default', option='ns_port'))
+  Pyro4.config.NS_PORT = int(CP.get(section='pyro', option='ns_port'))
 else:
   Pyro4.config.NS_PORT = 9090
 
