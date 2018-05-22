@@ -10,6 +10,7 @@ import logging
 import os
 import pwd
 import socket
+import sys
 import threading
 import time
 import traceback
@@ -18,6 +19,8 @@ import Queue
 import Pyro4
 
 from mwa_trigger import fermi_swift
+
+PRETEND = False   # Set to true to trigger event in 'pretend' mode, nopt actually schedule observations.
 
 EVENTHANDLERS = [fermi_swift.processevent]    # One or more handler functions - all will be called in turn on each XML event.
 
@@ -197,6 +200,11 @@ def QueueWorker():
 
 
 if __name__ == '__main__':
+  if (len(sys.argv) > 1) and '-p' in sys.argv:
+    PRETEND = True
+
+  if PRETEND:
+    DEFAULTLOGGER.info('Working in PRETEND mode, not actually scheduling observations.')
   EventQueue = Queue.Queue(maxsize=10)
 
   # Start a background thread accepting network connections that add events to the queue.

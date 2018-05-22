@@ -278,7 +278,7 @@ def handle_grb(v):
         emaildict = {'triggerid':trig_id,
                      'trigtime':Time.now().iso,
                      'ra':Angle(grb.ra[-1], unit=astropy.units.deg).to_string(unit=astropy.units.hour, sep=':'),
-                     'dec':Angle(grb.dec[-1], unit=astropy.units.deg).to_string(unit=astropy.units.dec, sep=':'),
+                     'dec':Angle(grb.dec[-1], unit=astropy.units.deg).to_string(unit=astropy.units.deg, sep=':'),
                      'err':grb[err][-1],
                      'success':success_string,
                      'errors':errors_string}
