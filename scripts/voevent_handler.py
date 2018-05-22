@@ -23,7 +23,7 @@ class MWALogFormatter(object):
     return "%s: %s" % (time.ctime(), record.getMessage())
 
 
-LOGLEVEL_CONSOLE = logging.DEBUG      # Logging level for console messages (INFO, DEBUG, ERROR, CRITICAL, etc)
+# LOGLEVEL_CONSOLE = logging.DEBUG      # Logging level for console messages (INFO, DEBUG, ERROR, CRITICAL, etc)
 LOGLEVEL_LOGFILE = logging.DEBUG      # Logging level for logfile
 
 # Make the log file name include the username, to avoid permission errors
@@ -36,12 +36,12 @@ filehandler = logging.FileHandler(LOGFILE)
 filehandler.setLevel(LOGLEVEL_LOGFILE)
 filehandler.setFormatter(formatter)
 
-consolehandler = logging.StreamHandler()
-consolehandler.setLevel(LOGLEVEL_CONSOLE)
-consolehandler.setFormatter(formatter)
+# consolehandler = logging.StreamHandler()
+# consolehandler.setLevel(LOGLEVEL_CONSOLE)
+# consolehandler.setFormatter(formatter)
 
 DEFAULTLOGGER = logging.getLogger('voevent')
-DEFAULTLOGGER.addHandler(consolehandler)
+# DEFAULTLOGGER.addHandler(consolehandler)
 DEFAULTLOGGER.addHandler(filehandler)
 ##############
 
