@@ -7,6 +7,8 @@
 
 import ConfigParser
 import logging
+import os
+import pwd
 import socket
 import threading
 import time
@@ -38,7 +40,10 @@ class MWALogFormatter(object):
 
 LOGLEVEL_CONSOLE = logging.DEBUG      # Logging level for console messages (INFO, DEBUG, ERROR, CRITICAL, etc)
 LOGLEVEL_LOGFILE = logging.DEBUG      # Logging level for logfile
-LOGFILE = "/var/log/voevents.log"
+
+# Make the log file name include the username, to avoid permission errors
+LOGFILE = "/var/log/voevents-%s.log" % pwd.getpwuid(os.getuid()).pw_name
+
 
 formatter = MWALogFormatter()
 
