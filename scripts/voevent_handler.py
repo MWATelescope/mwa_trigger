@@ -16,26 +16,8 @@ import time
 import traceback
 import Queue
 
-import Pyro4
 
-from mwa_trigger import fermi_swift
-
-PRETEND = False   # Set to true to trigger event in 'pretend' mode, nopt actually schedule observations.
-
-EVENTHANDLERS = [fermi_swift.processevent]    # One or more handler functions - all will be called in turn on each XML event.
-
-Pyro4.config.COMMTIMEOUT = 10.0
-Pyro4.config.THREADPOOL_SIZE_MIN = 8
-Pyro4.config.SERIALIZERS_ACCEPTED.add('pickle')
-
-REFERENCEIP = '8.8.8.8'  # A host guaranteed to be visible on the network interface that we want the Pyro server to bind to
-EXITING = None
-PYRO_DAEMON = None
-
-CPPATH = ['/usr/local/etc/trigger.conf', './trigger.conf']   # Path list to look for configuration file
-
-
-############### set up the logging
+############### set up the logging before importing Pyro4
 class MWALogFormatter(object):
   def format(self,record):
     return "%s: %s" % (time.ctime(), record.getMessage())
@@ -62,6 +44,26 @@ DEFAULTLOGGER = logging.getLogger('voevent')
 DEFAULTLOGGER.addHandler(consolehandler)
 DEFAULTLOGGER.addHandler(filehandler)
 ##############
+
+import Pyro4
+
+from mwa_trigger import fermi_swift
+
+PRETEND = False   # Set to true to trigger event in 'pretend' mode, nopt actually schedule observations.
+
+EVENTHANDLERS = [fermi_swift.processevent]    # One or more handler functions - all will be called in turn on each XML event.
+
+Pyro4.config.COMMTIMEOUT = 10.0
+Pyro4.config.THREADPOOL_SIZE_MIN = 8
+Pyro4.config.SERIALIZERS_ACCEPTED.add('pickle')
+
+REFERENCEIP = '8.8.8.8'  # A host guaranteed to be visible on the network interface that we want the Pyro server to bind to
+EXITING = None
+PYRO_DAEMON = None
+
+CPPATH = ['/usr/local/etc/trigger.conf', './trigger.conf']   # Path list to look for configuration file
+
+
 
 ############## Point to a running Pyro nameserver #####################
 # If not on site, start one before running this code, using pyro_nameserver.py

@@ -14,12 +14,13 @@ import sys
 import traceback
 import warnings
 
+logging.basicConfig()
+DEFAULTLOGGER = logging.getLogger()
+
 import Pyro4
 
 CPPATH = ['/usr/local/etc/trigger.conf', './trigger.conf']   # Path list to look for configuration file
 
-logging.basicConfig()
-DEFAULTLOGGER = logging.getLogger()
 
 ############## Point to a running Pyro nameserver #####################
 # If not on site, start one before running this code, using pyro_nameserver.py
