@@ -275,7 +275,7 @@ def handle_grb(v):
         else:
             success_string = "FAILURE - observation NOT inserted into MWA schedule"
         errors_string = '\n'.join(result['errors'])
-        emaildict = {'triggerid':grb.trig_id,
+        emaildict = {'triggerid':trig_id,
                      'trigtime':Time.now().iso,
                      'ra':Angle(grb.ra[-1], unit=astropy.units.deg).to_string(unit=astropy.units.hour, sep=':'),
                      'dec':Angle(grb.dec[-1], unit=astropy.units.deg).to_string(unit=astropy.units.dec, sep=':'),
@@ -284,8 +284,8 @@ def handle_grb(v):
                      'errors':errors_string}
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                             to_addresses=NOTIFY_LIST,
-                            subject=EMAIL_SUBJECT_TEMPLATE % grb.trig_id,
+                            subject=EMAIL_SUBJECT_TEMPLATE % trig_id,
                             msg_text=EMAIL_TEMPLATE % emaildict,
-                            attachments=[('schedule_%s.txt' % grb.trig_id, '\n'.join(result['schedule']), 'text/plain'),
-                                         ('clear_%s.txt' % grb.trig_id, '\n'.join(result['clear']), 'text/plain')])
+                            attachments=[('schedule_%s.txt' % trig_id, '\n'.join(result['schedule']), 'text/plain'),
+                                         ('clear_%s.txt' % trig_id, '\n'.join(result['clear']), 'text/plain')])
     return
