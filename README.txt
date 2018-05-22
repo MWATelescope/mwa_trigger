@@ -59,8 +59,8 @@ To get a trigger handler running, you will need to:
 
   That will exit, but leave comet running in the background. The comet broker will call the push_voevent.py
   script when a VOEvent is received. You can run multiple instances of the comet broker at the same time,
-  pointing at different higher-level brokers, and all will use push_voevent.py to pass events on to a single
-  instance of voevent_handler.py. You may want to use a different IVO or broker.
+  pointing at different higher-level brokers, and all will use push_voevent.py to pass events on to a
+  single instance of voevent_handler.py. You may want to use a different IVO or broker.
 
 
 - You can send a test trigger by doing something like:
