@@ -50,38 +50,51 @@ MWAPOS = EarthLocation.from_geodetic(lon="116:40:14.93",
 
 
 class TriggerEvent(object):
+    """
+    Class to encapsulate a single trigger event. It can include multiple VOEvent structures,
+    stored in the .events attribute, so long as those VOEvents all refer to the same underlying
+    physical event (eg, updates with better positions).
+    """
     def __init__(self, event=None, logger=log):
-        self.ra = []  # a list of all the position ra/dec/errs
-        self.dec = []
-        self.err = []
-        self.triggered = False  # True if this event has ever been triggered
+        """
+        Create a new trigger event and initialise attributes.
+
+        :param event: string containing XML format VOEvent.
+        :param logger: optional logger object to use for log messages associated with this event.
+        """
+        # ra,dec and err are lists of all the position values, with the most recent (and presumably best) last.
+        self.ra = []   # list of RAs in J2000 degrees, most recent last.
+        self.dec = []  # List of DECs in J2000 degrees, most recent last.
+        self.err = []  # List of position error radii, in J2000 degrees, most recent last.
+        self.triggered = False  # True if this event has ever been triggered (generated MWA observations)
         self.trigger_id = ''  # the id for this event as it appears in the observing schedule
-        self.events = []  # a list of all the voevents
+        self.events = []  # a list of all the voevent XML strings, most recent last.
         self.first_trig_time = None  # when was the TriggerEvent first triggered
-        self.last_trig_type = None
-        self.loglist = []
-        self.logger = logger
+        self.last_trig_type = None  # Arbitrary string storing the reason for the last trigger.
+        self.loglist = []   # List of log messages associated with this trigger event.
+        self.logger = logger  # Logger object to use for log messages associated with this event.
 
         self.info('Event created')
         self.add_event(event)
 
     def add_event(self, event):
-        """For storing a list of all VOEvents associated with this TriggerEvent"""
+        """
+        Add an XML event string to the .events list for this event.
+
+        :param event: string containing XML format VOEvent.
+        """
         if event is not None:
             self.info('New VOEvent added')
             self.events.append(event)
 
-    def trigger(self, time, ttype):
-        self.triggered = True
-        # This is the *first* trigger time so only update it once
-        if self.first_trig_time is None:
-            self.info('First trigger sent')
-            self.first_trig_time = time
-        else:
-            self.info('Subsequent trigger sent')
-        self.last_trig_type = ttype
-
     def add_pos(self, pos):
+        """
+        Add a position to the list of positions for this event. Newer (and presumably more accurate) positions
+        are appended to the end of the coordinate lists.
+
+        :param pos: A tuple of (ra, dec, err) where ra and dec are the J2000 coords in degrees, and err is the error radius in deg
+        :return:
+        """
         ra, dec, err = pos
         self.ra.append(ra)
         self.dec.append(dec)
@@ -89,21 +102,40 @@ class TriggerEvent(object):
         self.info('Position added')
 
     def get_pos(self, index=-1):
+        """
+        Return one position tuple (ra, dec, err) for this event. By default, the most recent position is returned, but
+        any position can be returned by passing the relevant index value (eg, for the first position, use index=0).
+
+        :param index: The list index to return, satisying normal Python list indexing rules. Default of -1
+        :return: A tuple of (ra, dec, err) where ra and dec are the J2000 coords in degrees, and err is the error radius in deg
+        """
         if len(self.ra) < abs(index):
             return None, None, None
         return self.ra[index], self.dec[index], self.err[index]
 
-    def trigger_observation(self, obsname='Trigger_test', time_min=30, project_id="", secure_key=""):
+    def trigger_observation(self, ttype=None, obsname='Trigger_test', time_min=30, pretend=False, project_id="", secure_key=""):
         """
         Tell the MWA to observe the target of interest - override this method in your handler as desired if you
         want some other observation parameters.
 
+        :param ttype: Arbitrary string giving the reason for this trigger (eg 'Flt').
         :param obsname: Arbitrary string for the name of the observation in the schedule.
         :param time_min: Total length of observation time, in minutes.
+        :param pretend: Boolean, True if we don't want to actually schedule the observations.
         :param project_id: The project ID requesting the triggered observation
         :param secure_key: The password specific to that project ID
         :return: The full results dictionary returned by the triggerservice API (see triggerservice.trigger)
         """
+
+        self.triggered = True
+        # This is the *first* trigger time so only update it once
+        if self.first_trig_time is None:
+            self.info('First trigger sent')
+            self.first_trig_time = Time.now()
+        else:
+            self.info('Subsequent trigger sent')
+        self.last_trig_type = ttype
+
         if time_min < 2:
             self.debug("Requested time is <2 min. Not triggering")
             return
@@ -128,9 +160,10 @@ class TriggerEvent(object):
         # trigger if we are above the horizon limit
         if alt > HORIZON_LIMIT:
             self.info("Triggering at gps time %d ..." % (t.gps,))
-            result = triggerservice.trigger(project_id=project_id, secure_key=secure_key, ra=ra, dec=dec,
+            result = triggerservice.trigger(project_id=project_id, secure_key=secure_key,
+                                            pretend=pretend,
+                                            ra=ra, dec=dec,
                                             creator='VOEvent_Auto_Trigger_{0}'.format(__version__), obsname=obsname,
-                                            pretend=False,
                                             freqspecs='145,24', nobs=nobs, avoidsun=True, inttime=0.5, freqres=10,
                                             exptime=120, calibrator=True, calexptime=120)
             self.debug("Response: {0}".format(result))
@@ -140,6 +173,14 @@ class TriggerEvent(object):
             return
 
     def log(self, level=logging.DEBUG, msg=''):
+        """
+        Wrapper function, so log messages passed to this object by calling the debug, info, warning, error and critical
+        methods can be caught and saved in a 'loglist' attribute, then passed on to the logger object for handling.
+
+        :param level: One of logging.DEBUG, logging.INFO, etc.
+        :param msg: string containing the full log message.
+        :return: None
+        """
         self.logger.log(level=level, msg=msg)
         self.loglist.append(msg)
 
@@ -176,6 +217,7 @@ def get_position_info(v):
 def get_secure_key(project_id):
     """
     Look up the supplied project ID in the configuration file, to find the matching password
+
     :param project_id: Project ID string, eg C001
     :return: password associated with that project ID
     """

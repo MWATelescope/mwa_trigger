@@ -6,6 +6,10 @@
    This command will be called by the COMET event broker as each incoming XML packet
    is received, and may be called two or more times in parallel if packets arrive at
    nearly the same time.
+
+   It can also be called manually for testing, eg:
+
+   cat test.xml | ./push_voevent.py
 """
 
 import ConfigParser
@@ -28,17 +32,17 @@ CP = ConfigParser.SafeConfigParser()
 CP.read(CPPATH)
 
 if CP.has_option(section='pyro', option='ns_host'):
-  Pyro4.config.NS_HOST = CP.get(section='pyro', option='ns_host')
+    Pyro4.config.NS_HOST = CP.get(section='pyro', option='ns_host')
 else:
-  Pyro4.config.NS_HOST = 'localhost'
+    Pyro4.config.NS_HOST = 'localhost'
 
 if CP.has_option(section='pyro', option='ns_port'):
-  Pyro4.config.NS_PORT = int(CP.get(section='pyro', option='ns_port'))
+    Pyro4.config.NS_PORT = int(CP.get(section='pyro', option='ns_port'))
 else:
-  Pyro4.config.NS_PORT = 9090
+    Pyro4.config.NS_PORT = 9090
 
 if Pyro4.config.NS_HOST in ['helios', 'mwa-db']:
-  Pyro4.config.SERIALIZER = 'pickle'   # We must be on site, where we have an ancient Pyro4 install and nameserver running
+    Pyro4.config.SERIALIZER = 'pickle'   # We must be on site, where we have an ancient Pyro4 install and nameserver running
 
 Pyro4.config.COMMTIMEOUT = 10.0
 
@@ -48,45 +52,52 @@ warnings.simplefilter('ignore', UserWarning)
 
 
 def initPyro(logger=DEFAULTLOGGER):
-  """Create a proxy object for the VOEventHandler, to call methods on remotely.
-  """
-  logger.debug("Creating client object to connect to voevent_handler")
-  ns = Pyro4.locateNS()
-  uri = ns.lookup('VOEventHandler')
-  client = Pyro4.Proxy(uri)
-  with client:
-    client.ping()   # Make sure the remote server is alive
-    logger.debug('Pyro ping() succeeded!')
-  return client
+    """
+    Create a proxy object for the VOEventHandler, to call methods on remotely.
+
+    :param logger: An optional logging.Logger object to use to log messages from the Pyro4 proxy
+    """
+    logger.debug("Creating client object to connect to voevent_handler")
+    ns = Pyro4.locateNS()
+    uri = ns.lookup('VOEventHandler')
+    client = Pyro4.Proxy(uri)
+    with client:
+        client.ping()   # Make sure the remote server is alive
+        logger.debug('Pyro ping() succeeded!')
+    return client
 
 
 def PyroTransmit(event='', logger=DEFAULTLOGGER):
-  """Send an XML string to the remote VOEventHandler for processing.
-  """
-  try:
-    client = initPyro()   # Create a client proxy object
-  except Pyro4.errors.PyroError:
-    logger.exception('Exception in initPyro()')
-    return False
+    """
+    Send an XML string to the remote VOEventHandler for processing.
 
-  try:
-    with client:
-      logger.debug('Transmitting event to the handler via Pyro')
-      client.putEvent(event=event)   # Send the XML
-  except (Pyro4.errors.ConnectionClosedError, Pyro4.errors.TimeoutError, Pyro4.errors.ProtocolError):
-    logger.error('Communication exception in PyroTransmit')
-    return False
-  except Pyro4.errors.PyroError:
-    logger.error('Other exception in PyroTransmitLoop: %s', traceback.format_exc())
-    return False
+    :param event: string containing VOEvent XML
+    :param logger: An optional logging.Logger object to use to log messages from the Pyro4 proxy
+    """
+    try:
+        client = initPyro()   # Create a client proxy object
+    except Pyro4.errors.PyroError:
+        logger.exception('Exception in initPyro()')
+        return False
 
-  return True
+    try:
+        with client:
+          logger.debug('Transmitting event to the handler via Pyro')
+          client.putEvent(event=event)   # Send the XML
+    except (Pyro4.errors.ConnectionClosedError, Pyro4.errors.TimeoutError, Pyro4.errors.ProtocolError):
+        logger.error('Communication exception in PyroTransmit')
+        return False
+    except Pyro4.errors.PyroError:
+        logger.error('Other exception in PyroTransmitLoop: %s', traceback.format_exc())
+        return False
+
+    return True
 
 
 if __name__ == '__main__':
-  event = sys.stdin.read()
-  success = PyroTransmit(event)
-  if success:
-    sys.exit(0)
-  else:
-    sys.exit(-1)
+    event = sys.stdin.read()
+    success = PyroTransmit(event)
+    if success:
+        sys.exit(0)
+    else:
+        sys.exit(-1)

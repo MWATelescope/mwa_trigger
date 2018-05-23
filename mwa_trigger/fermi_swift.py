@@ -4,6 +4,8 @@
 Library containing one or more functions to process incoming VOEvent XML strings. This library will
 be imported by a long running process, so you can load large data files, etc, at import time, rather than
 inside the processevent() function, to save time.
+
+This library only handles Fermi and SWIFT VOEvents, other types of event would be handled in a seperate library.
 """
 
 __version__ = "0.2"
@@ -55,6 +57,9 @@ xml_cache = {}
 
 
 class GRB(handlers.TriggerEvent):
+    """
+    Subclass the TriggerEvent class to add a parameter 'short', relevant only for GRB type events.
+    """
     def __init__(self, event=None):
         self.short = False  # True if short
         handlers.TriggerEvent.__init__(self, event=event)
@@ -62,13 +67,15 @@ class GRB(handlers.TriggerEvent):
     # Override or add GRB specific methods here if desired.
 
 
-def processevent(event=''):
+def processevent(event='', pretend=True):
     """
+    Called externally by the voevent_handler script when a new VOEvent is received. Return True if
+    the event was parsed by this handler, False if it was another type of event that should be
+    examined by a different handler.
 
     :param event: A string containg the XML string in VOEvent format
-    :return: TBD - do we want multiple handlers? Do we try a new event in each handler until
-    one returns True, indicating that it understands it, or simply call all handlers
-    for every events?
+    :param pretend: Boolean, True if we don't want to actually schedule the observations.
+    :return: Boolean, True if this handler processed this event, False to pass it to another handler function.
     """
 
     # event arrives as a unicode string but loads requires a non-unicode string.
@@ -77,13 +84,19 @@ def processevent(event=''):
     isgrb = is_grb(v)
     log.debug("GRB? {0}".format(isgrb))
     if isgrb:
-        handle_grb(v)
+        handle_grb(v, pretend=pretend)
 
     log.info("Finished.")
     return isgrb     # True if we're handling this event, False if we're rejecting it
 
 
 def is_grb(v):
+    """
+    Tests to see if this XML packet is a Gamma Ray Burst event (SWIFT or Fermi alert).
+
+    :param v: string in VOEvent XML format
+    :return: Boolean, True if this event is a GRB.
+    """
     ivorn = v.attrib['ivorn']
 
     trig_list = ("ivo://nasa.gsfc.gcn/SWIFT#BAT_GRB_Pos",  # Swift positions
@@ -98,7 +111,14 @@ def is_grb(v):
     return False
 
 
-def handle_grb(v):
+def handle_grb(v, pretend=False):
+    """
+    Handles the actual VOEvent parsing, generating observations if appropriate.
+
+    :param v: string in VOEvent XML format
+    :param pretend: Boolean, True if we don't want to actually schedule the observations.
+    :return: None
+    """
     log.debug("processing GRB {0}".format(v.attrib['ivorn']))
 
     # trigger = False
@@ -267,8 +287,12 @@ def handle_grb(v):
         grb.debug("Current schedule empty")
 
     # Do the trigger
-    grb.trigger(time=Time.now(), ttype=this_trig_type)
-    result = grb.trigger_observation(obsname=trig_id, time_min=req_time_min, project_id=PROJECT_ID, secure_key=SECURE_KEY)
+    result = grb.trigger_observation(ttype=this_trig_type,
+                                     obsname=trig_id,
+                                     time_min=req_time_min,
+                                     pretend=pretend,
+                                     project_id=PROJECT_ID,
+                                     secure_key=SECURE_KEY)
     if result is not None:
         if result['success']:
             success_string = "SUCCESS - observation inserted into MWA schedule"
