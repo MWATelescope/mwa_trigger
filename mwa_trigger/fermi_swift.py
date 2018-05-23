@@ -314,10 +314,12 @@ def handle_grb(v, pretend=False):
         clear_data = "Commands:\n%s \n\n STDOUT:\n%s \n\n STDERR:\n%s" % (result['clear']['command'],
                                                                           result['clear']['stdout'],
                                                                           result['clear']['stderr'])
+        log_data = '\n'.join(grb.loglist)
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                             to_addresses=NOTIFY_LIST,
                             subject=EMAIL_SUBJECT_TEMPLATE % trig_id,
                             msg_text=EMAIL_TEMPLATE % emaildict,
                             attachments=[('schedule_%s.txt' % trig_id, sched_data, 'text/plain'),
-                                         ('clear_%s.txt' % trig_id, clear_data, 'text/plain')])
+                                         ('clear_%s.txt' % trig_id, clear_data, 'text/plain'),
+                                         ('log_%s.txt' % trig_id, log_data, 'text/plain')])
     return
