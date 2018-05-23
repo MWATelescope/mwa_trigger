@@ -35,7 +35,6 @@ SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
 NOTIFY_LIST = ['Andrew.Williams@curtin.edu.au']   # For testing
 
 EMAIL_TEMPLATE = """
-
 The Fermi/Swift handler triggered an MWA observation for a 
 Fermi/Swift GRB at %(trigtime)s UTC.
 

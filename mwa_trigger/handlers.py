@@ -186,7 +186,7 @@ class TriggerEvent(object):
                                             creator='VOEvent_Auto_Trigger_{0}'.format(__version__), obsname=obsname,
                                             freqspecs='145,24', nobs=nobs, avoidsun=True, inttime=0.5, freqres=10,
                                             exptime=120, calibrator=True, calexptime=120)
-            self.debug("Response: {0}".format(result))
+            # self.debug("Response: {0}".format(result))
 
             if email_tolist:
                 if result['success']:
