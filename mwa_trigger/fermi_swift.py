@@ -30,7 +30,9 @@ FERMI_POBABILITY_THRESHOLD = 50  # Trigger on Fermi events that have most-likely
 
 PROJECT_ID = 'D0009'
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
-NOTIFY_LIST = ['too@mwa128t.org', 'Paul.Hancock@curtin.edu.au', 'Gemma.Anderson@curtin.edu.au', 'Andrew.Williams@curtin.edu.au']
+
+# NOTIFY_LIST = ['too@mwa128t.org', 'Paul.Hancock@curtin.edu.au', 'Gemma.Anderson@curtin.edu.au', 'Andrew.Williams@curtin.edu.au']
+NOTIFY_LIST = ['Andrew.Williams@curtin.edu.au']   # For testing
 
 EMAIL_TEMPLATE = """
 
