@@ -308,12 +308,12 @@ def handle_grb(v, pretend=False):
                      'err':grb.err[-1],
                      'success':success_string,
                      'errors':errors_string}
-        sched_data = "Commands:\n%s \n\n STDOUT:\n%s \n\n STDERR:\n%s" % ('\n'.join(result['schedule']['commands']),
-                                                                          '\n'.join(result['schedule']['stdout']),
-                                                                          '\n'.join(result['schedule']['stderr']))
-        clear_data = "Commands:\n%s \n\n STDOUT:\n%s \n\n STDERR:\n%s" % ('\n'.join(result['clear']['command']),
-                                                                          '\n'.join(result['clear']['stdout']),
-                                                                          '\n'.join(result['clear']['stderr']))
+        sched_data = "Commands:\n%s \n\n STDOUT:\n%s \n\n STDERR:\n%s" % (result['schedule']['commands'],
+                                                                          result['schedule']['stdout'],
+                                                                          result['schedule']['stderr'])
+        clear_data = "Commands:\n%s \n\n STDOUT:\n%s \n\n STDERR:\n%s" % (result['clear']['command'],
+                                                                          result['clear']['stdout'],
+                                                                          result['clear']['stderr'])
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                             to_addresses=NOTIFY_LIST,
                             subject=EMAIL_SUBJECT_TEMPLATE % trig_id,
