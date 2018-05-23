@@ -311,7 +311,7 @@ def handle_grb(v, pretend=False):
         sched_data = "Commands:\n%s \n\n STDOUT:\n%s \n\n STDERR:\n%s" % ('\n'.join(result['schedule']['commands']),
                                                                           '\n'.join(result['schedule']['stdout']),
                                                                           '\n'.join(result['schedule']['stderr']))
-        clear_data = "Commands:\n%s \n\n STDOUT:\n%s \n\n STDERR:\n%s" % ('\n'.join(result['clear']['commands']),
+        clear_data = "Commands:\n%s \n\n STDOUT:\n%s \n\n STDERR:\n%s" % ('\n'.join(result['clear']['command']),
                                                                           '\n'.join(result['clear']['stdout']),
                                                                           '\n'.join(result['clear']['stderr']))
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
