@@ -195,7 +195,7 @@ class TriggerEvent(object):
                     success_string = "FAILURE - observation NOT inserted into MWA schedule"
                 errorkeys = result['errors'].keys()
                 errorkeys.sort()
-                errors_string = '\n'.join(['[%d]: %s' % (num, result['errors'][num]) for num in errorkeys])
+                errors_string = '\n'.join(['[%s]: %s' % (num, result['errors'][num]) for num in errorkeys])
                 email_footer = EMAIL_FOOTER_TEMPLATE % {'success': success_string, 'errors': errors_string}
 
                 attachments = []
