@@ -45,11 +45,6 @@ RA:         %(ra)s hours
 Dec:        %(dec)s deg
 Error Rad:  %(err)7.3f deg
 
-Result: %(success)s
-
-Errors: 
-%(errors)s
-
 """
 
 EMAIL_SUBJECT_TEMPLATE = "Fermi-Swift handler trigger for %s"
@@ -288,38 +283,20 @@ def handle_grb(v, pretend=False):
     else:
         grb.debug("Current schedule empty")
 
+    emaildict = {'triggerid': grb.trigger_id,
+                 'trigtime': Time.now().iso,
+                 'ra': Angle(grb.ra[-1], unit=astropy.units.deg).to_string(unit=astropy.units.hour, sep=':'),
+                 'dec': Angle(grb.dec[-1], unit=astropy.units.deg).to_string(unit=astropy.units.deg, sep=':'),
+                 'err': grb.err[-1]}
+    email_text = EMAIL_TEMPLATE % emaildict
+    email_subject = EMAIL_SUBJECT_TEMPLATE % grb.trigger_id
     # Do the trigger
-    result = grb.trigger_observation(ttype=this_trig_type,
-                                     obsname=trig_id,
-                                     time_min=req_time_min,
-                                     pretend=pretend,
-                                     project_id=PROJECT_ID,
-                                     secure_key=SECURE_KEY)
-    if result is not None:
-        if result['success']:
-            success_string = "SUCCESS - observation inserted into MWA schedule"
-        else:
-            success_string = "FAILURE - observation NOT inserted into MWA schedule"
-        errors_string = '\n'.join(result['errors'])
-        emaildict = {'triggerid':trig_id,
-                     'trigtime':Time.now().iso,
-                     'ra':Angle(grb.ra[-1], unit=astropy.units.deg).to_string(unit=astropy.units.hour, sep=':'),
-                     'dec':Angle(grb.dec[-1], unit=astropy.units.deg).to_string(unit=astropy.units.deg, sep=':'),
-                     'err':grb.err[-1],
-                     'success':success_string,
-                     'errors':errors_string}
-        sched_data = "Commands:\n%s \n\n STDOUT:\n%s \n\n STDERR:\n%s" % (result['schedule']['commands'],
-                                                                          result['schedule']['stdout'],
-                                                                          result['schedule']['stderr'])
-        clear_data = "Commands:\n%s \n\n STDOUT:\n%s \n\n STDERR:\n%s" % (result['clear']['command'],
-                                                                          result['clear']['stdout'],
-                                                                          result['clear']['stderr'])
-        log_data = '\n'.join([str(x) for x in grb.loglist])
-        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
-                            to_addresses=NOTIFY_LIST,
-                            subject=EMAIL_SUBJECT_TEMPLATE % trig_id,
-                            msg_text=EMAIL_TEMPLATE % emaildict,
-                            attachments=[('schedule_%s.txt' % trig_id, sched_data, 'text/plain'),
-                                         ('clear_%s.txt' % trig_id, clear_data, 'text/plain'),
-                                         ('log_%s.txt' % trig_id, log_data, 'text/plain')])
-    return
+    grb.trigger_observation(ttype=this_trig_type,
+                            obsname=trig_id,
+                            time_min=req_time_min,
+                            pretend=pretend,
+                            project_id=PROJECT_ID,
+                            secure_key=SECURE_KEY,
+                            email_tolist=NOTIFY_LIST,
+                            email_text=email_text,
+                            email_subject=email_subject)

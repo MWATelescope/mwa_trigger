@@ -49,6 +49,14 @@ MWAPOS = EarthLocation.from_geodetic(lon="116:40:14.93",
                                      height=377.8)
 
 
+EMAIL_FOOTER_TEMPLATE = """
+Result: %(success)s
+
+Errors: 
+%(errors)s
+"""
+
+
 class TriggerEvent(object):
     """
     Class to encapsulate a single trigger event. It can include multiple VOEvent structures,
@@ -113,7 +121,16 @@ class TriggerEvent(object):
             return None, None, None
         return self.ra[index], self.dec[index], self.err[index]
 
-    def trigger_observation(self, ttype=None, obsname='Trigger_test', time_min=30, pretend=False, project_id="", secure_key=""):
+    def trigger_observation(self,
+                            ttype=None,
+                            obsname='Trigger_test',
+                            time_min=30,
+                            pretend=False,
+                            project_id="",
+                            secure_key="",
+                            email_tolist=None,
+                            email_text="",
+                            email_subject=""):
         """
         Tell the MWA to observe the target of interest - override this method in your handler as desired if you
         want some other observation parameters.
@@ -124,6 +141,9 @@ class TriggerEvent(object):
         :param pretend: Boolean, True if we don't want to actually schedule the observations.
         :param project_id: The project ID requesting the triggered observation
         :param secure_key: The password specific to that project ID
+        :param email_tolist: list of email addresses to send the notification email to.
+        :param email_text: Base email message - success string, errors, and other data will be appended and attached
+        :param email_subject: string containing email subject line
         :return: The full results dictionary returned by the triggerservice API (see triggerservice.trigger)
         """
 
@@ -167,6 +187,37 @@ class TriggerEvent(object):
                                             freqspecs='145,24', nobs=nobs, avoidsun=True, inttime=0.5, freqres=10,
                                             exptime=120, calibrator=True, calexptime=120)
             self.debug("Response: {0}".format(result))
+
+            if email_tolist:
+                if result['success']:
+                    success_string = "SUCCESS - observation inserted into MWA schedule"
+                else:
+                    success_string = "FAILURE - observation NOT inserted into MWA schedule"
+                errorkeys = result['errors'].keys()
+                errorkeys.sort()
+                errors_string = '\n'.join(['[%d]: %s' % (num, result['errors'][num]) for num in errorkeys])
+                email_footer = EMAIL_FOOTER_TEMPLATE % {'success': success_string, 'errors': errors_string}
+
+                attachments = []
+                if result['schedule']:
+                    sched_data = "Commands:\n%s \n\n STDOUT:\n%s \n\n STDERR:\n%s" % (result['schedule']['commands'],
+                                                                                      result['schedule']['stdout'],
+                                                                                      result['schedule']['stderr'])
+                    attachments.append(('schedule_%s.txt' % self.trigger_id, sched_data, 'text/plain'))
+                if result['clear']:
+                    clear_data = "Commands:\n%s \n\n STDOUT:\n%s \n\n STDERR:\n%s" % (result['clear']['command'],
+                                                                                      result['clear']['stdout'],
+                                                                                      result['clear']['stderr'])
+                    attachments.append(('clear_%s.txt' % self.trigger_id, clear_data, 'text/plain'))
+                log_data = '\n'.join([str(x) for x in self.loglist])
+                attachments.append(('log_%s.txt' % self.trigger_id, log_data, 'text/plain'))
+
+                send_email(from_address='mwa@telemetry.mwa128t.org',
+                           to_addresses=email_tolist,
+                           subject=email_subject,
+                           msg_text=email_text + email_footer,
+                           attachments=attachments)
+
             return result
         else:
             self.debug("not triggering due to horizon limit: alt {0} < {1}".format(alt, HORIZON_LIMIT))
