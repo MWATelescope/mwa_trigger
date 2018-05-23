@@ -45,7 +45,7 @@ RA:         %(ra)s hours
 Dec:        %(dec)s deg
 Error Rad:  %(err)7.3f deg
 
-Result: %(result)s
+Result: %(success)s
 
 Errors: 
 %(errors)s
@@ -308,10 +308,16 @@ def handle_grb(v, pretend=False):
                      'err':grb.err[-1],
                      'success':success_string,
                      'errors':errors_string}
+        sched_data = "Commands:\n%s \n\n STDOUT:\n%s \n\n STDERR:\n%s" % ('\n'.join(result['schedule']['commands']),
+                                                                          '\n'.join(result['schedule']['stdout']),
+                                                                          '\n'.join(result['schedule']['stderr']))
+        clear_data = "Commands:\n%s \n\n STDOUT:\n%s \n\n STDERR:\n%s" % ('\n'.join(result['clear']['commands']),
+                                                                          '\n'.join(result['clear']['stdout']),
+                                                                          '\n'.join(result['clear']['stderr']))
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                             to_addresses=NOTIFY_LIST,
                             subject=EMAIL_SUBJECT_TEMPLATE % trig_id,
                             msg_text=EMAIL_TEMPLATE % emaildict,
-                            attachments=[('schedule_%s.txt' % trig_id, '\n'.join(result['schedule']), 'text/plain'),
-                                         ('clear_%s.txt' % trig_id, '\n'.join(result['clear']), 'text/plain')])
+                            attachments=[('schedule_%s.txt' % trig_id, sched_data, 'text/plain'),
+                                         ('clear_%s.txt' % trig_id, clear_data, 'text/plain')])
     return
