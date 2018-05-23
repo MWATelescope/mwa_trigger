@@ -221,7 +221,7 @@ def handle_grb(v, pretend=False):
     obslist = triggerservice.obslist(obstime=1800)
     if obslist is not None and len(obslist) > 0:
         grb.debug("Currently observing:")
-        grb.debug(obslist)
+        grb.debug(str(obslist))
         # are we currently observing *this* GRB?
         obs = str(obslist[0][1])  # in case the obslist is returning unicode strings
         grb.debug("obs {0}, trig {1}".format(obs, trig_id))

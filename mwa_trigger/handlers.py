@@ -182,7 +182,8 @@ class TriggerEvent(object):
         :return: None
         """
         self.logger.log(level=level, msg=msg)
-        self.loglist.append(msg)
+        now = Time.now()
+        self.loglist.append("%s=(%d): %s" % (now.iso, int(now.gps), msg))
 
     def debug(self, msg=''):
         self.log(level=logging.DEBUG, msg=msg)

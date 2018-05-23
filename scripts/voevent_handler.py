@@ -19,14 +19,17 @@ import time
 import traceback
 import Queue
 
+from astropy.time import Time
+
 
 ############### set up the logging before importing Pyro4
 class MWALogFormatter(object):
     """
     Add a time string to the start of any log messages sent to the log file.
     """
-    def format(self,record):
-        return "%s: %s" % (time.ctime(), record.getMessage())
+    def format(self, record):
+        now = Time.now()
+        return "%s=(%d): %s" % (now.iso, int(now.gps), record.getMessage())
 
 
 LOGLEVEL_LOGFILE = logging.DEBUG      # Logging level for logfile
