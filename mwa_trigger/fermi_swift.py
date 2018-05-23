@@ -305,7 +305,7 @@ def handle_grb(v, pretend=False):
                      'trigtime':Time.now().iso,
                      'ra':Angle(grb.ra[-1], unit=astropy.units.deg).to_string(unit=astropy.units.hour, sep=':'),
                      'dec':Angle(grb.dec[-1], unit=astropy.units.deg).to_string(unit=astropy.units.deg, sep=':'),
-                     'err':grb[err][-1],
+                     'err':grb.err[-1],
                      'success':success_string,
                      'errors':errors_string}
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
