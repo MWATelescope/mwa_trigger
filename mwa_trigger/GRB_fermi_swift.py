@@ -8,7 +8,7 @@ inside the processevent() function, to save time.
 This library only handles Fermi and SWIFT VOEvents, other types of event would be handled in a seperate library.
 """
 
-__version__ = "0.2"
+__version__ = "0.3"
 __author__ = ["Paul Hancock", "Andrew Williams", "Gemma Anderson"]
 
 import logging
@@ -22,7 +22,7 @@ import voeventparse
 import handlers
 import triggerservice
 
-log = logging.getLogger('voevent.handlers.fermi_swift')   # Inherit the logging setup from handlers.py
+log = logging.getLogger('voevent.handlers.GRB_fermi_swift')   # Inherit the logging setup from handlers.py
 
 # Settings
 HORIZON_LIMIT = 30  # Don't observe if the source is below this elevation
@@ -32,7 +32,8 @@ PROJECT_ID = 'D0009'
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
 
 # NOTIFY_LIST = ['too@mwa128t.org', 'Paul.Hancock@curtin.edu.au', 'Gemma.Anderson@curtin.edu.au', 'Andrew.Williams@curtin.edu.au']
-NOTIFY_LIST = ['Andrew.Williams@curtin.edu.au']   # For testing
+# NOTIFY_LIST = ['Andrew.Williams@curtin.edu.au']   # For testing
+NOTIFY_LIST = ["Paul.Hancock@curtin.edu.au", "Gemma.Anderson@curtin.edu.au"]
 
 EMAIL_TEMPLATE = """
 The Fermi/Swift handler triggered an MWA observation for a 
