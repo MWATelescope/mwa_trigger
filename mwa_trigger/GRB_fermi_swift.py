@@ -36,7 +36,7 @@ SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
 NOTIFY_LIST = ["Paul.Hancock@curtin.edu.au", "Gemma.Anderson@curtin.edu.au"]
 
 EMAIL_TEMPLATE = """
-The Fermi/Swift handler triggered an MWA observation for a 
+The GRB Fermi+Swift handler triggered an MWA observation for a 
 Fermi/Swift GRB at %(trigtime)s UTC.
 
 Details are:
@@ -47,7 +47,7 @@ Error Rad:  %(err)7.3f deg
 
 """
 
-EMAIL_SUBJECT_TEMPLATE = "Fermi-Swift handler trigger for %s"
+EMAIL_SUBJECT_TEMPLATE = "GRB Fermi+Swift handler trigger for %s"
 
 # state storage
 xml_cache = {}
