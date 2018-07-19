@@ -141,7 +141,8 @@ To get a trigger handler running, you will need to:
   (You may want to use python voevent_handler.py within a virtual environment)
 
 
-- In a third terminal window, run:
+- If you want to respond to actual broadcast VOEvents (as opposed to manually pushing VOEvent XML
+  files for testing), then, in a third terminal window, run:
 
       twistd comet --remote=voevent.4pisky.org -r -v --cmd=./push_voevent.py
                    --local-ivo=ivo://mwa-paul/comet-broker
@@ -150,6 +151,9 @@ To get a trigger handler running, you will need to:
   script when a VOEvent is received. You can run multiple instances of the comet broker at the same time,
   pointing at different higher-level brokers, and all will use push_voevent.py to pass events on to a
   single instance of voevent_handler.py. You may want to use a different IVO or broker.
+
+  If you are only pushing static XML files for testing, you won't need the Twisted or Comet packages
+  installed.
 
 
 - You can send a test trigger by doing something like:
