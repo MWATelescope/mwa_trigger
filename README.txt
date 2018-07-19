@@ -26,81 +26,87 @@ VOEvent trigger front end for scheduling MWA observations. This repository is ma
 
 Software overview:
 
-The triggering system is divided into two parts. The back-end is a web service, on an on-site server, and part of the
-telescope Monitor and Control system. It accepts stateless requests from clients, anywhere on the internet. An entirely
-separate front end (contained in this repository) parses incoming VOEvents, makes decisions about when to trigger a new
-observation (or repoint an existing triggered observation with a better position), and calls the web service to actually
-schedule the observations.
+The triggering system is divided into two parts. The back-end is a web service, on an on-site server, and
+part of the telescope Monitor and Control system. It accepts stateless requests from clients, anywhere on
+the internet. An entirely separate front end (contained in this repository) parses incoming VOEvents,
+makes decisions about when to trigger a new observation (or repoint an existing triggered observation with
+a better position), and calls the web service to actually schedule the observations.
 
-Multiple front ends can use the web service - another VOEvent parser running in parallel, real-time code running on
-site analysing the data stream in some way, etc.
+Multiple front ends can use the web service - another VOEvent parser running in parallel, real-time code
+running on site analysing the data stream in some way, etc.
 
-Separating the science (what VOEvents to trigger on, and why) from the scheduling function lets the operations team
-handle the code that directly controls the telescope schedule, while allowing scientists in the transient science
-project teams to write their own code to decide which events to follow, and how.
+Separating the science (what VOEvents to trigger on, and why) from the scheduling function lets the
+operations team handle the code that directly controls the telescope schedule, while allowing scientists
+in the transient science project teams to write their own code to decide which events to follow, and how.
 
 Back-end web service (in the mwa-MandC-Core repository, running on site):
 
-The back-end web service has these functions, called by generating an HTTP request to a particular URL with a set of
-parameters:
+The back-end web service has these functions, called by generating an HTTP request to a particular URL
+with a set of parameters:
 
-  - busy() - when given a science project ID code and a desired override time, in seconds from the present, return
-  'True' if that science project is authorised to remove all of the observations already in the schedule over that time
-  period.
+  - busy() - when given a science project ID code and a desired override time, in seconds from the present,
+  return 'True' if that science project is authorised to remove all of the observations already in the
+  schedule over that time period.
 
-  - obslist() - when given a desired override time, return a summary of all observations already in the schedule over
-  that time period.
+  - obslist() - when given a desired override time, return a summary of all observations already in the
+  schedule over that time period.
 
-  - triggerobs() - The caller supplies a science project ID code, the password associated with that project, and a set
-  of observation parameters (described later). If that science project is authorised to override all the observations
-  already in the schedule over the requested time period, that period in the schedule is cleared, and the requested
-  observation/s are added to the schedule, starting at that instant.
+  - triggerobs() - The caller supplies a science project ID code, the password associated with that
+  project, and a set of observation parameters (described later). If that science project is authorised
+  to override all the observations already in the schedule over the requested time period, that period
+  in the schedule is cleared, and the requested observation/s are added to the schedule, starting at
+  that instant.
 
-  - triggervcs() - like triggerobs, only schedules observations in Voltage Capture mode, if there is enough free disk
-  space on the voltage capture servers.
+  - triggervcs() - like triggerobs, only schedules observations in Voltage Capture mode, if there is
+  enough free disk space on the voltage capture servers.
 
-The back end of the triggering system ONLY cares about the science project code asking for an override, the science
-project codes of the observations in the schedule, and the supplied password. Which transient projects are authorised to
-override which observing projects is decided by the MWA board and the MWA director, and encoded in a configuration file
-maintained by the operations team. There is only one additional constraint - ongoing voltage capture observations can
-not be interrupted at the moment, but this will change in the future.
+The back end of the triggering system ONLY cares about the science project code asking for an override,
+the science project codes of the observations in the schedule, and the supplied password. Which transient
+projects are authorised to override which observing projects is decided by the MWA board and the MWA
+director, and encoded in a configuration file maintained by the operations team. There is only one
+additional constraint - ongoing voltage capture observations can not be interrupted at the moment, but
+this will change in the future.
 
-There are many observation parameters that can be passed, to satisfy different science requirements. These include:
+There are many observation parameters that can be passed, to satisfy different science requirements.
+These include:
 
-  - One or more pointing directions, each specified as an RA/Dec, an Azimuth/Elevation, or a source name (from a limited
-   local list of typical targets).
+  - One or more pointing directions, each specified as an RA/Dec, an Azimuth/Elevation, or a source
+  name (from a limited local list of typical targets).
 
-  - Whether to modify the given pointing direction/s to keep the desired target near the primary beam centre, but to
-  minimise the power from the Sun by putting it in a primary beam null. This option has no affect if the Sun is below
-  the horizon.
+  - Whether to modify the given pointing direction/s to keep the desired target near the primary beam
+  centre, but to minimise the power from the Sun by putting it in a primary beam null. This option has
+  no affect if the Sun is below the horizon.
 
-  - One or more frequency specifiers, defining the (arbitrary) set of 24 coarse channels to save, out of the 256 coarse
-  channels (1.28 MHz wide) defining the 0 - 327.68 MHz total bandwidth. Pointing directions and frequency specifiers are
-   multiplied - for example, if two pointing directions are given, and three frequency specifiers, then each target
-   direction will be observed at each of the three chosen frequency sets.
+  - One or more frequency specifiers, defining the (arbitrary) set of 24 coarse channels to save, out
+  of the 256 coarse channels (1.28 MHz wide) defining the 0 - 327.68 MHz total bandwidth. Pointing
+  directions and frequency specifiers are multiplied - for example, if two pointing directions are given,
+  and three frequency specifiers, then each target direction will be observed at each of the three
+  chosen frequency sets.
 
-  - The number of observations to schedule, and the length of each observation. Typically 15 observations of 120 seconds
-   each are scheduled. This is because the MWA analogue beamformers do not track sidereal motion during a single
-   observation.
+  - The number of observations to schedule, and the length of each observation. Typically 15 observations
+  of 120 seconds each are scheduled. This is because the MWA analogue beamformers do not track sidereal
+  motion during a single observation.
 
-  - The correlator averaging parameters to use - frequency resolution (currently 10, 20, or 40 kHz) and time resolution
-  (currently 0.5, 1.0 or 2.0 seconds)
+  - The correlator averaging parameters to use - frequency resolution (currently 10, 20, or 40 kHz) and
+  time resolution (currently 0.5, 1.0 or 2.0 seconds)
 
-  - Whether to schedule calibrator observation/s after the triggered source, and if so, what source to calibrate on, and
-   how long the calibrator observation/s should be. The user can also let the system choose a calibrator source
-   automatically. If more than one one frequency specifier was given, then the calibrator will also be observed at each
-   of the given frequencies.
+  - Whether to schedule calibrator observation/s after the triggered source, and if so, what source to
+  calibrate on, and how long the calibrator observation/s should be. The user can also let the system
+  choose a calibrator source automatically. If more than one one frequency specifier was given, then
+  the calibrator will also be observed at each of the given frequencies.
 
 Latency:
 
-The MWA observing schedule is stored in a set of database tables on a PostgreSQL server on-site, with start and stop
-times stored as the number of seconds since the GPS epoch ('GPS seconds'). All observations must start and stop on an
-integer multiple of eight GPS seconds, so while an observation in progress can be truncated by changing it's stop time,
-the modulo 8 seconds constraint gives a natural latency of up to 8 seconds. In practice, the Monitor and Control system
-gives the various components of the telescope time to prepare, by sending their new configuration a few seconds ahead of
-the start of each observation. This means that a running observation cannot have its stop time changed to a value less
-than four seconds in the future, and a new observation can't be scheduled to start less than 4 seconds in the future.
-Including other processing delays, this gives a latency period of 8-16 seconds between the trigger time and the start
+The MWA observing schedule is stored in a set of database tables on a PostgreSQL server on-site, with
+start and stop times stored as the number of seconds since the GPS epoch ('GPS seconds'). All
+observations must start and stop on an integer multiple of eight GPS seconds, so while an observation
+in progress can be truncated by changing it's stop time, the modulo 8 seconds constraint gives a natural
+latency of up to 8 seconds. In practice, the Monitor and Control system gives the various components of
+the telescope time to prepare, by sending their new configuration a few seconds ahead of the start of
+each observation. This means that a running observation cannot have its stop time changed to a value less
+than four seconds in the future, and a new observation can't be scheduled to start less than 4 seconds
+in the future. Including other processing delays, this gives a latency period of 8-16 seconds between
+the trigger time and the start
 of a triggered observation.
 
 
