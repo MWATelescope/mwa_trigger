@@ -34,7 +34,7 @@ HORIZON_LIMIT = 30  # Don't observe if the source is below this elevation
 FERMI_POBABILITY_THRESHOLD = 50  # Trigger on Fermi events that have most-likely-prob > this number
 
 
-CPPATH = ['/usr/local/etc/trigger.conf', './trigger.conf']   # Path list to look for configuration file
+CPPATH = ['/usr/local/etc/trigger.conf', 'mwa_trigger/trigger.conf', './trigger.conf']   # Path list to look for configuration file
 CP = ConfigParser.SafeConfigParser()
 CP.read(CPPATH)
 
@@ -85,11 +85,11 @@ class TriggerEvent(object):
         # default observing parameters to be passed to triggerservice.trigger
         self.freqspecs = '145,24'
         self.avoidsun = True
-        self.inttime = 0.5
-        self.freqres = 10
-        self.exptime = 120
+        self.inttime = 0.5  # seconds 0.5, 1, 2 are the only valid values currently
+        self.freqres = 10  # khz
+        self.exptime = 120  # seconds
         self.calibrator = True
-        self.calexptime  = 120
+        self.calexptime  = 120  # seconds
         self.vcsmode = False
 
         self.info('Event created')
@@ -186,7 +186,7 @@ class TriggerEvent(object):
         self.debug("Triggered observation at an elevation of {0}".format(alt))
 
         # how many observations are required
-        nobs = int(time_min // 2)
+        nobs = int(time_min*60 // self.exptime)
         # trigger if we are above the horizon limit
         if alt > HORIZON_LIMIT:
             self.info("Triggering at gps time %d ..." % (t.gps,))
