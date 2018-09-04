@@ -82,6 +82,16 @@ class TriggerEvent(object):
         self.loglist = []   # List of log messages associated with this trigger event.
         self.logger = logger  # Logger object to use for log messages associated with this event.
 
+        # default observing parameters to be passed to triggerservice.trigger
+        self.freqspecs = '145,24'
+        self.avoidsun = True
+        self.inttime = 0.5
+        self.freqres = 10
+        self.exptime = 120
+        self.calibrator = True
+        self.calexptime  = 120
+        self.vcsmode = False
+
         self.info('Event created')
         self.add_event(event)
 
@@ -183,9 +193,13 @@ class TriggerEvent(object):
             result = triggerservice.trigger(project_id=project_id, secure_key=secure_key,
                                             pretend=pretend,
                                             ra=ra, dec=dec,
-                                            creator='VOEvent_Auto_Trigger_{0}'.format(__version__), obsname=obsname,
-                                            freqspecs='145,24', nobs=nobs, avoidsun=True, inttime=0.5, freqres=10,
-                                            exptime=120, calibrator=True, calexptime=120)
+                                            creator='VOEvent_Auto_Trigger_{0}'.format(__version__),
+                                            obsname=obsname, nobs=nobs,
+                                            freqspecs=self.freqspecs, avoidsun=self.avoidsun,
+                                            inttime=self.inttime, freqres=self.freqres,
+                                            exptime=self.exptime,
+                                            calibrator=self.calibrator, calexptime=self.calexptime,
+                                            vcsmode=self.vcsmode)
             # self.debug("Response: {0}".format(result))
 
             if email_tolist:
