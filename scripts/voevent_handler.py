@@ -51,7 +51,7 @@ import Pyro4
 
 from mwa_trigger import GRB_fermi_swift, FlareStar_swift_maxi
 
-PRETEND = False   # Set to true to trigger event in 'pretend' mode, nopt actually schedule observations.
+PRETEND = True   # Set to true to trigger event in 'pretend' mode, nopt actually schedule observations.
 
 EVENTHANDLERS = [GRB_fermi_swift.processevent, FlareStar_swift_maxi.processevent]    # One or more handler functions - all will be called in turn on each XML event.
 

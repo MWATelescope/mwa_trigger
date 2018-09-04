@@ -255,6 +255,8 @@ def trigger(project_id=None, secure_key=None,
         postdict['avoidsun'] = avoidsun
     if pretend is not None:
         postdict['pretend'] = pretend
+    if vcsmode is not None:
+        postdict['vcsmode'] = vcsmode
 
     if vcsmode:
         result = web_api(url=BASEURL + 'triggervcs', urldict=urldict, postdict=postdict, logger=logger)
