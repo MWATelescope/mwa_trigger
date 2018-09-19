@@ -62,6 +62,15 @@ with a set of parameters:
   - triggervcs() - like triggerobs, only schedules observations in Voltage Capture mode, if there is
   enough free disk space on the voltage capture servers.
 
+  - triggerbuffer() - If there is a currently scheduled observation in the 'Voltage Buffer' mode, this
+  service, when called, sends a signal to the capture processes on each of the VCS computers, causing
+  them to immediately dump their memory buffers to disk (150 seconds of data in the current
+  configuration), and continue dumping data to disk for the time specified. Note that it can take a
+  long time (tens of minutes) for the capture processes to finish dumping their memory buffers and
+  'catch up' to real time. After the observing time specified, a VOLTAGE_STOP observation is inserted
+  into the schedule, unless the requested observing time extends past an existing VOLTAGE_STOP
+  observation.
+
 The back end of the triggering system ONLY cares about the science project code asking for an override,
 the science project codes of the observations in the schedule, and the supplied password. Which transient
 projects are authorised to override which observing projects is decided by the MWA board and the MWA
@@ -69,8 +78,9 @@ director, and encoded in a configuration file maintained by the operations team.
 additional constraint - ongoing voltage capture observations can not be interrupted at the moment, but
 this will change in the future.
 
-There are many observation parameters that can be passed, to satisfy different science requirements.
-These include:
+The triggerbuffer() service uses the existing VOLTAGE_BUFFER observations in the schedule, so does not
+take any other observation parameters. For triggerobs() and triggervcs(), there are many observation
+parameters that can be passed, to satisfy different science requirements. These include:
 
   - One or more pointing directions, each specified as an RA/Dec, an Azimuth/Elevation, or a source
   name (from a limited local list of typical targets).
