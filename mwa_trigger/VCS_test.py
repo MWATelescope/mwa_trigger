@@ -56,8 +56,9 @@ class GRB(handlers.TriggerEvent):
     Subclass the TriggerEvent class to add a parameter 'short', relevant only for GRB type events.
     """
     def __init__(self, event=None):
-        self.short = False  # True if short
         handlers.TriggerEvent.__init__(self, event=event)
+        self.short = False  # True if short
+
 
     # Override or add GRB specific methods here if desired.
 
@@ -136,6 +137,7 @@ def handle_grb(v, pretend=False):
             grb.trigger_id = trig_id
             # set trigger mode to vcs for now
             grb.vcsmode = True
+            grb.buffered = True
             grb.exptime = 12*60
             grb.avoidsun = False
             xml_cache[trig_id] = grb
