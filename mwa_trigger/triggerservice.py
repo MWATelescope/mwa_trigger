@@ -199,7 +199,7 @@ def trigger(project_id=None, secure_key=None,
     :param vcsmode: boolean. If True, the observations are made in 'Voltage Capture' mode instead of normal (HW_LFILES) mode.
     :param pretend: boolean or integer. If True, the clear_schedule.py and single_observation.py commands will be generated but NOT run.
     :param logger: optional logging.logger object
-    :return: dictionary structure describing the processing.
+    :return: dictionary structure describing the processing (see trigger() function for more information).
     """
     urldict = {}
     postdict = {}
@@ -265,17 +265,20 @@ def trigger(project_id=None, secure_key=None,
 def triggerbuffer(project_id=None,
                   secure_key=None,
                   pretend=None,
+                  obstime=None,
                   logger=DEFAULTLOGGER):
     """
-    Assuming the correlator is in VOLTAGE_BUFFER mode, trigger an immediate dump of the memory buffers to
-    disk, and continue capturing voltage data until either the disks are full, or a STOP_CAPTURE observation
-    is processed.
+    If the correlator is in VOLTAGE_BUFFER mode, trigger an immediate dump of the memory buffers to
+    disk, and start capturing voltage data for obstime seconds (after which a 16 second VOLTAGE_STOP observation is
+    inserted into the schedule), or until the next scheduled VOLTAGE_STOP observation, whichever comes
+    first.
 
     :param project_id: eg 'C001' - project ID for the triggered observations
     :param secure_key: password associated with that project_id
     :param pretend: boolean or integer. If True, the triggervcs command will NOT be run.
     :param logger: optional logging.logger object
-    :return: A tuple of (success, message) where success is a boolean, and message is a response string.
+    :param obstime: Duration of data capture, in seconds.
+    :return: dictionary structure describing the processing (see trigger() function for more information).
     """
     urldict = {}
     postdict = {}
@@ -293,6 +296,9 @@ def triggerbuffer(project_id=None,
 
     if pretend is not None:
         postdict['pretend'] = pretend
+
+    if obstime is not None:
+        postdict['obstime'] = obstime
 
     result = web_api(url=BASEURL + 'triggerbuffer', urldict=urldict, postdict=postdict, logger=logger)
     return result
