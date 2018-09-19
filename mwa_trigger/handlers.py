@@ -91,6 +91,7 @@ class TriggerEvent(object):
         self.calibrator = True
         self.calexptime  = 120  # seconds
         self.vcsmode = False
+        self.buffered = False
 
         self.info('Event created')
         self.add_event(event)
@@ -199,7 +200,7 @@ class TriggerEvent(object):
                                             inttime=self.inttime, freqres=self.freqres,
                                             exptime=self.exptime,
                                             calibrator=self.calibrator, calexptime=self.calexptime,
-                                            vcsmode=self.vcsmode)
+                                            vcsmode=self.vcsmode, buffered=self.buffered)
             # self.debug("Response: {0}".format(result))
 
             if email_tolist:
