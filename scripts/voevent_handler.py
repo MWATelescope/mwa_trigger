@@ -35,7 +35,7 @@ class MWALogFormatter(object):
 LOGLEVEL_LOGFILE = logging.DEBUG      # Logging level for logfile
 
 # Make the log file name include the username, to avoid permission errors
-LOGFILE = "/var/log/voevents-%s.log" % pwd.getpwuid(os.getuid()).pw_name
+LOGFILE = "/var/log/mwa/voevents-%s.log" % pwd.getpwuid(os.getuid()).pw_name
 
 formatter = MWALogFormatter()
 
