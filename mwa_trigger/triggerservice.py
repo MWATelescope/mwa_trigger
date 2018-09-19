@@ -200,7 +200,7 @@ def trigger(project_id=None, secure_key=None,
     :param vcsmode: boolean. If True, the observations are made in 'Voltage Capture' mode instead of normal (HW_LFILES) mode.
     :param pretend: boolean or integer. If True, the clear_schedule.py and single_observation.py commands will be generated but NOT run.
     :param logger: optional logging.logger object
-    :return: dictionary structure describing the processing (see trigger() function for more information).
+    :return: dictionary structure describing the processing (see above for more information).
     """
     urldict = {}
     postdict = {}
@@ -274,12 +274,29 @@ def triggerbuffer(project_id=None,
     inserted into the schedule), or until the next scheduled VOLTAGE_STOP observation, whichever comes
     first.
 
+    The structure returned is a dictionary, containing the following:
+      result['success'] - a boolean, True if the observations were scheduled successfully, False if there was an error.
+      result['errors'] - a dictionary, containing integer keys from 0-N, where each value is an error message. Normally empty.
+      result['params'] - a dictionary containing all parameters passed to the web service, after parsing, and some extra
+                         parameters calculated by the web service (the name of the automatically chosen calibrator, etc).
+      result['clear'] - the commands used to clear the schedule. It contains the keys/values:
+                           'command': The full clear_schedule.py command line
+                           'retcode': The integer return code from that command
+                           'stderr': The output to STDERR from that command
+                           'stdout': The output to STDOUT from that command
+      result['schedule'] - the commands used to trigger the buffer dump and add a VOLTAGE_STOP observation.
+                           It contains the keys/values:
+                               'command': A string containing all of the single_observation.py command lines
+                               'retcode':The integer return code from the shell spawned to run those commands
+                               'stderr': The output to STDERR from those commands
+                               'stdout': The output to STDOUT from those commands
+
     :param project_id: eg 'C001' - project ID for the triggered observations
     :param secure_key: password associated with that project_id
     :param pretend: boolean or integer. If True, the triggervcs command will NOT be run.
     :param logger: optional logging.logger object
     :param obstime: Duration of data capture, in seconds.
-    :return: dictionary structure describing the processing (see trigger() function for more information).
+    :return: dictionary structure describing the processing (see above for more information).
     """
     urldict = {}
     postdict = {}
