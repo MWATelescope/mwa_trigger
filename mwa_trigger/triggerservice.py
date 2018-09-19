@@ -141,6 +141,7 @@ def trigger(project_id=None, secure_key=None,
             freqres=None, inttime=None,
             avoidsun=None,
             vcsmode=None,
+            buffered=None,
             pretend=None,
             logger=DEFAULTLOGGER):
     """
@@ -198,10 +199,19 @@ def trigger(project_id=None, secure_key=None,
     :param inttime: Correlator integration time for observations. None to use whatever the current mode is, for lower latency. Eg 0.5
     :param avoidsun: boolean or integer. If True, the coordinates of the target and calibrator are shifted slightly to put the Sun in a null.
     :param vcsmode: boolean. If True, the observations are made in 'Voltage Capture' mode instead of normal (HW_LFILES) mode.
+    :param buffered: boolean. If True and vcsmode, trigger a Voltage capture using the ring buffer.
     :param pretend: boolean or integer. If True, the clear_schedule.py and single_observation.py commands will be generated but NOT run.
     :param logger: optional logging.logger object
     :return: dictionary structure describing the processing (see above for more information).
     """
+
+    if vcsmode and buffered:
+        return triggerbuffer(project_id=project_id,
+                             secure_key=secure_key,
+                             pretend=pretend,
+                             obstime=nobs*exptime,
+                             logger=logger)
+
     urldict = {}
     postdict = {}
     if project_id is not None:
