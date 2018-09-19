@@ -2,3 +2,4 @@
 .idea
 twistd.log*
 twistd.pid
+*.pyc
