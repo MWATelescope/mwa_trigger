@@ -90,10 +90,10 @@ def web_api(url='', urldict=None, postdict=None, username=None, password=None, l
 
 def busy(project_id=None, obstime=None, logger=DEFAULTLOGGER):
     """
-    Call with a project_id and a desired observing time. This function will return True if the given project_id
-    is allowed to override current observations from now for the given length of time, or False if not.
+    Call with a project_id and a desired observing time. This function will return False if the given project_id
+    is allowed to override current observations from now for the given length of time, or True if not.
 
-    Note that this doesn't guarantee a later call to trigger() will succeed, as new observations may have been
+    Note that a False result doesn't guarantee a later call to trigger() will succeed, as new observations may have been
     added to the schedule in the meantime.
 
     :param project_id: eg 'C001'
@@ -199,7 +199,7 @@ def trigger(project_id=None, secure_key=None,
     :param vcsmode: boolean. If True, the observations are made in 'Voltage Capture' mode instead of normal (HW_LFILES) mode.
     :param pretend: boolean or integer. If True, the clear_schedule.py and single_observation.py commands will be generated but NOT run.
     :param logger: optional logging.logger object
-    :return: dictionary structure describing the processing.
+    :return: dictionary structure describing the processing (see trigger() function for more information).
     """
     urldict = {}
     postdict = {}
@@ -259,4 +259,46 @@ def trigger(project_id=None, secure_key=None,
         result = web_api(url=BASEURL + 'triggervcs', urldict=urldict, postdict=postdict, logger=logger)
     else:
         result = web_api(url=BASEURL + 'triggerobs', urldict=urldict, postdict=postdict, logger=logger)
+    return result
+
+
+def triggerbuffer(project_id=None,
+                  secure_key=None,
+                  pretend=None,
+                  obstime=None,
+                  logger=DEFAULTLOGGER):
+    """
+    If the correlator is in VOLTAGE_BUFFER mode, trigger an immediate dump of the memory buffers to
+    disk, and start capturing voltage data for obstime seconds (after which a 16 second VOLTAGE_STOP observation is
+    inserted into the schedule), or until the next scheduled VOLTAGE_STOP observation, whichever comes
+    first.
+
+    :param project_id: eg 'C001' - project ID for the triggered observations
+    :param secure_key: password associated with that project_id
+    :param pretend: boolean or integer. If True, the triggervcs command will NOT be run.
+    :param logger: optional logging.logger object
+    :param obstime: Duration of data capture, in seconds.
+    :return: dictionary structure describing the processing (see trigger() function for more information).
+    """
+    urldict = {}
+    postdict = {}
+    if project_id is not None:
+        urldict['project_id'] = project_id
+    else:
+        logger.error('triggering.trigger() must be passed a valid project_id')
+        return None
+
+    if secure_key is not None:
+        postdict['secure_key'] = secure_key
+    else:
+        logger.error('triggering.trigger() must be passed a valid secure_key')
+        return None
+
+    if pretend is not None:
+        postdict['pretend'] = pretend
+
+    if obstime is not None:
+        postdict['obstime'] = obstime
+
+    result = web_api(url=BASEURL + 'triggerbuffer', urldict=urldict, postdict=postdict, logger=logger)
     return result

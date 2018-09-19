@@ -25,18 +25,16 @@ import triggerservice
 log = logging.getLogger('voevent.handlers.GRB_fermi_swift')   # Inherit the logging setup from handlers.py
 
 # Settings
-HORIZON_LIMIT = 30  # Don't observe if the source is below this elevation
 FERMI_POBABILITY_THRESHOLD = 50  # Trigger on Fermi events that have most-likely-prob > this number
+LONG_SHORT_LIMIT = 2.05 #seconds
 
 PROJECT_ID = 'D0009'
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
 
-# NOTIFY_LIST = ['too@mwa128t.org', 'Paul.Hancock@curtin.edu.au', 'Gemma.Anderson@curtin.edu.au', 'Andrew.Williams@curtin.edu.au']
-# NOTIFY_LIST = ['Andrew.Williams@curtin.edu.au']   # For testing
 NOTIFY_LIST = ["Paul.Hancock@curtin.edu.au", "Gemma.Anderson@curtin.edu.au"]
 
 EMAIL_TEMPLATE = """
-The GRB Fermi+Swift handler triggered an MWA observation for a 
+The GRB Fermi+Swift handler triggered an MWA observation for a
 Fermi/Swift GRB at %(trigtime)s UTC.
 
 Details are:
@@ -102,10 +100,19 @@ def is_grb(v):
                  "ivo://nasa.gsfc.gcn/Fermi#GBM_Gnd_Pos",
                  "ivo://nasa.gsfc.gcn/Fermi#GBM_Fin_Pos"
                  )
+    swift_fermi = False
     for t in trig_list:
         if ivorn.find(t) == 0:
-            return True
-    return False
+            swift_fermi = True
+            break
+    if not swift_fermi:
+        return False
+    else:
+        grbid = v.find(".//Param[@name='GRB_Identified']").attrib['value']
+        if grbid != 'true':
+            return False
+    return True
+
 
 
 def handle_grb(v, pretend=False):
@@ -121,6 +128,10 @@ def handle_grb(v, pretend=False):
     # trigger = False
 
     if 'SWIFT' in v.attrib['ivorn']:
+        grbid = v.find(".//Param[@name='GRB_Identified']").attrib['value']
+        if grbid != 'true':
+            log.debug("SWIFT alert but not a GRB")
+            return
         log.debug("SWIFT GRB trigger detected")
         this_trig_type = "SWIFT"
 
@@ -135,7 +146,7 @@ def handle_grb(v, pretend=False):
             grb.add_event(v)
 
         trig_time = float(v.find(".//Param[@name='Integ_Time']").attrib['value'])
-        if trig_time < 2:
+        if trig_time < LONG_SHORT_LIMIT:
             grb.debug("Probably a short GRB: t={0} < 2".format(trig_time))
             grb.short = True
             trigger = True
@@ -164,7 +175,7 @@ def handle_grb(v, pretend=False):
         # eg Fermi#GBM_Gnd_Pos
         if this_trig_type == 'Flt':
             trig_time = float(v.find(".//Param[@name='Trig_Timescale']").attrib['value'])
-            if trig_time < 2:
+            if trig_time < LONG_SHORT_LIMIT:
                 grb.short = True
                 grb.debug("Possibly a short GRB: t={0}".format(trig_time))
             else:
