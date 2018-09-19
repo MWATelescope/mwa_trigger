@@ -28,7 +28,7 @@ log = logging.getLogger('voevent.handlers.GRB_fermi_swift')   # Inherit the logg
 FERMI_POBABILITY_THRESHOLD = 50  # Trigger on Fermi events that have most-likely-prob > this number
 LONG_SHORT_LIMIT = 2.05 #seconds
 
-PROJECT_ID = 'D0009'
+PROJECT_ID = 'G0055'
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
 
 NOTIFY_LIST = ["Paul.Hancock@curtin.edu.au", "Gemma.Anderson@curtin.edu.au"]

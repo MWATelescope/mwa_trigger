@@ -27,7 +27,7 @@ log = logging.getLogger('voevent.handlers.FlareStar_swift_maxi')   # Inherit the
 # Settings
 DEC_LIMIT = 32.
 
-PROJECT_ID = 'D0009'
+PROJECT_ID = 'G0056'
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
 
 NOTIFY_LIST = ["Paul.Hancock@curtin.edu.au", "Gemma.Anderson@curtin.edu.au"]
