@@ -70,7 +70,8 @@ def web_api(url='', urldict=None, postdict=None, username=None, password=None, l
         try:
             resobj = urllib2.urlopen(req)
             data = resobj.read()
-        except (ValueError, urllib2.URLError):  # urlopen failed, or there was an error reading from the opened request object
+        except (ValueError, urllib2.URLError):
+            logger.error('urlopen failed, or there was an error reading from the opened request object')
             return None
 
         try:
