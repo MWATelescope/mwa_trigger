@@ -202,7 +202,9 @@ class TriggerEvent(object):
                                             calibrator=self.calibrator, calexptime=self.calexptime,
                                             vcsmode=self.vcsmode, buffered=self.buffered)
             # self.debug("Response: {0}".format(result))
-
+            if result is None:
+                self.logger.error("Trigger Service Error: triggerservice.trigger() returned None")
+                return
             if email_tolist:
                 if result['success']:
                     success_string = "SUCCESS - observation inserted into MWA schedule"
