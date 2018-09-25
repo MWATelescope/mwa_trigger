@@ -53,7 +53,7 @@ from mwa_trigger import GRB_fermi_swift, FlareStar_swift_maxi, VCS_test
 
 PRETEND = True   # Set to true to trigger event in 'pretend' mode, not actually schedule observations.
 
-EVENTHANDLERS = [VCS_test.processevent, GRB_fermi_swift.processevent, FlareStar_swift_maxi.processevent]    # One or more handler functions - all will be called in turn on each XML event.
+EVENTHANDLERS = [GRB_fermi_swift.processevent, FlareStar_swift_maxi.processevent]    # One or more handler functions - all will be called in turn on each XML event.
 
 Pyro4.config.COMMTIMEOUT = 10.0
 Pyro4.config.THREADPOOL_SIZE_MIN = 8
