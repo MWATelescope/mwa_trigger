@@ -12,7 +12,7 @@ __version__ = "0.1"
 __author__ = ["Paul Hancock", "Andrew Williams", "Gemma Anderson"]
 
 import logging
-
+import os
 import astropy
 from astropy.coordinates import Angle
 from astropy.time import Time
@@ -27,7 +27,7 @@ log = logging.getLogger('voevent.handlers.FlareStar_swift_maxi')   # Inherit the
 # Settings
 DEC_LIMIT = 32.
 
-PROJECT_ID = 'D0009'
+PROJECT_ID = 'G0056'
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
 
 NOTIFY_LIST = ["Paul.Hancock@curtin.edu.au", "Gemma.Anderson@curtin.edu.au"]
@@ -58,7 +58,8 @@ def make_flare_star_names():
     None
     """
     global flare_stars
-    flare_stars = [a.strip().lower() for a in open('mwa_trigger/FlareStarNames.txt', 'r').readlines() if not a.startswith("#")]
+    data_file = "{0}/FlareStarNames.txt".format(os.path.dirname(__file__))
+    flare_stars = [a.strip().lower() for a in open(data_file, 'r').readlines() if not a.startswith("#")]
     # reformat ' ' into either '' or '_' in the list above
     flare_stars.extend([re.sub(' ', '_', f) for f in flare_stars if ' ' in f])
     flare_stars.extend([re.sub(' ', '', f) for f in flare_stars if ' ' in f])
@@ -206,3 +207,6 @@ def handle_flarestar(v, pretend=False):
                            email_tolist=NOTIFY_LIST,
                            email_text=email_text,
                            email_subject=email_subject)
+
+if __name__=="__main__":
+    print("Flare stars are:{0}".format(flare_stars))

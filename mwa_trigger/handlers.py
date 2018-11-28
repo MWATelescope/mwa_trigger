@@ -34,7 +34,7 @@ HORIZON_LIMIT = 30  # Don't observe if the source is below this elevation
 FERMI_POBABILITY_THRESHOLD = 50  # Trigger on Fermi events that have most-likely-prob > this number
 
 
-CPPATH = ['/usr/local/etc/trigger.conf', './trigger.conf']   # Path list to look for configuration file
+CPPATH = ['/usr/local/etc/trigger.conf', 'mwa_trigger/trigger.conf', './trigger.conf']   # Path list to look for configuration file
 CP = ConfigParser.SafeConfigParser()
 CP.read(CPPATH)
 
@@ -81,6 +81,17 @@ class TriggerEvent(object):
         self.last_trig_type = None  # Arbitrary string storing the reason for the last trigger.
         self.loglist = []   # List of log messages associated with this trigger event.
         self.logger = logger  # Logger object to use for log messages associated with this event.
+
+        # default observing parameters to be passed to triggerservice.trigger
+        self.freqspecs = '145,24'
+        self.avoidsun = True
+        self.inttime = 0.5  # seconds 0.5, 1, 2 are the only valid values currently
+        self.freqres = 10  # khz
+        self.exptime = 120  # seconds
+        self.calibrator = True
+        self.calexptime  = 120  # seconds
+        self.vcsmode = False
+        self.buffered = False
 
         self.info('Event created')
         self.add_event(event)
@@ -176,18 +187,24 @@ class TriggerEvent(object):
         self.debug("Triggered observation at an elevation of {0}".format(alt))
 
         # how many observations are required
-        nobs = int(time_min // 2)
+        nobs = int(time_min*60 // self.exptime)
         # trigger if we are above the horizon limit
         if alt > HORIZON_LIMIT:
             self.info("Triggering at gps time %d ..." % (t.gps,))
             result = triggerservice.trigger(project_id=project_id, secure_key=secure_key,
                                             pretend=pretend,
                                             ra=ra, dec=dec,
-                                            creator='VOEvent_Auto_Trigger_{0}'.format(__version__), obsname=obsname,
-                                            freqspecs='145,24', nobs=nobs, avoidsun=True, inttime=0.5, freqres=10,
-                                            exptime=120, calibrator=True, calexptime=120)
+                                            creator='VOEvent_Auto_Trigger_{0}'.format(__version__),
+                                            obsname=obsname, nobs=nobs,
+                                            freqspecs=self.freqspecs, avoidsun=self.avoidsun,
+                                            inttime=self.inttime, freqres=self.freqres,
+                                            exptime=self.exptime,
+                                            calibrator=self.calibrator, calexptime=self.calexptime,
+                                            vcsmode=self.vcsmode, buffered=self.buffered)
             # self.debug("Response: {0}".format(result))
-
+            if result is None:
+                self.logger.error("Trigger Service Error: triggerservice.trigger() returned None")
+                return
             if email_tolist:
                 if result['success']:
                     success_string = "SUCCESS - observation inserted into MWA schedule"

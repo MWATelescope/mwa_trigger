@@ -5,11 +5,11 @@ Library containing one or more functions to process incoming VOEvent XML strings
 be imported by a long running process, so you can load large data files, etc, at import time, rather than
 inside the processevent() function, to save time.
 
-This library only handles Fermi and SWIFT VOEvents, other types of event would be handled in a seperate library.
+This library only handles SWIFT VOEvents, other types of event would be handled in a seperate library.
 """
 
 __version__ = "0.3"
-__author__ = ["Paul Hancock", "Andrew Williams", "Gemma Anderson"]
+__author__ = ["Paul Hancock", "Andrew Williams", "Steven Tremblay"]
 
 import logging
 
@@ -22,20 +22,20 @@ import voeventparse
 import handlers
 import triggerservice
 
-log = logging.getLogger('voevent.handlers.GRB_fermi_swift')   # Inherit the logging setup from handlers.py
+log = logging.getLogger('voevent.handlers.VCS_test')   # Inherit the logging setup from handlers.py
 
 # Settings
 FERMI_POBABILITY_THRESHOLD = 50  # Trigger on Fermi events that have most-likely-prob > this number
 LONG_SHORT_LIMIT = 2.05 #seconds
 
-PROJECT_ID = 'G0055'
+PROJECT_ID = 'D0009'
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
 
 NOTIFY_LIST = ["Paul.Hancock@curtin.edu.au", "Gemma.Anderson@curtin.edu.au"]
 
 EMAIL_TEMPLATE = """
-The GRB Fermi+Swift handler triggered an MWA observation for a
-Fermi/Swift GRB at %(trigtime)s UTC.
+The VCS_test handler triggered an MWA observation for a
+Swift GRB at %(trigtime)s UTC.
 
 Details are:
 Trigger ID: %(triggerid)s
@@ -45,7 +45,7 @@ Error Rad:  %(err)7.3f deg
 
 """
 
-EMAIL_SUBJECT_TEMPLATE = "GRB Fermi+Swift handler trigger for %s"
+EMAIL_SUBJECT_TEMPLATE = "VCS_Test Swift handler trigger for %s"
 
 # state storage
 xml_cache = {}
@@ -56,8 +56,9 @@ class GRB(handlers.TriggerEvent):
     Subclass the TriggerEvent class to add a parameter 'short', relevant only for GRB type events.
     """
     def __init__(self, event=None):
-        self.short = False  # True if short
         handlers.TriggerEvent.__init__(self, event=event)
+        self.short = False  # True if short
+
 
     # Override or add GRB specific methods here if desired.
 
@@ -94,12 +95,7 @@ def is_grb(v):
     """
     ivorn = v.attrib['ivorn']
 
-    trig_list = ("ivo://nasa.gsfc.gcn/SWIFT#BAT_GRB_Pos",  # Swift positions
-                 # "ivo://nasa.gsfc.gcn/Fermi#GBM_Alert",  # Ignore these as they always have ra/dec = 0/0
-                 "ivo://nasa.gsfc.gcn/Fermi#GBM_Flt_Pos",  # Fermi positions
-                 "ivo://nasa.gsfc.gcn/Fermi#GBM_Gnd_Pos",
-                 "ivo://nasa.gsfc.gcn/Fermi#GBM_Fin_Pos"
-                 )
+    trig_list = ["ivo://nasa.gsfc.gcn/SWIFT#BAT_GRB_Pos", ]
     swift_fermi = False
     for t in trig_list:
         if ivorn.find(t) == 0:
@@ -112,7 +108,6 @@ def is_grb(v):
         if grbid != 'true':
             return False
     return True
-
 
 
 def handle_grb(v, pretend=False):
@@ -140,6 +135,11 @@ def handle_grb(v, pretend=False):
         if trig_id not in xml_cache:
             grb = GRB(event=v)
             grb.trigger_id = trig_id
+            # set trigger mode to vcs for now
+            grb.vcsmode = True
+            grb.buffered = True
+            grb.exptime = 12*60
+            grb.avoidsun = False
             xml_cache[trig_id] = grb
         else:
             grb = xml_cache[trig_id]
@@ -155,59 +155,8 @@ def handle_grb(v, pretend=False):
             grb.debug("Probably a long GRB: t={0} > 2".format(trig_time))
             grb.short = False
             trigger = True
-
-    elif "Fermi" in v.attrib['ivorn']:
-        log.debug("Fermi GRB notice detected")
-
-        # cache the event using the trigger id
-        trig_id = "Fermi_" + v.attrib['ivorn'].split('_')[-2]
-        this_trig_type = v.attrib['ivorn'].split('_')[1]  # Flt, Gnd, or Fin
-
-        if trig_id not in xml_cache:
-            grb = GRB(event=v)
-            grb.trigger_id = trig_id
-            xml_cache[trig_id] = grb
-        else:
-            grb = xml_cache[trig_id]
-            grb.add_event(v)
-
-        # Not all alerts have trigger times.
-        # eg Fermi#GBM_Gnd_Pos
-        if this_trig_type == 'Flt':
-            trig_time = float(v.find(".//Param[@name='Trig_Timescale']").attrib['value'])
-            if trig_time < LONG_SHORT_LIMIT:
-                grb.short = True
-                grb.debug("Possibly a short GRB: t={0}".format(trig_time))
-            else:
-                grb.debug("Probably not a short GRB: t={0}".format(trig_time))
-                grb.debug("Not Triggering")
-                return  # don't trigger
-
-            most_likely = int(v.find(".//Param[@name='Most_Likely_Index']").attrib['value'])
-
-            # ignore things that don't have GRB as best guess
-            if most_likely == 4:
-                grb.debug("MOST_LIKELY = GRB")
-                prob = int(v.find(".//Param[@name='Most_Likely_Prob']").attrib['value'])
-
-                # ignore things that don't reach our probability threshold
-                if prob > FERMI_POBABILITY_THRESHOLD:
-                    grb.debug("Prob(GRB): {0}% > {1}".format(prob, FERMI_POBABILITY_THRESHOLD))
-                    trigger = True
-                else:
-                    grb.debug("Prob(GRB): {0}% <{1}".format(prob, FERMI_POBABILITY_THRESHOLD))
-                    grb.debug("Not Triggering")
-                    return
-            else:
-                grb.debug("MOST_LIKELY != GRB")
-                grb.debug("Not Triggering")
-                return
-        else:
-            # for Gnd/Fin we trigger if we already triggered on the Flt position
-            grb.debug("Gnd/Flt message -> reverting to Flt trigger")
-            trigger = grb.triggered
     else:
-        log.debug("Not a Fermi or SWIFT GRB.")
+        log.debug("Not a SWIFT GRB.")
         log.debug("Not Triggering")
         return
 
@@ -234,36 +183,6 @@ def handle_grb(v, pretend=False):
 
         # Same GRB trigger from same telescope
         if obs == trig_id:
-            #  update the schedule!
-            grb.info("Already observing this GRB")
-            last_pos = grb.get_pos(-2)
-            grb.info("Old position: RA {0}, Dec {1}, err {2}".format(*last_pos))
-
-            if "SWIFT" in trig_id:
-                grb.info("Updating SWIFT observation with new coords")
-                pass
-
-            elif "Fermi" in trig_id:
-                prev_type = grb.last_trig_type
-                if this_trig_type == 'Flt' and (prev_type in ['Gnd','Fin']):
-                    grb.info("{0} positions have precedence over {1}".format(prev_type, this_trig_type))
-                    grb.info("Not triggering")
-                    return
-                elif this_trig_type == 'Gnd' and prev_type == 'Fin':
-                    grb.info("{0} positions have precedence over {1}".format(prev_type, this_trig_type))
-                    grb.info("Not triggering")
-                    return
-                else:
-                    grb.info("Triggering {0} to replace {1}".format(this_trig_type, prev_type))
-
-            # shorten the observing time requested so we are ~30mins total.
-            if grb.first_trig_time is not None:
-                req_time_min = 30 - (Time.now() - grb.first_trig_time).sec // 60
-            else:
-                req_time_min = 30
-
-        # if we are observing a SWIFT trigger but not the trigger we just received
-        elif 'SWIFT' in obs:
             if "SWIFT" in trig_id:
                 if obs in xml_cache:
                     prev_short = xml_cache[obs].short
@@ -279,16 +198,6 @@ def handle_grb(v, pretend=False):
             else:
                 grb.info("Not interrupting previous obs")
                 return
-
-        # if we are observing a FERMI trigger but not the trigger we just received
-        elif 'Fermi' in obs:
-            # SWIFT > Fermi
-            if "SWIFT" in trig_id:
-                grb.info("Replacing a Fermi trigger with a SWIFT trigger")
-            else:
-                grb.info("Currently observing a different Fermi trigger, not interrupting")
-                return
-
         else:
             grb.info("Not currently observing any GRBs")
     else:
@@ -303,8 +212,8 @@ def handle_grb(v, pretend=False):
     email_subject = EMAIL_SUBJECT_TEMPLATE % grb.trigger_id
     # Do the trigger
     grb.trigger_observation(ttype=this_trig_type,
-                            obsname=trig_id,
-                            time_min=req_time_min,
+                            obsname=trig_id+"_test",  # add test to file name so we don't archive these obs.
+                            time_min=12,
                             pretend=pretend,
                             project_id=PROJECT_ID,
                             secure_key=SECURE_KEY,
