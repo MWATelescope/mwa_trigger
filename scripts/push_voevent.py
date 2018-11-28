@@ -13,13 +13,37 @@
 """
 
 import ConfigParser
+import datetime
 import logging
+import os
+import pwd
 import sys
 import traceback
 import warnings
 
-logging.basicConfig()
-DEFAULTLOGGER = logging.getLogger()
+
+############### set up the logging before importing Pyro4
+class MWALogFormatter(object):
+    """
+    Add a time string to the start of any log messages sent to the log file.
+    """
+    def format(self, record):
+        return "%s: %s" % (datetime.datetime.utcnow().isoformat(), record.getMessage())
+
+
+LOGLEVEL_LOGFILE = logging.DEBUG      # Logging level for logfile
+
+# Make the log file name include the username, to avoid permission errors
+LOGFILE = "/var/log/mwa/push_voevent-%s.log" % pwd.getpwuid(os.getuid()).pw_name
+
+formatter = MWALogFormatter()
+
+filehandler = logging.FileHandler(LOGFILE)
+filehandler.setLevel(LOGLEVEL_LOGFILE)
+filehandler.setFormatter(formatter)
+
+DEFAULTLOGGER = logging.getLogger('push_voevent')
+DEFAULTLOGGER.addHandler(filehandler)
 
 import Pyro4
 
@@ -82,8 +106,8 @@ def PyroTransmit(event='', logger=DEFAULTLOGGER):
 
     try:
         with client:
-          logger.debug('Transmitting event to the handler via Pyro')
-          client.putEvent(event=event)   # Send the XML
+            logger.debug('Transmitting event to the handler via Pyro')
+            client.putEvent(event=event)   # Send the XML
     except (Pyro4.errors.ConnectionClosedError, Pyro4.errors.TimeoutError, Pyro4.errors.ProtocolError):
         logger.error('Communication exception in PyroTransmit')
         return False
