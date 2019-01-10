@@ -49,6 +49,9 @@ DEFAULTLOGGER.addHandler(filehandler)
 
 import Pyro4
 
+sys.excepthook = Pyro4.util.excepthook
+Pyro4.config.DETAILED_TRACEBACK = True
+
 from mwa_trigger import GRB_fermi_swift, FlareStar_swift_maxi, VCS_test
 
 PRETEND = True   # Set to true to trigger event in 'pretend' mode, not actually schedule observations.
@@ -218,21 +221,29 @@ if __name__ == '__main__':
         DEFAULTLOGGER.info('Working in PRETEND mode, not actually scheduling observations.')
     EventQueue = Queue.Queue(maxsize=10)
 
-    # Start a background thread accepting network connections that add events to the queue.
-    rpcHandler = VOEventHandler(logger=DEFAULTLOGGER)
-    pyro_thread = threading.Thread(target=rpcHandler.servePyroRequests, name='PyroDaemon')
-    pyro_thread.daemon = True
-    pyro_thread.start()
+    while True:
+        # Start a background thread accepting network connections that add events to the queue.
+        rpcHandler = VOEventHandler(logger=DEFAULTLOGGER)
+        pyro_thread = threading.Thread(target=rpcHandler.servePyroRequests, name='PyroDaemon')
+        pyro_thread.daemon = True
+        DEFAULTLOGGER.info('Starting Pyro4 request handler.')
+        pyro_thread.start()
 
-    # Start a background thread to process incoming events from the queue, one by one.
-    queue_thread = threading.Thread(target=QueueWorker, name='QueueDaemon')
-    queue_thread.daemon = True
-    queue_thread.start()
+        # Start a background thread to process incoming events from the queue, one by one.
+        queue_thread = threading.Thread(target=QueueWorker, name='QueueDaemon')
+        queue_thread.daemon = True
+        DEFAULTLOGGER.info('Starting Queue handler.')
+        queue_thread.start()
 
-    try:
-        while True:
-            time.sleep(3600)
-    finally:
-        EXITING = True
-        PYRO_DAEMON.shutdown()
-        time.sleep(1)
+        try:
+            while True:
+                if not pyro_thread.is_alive():
+                    DEFAULTLOGGER.error('Pyro request handler thread has died - restarting.')
+                    break
+                if not queue_thread.is_alive():
+                    DEFAULTLOGGER.error('Queue handler thread has died - restarting.')
+                    break
+        finally:
+            EXITING = True
+            PYRO_DAEMON.shutdown()
+            time.sleep(5)
