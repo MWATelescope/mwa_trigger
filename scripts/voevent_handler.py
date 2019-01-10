@@ -237,6 +237,7 @@ if __name__ == '__main__':
 
         try:
             while True:
+                time.sleep(5)
                 if not pyro_thread.is_alive():
                     DEFAULTLOGGER.error('Pyro request handler thread has died - restarting.')
                     break
