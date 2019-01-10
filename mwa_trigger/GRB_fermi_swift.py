@@ -108,7 +108,12 @@ def is_grb(v):
     if not swift_fermi:
         return False
     else:
-        grbid = v.find(".//Param[@name='GRB_Identified']").attrib['value']
+        try:
+            grbid = v.find(".//Param[@name='GRB_Identified']").attrib['value']
+        except AttributeError:
+            log.error("Param[@name='GRB_Identified'] not found in XML packet - discarding.")
+            return False
+
         if grbid != 'true':
             return False
     return True
