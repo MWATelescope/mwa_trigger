@@ -247,4 +247,5 @@ if __name__ == '__main__':
         finally:
             EXITING = True
             PYRO_DAEMON.shutdown()
-            time.sleep(5)
+            time.sleep(15)
+            EXITING = False
