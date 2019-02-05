@@ -43,6 +43,7 @@ filehandler.setLevel(LOGLEVEL_LOGFILE)
 filehandler.setFormatter(formatter)
 
 DEFAULTLOGGER = logging.getLogger('push_voevent')
+DEFAULTLOGGER.setLevel(logging.DEBUG)
 DEFAULTLOGGER.addHandler(filehandler)
 
 import Pyro4
@@ -81,10 +82,13 @@ def initPyro(logger=DEFAULTLOGGER):
 
     :param logger: An optional logging.Logger object to use to log messages from the Pyro4 proxy
     """
-    logger.debug("Creating client object to connect to voevent_handler")
-    ns = Pyro4.locateNS()
+    logger.debug("Locating Pyro nameserver")
+    ns = Pyro4.locateNS(host='helios', broadcast=False)
+    logger.debug("Found Pyro nameserver")
     uri = ns.lookup('VOEventHandler')
+    logger.debug("Looked up VOEventHandler uri")
     client = Pyro4.Proxy(uri)
+    logger.debug("Created Pyro client")
     with client:
         client.ping()   # Make sure the remote server is alive
         logger.debug('Pyro ping() succeeded!')
