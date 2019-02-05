@@ -2,9 +2,19 @@
 VOEvent trigger front end for scheduling MWA observations. This repository is made up of:
 
 /README.txt - this file
-/setup.py - package file
 /trigger.conf.example - sample configuration file
-/python_requirements.txt - requirements file to set up a virtual python environment
+
+pyro_nameserver.py - simple script to start a Pyro4 Remote Procedure Call (RPC) nameserver running,
+                     to allow push_voevent.py to communicate with voevent_handler.py.
+push_voevent.py - script that takes a VOEvent on standard input and passes it on via RPC call
+                  to the voevent_handler.py daemon. The push_voevent.py script is usually called
+                  by the 'comet' VOEvent broker when a VOEvent is received, but it can also be
+                  called from the command line, for testing.
+voevent_handler.py - This daemon runs continuously once it's started, and accepts VOEvents via RPC call
+                     from the push_voevent.py script. These events are queued, and one by one, queued
+                     events are passed to a predefined 'handler function' for processing. If a handler
+                     function returned False, the next handler function is tried. If a handler
+                     returns True, no more handlers are tried for that VOEvent.
 
 /mwa_trigger/
     __init__.py - package file
@@ -13,18 +23,6 @@ VOEvent trigger front end for scheduling MWA observations. This repository is ma
                   triggers.
     GRB_fermi_swift.py - library containing the handler function to parse and trigger on Fermi/Swift VOEvents.
 
-/scripts/
-    pyro_nameserver.py - simple script to start a Pyro4 Remote Procedure Call (RPC) nameserver running,
-                         to allow push_voevent.py to communicate with voevent_handler.py.
-    push_voevent.py - script that takes a VOEvent on standard input and passes it on via RPC call
-                      to the voevent_handler.py daemon. The push_voevent.py script is usually called
-                      by the 'comet' VOEvent broker when a VOEvent is received, but it can also be
-                      called from the command line, for testing.
-    voevent_handler.py - This daemon runs continuously once it's started, and accepts VOEvents via RPC call
-                         from the push_voevent.py script. These events are queued, and one by one, queued
-                         events are passed to a predefined 'handler function' for processing. If a handler
-                         function returned False, the next handler function is tried. If a handler
-                         returns True, no more handlers are tried for that VOEvent.
 
 Software overview:
 
@@ -154,7 +152,7 @@ To get a trigger handler running, you will need to:
 - If you want to respond to actual broadcast VOEvents (as opposed to manually pushing VOEvent XML
   files for testing), then, in a third terminal window, run:
 
-      twistd comet --remote=voevent.4pisky.org -r -v --cmd=./push_voevent.py
+      twistd comet --remote=voevent.4pisky.org -r -v --cmd=/path/to/your/push_voevent.py
                    --local-ivo=ivo://mwa-paul/comet-broker
 
   That will exit, but leave comet running in the background. The comet broker will call the push_voevent.py
