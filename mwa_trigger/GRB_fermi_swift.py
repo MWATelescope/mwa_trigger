@@ -94,28 +94,40 @@ def is_grb(v):
     """
     ivorn = v.attrib['ivorn']
 
-    trig_list = ("ivo://nasa.gsfc.gcn/SWIFT#BAT_GRB_Pos",  # Swift positions
-                 # "ivo://nasa.gsfc.gcn/Fermi#GBM_Alert",  # Ignore these as they always have ra/dec = 0/0
+    trig_swift = ("ivo://nasa.gsfc.gcn/SWIFT#BAT_GRB_Pos",  # Swift positions
+                  )
+
+    trig_fermi =(# "ivo://nasa.gsfc.gcn/Fermi#GBM_Alert",  # Ignore these as they always have ra/dec = 0/0
                  "ivo://nasa.gsfc.gcn/Fermi#GBM_Flt_Pos",  # Fermi positions
                  "ivo://nasa.gsfc.gcn/Fermi#GBM_Gnd_Pos",
                  "ivo://nasa.gsfc.gcn/Fermi#GBM_Fin_Pos"
                  )
-    swift_fermi = False
-    for t in trig_list:
+
+    swift = False
+    fermi = False
+    for t in trig_swift:
         if ivorn.find(t) == 0:
-            swift_fermi = True
+            swift = True
             break
-    if not swift_fermi:
+    for t in trig_fermi:
+        if ivorn.find(t) == 0:
+            fermi = True
+            break
+
+    if not (swift or fermi):
         return False
     else:
-        try:
-            grbid = v.find(".//Param[@name='GRB_Identified']").attrib['value']
-        except AttributeError:
-            log.error("Param[@name='GRB_Identified'] not found in XML packet - discarding.")
-            return False
-
-        if grbid != 'true':
-            return False
+        if swift:
+            # check to see if a GRB was identified
+            try:
+                grbid = v.find(".//Param[@name='GRB_Identified']").attrib['value']
+            except AttributeError:
+                log.error("Param[@name='GRB_Identified'] not found in XML packet - discarding.")
+                return False
+            if grbid != 'true':
+                return False
+        elif fermi:
+            pass  # all fermi triggers are GRB triggers (for now)
     return True
 
 
