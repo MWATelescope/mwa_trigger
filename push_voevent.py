@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#! /usr/bin/env python
 
 """Takes the XML for a VO event on standard input, and passes it on to the running
    voevent_handler process, where it will be queued and processed.
@@ -83,7 +83,7 @@ def initPyro(logger=DEFAULTLOGGER):
     :param logger: An optional logging.Logger object to use to log messages from the Pyro4 proxy
     """
     logger.debug("Locating Pyro nameserver")
-    ns = Pyro4.locateNS(host='helios', broadcast=False)
+    ns = Pyro4.locateNS(host=CP.get(section='pyro', option='ns_host'), broadcast=False)
     logger.debug("Found Pyro nameserver")
     uri = ns.lookup('VOEventHandler')
     logger.debug("Looked up VOEventHandler uri")
