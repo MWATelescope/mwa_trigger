@@ -54,7 +54,7 @@ Pyro4.config.DETAILED_TRACEBACK = True
 
 from mwa_trigger import GRB_fermi_swift, FlareStar_swift_maxi, VCS_test
 
-PRETEND = True   # Set to true to trigger event in 'pretend' mode, not actually schedule observations.
+PRETEND = False   # Set to true to trigger event in 'pretend' mode, not actually schedule observations.
 
 EVENTHANDLERS = [GRB_fermi_swift.processevent, FlareStar_swift_maxi.processevent]    # One or more handler functions - all will be called in turn on each XML event.
 
