@@ -114,10 +114,12 @@ def is_flarestar(v):
     :param v: string in VOEvent XML format
     :return: Boolean, True if this event is a Flare Star.
     """
+    swift=False
     # SWIFT encodes a Why.Inference.Name
     if hasattr(v.Why.Inference, 'Name'):
         name = v.Why.Inference.Name
         log.debug("Found {0} in SWIFT format".format(name))
+        swift=True
     else:
         # MAXI uses a Soruce_Name parameter
         src = v.find(".//Param[@name='Source_Name']")
@@ -131,6 +133,9 @@ def is_flarestar(v):
         log.debug("Found {0} in MAXI format".format(name))
 
     if str(name).lower() in flare_stars:
+        # check if this is a sub_sub_threshold event and ignore if it is
+        if swift and 'sub-sub-threshold' in str(v.What.Description):
+            return False
         return True
     return False
 
