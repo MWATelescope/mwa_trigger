@@ -137,13 +137,16 @@ def handle_gw(v, pretend=False):
         log.debug("No skymap in VOEvent. Not triggering.")
         return
     
-    response = mwa_gw.MWA_GW_fast(params['skymap_fits'], logger=log)
-    
     event = GW(event=v)
     
-    ra, dec = get_mwapointing_grid(minprob=0.01, minelevation=45)
+    ML = mwa_gw.MWA_GW_fast(params['skymap_fits'], logger=log)
     
-    gw.add_pos(ra, dec, 0.0)
+    RA,Dec=ML.get_mwapointing()
+    grid,dist=ML.MWA_grid.find_closest_grid_pointing(RA,Dec)
+    RAgrid,Decgrid=ML.get_mwapointing_grid()
+    gridgrid,griddist=ML.MWA_grid.find_closest_grid_pointing(RAgrid,Decgrid)
+    
+    gw.add_pos(RAgrid,Decgrid, 0.0)
     
     trig_id = params['GraceID']
     event.trigger_id = trig_id
