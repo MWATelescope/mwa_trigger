@@ -15,7 +15,7 @@ import triggerservice
 import healpy as hp
 
 import astropy.utils.data
-#import lxml.etree
+import lxml.etree
 
 from astropy.coordinates import SkyCoord, EarthLocation, AltAz
 from astropy.time import Time
@@ -24,6 +24,8 @@ import astropy.units as u
 import numpy as np
 
 from mwa_pb import primary_beam
+
+from timeit import default_timer as timer
 
 
 log = logging.getLogger('voevent.handlers.LVC_GW')   # Inherit the logging setup from handlers.py
@@ -39,8 +41,9 @@ SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
 NOTIFY_LIST = ['ddob1600@uni.sydney.edu.au', 'kaplan@uwm.edu', 'tara@physics.usyd.edu.au']
 
 EMAIL_TEMPLATE = """
-The LIGO-GW handled triggered an MWA observation for 
-%(name)s at %(trigtime)s UTC.
+The LIGO-GW handler triggered an
+MWA observation at %(trigtime)s UTC.
+
 Details are:
 Trigger ID: %(triggerid)s
 RA:         %(ra)s hours
@@ -59,14 +62,14 @@ xml_cache = {}
 
 ################################################################################
 class MWA_grid_points():
-    file=os.path.join('..',
+    grid_file=os.path.join('..',
                       'data','grid_points.fits')
     
     def __init__(self, frame, logger=log):
         try:
             self.logger = logger
             self.frame=frame
-            self.data=Table.read(MWA_grid_points.file)
+            self.data=Table.read(MWA_grid_points.grid_file)
             self.logger.debug('Grid points loaded')
             
             self.gridAltAz = SkyCoord(self.data['azimuth']*u.deg, self.data['elevation']*u.deg, frame=self.frame)
@@ -74,44 +77,51 @@ class MWA_grid_points():
             
 
         except:
-            self.logger.critical('Cannot open MWA grid points file %s' % MWA_grid_points.file)
+            self.logger.critical('Cannot open MWA grid points file %s' % MWA_grid_points.grid_file)
             self.data=None
         
         
     
     ##################################################
-    def get_radec(self):
+    def get_radec(self, frame=None):
         """
-        gridRA,gridDec=MWA_grid_points.get_radec()
-        RA,Dec of grid at a particular obstime
+        Calculate the celestial coordinates of MWA grid points in the MWA frame
+        :param frame: An astropy coordinate frame. By default: MWA frame at current time
+        
+        :return: An astropy SkyCoord with the celestial coordinates
         """
         
-        altaz = SkyCoord(self.data['azimuth']*u.deg, self.data['elevation']*u.deg, frame =self.frame)
+        if not frame:
+          frame = self.frame
+          
+        altaz = SkyCoord(self.data['azimuth']*u.deg, self.data['elevation']*u.deg, frame=frame)
         radec = altaz.transform_to('icrs')
         
         return radec
 
 
     ##################################################
-    def find_closest_grid_pointing(self, RA, Dec):
+    def find_closest_grid_pointing(self, RADec):
         """
         Returns the grid pointing that is closest to the requested position (Ra,Dec) in degrees
         along with the distance to that point in degrees
         
+        :param RADec: An astropy SkyCoord with the celestial coordinates of the requested position
+        
+        :return closest: An astropy Row with the closest gridpoint to RADec
+        :return closest_distance: An astropy Angle with the distance from the closest gridpoint to the requested position
+        
         """
 
-        if RA is None:
+        if RADec is None:
             return None,None
 
         if self.data is None:
             self.logger.critical('Unable to find MWA grid points')
             return None,None
 
-        pos = SkyCoord(RA, Dec)
-        
-        distances = self.gridAltAz.separation(pos)
-        
-        
+        distances = self.gridAltAz.separation(RADec)
+                
         closest_arg = np.argmin(distances)
         closest = self.data[closest_arg]
         closest_distance = distances[closest_arg]
@@ -143,10 +153,10 @@ class GW(handlers.TriggerEvent):
         for i in xrange(len(gwheader)):
             self.header[gwheader[i][0]]=gwheader[i][1]
 
-        # compute the pointings for now
-        # i.e., as soon as possible after the alert
+        # compute the pointings for a specified time if provided
         if time:
           self.obstime=time
+        # otherwise computer the pointings for the current time
         else:
           self.obstime=astropy.time.Time.now()
         
@@ -174,6 +184,11 @@ class GW(handlers.TriggerEvent):
         
     ##################################################
     def compute_coords(self):
+        """
+        Convert the coordinates of the downsampled skymap to RA,Dec.
+        Then convert RA,Dec to Alt,Az in the current observatory frame.
+        
+        """
         # theta is co-latitude
         # phi is longitude
         # both in radians
@@ -189,15 +204,23 @@ class GW(handlers.TriggerEvent):
         
         
     ##################################################
-    def interp(self, RA, Dec):
-        return healpy.get_interp_val(self.gwmap_down, np.radians(90-Dec), np.radians(RA), nest=True)
+    def interp(self, RADec):
+        """
+        Compute the bilinear interpolation value of a sky position
+        using the 4 nearest points on the skymap
+        
+        :param RADec: An astropy SkyCoord with the requested sky position
+        :return: The interpolated value as a float
+        
+        """
+        return healpy.get_interp_val(self.gwmap_down, np.radians(90-RADec.Dec.value), np.radians(RA.ra.value), nest=True)
         
         
     ##################################################
     def get_mwapointing(self, frequency=150e6, minprob=0.01, ZAweight=False):
         """
-        RA,Dec=MWA_GW.get_mwapointing(frequency=150e6, minprob=0.01, ZAweight=False)
-        return RA,Dec in degrees of brightest GW pixel
+        RADec=MWA_GW.get_mwapointing(frequency=150e6, minprob=0.01, ZAweight=False)
+        return the astropy SkyCoord of brightest GW pixel
         constrained to be above horizon.
         Will additionally weight by cos(ZA) if desired
         """
@@ -210,8 +233,8 @@ class GW(handlers.TriggerEvent):
             return None,None
     
         # first go from altitude to zenith angle
-        theta_horz=np.radians((90-self.AltAz_down.alt))
-        phi_horz=np.radians(self.AltAz_down.az)
+        theta_horz=np.pi/2-self.AltAz_down.alt.radian
+        phi_horz=self.AltAz_down.az.radian
 
         if ZAweight:
             # weight the map by cos(ZA) if desired
@@ -219,10 +242,9 @@ class GW(handlers.TriggerEvent):
             pointingmap*=np.cos(theta_horz)
         
         select_pointing = pointingmap==pointingmap.max()
-        RA_point = self.RA_down[select_pointing][0]
-        Dec_point = self.Dec_down[select_pointing][0]
+        RADec_point = self.RADec_down[select_pointing]
 
-        return RA_point, Dec_point
+        return RADec_point
         
         
     ##################################################
@@ -267,13 +289,13 @@ class GW(handlers.TriggerEvent):
     def get_mwapointing_grid(self, frequency=150e6, minprob=0.01, minelevation=45,
                              returndelays=False, returnpower=False):
         """
-        RA,Dec=MWA_GW.get_mwapointing_grid(frequency=150e6, minprob=0.01, minelevation=45
+        RADec=MWA_GW.get_mwapointing_grid(frequency=150e6, minprob=0.01, minelevation=45
         returndelays=False, returnpower=False)
         if returndelays=True, returns:
         RADec,delays
         
         if returnpower=True, returns:
-        RA,Dec,delays,power
+        RADec,delays,power
         """
 
         
@@ -310,10 +332,11 @@ class GW(handlers.TriggerEvent):
                     return None,None
                     
         # first go from altitude to zenith angle
-        theta_horz=(90*u.deg-AltAz.alt).radian
-        phi_horz=(AltAz.az).radian
+        theta_horz=np.pi/2-AltAz.alt.radian
+        phi_horz=AltAz.az.radian
         
         mapsum=np.zeros((len(self.MWA_grid.data)))
+        start = timer()
         for igrid in xrange(len(self.MWA_grid.data)):
             beamX,beamY=primary_beam.MWA_Tile_analytic(theta_horz, phi_horz,
                                                        freq=frequency,
@@ -325,6 +348,9 @@ class GW(handlers.TriggerEvent):
         # this is the best grid point
         # such that it is over our minimum elevation
         igrid=np.where(mapsum==mapsum[self.MWA_grid.data['elevation']>minelevation].max())[0][0]
+        end=timer()
+        log.info("Best pointing found in %.1f s"%(end-start))
+        log.info("Looped over %d grid points"%(len(self.MWA_grid.data)))
         
         if not (self.MWA_grid.data['elevation'][igrid]>minelevation):
             self.logger.info('Elevation %.1f deg too low\n' % self.MWA_grid.data['elevation'][igrid])
@@ -398,8 +424,9 @@ def is_gw(v):
     :return: Boolean, True if this event is a GW.
     """
     ivorn = v.attrib['ivorn']
+    log.debug("ivorn: %s"%(ivorn))
 
-    trig_ligo = "ivo://nasa.gsfc.gcn/LVC#"
+    trig_ligo = "ivo://gwnet/LVC#"
     
     ligo = False
     
@@ -409,7 +436,7 @@ def is_gw(v):
     return ligo
 
 
-def handle_gw(v, pretend=False):
+def handle_gw(v, pretend=False, time=None):
     """
     Handles the parsing of the VOEvent and generates observations.
     
@@ -441,24 +468,30 @@ def handle_gw(v, pretend=False):
         log.debug("Event below NS threshold (%.1f). Not triggering."%(HAS_NS_THRESH))
         return
         
-    if 'skymap_fits' in params:
+    if 'skymap_fits' not in params:
         log.debug("No skymap in VOEvent. Not triggering.")
         return
     
     gw = GW(event=v)
-    gw.load_skymap(params['skymap_fits'])
+    gw.load_skymap(params['skymap_fits'], time=time)
     
     trig_id = params['GraceID']
     gw.trigger_id = trig_id
     
     
     
-    RA,Dec=ML.get_mwapointing()
-    grid,dist=ML.MWA_grid.find_closest_grid_pointing(RA,Dec)
-    RAgrid,Decgrid=ML.get_mwapointing_grid()
-    gridgrid,griddist=ML.MWA_grid.find_closest_grid_pointing(RAgrid,Decgrid)
+    #RADec=gw.get_mwapointing()
+    #grid,dist=gw.MWA_grid.find_closest_grid_pointing(RADec)
+    RADecgrid = gw.get_mwapointing_grid()
+    if RADecgrid is None:
+      log.info("Not triggering")
+      return
+      
+    #gridgrid,griddist=gw.MWA_grid.find_closest_grid_pointing(RADecgrid)
     
-    gw.add_pos(RAgrid,Decgrid, 0.0)
+    ra, dec = RADecgrid.ra, RADecgrid.dec
+    log.debug("Coordinate: %s, %s"%(ra, dec))
+    gw.add_pos((ra, dec, 0.0))
     
     
     
@@ -479,22 +512,45 @@ def handle_gw(v, pretend=False):
     email_subject = EMAIL_SUBJECT_TEMPLATE % gw.trigger_id
     # Do the trigger
     gw.trigger_observation(ttype="LVC",
-                            obsname=trig_id,
-                            time_min=req_time_s/60,
-                            pretend=pretend,
-                            project_id=PROJECT_ID,
-                            secure_key=SECURE_KEY,
-                            email_tolist=NOTIFY_LIST,
-                            email_text=email_text,
-                            email_subject=email_subject)
+                           obsname=trig_id,
+                           time_min=req_time_s/60,
+                           pretend=pretend,
+                           project_id=PROJECT_ID,
+                           secure_key=SECURE_KEY,
+                           email_tolist=NOTIFY_LIST,
+                           email_text=email_text,
+                           email_subject=email_subject)
     
     
+def test_event(filepath='../test_events/MS190410a-1-Preliminary.xml', test_time = Time('2018-4-03 12:00:00')):
 
+  pretend=True
+  
+  log.info('Running test event from %s'%(filepath))
+  log.info('Mock time: %s'%(test_time))
+  
+  payload = astropy.utils.data.get_file_contents(filepath)
+  v = lxml.etree.fromstring(payload)
+  
+  start = timer()
+  isgw = is_gw(v)
+  log.debug("GW? {0}".format(isgw))
+  if isgw:
+      handle_gw(v, pretend=pretend, time=test_time)
+      
+  end = timer()
 
-if __name__ == '__main__':
+  log.info("Finished. Response time: %.1f s"%(end-start))
+  
+def test_skymap():
   test_time = Time('2018-4-03 19:00:00')
   event = GW()
   event.load_skymap('../test_events/bayestar.fits.gz', time=test_time)
 
   event.get_mwapointing_grid()
+  
+
+if __name__ == '__main__':
+  test_event()
+#  test_event(filepath='../test_events/LVC_example_preliminary.xml')
   
