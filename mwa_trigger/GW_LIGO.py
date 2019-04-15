@@ -505,10 +505,12 @@ def handle_gw(v, pretend=False, time=None):
         
     emaildict = {'triggerid': gw.trigger_id,
                  'trigtime': Time.now().iso,
-                 'ra': ra,
-                 'dec': dec}
+                 'ra': ra.to_string(unit=astropy.units.hour, sep=':'),
+                 'dec': dec.to_string(unit=astropy.units.deg, sep=':')}
     
     email_text = EMAIL_TEMPLATE % emaildict
+    log.info(email_text)
+    
     email_subject = EMAIL_SUBJECT_TEMPLATE % gw.trigger_id
     # Do the trigger
     gw.trigger_observation(ttype="LVC",
