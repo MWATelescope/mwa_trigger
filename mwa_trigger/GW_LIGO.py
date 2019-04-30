@@ -7,7 +7,7 @@ import astropy
 from astropy.coordinates import Angle
 from astropy.time import Time
 import re
-#import voeventparse
+import voeventparse
 
 import handlers
 import triggerservice
@@ -479,15 +479,10 @@ def handle_gw(v, pretend=False, time=None):
     gw.trigger_id = trig_id
     
     
-    
-    #RADec=gw.get_mwapointing()
-    #grid,dist=gw.MWA_grid.find_closest_grid_pointing(RADec)
     RADecgrid = gw.get_mwapointing_grid()
     if RADecgrid is None:
       log.info("Not triggering")
       return
-      
-    #gridgrid,griddist=gw.MWA_grid.find_closest_grid_pointing(RADecgrid)
     
     ra, dec = RADecgrid.ra, RADecgrid.dec
     log.debug("Coordinate: %s, %s"%(ra, dec))
@@ -532,7 +527,7 @@ def test_event(filepath='../test_events/MS190410a-1-Preliminary.xml', test_time 
   log.info('Mock time: %s'%(test_time))
   
   payload = astropy.utils.data.get_file_contents(filepath)
-  v = lxml.etree.fromstring(payload)
+  v = voeventparse.loads(str(event))
   
   start = timer()
   isgw = is_gw(v)
