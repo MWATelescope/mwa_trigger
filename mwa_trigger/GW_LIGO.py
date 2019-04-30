@@ -6,20 +6,20 @@ import os
 import astropy
 from astropy.coordinates import Angle
 from astropy.time import Time
-import re
+# import re
 import voeventparse
 
 import handlers
 import triggerservice
 
-import healpy as hp
+import healpy
 
 import astropy.utils.data
-import lxml.etree
+# import lxml.etree
 
-from astropy.coordinates import SkyCoord, EarthLocation, AltAz
+from astropy.coordinates import SkyCoord, EarthLocation   # , AltAz
 from astropy.time import Time
-from astropy.table import Table, Column
+from astropy.table import Table   # , Column
 import astropy.units as u
 import numpy as np
 
@@ -59,9 +59,8 @@ xml_cache = {}
 
 
 ################################################################################
-class MWA_grid_points():
-    grid_file = os.path.join('..',
-                             'data', 'grid_points.fits')
+class MWA_grid_points(object):
+    grid_file = os.path.join('..', 'data', 'grid_points.fits')
 
     def __init__(self, frame, logger=log):
         try:
@@ -72,7 +71,6 @@ class MWA_grid_points():
 
             self.gridAltAz = SkyCoord(self.data['azimuth'] * u.deg, self.data['elevation'] * u.deg, frame=self.frame)
             self.logger.debug('Grid points converted to SkyCoord')
-
 
         except:
             self.logger.critical('Cannot open MWA grid points file %s' % MWA_grid_points.grid_file)
@@ -133,16 +131,31 @@ class GW(handlers.TriggerEvent):
     """
 
     def __init__(self, event=None):
+        self.gwfile = ''
+        self.gwmap = ''
+        self.header = {}
+        self.obstime = 0
+        self.frame = None
+        self.nside = 0
+        self.npix = 0
+        self.MWA_grid = None
+        self.nside_down = 0
+        self.npix_down = 0
+        self.gwmap_down = None
+        self.RADec_down = None
+        self.AltAz_down = None
         handlers.TriggerEvent.__init__(self, event=event)
 
     ##################################################
     def load_skymap(self, gwfile, nside=64, time=None):
         self.gwfile = gwfile
         try:
-            self.gwmap, gwheader = hp.read_map(self.gwfile, h=True, nest=True, verbose=False)
+            self.gwmap, gwheader = healpy.read_map(self.gwfile, h=True, nest=True, verbose=False)
             self.logger.debug('Read in GW map %s' % self.gwfile)
         except:
             self.logger.error('Unable to read GW sky probability map %s' % self.gwfile)
+            return
+
         self.header = {}
         for i in xrange(len(gwheader)):
             self.header[gwheader[i][0]] = gwheader[i][1]
@@ -159,17 +172,18 @@ class GW(handlers.TriggerEvent):
         self.logger.debug('Current time is %s' % (self.obstime))
 
         self.nside = self.header['NSIDE']
-        self.npix = hp.nside2npix(self.nside)
+        self.npix = healpy.nside2npix(self.nside)
         self.logger.debug('Original NSIDE=%d, NPIX=%d' % (self.nside,
                                                           self.npix))
 
         self.MWA_grid = MWA_grid_points(self.frame, logger=self.logger)
 
         self.nside_down = nside
-        self.npix_down = hp.nside2npix(self.nside_down)
-        self.gwmap_down = hp.ud_grade(self.gwmap, self.nside_down, power=-2,
-                                      order_in='NESTED',
-                                      order_out='NESTED')
+        self.npix_down = healpy.nside2npix(self.nside_down)
+        self.gwmap_down = healpy.ud_grade(self.gwmap,
+                                          self.nside_down, power=-2,
+                                          order_in='NESTED',
+                                          order_out='NESTED')
         self.logger.debug('Downsampled to NSIDE=%d' % self.nside_down)
 
         self.compute_coords()
@@ -184,7 +198,7 @@ class GW(handlers.TriggerEvent):
         # theta is co-latitude
         # phi is longitude
         # both in radians
-        theta, phi = hp.pix2ang(self.nside_down, np.arange(self.npix_down), nest=True)
+        theta, phi = healpy.pix2ang(self.nside_down, np.arange(self.npix_down), nest=True)
 
         # now in degrees
         Dec_down = 90 - np.degrees(theta)
@@ -204,7 +218,7 @@ class GW(handlers.TriggerEvent):
         :return: The interpolated value as a float
         
         """
-        return healpy.get_interp_val(self.gwmap_down, np.radians(90 - RADec.Dec.value), np.radians(RA.ra.value),
+        return healpy.get_interp_val(self.gwmap_down, np.radians(90 - RADec.Dec.value), np.radians(RADec.ra.value),
                                      nest=True)
 
     ##################################################
@@ -225,7 +239,7 @@ class GW(handlers.TriggerEvent):
 
         # first go from altitude to zenith angle
         theta_horz = np.pi / 2 - self.AltAz_down.alt.radian
-        phi_horz = self.AltAz_down.az.radian
+        # phi_horz = self.AltAz_down.az.radian
 
         if ZAweight:
             # weight the map by cos(ZA) if desired
@@ -244,8 +258,8 @@ class GW(handlers.TriggerEvent):
         """
 
         # first go from altitude to zenith angle
-        theta_horz = np.radians((90 - self.Alt_down))
-        phi_horz = np.radians(self.Az_down)
+        theta_horz = np.pi / 2 - self.AltAz_down.alt.radian
+        phi_horz = self.AltAz_down.az.radian
 
         beamX, beamY = primary_beam.MWA_Tile_analytic(theta_horz, phi_horz,
                                                       freq=frequency,
@@ -278,6 +292,15 @@ class GW(handlers.TriggerEvent):
     def get_mwapointing_grid(self, frequency=150e6, minprob=0.01, minelevation=45,
                              returndelays=False, returnpower=False):
         """
+
+        :param frequency: Frequency in Hz
+        :param minprob: Minimum probability value
+        :param minelevation: Minimum elevation angle, in degrees
+        :param returndelays: If True, return delay values as well as MWA grid points
+        :param returnpower: If True, return delay values AND primary beam power in that direction as well as MWA grid points
+        :return: astropy.coordinates.SkyCoord object containing MWA coordinate grid
+        """
+        """
         RADec=MWA_GW.get_mwapointing_grid(frequency=150e6, minprob=0.01, minelevation=45
         returndelays=False, returnpower=False)
         if returndelays=True, returns:
@@ -287,7 +310,7 @@ class GW(handlers.TriggerEvent):
         RADec,delays,power
         """
 
-        if self.MWA_grid.data is None:
+        if (self.MWA_grid is None) or (self.MWA_grid.data is None):
             self.logger.critical('Unable to find MWA grid points')
             if not (returndelays or returnpower):
                 return None
@@ -298,10 +321,10 @@ class GW(handlers.TriggerEvent):
                     return None, None
 
         # has it been downsampled already
-        npix = self.npix_down
-        nside = self.nside_down
+        # npix = self.npix_down
+        # nside = self.nside_down
         gwmap = self.gwmap_down
-        RADec = self.RADec_down
+        # RADec = self.RADec_down
         AltAz = self.AltAz_down
 
         gridRADec = self.MWA_grid.get_radec()
@@ -429,6 +452,7 @@ def handle_gw(v, pretend=False, time=None):
     
     :param v: string in VOEvent XML format
     :param pretend: Boolean, True if we don't want to schedule observations (automatically switches to True for test events)
+    :param time: astropy.time.Time object for calculations
     :return: None
     """
 
@@ -465,7 +489,7 @@ def handle_gw(v, pretend=False, time=None):
     trig_id = params['GraceID']
     gw.trigger_id = trig_id
 
-    RADecgrid = gw.get_mwapointing_grid()
+    RADecgrid = gw.get_mwapointing_grid(returndelays=False, returnpower=False)
     if RADecgrid is None:
         log.info("Not triggering")
         return
@@ -510,7 +534,7 @@ def test_event(filepath='../test_events/MS190410a-1-Preliminary.xml', test_time=
     log.info('Mock time: %s' % (test_time))
 
     payload = astropy.utils.data.get_file_contents(filepath)
-    v = voeventparse.loads(str(event))
+    v = voeventparse.loads(str(payload))
 
     start = timer()
     isgw = is_gw(v)
