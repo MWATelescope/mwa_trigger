@@ -21,6 +21,10 @@ import Queue
 
 from astropy.time import Time
 
+import voeventparse
+
+IVORN_LIST = []    # Maintain list of ivorn names that have already been processed by the queue
+
 
 ############### set up the logging before importing Pyro4
 class MWALogFormatter(object):
@@ -52,11 +56,11 @@ import Pyro4
 sys.excepthook = Pyro4.util.excepthook
 Pyro4.config.DETAILED_TRACEBACK = True
 
-from mwa_trigger import GRB_fermi_swift, FlareStar_swift_maxi, VCS_test
+from mwa_trigger import GRB_fermi_swift, FlareStar_swift_maxi  # , GW_LIGO
 
 PRETEND = False   # Set to true to trigger event in 'pretend' mode, not actually schedule observations.
 
-EVENTHANDLERS = [GRB_fermi_swift.processevent, FlareStar_swift_maxi.processevent]    # One or more handler functions - all will be called in turn on each XML event.
+EVENTHANDLERS = [GRB_fermi_swift.processevent, FlareStar_swift_maxi.processevent]   # , GW_LIGO.processevent]    # One or more handler functions - all will be called in turn on each XML event.
 
 Pyro4.config.COMMTIMEOUT = 10.0
 Pyro4.config.THREADPOOL_SIZE_MIN = 8
@@ -203,13 +207,21 @@ def QueueWorker():
     Only exits if the global EXITING is set to True externally, to trigger a clean shutdown.
     """
     global EXITING
+    global IVORN_LIST
     while not EXITING:
         eventxml = EventQueue.get()
-        DEFAULTLOGGER.info("Processing event, current queue size is %d" % EventQueue.qsize())
-        for hfunc in EVENTHANDLERS:
-            handled = hfunc(event=eventxml, pretend=PRETEND)
-            if handled:   # One of the handlers accepted this event
-                break    # Don't try any more event handlers.
+        v = voeventparse.loads(str(eventxml))
+        if v.attrib['ivorn'] in IVORN_LIST:
+            DEFAULTLOGGER.info("Already seen event %s, discarding. Current queue size is %d" % (v.attrib['ivorn'],
+                                                                                                EventQueue.qsize()))
+        else:
+            DEFAULTLOGGER.info("Processing event %s. Current queue size is %d" % (v.attrib['ivorn'],
+                                                                                  EventQueue.qsize()))
+            IVORN_LIST.append(v.attrib['ivorn'])
+            for hfunc in EVENTHANDLERS:
+                handled = hfunc(event=eventxml, pretend=PRETEND)
+                if handled:   # One of the handlers accepted this event
+                    break    # Don't try any more event handlers.
         EventQueue.task_done()
 
 
