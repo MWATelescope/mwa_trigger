@@ -29,6 +29,8 @@ from timeit import default_timer as timer
 
 log = logging.getLogger('voevent.handlers.LVC_GW')  # Inherit the logging setup from handlers.py
 
+GW_PRETEND = True    # Override incoming 'pretend' parameter
+
 # Settings
 DEC_LIMIT = 15.
 
@@ -421,7 +423,7 @@ def processevent(event='', pretend=True):
     isgw = is_gw(v)
     log.debug("GW? {0}".format(isgw))
     if isgw:
-        handle_gw(v, pretend=pretend)
+        handle_gw(v, pretend=(pretend or GW_PRETEND))
 
     log.info("Finished.")
     return isgw  # True if we're handling this event, False if we're rejecting it
@@ -519,7 +521,7 @@ def handle_gw(v, pretend=False, time=None):
     gw.trigger_observation(ttype="LVC",
                            obsname=trig_id,
                            time_min=req_time_s / 60,
-                           pretend=pretend,
+                           pretend=(pretend or GW_PRETEND),
                            project_id=PROJECT_ID,
                            secure_key=SECURE_KEY,
                            email_tolist=NOTIFY_LIST,
@@ -540,7 +542,7 @@ def test_event(filepath='../test_events/MS190410a-1-Preliminary.xml', test_time=
     isgw = is_gw(v)
     log.debug("GW? {0}".format(isgw))
     if isgw:
-        handle_gw(v, pretend=pretend, time=test_time)
+        handle_gw(v, pretend=(pretend or GW_PRETEND), time=test_time)
 
     end = timer()
 

@@ -30,7 +30,7 @@ DEC_LIMIT = 32.
 PROJECT_ID = 'G0056'
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
 
-NOTIFY_LIST = ["Paul.Hancock@curtin.edu.au", "Gemma.Anderson@curtin.edu.au"]
+NOTIFY_LIST = ["Paul.Hancock@curtin.edu.au", "Gemma.Anderson@curtin.edu.au", "Andrew.Williams@curtin.edu.au"]
 
 EMAIL_TEMPLATE = """
 The Flare Star MAXI+Swift handler triggered an MWA observation for

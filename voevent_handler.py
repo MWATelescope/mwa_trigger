@@ -56,11 +56,11 @@ import Pyro4
 sys.excepthook = Pyro4.util.excepthook
 Pyro4.config.DETAILED_TRACEBACK = True
 
-from mwa_trigger import GRB_fermi_swift, FlareStar_swift_maxi  # , GW_LIGO
+from mwa_trigger import GRB_fermi_swift, FlareStar_swift_maxi, GW_LIGO
 
 PRETEND = False   # Set to true to trigger event in 'pretend' mode, not actually schedule observations.
 
-EVENTHANDLERS = [GRB_fermi_swift.processevent, FlareStar_swift_maxi.processevent]   # , GW_LIGO.processevent]    # One or more handler functions - all will be called in turn on each XML event.
+EVENTHANDLERS = [GRB_fermi_swift.processevent, FlareStar_swift_maxi.processevent, GW_LIGO.processevent]    # One or more handler functions - all will be called in turn on each XML event.
 
 Pyro4.config.COMMTIMEOUT = 10.0
 Pyro4.config.THREADPOOL_SIZE_MIN = 8

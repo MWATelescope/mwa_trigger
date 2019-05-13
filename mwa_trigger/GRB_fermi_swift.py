@@ -31,7 +31,7 @@ LONG_SHORT_LIMIT = 2.05 #seconds
 PROJECT_ID = 'G0055'
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
 
-NOTIFY_LIST = ["Paul.Hancock@curtin.edu.au", "Gemma.Anderson@curtin.edu.au"]
+NOTIFY_LIST = ["Paul.Hancock@curtin.edu.au", "Gemma.Anderson@curtin.edu.au", "Andrew.Williams@curtin.edu.au"]
 
 EMAIL_TEMPLATE = """
 The GRB Fermi+Swift handler triggered an MWA observation for a
