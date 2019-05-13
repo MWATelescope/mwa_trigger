@@ -141,7 +141,8 @@ class TriggerEvent(object):
                             secure_key="",
                             email_tolist=None,
                             email_text="",
-                            email_subject=""):
+                            email_subject="",
+                            voevent=""):
         """
         Tell the MWA to observe the target of interest - override this method in your handler as desired if you
         want some other observation parameters.
@@ -150,12 +151,13 @@ class TriggerEvent(object):
         :param obsname: Arbitrary string for the name of the observation in the schedule.
         :param time_min: Total length of observation time, in minutes.
         :param pretend: Boolean, True if we don't want to actually schedule the observations.
-        :param project_id: The project ID requesting the triggered observation
-        :param secure_key: The password specific to that project ID
+        :param project_id: The project ID requesting the triggered observation.
+        :param secure_key: The password specific to that project ID.
         :param email_tolist: list of email addresses to send the notification email to.
-        :param email_text: Base email message - success string, errors, and other data will be appended and attached
-        :param email_subject: string containing email subject line
-        :return: The full results dictionary returned by the triggerservice API (see triggerservice.trigger)
+        :param email_text: Base email message - success string, errors, and other data will be appended and attached.
+        :param email_subject: string containing email subject line.
+        :param voevent: string containing the full XML text of the VOEvent.
+        :return: The full results dictionary returned by the triggerservice API (see triggerservice.trigger).
         """
 
         self.triggered = True
@@ -228,6 +230,7 @@ class TriggerEvent(object):
                     attachments.append(('clear_%s.txt' % self.trigger_id, clear_data, 'text/plain'))
                 log_data = '\n'.join([str(x) for x in self.loglist])
                 attachments.append(('log_%s.txt' % self.trigger_id, log_data, 'text/plain'))
+                attachments.append(('voevent.xml', voevent, 'text/plain'))
 
                 send_email(from_address='mwa@telemetry.mwa128t.org',
                            to_addresses=email_tolist,

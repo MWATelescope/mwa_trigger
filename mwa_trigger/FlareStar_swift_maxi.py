@@ -30,7 +30,11 @@ DEC_LIMIT = 32.
 PROJECT_ID = 'G0056'
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
 
+# Email these addresses when we trigger on an event
 NOTIFY_LIST = ["Paul.Hancock@curtin.edu.au", "Gemma.Anderson@curtin.edu.au", "Andrew.Williams@curtin.edu.au"]
+
+# Email these addresses when we handle an event that is a GRB, but we don't trigger on it.
+DEBUG_NOTIFY_LIST = ["Gemma.Anderson@curtin.edu.au", "Andrew.Williams@curtin.edu.au"]
 
 EMAIL_TEMPLATE = """
 The Flare Star MAXI+Swift handler triggered an MWA observation for
@@ -40,6 +44,15 @@ Details are:
 Trigger ID: %(triggerid)s
 RA:         %(ra)s hours
 Dec:        %(dec)s deg
+"""
+
+
+DEBUG_EMAIL_TEMPLATE = """
+The Flare Star MAXI+Swift handler did NOT trigger an MWA observation for a
+Flare Star. Log messages are:
+
+%s
+
 """
 
 EMAIL_SUBJECT_TEMPLATE = "Flare Star MAXI+Swift handler trigger for %s"
@@ -64,6 +77,7 @@ def make_flare_star_names():
     flare_stars.extend([re.sub(' ', '_', f) for f in flare_stars if ' ' in f])
     flare_stars.extend([re.sub(' ', '', f) for f in flare_stars if ' ' in f])
     return
+
 
 make_flare_star_names()
 
@@ -114,12 +128,12 @@ def is_flarestar(v):
     :param v: string in VOEvent XML format
     :return: Boolean, True if this event is a Flare Star.
     """
-    swift=False
+    swift = False
     # SWIFT encodes a Why.Inference.Name
     if hasattr(v.Why.Inference, 'Name'):
         name = v.Why.Inference.Name
         log.debug("Found {0} in SWIFT format".format(name))
-        swift=True
+        swift = True
     else:
         # MAXI uses a Soruce_Name parameter
         src = v.find(".//Param[@name='Source_Name']")
@@ -155,8 +169,14 @@ def handle_flarestar(v, pretend=False):
     trig_id = v.find(".//Param[@name='TrigID']").attrib['value']
     c = voeventparse.get_event_position(v)
     if c.dec > DEC_LIMIT:
-        log.debug("Flare Star {0} above declination cutoff of +10 degrees".format(name))
+        msg = "Flare Star {0} above declination cutoff of +10 degrees".format(name)
+        log.debug(msg)
         log.debug("Not triggering")
+        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                            to_addresses=DEBUG_NOTIFY_LIST,
+                            subject='GRB_fermi_swift debug notification',
+                            msg_text=DEBUG_EMAIL_TEMPLATE % msg,
+                            attachments=voeventparse.dumps(v))
         return
 
     if trig_id not in xml_cache:
@@ -187,6 +207,11 @@ def handle_flarestar(v, pretend=False):
         if obs == trig_id:
             fs.info("already observing this star")
             fs.info("not triggering again")
+            handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                                to_addresses=DEBUG_NOTIFY_LIST,
+                                subject='GRB_fermi_swift debug notification',
+                                msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in fs.loglist]),
+                                attachments=voeventparse.dumps(v))
             return
     else:
         fs.debug("Current schedule empty")
@@ -203,15 +228,23 @@ def handle_flarestar(v, pretend=False):
     email_text = EMAIL_TEMPLATE % emaildict
     email_subject = EMAIL_SUBJECT_TEMPLATE % fs.trigger_id
     # Do the trigger
-    fs.trigger_observation(ttype=ttype,
-                           obsname=trig_id,
-                           time_min=req_time_min,
-                           pretend=pretend,
-                           project_id=PROJECT_ID,
-                           secure_key=SECURE_KEY,
-                           email_tolist=NOTIFY_LIST,
-                           email_text=email_text,
-                           email_subject=email_subject)
+    result = fs.trigger_observation(ttype=ttype,
+                                    obsname=trig_id,
+                                    time_min=req_time_min,
+                                    pretend=pretend,
+                                    project_id=PROJECT_ID,
+                                    secure_key=SECURE_KEY,
+                                    email_tolist=NOTIFY_LIST,
+                                    email_text=email_text,
+                                    email_subject=email_subject,
+                                    voevent=voeventparse.dumps(v))
+    if result is None:
+        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                            to_addresses=DEBUG_NOTIFY_LIST,
+                            subject='GRB_fermi_swift debug notification',
+                            msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in fs.loglist]),
+                            attachments=voeventparse.dumps(v))
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     print("Flare stars are:{0}".format(flare_stars))
