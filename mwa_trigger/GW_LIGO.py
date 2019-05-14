@@ -478,14 +478,14 @@ def handle_gw(v, pretend=False, time=None):
 
     params = {elem.attrib['name']:elem.attrib['value'] for elem in v.iterfind('.//Param')}
 
-    if params['Group'] != 'CBC':
-        log.debug("Event not CBC")
-        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
-                            to_addresses=DEBUG_NOTIFY_LIST,
-                            subject='GW_LIGO debug notification',
-                            msg_text=DEBUG_EMAIL_TEMPLATE % "Event not CBC",
-                            attachments=voeventparse.dumps(v))
-        return
+#    if params['Group'] != 'CBC':
+#        log.debug("Event not CBC")
+#        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+#                            to_addresses=DEBUG_NOTIFY_LIST,
+#                            subject='GW_LIGO debug notification',
+#                            msg_text=DEBUG_EMAIL_TEMPLATE % "Event not CBC",
+#                            attachments=voeventparse.dumps(v))
+#        return
 
     if params['Packet_Type'] == "164":
         log.debug("Alert is an event retraction. Not triggering.")
@@ -498,14 +498,14 @@ def handle_gw(v, pretend=False, time=None):
 
     alert_type = params['AlertType']
 
-    if alert_type != 'Preliminary':
-        log.debug("Alert type is not Preliminary. Not triggering.")
-        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
-                            to_addresses=DEBUG_NOTIFY_LIST,
-                            subject='GW_LIGO debug notification',
-                            msg_text=DEBUG_EMAIL_TEMPLATE % "Alert type is not Preliminary. Not triggering.",
-                            attachments=voeventparse.dumps(v))
-        return
+#    if alert_type != 'Preliminary':
+#        log.debug("Alert type is not Preliminary. Not triggering.")
+#        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+#                            to_addresses=DEBUG_NOTIFY_LIST,
+#                            subject='GW_LIGO debug notification',
+#                            msg_text=DEBUG_EMAIL_TEMPLATE % "Alert type is not Preliminary. Not triggering.",
+#                            attachments=voeventparse.dumps(v))
+#        return
 
     if float(params['HasNS']) < HAS_NS_THRESH:
         msg = "Event below NS threshold (%.1f). Not triggering." % (HAS_NS_THRESH)
