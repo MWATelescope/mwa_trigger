@@ -64,7 +64,7 @@ import Pyro4
 sys.excepthook = Pyro4.util.excepthook
 Pyro4.config.DETAILED_TRACEBACK = True
 
-import handlers
+from mwa_trigger import handlers
 from mwa_trigger import GRB_fermi_swift, FlareStar_swift_maxi, GW_LIGO
 
 PRETEND = False   # Set to true to trigger event in 'pretend' mode, not actually schedule observations.
