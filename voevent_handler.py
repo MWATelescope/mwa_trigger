@@ -225,21 +225,28 @@ def QueueWorker():
     """
     global EXITING
     global IVORN_LIST
-    while not EXITING:
-        eventxml = EventQueue.get()
-        v = voeventparse.loads(str(eventxml))
-        if v.attrib['ivorn'] in IVORN_LIST:
-            DEFAULTLOGGER.info("Already seen event %s, discarding. Current queue size is %d" % (v.attrib['ivorn'],
-                                                                                                EventQueue.qsize()))
-        else:
-            DEFAULTLOGGER.info("Processing event %s. Current queue size is %d" % (v.attrib['ivorn'],
-                                                                                  EventQueue.qsize()))
-            IVORN_LIST.append(v.attrib['ivorn'])
-            for hfunc in EVENTHANDLERS:
-                handled = hfunc(event=eventxml, pretend=PRETEND)
-                if handled:   # One of the handlers accepted this event
-                    break    # Don't try any more event handlers.
-        EventQueue.task_done()
+    try:
+        while not EXITING:
+            eventxml = EventQueue.get()
+            v = voeventparse.loads(str(eventxml))
+            if v.attrib['ivorn'] in IVORN_LIST:
+                DEFAULTLOGGER.info("Already seen event %s, discarding. Current queue size is %d" % (v.attrib['ivorn'],
+                                                                                                    EventQueue.qsize()))
+            else:
+                DEFAULTLOGGER.info("Processing event %s. Current queue size is %d" % (v.attrib['ivorn'],
+                                                                                      EventQueue.qsize()))
+                IVORN_LIST.append(v.attrib['ivorn'])
+                for hfunc in EVENTHANDLERS:
+                    handled = hfunc(event=eventxml, pretend=PRETEND)
+                    if handled:   # One of the handlers accepted this event
+                        break    # Don't try any more event handlers.
+            EventQueue.task_done()
+    except Exception:
+        DEFAULTLOGGER.error("Exception in QueueWorker. Restarting in 10 sec: %s" % (traceback.format_exc(),))
+        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                            to_addresses=EXCEPTION_NOTIFY_LIST,
+                            subject='Exception in QueueWorker loop',
+                            msg_text=EXCEPTION_EMAIL_TEMPLATE % traceback.format_exc())
 
 
 if __name__ == '__main__':
@@ -276,10 +283,6 @@ if __name__ == '__main__':
                     break
                 if not queue_thread.is_alive():
                     DEFAULTLOGGER.error('Queue handler thread has died - restarting.')
-                    handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
-                                        to_addresses=EXCEPTION_NOTIFY_LIST,
-                                        subject='Exception in Pyro4 daemon request loop',
-                                        msg_text=EXCEPTION_EMAIL_TEMPLATE % 'Queue handler thread has died - restarting.')
                     break
         finally:
             EXITING = True
