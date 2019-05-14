@@ -427,9 +427,11 @@ def processevent(event='', pretend=True):
     Called externally by the voevent_handler script when a new VOEvent is received. Return True if
     the event was parsed by this handler, False if it was another type of event that should be
     examined by a different handler.
+    
     :param event: A string containg the XML string in VOEvent format
     :param pretend: Boolean, True if we don't want to actually schedule the observations.
     :return: Boolean, True if this handler processed this event, False to pass it to another handler function.
+    
     """
 
     # event arrives as a unicode string but loads requires a non-unicode string.
@@ -447,8 +449,10 @@ def processevent(event='', pretend=True):
 def is_gw(v):
     """
     Tests to see if this XML packet is a Gravitational Wave event (LIGO OpenLVEM alert).
+    
     :param v: string in VOEvent XML format
     :return: Boolean, True if this event is a GW.
+    
     """
     ivorn = v.attrib['ivorn']
     log.debug("ivorn: %s" % (ivorn))
@@ -471,12 +475,35 @@ def handle_gw(v, pretend=False, time=None):
     :param pretend: Boolean, True if we don't want to schedule observations (automatically switches to True for test events)
     :param time: astropy.time.Time object for calculations
     :return: None
+    
     """
-
+    
+    max_response_time = 120 # seconds
+    
     if v.attrib['role'] == 'test':
         pretend = True
-
+        
+    time_string = v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Time.TimeInstant.ISOTime.text
+    
+    merger_time = Time(time_string)
+    delta_T = Time.now() - merger_time
+    delta_T_sec = delta_T.sec
+    
+    if delta_T_sec > max_response_time:
+      log_message = "Time since merger (%d s) greater than max response time (%d s). Not triggering"%(delta_T_sec, max_response_time)
+      log.info(log_message)
+      
+      handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                            to_addresses=DEBUG_NOTIFY_LIST,
+                            subject='GW_LIGO debug notification',
+                            msg_text=DEBUG_EMAIL_TEMPLATE % log_message,
+                            attachments=voeventparse.dumps(v))
+                            
+      return
+        
+        
     params = {elem.attrib['name']:elem.attrib['value'] for elem in v.iterfind('.//Param')}
+    
 
 #    if params['Group'] != 'CBC':
 #        log.debug("Event not CBC")
@@ -488,7 +515,7 @@ def handle_gw(v, pretend=False, time=None):
 #        return
 
     if params['Packet_Type'] == "164":
-        log.debug("Alert is an event retraction. Not triggering.")
+        log.info("Alert is an event retraction. Not triggering.")
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                             to_addresses=DEBUG_NOTIFY_LIST,
                             subject='GW_LIGO debug notification',
@@ -589,6 +616,11 @@ def test_event(filepath='../test_events/MS190410a-1-Preliminary.xml', test_time=
 
     payload = astropy.utils.data.get_file_contents(filepath)
     v = voeventparse.loads(str(payload))
+    
+    params = {elem.attrib['name']:elem.attrib['value'] for elem in v.iterfind('.//Param')}
+    
+    
+    return
 
     start = timer()
     isgw = is_gw(v)
