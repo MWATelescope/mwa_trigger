@@ -39,7 +39,11 @@ HAS_NS_THRESH = 0.5
 PROJECT_ID = 'D0011'
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
 
-NOTIFY_LIST = ['ddob1600@uni.sydney.edu.au', 'kaplan@uwm.edu', 'tara@physics.usyd.edu.au']
+# Email these addresses when we trigger on an event
+NOTIFY_LIST = ['ddob1600@uni.sydney.edu.au', 'kaplan@uwm.edu', 'tara@physics.usyd.edu.au', "Andrew.Williams@curtin.edu.au"]
+
+# Email these addresses when we handle an event that is a GRB, but we don't trigger on it.
+DEBUG_NOTIFY_LIST = ["Andrew.Williams@curtin.edu.au"]
 
 EMAIL_TEMPLATE = """
 The LIGO-GW handler triggered an
@@ -49,6 +53,14 @@ Details are:
 Trigger ID: %(triggerid)s
 RA:         %(ra)s hours
 Dec:        %(dec)s deg
+"""
+
+DEBUG_EMAIL_TEMPLATE = """
+The LIGO-GW handler did NOT trigger an MWA observation for a
+LIGO-GW GRB. Log messages are:
+
+%s
+
 """
 
 EMAIL_SUBJECT_TEMPLATE = "LIGO-GW handler trigger for %s"
@@ -64,9 +76,12 @@ xml_cache = {}
 class MWA_grid_points(object):
     grid_file = os.path.join('..', 'data', 'grid_points.fits')
 
-    def __init__(self, frame, logger=log):
+    def __init__(self, frame, logger=None):
         try:
-            self.logger = logger
+            if logger is None:
+                self.logger = log
+            else:
+                self.logger = logger
             self.frame = frame
             self.data = Table.read(MWA_grid_points.grid_file)
             self.logger.debug('Grid points loaded')
@@ -132,7 +147,7 @@ class GW(handlers.TriggerEvent):
     Subclass the TriggerEvent class for GW events.
     """
 
-    def __init__(self, event=None):
+    def __init__(self, event=None, logger=log):
         self.gwfile = ''
         self.gwmap = ''
         self.header = {}
@@ -146,16 +161,16 @@ class GW(handlers.TriggerEvent):
         self.gwmap_down = None
         self.RADec_down = None
         self.AltAz_down = None
-        handlers.TriggerEvent.__init__(self, event=event)
+        handlers.TriggerEvent.__init__(self, event=event, logger=logger)
 
     ##################################################
     def load_skymap(self, gwfile, nside=64, time=None):
         self.gwfile = gwfile
         try:
             self.gwmap, gwheader = healpy.read_map(self.gwfile, h=True, nest=True, verbose=False)
-            self.logger.debug('Read in GW map %s' % self.gwfile)
+            self.debug('Read in GW map %s' % self.gwfile)
         except:
-            self.logger.error('Unable to read GW sky probability map %s' % self.gwfile)
+            self.error('Unable to read GW sky probability map %s' % self.gwfile)
             return
 
         self.header = {}
@@ -171,14 +186,14 @@ class GW(handlers.TriggerEvent):
 
         self.frame = astropy.coordinates.AltAz(obstime=self.obstime, location=MWA)
 
-        self.logger.debug('Current time is %s' % (self.obstime))
+        self.debug('Current time is %s' % (self.obstime))
 
         self.nside = self.header['NSIDE']
         self.npix = healpy.nside2npix(self.nside)
-        self.logger.debug('Original NSIDE=%d, NPIX=%d' % (self.nside,
-                                                          self.npix))
+        self.debug('Original NSIDE=%d, NPIX=%d' % (self.nside, self.npix))
 
-        self.MWA_grid = MWA_grid_points(self.frame, logger=self.logger)
+        # Pass in 'self' as the logger, to catch any log messages in the self.loglist attribute
+        self.MWA_grid = MWA_grid_points(self.frame, logger=self)
 
         self.nside_down = nside
         self.npix_down = healpy.nside2npix(self.nside_down)
@@ -186,7 +201,7 @@ class GW(handlers.TriggerEvent):
                                           self.nside_down, power=-2,
                                           order_in='NESTED',
                                           order_out='NESTED')
-        self.logger.debug('Downsampled to NSIDE=%d' % self.nside_down)
+        self.debug('Downsampled to NSIDE=%d' % self.nside_down)
 
         self.compute_coords()
 
@@ -236,7 +251,7 @@ class GW(handlers.TriggerEvent):
 
         # figure out what fraction is above horizon
         if (pointingmap).sum() < minprob:
-            self.logger.info('Insufficient power above horizon\n')
+            self.info('Insufficient power above horizon\n')
             return None, None
 
         # first go from altitude to zenith angle
@@ -313,7 +328,7 @@ class GW(handlers.TriggerEvent):
         """
 
         if (self.MWA_grid is None) or (self.MWA_grid.data is None):
-            self.logger.critical('Unable to find MWA grid points')
+            self.critical('Unable to find MWA grid points')
             if not (returndelays or returnpower):
                 return None
             else:
@@ -331,11 +346,11 @@ class GW(handlers.TriggerEvent):
 
         gridRADec = self.MWA_grid.get_radec()
 
-        self.logger.debug('Computing pointing for %s' % (self.obstime))
+        self.debug('Computing pointing for %s' % (self.obstime))
 
         # figure out what fraction is above horizon
         if (gwmap * (AltAz.alt > 0)).sum() < minprob:
-            self.logger.info('Insufficient power above horizon\n')
+            self.info('Insufficient power above horizon\n')
             if not (returndelays or returnpower):
                 return None
             else:
@@ -362,11 +377,11 @@ class GW(handlers.TriggerEvent):
         # such that it is over our minimum elevation
         igrid = np.where(mapsum == mapsum[self.MWA_grid.data['elevation'] > minelevation].max())[0][0]
         end = timer()
-        log.info("Best pointing found in %.1f s" % (end - start))
-        log.info("Looped over %d grid points" % (len(self.MWA_grid.data)))
+        self.info("Best pointing found in %.1f s" % (end - start))
+        self.info("Looped over %d grid points" % (len(self.MWA_grid.data)))
 
         if not (self.MWA_grid.data['elevation'][igrid] > minelevation):
-            self.logger.info('Elevation %.1f deg too low\n' % self.MWA_grid.data['elevation'][igrid])
+            self.info('Elevation %.1f deg too low\n' % self.MWA_grid.data['elevation'][igrid])
             # too close to horizon
             if not (returndelays or returnpower):
                 return None
@@ -376,17 +391,17 @@ class GW(handlers.TriggerEvent):
                 else:
                     return None, None
 
-        self.logger.info('Best pointing at RA,Dec=%.1f,%.1f; Az,El=%.1f,%.1f: power=%.3f' %
-                         (gridRADec[igrid].ra.value, gridRADec[igrid].dec.value,
-                          self.MWA_grid.data['azimuth'][igrid],
-                          self.MWA_grid.data['elevation'][igrid],
-                          mapsum[igrid]))
+        msg = 'Best pointing at RA,Dec=%.1f,%.1f; Az,El=%.1f,%.1f: power=%.3f'
+        self.info(msg % (gridRADec[igrid].ra.value, gridRADec[igrid].dec.value,
+                         self.MWA_grid.data['azimuth'][igrid],
+                         self.MWA_grid.data['elevation'][igrid],
+                         mapsum[igrid]))
 
         if mapsum[igrid] < minprob:
-            self.logger.info('Pointing at Az,El=%.1f,%.1f has power=%.3f < min power\n' %
-                             (self.MWA_grid.data['azimuth'][igrid],
-                              self.MWA_grid.data['elevation'][igrid],
-                              mapsum[igrid]))
+            msg = 'Pointing at Az,El=%.1f,%.1f has power=%.3f < min power\n'
+            self.info(msg % (self.MWA_grid.data['azimuth'][igrid],
+                             self.MWA_grid.data['elevation'][igrid],
+                             mapsum[igrid]))
 
             if not (returndelays or returnpower):
                 return None
@@ -465,24 +480,50 @@ def handle_gw(v, pretend=False, time=None):
 
     if params['Group'] != 'CBC':
         log.debug("Event not CBC")
+        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                            to_addresses=DEBUG_NOTIFY_LIST,
+                            subject='GW_LIGO debug notification',
+                            msg_text=DEBUG_EMAIL_TEMPLATE % "Event not CBC",
+                            attachments=voeventparse.dumps(v))
         return
 
     if params['Packet_Type'] == "164":
         log.debug("Alert is an event retraction. Not triggering.")
+        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                            to_addresses=DEBUG_NOTIFY_LIST,
+                            subject='GW_LIGO debug notification',
+                            msg_text=DEBUG_EMAIL_TEMPLATE % "Alert is an event retraction. Not triggering.",
+                            attachments=voeventparse.dumps(v))
         return
 
     alert_type = params['AlertType']
 
     if alert_type != 'Preliminary':
         log.debug("Alert type is not Preliminary. Not triggering.")
+        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                            to_addresses=DEBUG_NOTIFY_LIST,
+                            subject='GW_LIGO debug notification',
+                            msg_text=DEBUG_EMAIL_TEMPLATE % "Alert type is not Preliminary. Not triggering.",
+                            attachments=voeventparse.dumps(v))
         return
 
     if float(params['HasNS']) < HAS_NS_THRESH:
-        log.debug("Event below NS threshold (%.1f). Not triggering." % (HAS_NS_THRESH))
+        msg = "Event below NS threshold (%.1f). Not triggering." % (HAS_NS_THRESH)
+        log.debug(msg)
+        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                            to_addresses=DEBUG_NOTIFY_LIST,
+                            subject='GW_LIGO debug notification',
+                            msg_text=DEBUG_EMAIL_TEMPLATE % msg,
+                            attachments=voeventparse.dumps(v))
         return
 
     if 'skymap_fits' not in params:
         log.debug("No skymap in VOEvent. Not triggering.")
+        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                            to_addresses=DEBUG_NOTIFY_LIST,
+                            subject='GW_LIGO debug notification',
+                            msg_text=DEBUG_EMAIL_TEMPLATE % "No skymap in VOEvent. Not triggering.",
+                            attachments=voeventparse.dumps(v))
         return
 
     gw = GW(event=v)
@@ -493,11 +534,16 @@ def handle_gw(v, pretend=False, time=None):
 
     RADecgrid = gw.get_mwapointing_grid(returndelays=False, returnpower=False)
     if RADecgrid is None:
-        log.info("Not triggering")
+        gw.info("No pointing from skymap, not triggering")
+        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                            to_addresses=DEBUG_NOTIFY_LIST,
+                            subject='GW_LIGO debug notification',
+                            msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in gw.loglist]),
+                            attachments=voeventparse.dumps(v))
         return
 
     ra, dec = RADecgrid.ra, RADecgrid.dec
-    log.debug("Coordinate: %s, %s" % (ra, dec))
+    gw.debug("Coordinate: %s, %s" % (ra, dec))
     gw.add_pos((ra, dec, 0.0))
 
     req_time_s = 1800
@@ -514,19 +560,25 @@ def handle_gw(v, pretend=False, time=None):
                  'dec':dec.to_string(unit=astropy.units.deg, sep=':')}
 
     email_text = EMAIL_TEMPLATE % emaildict
-    log.info(email_text)
+    gw.info(email_text)
 
     email_subject = EMAIL_SUBJECT_TEMPLATE % gw.trigger_id
     # Do the trigger
-    gw.trigger_observation(ttype="LVC",
-                           obsname=trig_id,
-                           time_min=req_time_s / 60,
-                           pretend=(pretend or GW_PRETEND),
-                           project_id=PROJECT_ID,
-                           secure_key=SECURE_KEY,
-                           email_tolist=NOTIFY_LIST,
-                           email_text=email_text,
-                           email_subject=email_subject)
+    result = gw.trigger_observation(ttype="LVC",
+                                    obsname=trig_id,
+                                    time_min=req_time_s / 60,
+                                    pretend=(pretend or GW_PRETEND),
+                                    project_id=PROJECT_ID,
+                                    secure_key=SECURE_KEY,
+                                    email_tolist=NOTIFY_LIST,
+                                    email_text=email_text,
+                                    email_subject=email_subject)
+    if result is None:
+        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                            to_addresses=DEBUG_NOTIFY_LIST,
+                            subject='GW_LIGO debug notification',
+                            msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in gw.loglist]),
+                            attachments=voeventparse.dumps(v))
 
 
 def test_event(filepath='../test_events/MS190410a-1-Preliminary.xml', test_time=Time('2018-4-03 12:00:00')):
