@@ -34,7 +34,7 @@ SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
 NOTIFY_LIST = ["Paul.Hancock@curtin.edu.au", "Gemma.Anderson@curtin.edu.au", "Andrew.Williams@curtin.edu.au"]
 
 # Email these addresses when we handle an event that is a GRB, but we don't trigger on it.
-DEBUG_NOTIFY_LIST = ["Gemma.Anderson@curtin.edu.au", "Andrew.Williams@curtin.edu.au"]
+DEBUG_NOTIFY_LIST = ["Paul.Hancock@curtin.edu.au", "Gemma.Anderson@curtin.edu.au", "Andrew.Williams@curtin.edu.au"]
 
 EMAIL_TEMPLATE = """
 The Flare Star MAXI+Swift handler triggered an MWA observation for
