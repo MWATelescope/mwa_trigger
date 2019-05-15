@@ -74,7 +74,8 @@ xml_cache = {}
 
 ################################################################################
 class MWA_grid_points(object):
-    grid_file = os.path.join('..', 'data', 'grid_points.fits')
+    libpath = os.path.join(os.path.split(__file__)[:-1])[0]
+    grid_file = os.path.join(libpath, '..', 'data', 'grid_points.fits')
 
     def __init__(self, frame, logger=None):
         try:
