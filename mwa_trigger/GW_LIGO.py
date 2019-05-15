@@ -483,35 +483,8 @@ def handle_gw(v, pretend=False, time=None):
     
     if v.attrib['role'] == 'test':
         pretend = True
-        
-    time_string = v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Time.TimeInstant.ISOTime.text
-    
-    merger_time = Time(time_string)
-    delta_T = Time.now() - merger_time
-    delta_T_sec = delta_T.sec
-    
-    if delta_T_sec > max_response_time:
-        log_message = "Time since merger (%d s) greater than max response time (%d s). Not triggering" % (delta_T_sec, max_response_time)
-        log.info(log_message)
-      
-        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
-                            to_addresses=DEBUG_NOTIFY_LIST,
-                            subject='GW_LIGO debug notification',
-                            msg_text=DEBUG_EMAIL_TEMPLATE % log_message,
-                            attachments=[('voevent.xml', voeventparse.dumps(v))])
-                            
-        return
-        
-    params = {elem.attrib['name']:elem.attrib['value'] for elem in v.iterfind('.//Param')}
 
-#    if params['Group'] != 'CBC':
-#        log.debug("Event not CBC")
-#        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
-#                            to_addresses=DEBUG_NOTIFY_LIST,
-#                            subject='GW_LIGO debug notification',
-#                            msg_text=DEBUG_EMAIL_TEMPLATE % "Event not CBC",
-#                            attachments=[('voevent.xml', voeventparse.dumps(v))])
-#        return
+    params = {elem.attrib['name']:elem.attrib['value'] for elem in v.iterfind('.//Param')}
 
     if params['Packet_Type'] == "164":
         log.info("Alert is an event retraction. Not triggering.")
@@ -531,6 +504,33 @@ def handle_gw(v, pretend=False, time=None):
                             msg_text=DEBUG_EMAIL_TEMPLATE % "Alert type is not Preliminary. Not triggering.",
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
+
+    time_string = v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Time.TimeInstant.ISOTime.text
+    
+    merger_time = Time(time_string)
+    delta_T = Time.now() - merger_time
+    delta_T_sec = delta_T.sec
+    
+    if delta_T_sec > max_response_time:
+        log_message = "Time since merger (%d s) greater than max response time (%d s). Not triggering" % (delta_T_sec, max_response_time)
+        log.info(log_message)
+      
+        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                            to_addresses=DEBUG_NOTIFY_LIST,
+                            subject='GW_LIGO debug notification',
+                            msg_text=DEBUG_EMAIL_TEMPLATE % log_message,
+                            attachments=[('voevent.xml', voeventparse.dumps(v))])
+                            
+        return
+
+#    if params['Group'] != 'CBC':
+#        log.debug("Event not CBC")
+#        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+#                            to_addresses=DEBUG_NOTIFY_LIST,
+#                            subject='GW_LIGO debug notification',
+#                            msg_text=DEBUG_EMAIL_TEMPLATE % "Event not CBC",
+#                            attachments=[('voevent.xml', voeventparse.dumps(v))])
+#        return
 
     if float(params['HasNS']) < HAS_NS_THRESH:
         msg = "Event below NS threshold (%.1f). Not triggering." % (HAS_NS_THRESH)
