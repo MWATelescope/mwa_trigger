@@ -478,7 +478,7 @@ def handle_gw(v, pretend=False, time=None):
     
     """
     
-    max_response_time = 120 # seconds
+    max_response_time = 120  # seconds
     
     if v.attrib['role'] == 'test':
         pretend = True
@@ -490,20 +490,18 @@ def handle_gw(v, pretend=False, time=None):
     delta_T_sec = delta_T.sec
     
     if delta_T_sec > max_response_time:
-      log_message = "Time since merger (%d s) greater than max response time (%d s). Not triggering"%(delta_T_sec, max_response_time)
-      log.info(log_message)
+        log_message = "Time since merger (%d s) greater than max response time (%d s). Not triggering" % (delta_T_sec, max_response_time)
+        log.info(log_message)
       
-      handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                             to_addresses=DEBUG_NOTIFY_LIST,
                             subject='GW_LIGO debug notification',
                             msg_text=DEBUG_EMAIL_TEMPLATE % log_message,
                             attachments=voeventparse.dumps(v))
                             
-      return
-        
+        return
         
     params = {elem.attrib['name']:elem.attrib['value'] for elem in v.iterfind('.//Param')}
-    
 
 #    if params['Group'] != 'CBC':
 #        log.debug("Event not CBC")
@@ -523,8 +521,7 @@ def handle_gw(v, pretend=False, time=None):
                             attachments=voeventparse.dumps(v))
         return
 
-    alert_type = params['AlertType']
-
+#    alert_type = params['AlertType']
 #    if alert_type != 'Preliminary':
 #        log.debug("Alert type is not Preliminary. Not triggering.")
 #        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
@@ -618,19 +615,16 @@ def test_event(filepath='../test_events/MS190410a-1-Preliminary.xml', test_time=
     v = voeventparse.loads(str(payload))
     
     params = {elem.attrib['name']:elem.attrib['value'] for elem in v.iterfind('.//Param')}
-    
-    
+
     return
 
-    start = timer()
-    isgw = is_gw(v)
-    log.debug("GW? {0}".format(isgw))
-    if isgw:
-        handle_gw(v, pretend=(pretend or GW_PRETEND), time=test_time)
-
-    end = timer()
-
-    log.info("Finished. Response time: %.1f s" % (end - start))
+#    start = timer()
+#    isgw = is_gw(v)
+#    log.debug("GW? {0}".format(isgw))
+#    if isgw:
+#        handle_gw(v, pretend=(pretend or GW_PRETEND), time=test_time)
+#    end = timer()
+#    log.info("Finished. Response time: %.1f s" % (end - start))
 
 
 def test_skymap():
