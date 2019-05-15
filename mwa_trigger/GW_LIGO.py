@@ -479,7 +479,8 @@ def handle_gw(v, pretend=False, time=None):
     
     """
     
-    max_response_time = 120  # seconds
+    #max_response_time = 120  # seconds
+    max_response_time = 900  # seconds - just for testing purposes
     
     if v.attrib['role'] == 'test':
         pretend = True
