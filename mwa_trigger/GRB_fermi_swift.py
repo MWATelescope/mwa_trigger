@@ -163,7 +163,7 @@ def handle_grb(v, pretend=False):
                                 to_addresses=DEBUG_NOTIFY_LIST,
                                 subject='GRB_fermi_swift debug notification',
                                 msg_text=DEBUG_EMAIL_TEMPLATE % "SWIFT alert but not a GRB",
-                                attachments=voeventparse.dumps(v))
+                                attachments=[('voevent.xml', voeventparse.dumps(v))])
 
             return
         log.debug("SWIFT GRB trigger detected")
@@ -220,7 +220,7 @@ def handle_grb(v, pretend=False):
                                     to_addresses=DEBUG_NOTIFY_LIST,
                                     subject='GRB_fermi_swift debug notification',
                                     msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in grb.loglist]),
-                                    attachments=voeventparse.dumps(v))
+                                    attachments=[('voevent.xml', voeventparse.dumps(v))])
                 return  # don't trigger
 
             most_likely = int(v.find(".//Param[@name='Most_Likely_Index']").attrib['value'])
@@ -242,7 +242,7 @@ def handle_grb(v, pretend=False):
                                         to_addresses=DEBUG_NOTIFY_LIST,
                                         subject='GRB_fermi_swift debug notification',
                                         msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in grb.loglist]),
-                                        attachments=voeventparse.dumps(v))
+                                        attachments=[('voevent.xml', voeventparse.dumps(v))])
                     return
             else:
                 msg = "MOST_LIKELY != GRB"
@@ -252,7 +252,7 @@ def handle_grb(v, pretend=False):
                                     to_addresses=DEBUG_NOTIFY_LIST,
                                     subject='GRB_fermi_swift debug notification',
                                     msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in grb.loglist]),
-                                    attachments=voeventparse.dumps(v))
+                                    attachments=[('voevent.xml', voeventparse.dumps(v))])
                 return
         else:
             # for Gnd/Fin we trigger if we already triggered on the Flt position
@@ -266,7 +266,7 @@ def handle_grb(v, pretend=False):
                             to_addresses=DEBUG_NOTIFY_LIST,
                             subject='GRB_fermi_swift debug notification',
                             msg_text=DEBUG_EMAIL_TEMPLATE % msg,
-                            attachments=voeventparse.dumps(v))
+                            attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
 
     if not trigger:
@@ -275,7 +275,7 @@ def handle_grb(v, pretend=False):
                             to_addresses=DEBUG_NOTIFY_LIST,
                             subject='GRB_fermi_swift debug notification',
                             msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in grb.loglist]),
-                            attachments=voeventparse.dumps(v))
+                            attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
 
     # get current position
@@ -316,7 +316,7 @@ def handle_grb(v, pretend=False):
                                         to_addresses=DEBUG_NOTIFY_LIST,
                                         subject='GRB_fermi_swift debug notification',
                                         msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in grb.loglist]),
-                                        attachments=voeventparse.dumps(v))
+                                        attachments=[('voevent.xml', voeventparse.dumps(v))])
                     return
                 elif this_trig_type == 'Gnd' and prev_type == 'Fin':
                     msg = "{0} positions have precedence over {1}".format(prev_type, this_trig_type)
@@ -326,7 +326,7 @@ def handle_grb(v, pretend=False):
                                         to_addresses=DEBUG_NOTIFY_LIST,
                                         subject='GRB_fermi_swift debug notification',
                                         msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in grb.loglist]),
-                                        attachments=voeventparse.dumps(v))
+                                        attachments=[('voevent.xml', voeventparse.dumps(v))])
                     return
                 else:
                     grb.info("Triggering {0} to replace {1}".format(this_trig_type, prev_type))
@@ -354,7 +354,7 @@ def handle_grb(v, pretend=False):
                                         to_addresses=DEBUG_NOTIFY_LIST,
                                         subject='GRB_fermi_swift debug notification',
                                         msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in grb.loglist]),
-                                        attachments=voeventparse.dumps(v))
+                                        attachments=[('voevent.xml', voeventparse.dumps(v))])
                     return
             else:
                 grb.info("Not interrupting previous obs")
@@ -362,7 +362,7 @@ def handle_grb(v, pretend=False):
                                     to_addresses=DEBUG_NOTIFY_LIST,
                                     subject='GRB_fermi_swift debug notification',
                                     msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in grb.loglist]),
-                                    attachments=voeventparse.dumps(v))
+                                    attachments=[('voevent.xml', voeventparse.dumps(v))])
                 return
 
         # if we are observing a FERMI trigger but not the trigger we just received
@@ -376,7 +376,7 @@ def handle_grb(v, pretend=False):
                                     to_addresses=DEBUG_NOTIFY_LIST,
                                     subject='GRB_fermi_swift debug notification',
                                     msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in grb.loglist]),
-                                    attachments=voeventparse.dumps(v))
+                                    attachments=[('voevent.xml', voeventparse.dumps(v))])
                 return
 
         else:
@@ -407,4 +407,4 @@ def handle_grb(v, pretend=False):
                             to_addresses=DEBUG_NOTIFY_LIST,
                             subject='GRB_fermi_swift debug notification',
                             msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in grb.loglist]),
-                            attachments=voeventparse.dumps(v))
+                            attachments=[('voevent.xml', voeventparse.dumps(v))])

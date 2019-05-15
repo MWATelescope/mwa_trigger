@@ -176,7 +176,7 @@ def handle_flarestar(v, pretend=False):
                             to_addresses=DEBUG_NOTIFY_LIST,
                             subject='GRB_fermi_swift debug notification',
                             msg_text=DEBUG_EMAIL_TEMPLATE % msg,
-                            attachments=voeventparse.dumps(v))
+                            attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
 
     if trig_id not in xml_cache:
@@ -211,7 +211,7 @@ def handle_flarestar(v, pretend=False):
                                 to_addresses=DEBUG_NOTIFY_LIST,
                                 subject='GRB_fermi_swift debug notification',
                                 msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in fs.loglist]),
-                                attachments=voeventparse.dumps(v))
+                                attachments=[('voevent.xml', voeventparse.dumps(v))])
             return
     else:
         fs.debug("Current schedule empty")
@@ -243,7 +243,7 @@ def handle_flarestar(v, pretend=False):
                             to_addresses=DEBUG_NOTIFY_LIST,
                             subject='GRB_fermi_swift debug notification',
                             msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in fs.loglist]),
-                            attachments=voeventparse.dumps(v))
+                            attachments=[('voevent.xml', voeventparse.dumps(v))])
 
 
 if __name__ == "__main__":

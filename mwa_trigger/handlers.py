@@ -311,7 +311,7 @@ def send_email(from_address='', to_addresses=None, msg_text='', subject='', atta
     :param attachments: A list of (filename, payload, mimetype) tuples, where:
                             -filename is the name the attachment will be saved as on the client, not a local file name.
                             -payload is the entire content of the attachment (a PNG image, zip file, etc)
-                            -mimetype is the type string, eg 'file/text'
+                            -mimetype is the type string, and defaults to 'text/plain' if omitted from the tuple
     :param logger: An optional logger object to use for logging messages, instead of the default logger.
     :return:
     """
@@ -335,12 +335,17 @@ def send_email(from_address='', to_addresses=None, msg_text='', subject='', atta
             return False
 
         try:
-            filename, payload, mimetype = attachspec
+            if len(attachspec) == 2:
+                filename, payload = attachspec
+                mimetype = 'text/plain'
+            else:
+                filename, payload, mimetype = attachspec
+
             if mimetype:
                 mimemain, mimesub = mimetype.split('/')
             else:
-                mimemain = 'application'
-                mimesub = 'octet-stream'
+                mimemain = 'text'
+                mimesub = 'plain'
         except ValueError:
             logger.error('attachments must be a tuple of (filename, payload, mimetype), where payload is the file contents.')
             return False

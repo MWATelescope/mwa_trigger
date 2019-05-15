@@ -498,7 +498,7 @@ def handle_gw(v, pretend=False, time=None):
                             to_addresses=DEBUG_NOTIFY_LIST,
                             subject='GW_LIGO debug notification',
                             msg_text=DEBUG_EMAIL_TEMPLATE % log_message,
-                            attachments=voeventparse.dumps(v))
+                            attachments=[('voevent.xml', voeventparse.dumps(v))])
                             
         return
         
@@ -510,7 +510,7 @@ def handle_gw(v, pretend=False, time=None):
 #                            to_addresses=DEBUG_NOTIFY_LIST,
 #                            subject='GW_LIGO debug notification',
 #                            msg_text=DEBUG_EMAIL_TEMPLATE % "Event not CBC",
-#                            attachments=voeventparse.dumps(v))
+#                            attachments=[('voevent.xml', voeventparse.dumps(v))])
 #        return
 
     if params['Packet_Type'] == "164":
@@ -519,7 +519,7 @@ def handle_gw(v, pretend=False, time=None):
                             to_addresses=DEBUG_NOTIFY_LIST,
                             subject='GW_LIGO debug notification',
                             msg_text=DEBUG_EMAIL_TEMPLATE % "Alert is an event retraction. Not triggering.",
-                            attachments=voeventparse.dumps(v))
+                            attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
 
     alert_type = params['AlertType']
@@ -529,7 +529,7 @@ def handle_gw(v, pretend=False, time=None):
                             to_addresses=DEBUG_NOTIFY_LIST,
                             subject='GW_LIGO debug notification',
                             msg_text=DEBUG_EMAIL_TEMPLATE % "Alert type is not Preliminary. Not triggering.",
-                            attachments=voeventparse.dumps(v))
+                            attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
 
     if float(params['HasNS']) < HAS_NS_THRESH:
@@ -539,7 +539,7 @@ def handle_gw(v, pretend=False, time=None):
                             to_addresses=DEBUG_NOTIFY_LIST,
                             subject='GW_LIGO debug notification',
                             msg_text=DEBUG_EMAIL_TEMPLATE % msg,
-                            attachments=voeventparse.dumps(v))
+                            attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
 
     if 'skymap_fits' not in params:
@@ -548,7 +548,7 @@ def handle_gw(v, pretend=False, time=None):
                             to_addresses=DEBUG_NOTIFY_LIST,
                             subject='GW_LIGO debug notification',
                             msg_text=DEBUG_EMAIL_TEMPLATE % "No skymap in VOEvent. Not triggering.",
-                            attachments=voeventparse.dumps(v))
+                            attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
 
     gw = GW(event=v)
@@ -564,7 +564,7 @@ def handle_gw(v, pretend=False, time=None):
                             to_addresses=DEBUG_NOTIFY_LIST,
                             subject='GW_LIGO debug notification',
                             msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in gw.loglist]),
-                            attachments=voeventparse.dumps(v))
+                            attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
 
     ra, dec = RADecgrid.ra, RADecgrid.dec
@@ -603,7 +603,7 @@ def handle_gw(v, pretend=False, time=None):
                             to_addresses=DEBUG_NOTIFY_LIST,
                             subject='GW_LIGO debug notification',
                             msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in gw.loglist]),
-                            attachments=voeventparse.dumps(v))
+                            attachments=[('voevent.xml', voeventparse.dumps(v))])
 
 
 def test_event(filepath='../test_events/MS190410a-1-Preliminary.xml', test_time=Time('2018-4-03 12:00:00')):
