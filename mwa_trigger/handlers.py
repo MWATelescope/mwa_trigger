@@ -230,7 +230,7 @@ class TriggerEvent(object):
                     attachments.append(('clear_%s.txt' % self.trigger_id, clear_data, 'text/plain'))
                 log_data = '\n'.join([str(x) for x in self.loglist])
                 attachments.append(('log_%s.txt' % self.trigger_id, log_data, 'text/plain'))
-                attachments.append(('voevent.xml', voevent, 'text/plain'))
+                attachments.append(('voevent.xml', voevent, 'text/xml'))
 
                 send_email(from_address='mwa@telemetry.mwa128t.org',
                            to_addresses=email_tolist,
@@ -337,7 +337,10 @@ def send_email(from_address='', to_addresses=None, msg_text='', subject='', atta
         try:
             if len(attachspec) == 2:
                 filename, payload = attachspec
-                mimetype = 'text/plain'
+                if filename.endswith('.xml'):
+                    mimetype = 'text/xml'
+                else:
+                    mimetype = 'text/plain'
             else:
                 filename, payload, mimetype = attachspec
 
