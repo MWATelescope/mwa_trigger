@@ -75,6 +75,8 @@ LIGO-GW GRB. Log messages are:
 
 EMAIL_SUBJECT_TEMPLATE = "LIGO-GW handler trigger for %s"
 
+DEBUG_EMAIL_SUBJECT_TEMPLATE = "GW_LIGO (%s) debug notification"
+
 # observatory location
 MWA = EarthLocation(lat='-26:42:11.95', lon='116:40:14.93', height=377.8 * u.m)
 
@@ -496,6 +498,7 @@ def handle_gw(v, pretend=False, time=None):
     params = {elem.attrib['name']:elem.attrib['value'] for elem in v.iterfind('.//Param')}
     
     trig_id = params['GraceID']
+    debug_email_subject = DEBUG_EMAIL_SUBJECT_TEMPLATE % trig_id
     
     if trig_id not in xml_cache:
       gw = GW(event=v)
@@ -511,7 +514,7 @@ def handle_gw(v, pretend=False, time=None):
         log.info("Alert is an event retraction. Not triggering.")
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                             to_addresses=DEBUG_NOTIFY_LIST,
-                            subject='GW_LIGO debug notification',
+                            subject=debug_email_subject,
                             msg_text=DEBUG_EMAIL_TEMPLATE % "Alert is an event retraction. Not triggering.",
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
@@ -538,7 +541,7 @@ def handle_gw(v, pretend=False, time=None):
       
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                             to_addresses=DEBUG_NOTIFY_LIST,
-                            subject='GW_LIGO debug notification',
+                            subject=debug_email_subject,
                             msg_text=DEBUG_EMAIL_TEMPLATE % log_message,
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
                             
@@ -558,7 +561,7 @@ def handle_gw(v, pretend=False, time=None):
         log.debug(msg)
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                             to_addresses=DEBUG_NOTIFY_LIST,
-                            subject='GW_LIGO debug notification',
+                            subject=debug_email_subject,
                             msg_text=DEBUG_EMAIL_TEMPLATE % msg,
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
@@ -567,7 +570,7 @@ def handle_gw(v, pretend=False, time=None):
         log.debug("No skymap in VOEvent. Not triggering.")
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                             to_addresses=DEBUG_NOTIFY_LIST,
-                            subject='GW_LIGO debug notification',
+                            subject=debug_email_subject,
                             msg_text=DEBUG_EMAIL_TEMPLATE % "No skymap in VOEvent. Not triggering.",
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
@@ -579,7 +582,7 @@ def handle_gw(v, pretend=False, time=None):
         gw.info("No pointing from skymap, not triggering")
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                             to_addresses=DEBUG_NOTIFY_LIST,
-                            subject='GW_LIGO debug notification',
+                            subject=debug_email_subject,
                             msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in gw.loglist]),
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
@@ -611,7 +614,7 @@ def handle_gw(v, pretend=False, time=None):
             gw.info("New pointing same as old pointing. Not triggering.")
             handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                             to_addresses=DEBUG_NOTIFY_LIST,
-                            subject='GW_LIGO debug notification',
+                            subject=debug_email_subject,
                             msg_text=DEBUG_EMAIL_TEMPLATE % "New pointing same as old pointing. Not triggering."),
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
                             
@@ -643,7 +646,7 @@ def handle_gw(v, pretend=False, time=None):
     if result is None:
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                             to_addresses=DEBUG_NOTIFY_LIST,
-                            subject='GW_LIGO debug notification',
+                            subject=debug_email_subject,
                             msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in gw.loglist]),
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
 
