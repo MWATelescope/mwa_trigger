@@ -31,13 +31,23 @@ log = logging.getLogger('voevent.handlers.LVC_GW')  # Inherit the logging setup 
 
 GW_PRETEND = True    # Override incoming 'pretend' parameter
 
+
+
+
 # Settings
 DEC_LIMIT = 15.
 
 HAS_NS_THRESH = 0.5
 
+MAX_RESPONSE_TIME = 900  # seconds - just for testing purposes
+
+OBS_LENGTH = 1800 # length of the observation in seconds
+
 PROJECT_ID = 'D0011'
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
+
+
+
 
 # Email these addresses when we trigger on an event
 NOTIFY_LIST = ['ddob1600@uni.sydney.edu.au', 'kaplan@uwm.edu', 'tara@physics.usyd.edu.au', "Andrew.Williams@curtin.edu.au"]
@@ -479,8 +489,6 @@ def handle_gw(v, pretend=False, time=None):
     
     """
     
-    #max_response_time = 120  # seconds
-    max_response_time = 900  # seconds - just for testing purposes
     
     if v.attrib['role'] == 'test':
         pretend = True
@@ -524,8 +532,8 @@ def handle_gw(v, pretend=False, time=None):
     delta_T = Time.now() - merger_time
     delta_T_sec = delta_T.sec
     
-    if delta_T_sec > max_response_time:
-        log_message = "Time since merger (%d s) greater than max response time (%d s). Not triggering" % (delta_T_sec, max_response_time)
+    if delta_T_sec > MAX_RESPONSE_TIME:
+        log_message = "Time since merger (%d s) greater than max response time (%d s). Not triggering" % (delta_T_sec, MAX_RESPONSE_TIME)
         log.info(log_message)
       
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
@@ -580,7 +588,7 @@ def handle_gw(v, pretend=False, time=None):
     gw.debug("Coordinate: %s, %s" % (ra, dec))
     gw.add_pos((ra, dec, 0.0))
 
-    req_time_s = 1800
+    req_time_s = OBS_LENGTH
 
     obslist = triggerservice.obslist(obstime=req_time_s)
 
