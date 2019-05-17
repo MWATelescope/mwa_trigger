@@ -91,6 +91,25 @@ EMAIL_SUBJECT_TEMPLATE = "LIGO-GW handler trigger for %s"
 
 DEBUG_EMAIL_SUBJECT_TEMPLATE = "GW_LIGO (%s) debug notification"
 
+GCN_TEMPLATE = """
+D. Kaplan (UWM), D. Dobie (Sydney/CSIRO), A. Williams (Curtin),
+T. Murphy (Sydney), I. Brown (UWM), E. Lenc (CSIRO), C. Lynch (Curtin),
+G. Anderson (Curtin), P. Hancock (Curtin),B. Gaensler (Toronto),
+K. Bannister (CSIRO) on behalf of the MWA Collaboration
+
+We have automatically triggered an observation of LIGO/Virgo %s
+with the Murchison Widefield Array (MWA). A 30 minute observation at a
+central frequency of 185 MHz with 30 MHz bandwidth started at %s
+(%.0f minutes post-merger) and lasted 30 minutes.
+
+The 20 x 20 deg field-of-view is centered on RA %.3f deg, Dec %.3f deg
+and contains %.3f of the localisation probability.
+
+Analysis of this data is underway, and subsequent epochs are planned.
+
+We thank the MWA Operations team for supporting these observations
+
+"""
 # observatory location
 MWA = EarthLocation(lat='-26:42:11.95', lon='116:40:14.93', height=377.8 * u.m)
 
@@ -568,7 +587,7 @@ def handle_gw(v, pretend=False, time=None):
 
     gw.load_skymap(params['skymap_fits'], time=time)    
 
-    RADecgrid = gw.get_mwapointing_grid(returndelays=False, returnpower=False, minprob=MIN_PROB)
+    RADecgrid, delays, power = gw.get_mwapointing_grid(returndelays=True, returnpower=True, minprob=MIN_PROB)
     if RADecgrid is None:
         gw.info("No pointing from skymap, not triggering")
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
@@ -578,9 +597,10 @@ def handle_gw(v, pretend=False, time=None):
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
 
-    ra, dec = RADecgrid.ra, RADecgrid.dec
-    gw.debug("Pointing at %s, %s" % (ra, dec))
-    gw.add_pos((ra.deg, dec.deg, 0.0))
+    ra, dec = RADecgrid.ra.deg, RADecgrid.dec.deg
+    gw.info("Pointing at %s, %s" % (ra, dec))
+    gw.info("Pointing contains %.3f of the localisation"%(power))
+    gw.add_pos((ra, dec, 0.0))
 
     req_time_s = OBS_LENGTH
 
@@ -647,6 +667,10 @@ def handle_gw(v, pretend=False, time=None):
 
     email_text = EMAIL_TEMPLATE % emaildict
     gw.info(email_text)
+
+    gw.info("Template GCN text:")
+    gcn_text = GCN_TEMPLATE % (trig_id, Time.now().iso, delta_T_sec, ra, dec, power)
+    gw.info(gcn_text)
 
     email_subject = EMAIL_SUBJECT_TEMPLATE % gw.trigger_id
     # Do the trigger
