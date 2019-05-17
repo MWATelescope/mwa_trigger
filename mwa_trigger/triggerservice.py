@@ -272,6 +272,9 @@ def trigger(project_id=None, secure_key=None,
     if vcsmode is not None:
         postdict['vcsmode'] = vcsmode
 
+    logger.debug('urldict=%s' % urldict)
+    logger.debug('postdict=%s' % postdict)
+
     if vcsmode:
         result = web_api(url=BASEURL + 'triggervcs', urldict=urldict, postdict=postdict, logger=logger)
     else:
