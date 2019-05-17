@@ -67,7 +67,7 @@ Dec:        %(dec)s deg
 
 DEBUG_EMAIL_TEMPLATE = """
 The LIGO-GW handler did NOT trigger an MWA observation for a
-LIGO-GW GRB. Log messages are:
+LIGO-GW event. Log messages are:
 
 %s
 
