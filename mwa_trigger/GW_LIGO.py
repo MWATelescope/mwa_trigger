@@ -91,6 +91,25 @@ EMAIL_SUBJECT_TEMPLATE = "LIGO-GW handler trigger for %s"
 
 DEBUG_EMAIL_SUBJECT_TEMPLATE = "GW_LIGO (%s) debug notification"
 
+GCN_TEMPLATE = """
+D. Kaplan (UWM), D. Dobie (Sydney/CSIRO), A. Williams (Curtin),
+T. Murphy (Sydney), I. Brown (UWM), E. Lenc (CSIRO), C. Lynch (Curtin),
+G. Anderson (Curtin), P. Hancock (Curtin),B. Gaensler (Toronto),
+K. Bannister (CSIRO) on behalf of the MWA Collaboration
+
+We have automatically triggered an observation of LIGO/Virgo %s
+with the Murchison Widefield Array (MWA). A 30 minute observation at a
+central frequency of 185 MHz with 30 MHz bandwidth started at %s
+(%.0f minutes post-merger) and lasted 30 minutes.
+
+The 20 x 20 deg field-of-view is centered on RA %.3f deg, Dec %.3f deg
+and contains %.3f of the localisation probability.
+
+Analysis of this data is underway, and subsequent epochs are planned.
+
+We thank the MWA Operations team for supporting these observations
+
+"""
 # observatory location
 MWA = EarthLocation(lat='-26:42:11.95', lon='116:40:14.93', height=377.8 * u.m)
 
