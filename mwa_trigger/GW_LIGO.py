@@ -580,7 +580,7 @@ def handle_gw(v, pretend=False, time=None):
 
     ra, dec = RADecgrid.ra, RADecgrid.dec
     gw.debug("Pointing at %s, %s" % (ra, dec))
-    gw.add_pos((ra, dec, 0.0))
+    gw.add_pos((ra.deg, dec.deg, 0.0))
 
     req_time_s = OBS_LENGTH
 
