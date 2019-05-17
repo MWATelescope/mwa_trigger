@@ -366,10 +366,7 @@ class GW(handlers.TriggerEvent):
                     return None, None
 
         # has it been downsampled already
-        # npix = self.npix_down
-        # nside = self.nside_down
         gwmap = self.gwmap_down
-        # RADec = self.RADec_down
         AltAz = self.AltAz_down
 
         gridRADec = self.MWA_grid.get_radec()
@@ -447,7 +444,7 @@ class GW(handlers.TriggerEvent):
             else:
                 return gridRADec[igrid], self.MWA_grid.data[igrid]['delays'], mapsum[igrid]
 
-            ################################################################################
+################################################################################
 
 
 def processevent(event='', pretend=True):
