@@ -31,9 +31,6 @@ log = logging.getLogger('voevent.handlers.LVC_GW')  # Inherit the logging setup 
 
 GW_PRETEND = True    # Override incoming 'pretend' parameter
 
-
-
-
 # Settings
 """
 Define triggering settings
@@ -64,8 +61,6 @@ DEC_LIMIT = 15.
 
 
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
-
-
 
 
 # Email these addresses when we trigger on an event
@@ -342,6 +337,7 @@ class GW(handlers.TriggerEvent):
                              returndelays=False, returnpower=False):
         """
 
+        :rtype: SkyCoord
         :param frequency: Frequency in Hz
         :param minprob: Minimum probability value
         :param minelevation: Minimum elevation angle, in degrees
@@ -510,7 +506,6 @@ def handle_gw(v, pretend=False, time=None):
     
     """
     
-    
     if v.attrib['role'] == 'test':
         pretend = True
         
@@ -520,14 +515,12 @@ def handle_gw(v, pretend=False, time=None):
     debug_email_subject = DEBUG_EMAIL_SUBJECT_TEMPLATE % trig_id
     
     if trig_id not in xml_cache:
-      gw = GW(event=v)
-      gw.trigger_id = trig_id
-      xml_cache[trig_id] = gw
-    
+        gw = GW(event=v)
+        gw.trigger_id = trig_id
+        xml_cache[trig_id] = gw 
     else:
-      gw = xml_cache[trig_id]
-      gw.add_event(v)
-      
+        gw = xml_cache[trig_id]
+        gw.add_event(v)  
 
     if params['Packet_Type'] == "164":
         log.info("Alert is an event retraction. Not triggering.")
@@ -539,14 +532,14 @@ def handle_gw(v, pretend=False, time=None):
         return
 
     alert_type = params['AlertType']
-#    if alert_type != 'Preliminary':
-#        log.debug("Alert type is not Preliminary. Not triggering.")
-#        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
-#                            to_addresses=DEBUG_NOTIFY_LIST,
-#                            subject='GW_LIGO debug notification',
-#                            msg_text=DEBUG_EMAIL_TEMPLATE % "Alert type is not Preliminary. Not triggering.",
-#                            attachments=[('voevent.xml', voeventparse.dumps(v))])
-#        return
+    if alert_type != 'Preliminary':
+        log.debug("Alert type is not Preliminary. Not triggering.")
+        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                            to_addresses=DEBUG_NOTIFY_LIST,
+                            subject='GW_LIGO debug notification',
+                            msg_text=DEBUG_EMAIL_TEMPLATE % "Alert type is not Preliminary. Not triggering.",
+                            attachments=[('voevent.xml', voeventparse.dumps(v))])
+        return
 
     time_string = v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Time.TimeInstant.ISOTime.text
     
@@ -557,7 +550,6 @@ def handle_gw(v, pretend=False, time=None):
     if delta_T_sec > MAX_RESPONSE_TIME:
         log_message = "Time since merger (%d s) greater than max response time (%d s). Not triggering" % (delta_T_sec, MAX_RESPONSE_TIME)
         log.info(log_message)
-      
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                             to_addresses=DEBUG_NOTIFY_LIST,
                             subject=debug_email_subject,
@@ -622,26 +614,24 @@ def handle_gw(v, pretend=False, time=None):
         gw.debug("obs {0}, trig {1}".format(obs, trig_id))
         
         if obs == trig_id:
-          gw.info("Already observing this GW event")
-          
-          last_pos = gw.get_pos(-2)
-          last_ra = last_pos[0]
-          last_dec = last_pos[1]
-          gw.info("Old position: RA {0}, Dec {1}".format(last_ra,last_dec))
-          
-          if (ra == last_ra) and (dec == last_dec):
-            gw.info("New pointing same as old pointing. Not triggering.")
-            handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
-                            to_addresses=DEBUG_NOTIFY_LIST,
-                            subject=debug_email_subject,
-                            msg_text=DEBUG_EMAIL_TEMPLATE % "New pointing same as old pointing. Not triggering."),
-                            attachments=[('voevent.xml', voeventparse.dumps(v))])
-                            
-            return
+            gw.info("Already observing this GW event")
             
+            last_pos = gw.get_pos(-2)
+            last_ra = last_pos[0]
+            last_dec = last_pos[1]
+            gw.info("Old position: RA {0}, Dec {1}".format(last_ra,last_dec))
+          
+            if (ra == last_ra) and (dec == last_dec):
+                gw.info("New pointing same as old pointing. Not triggering.")
+                handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                                    to_addresses=DEBUG_NOTIFY_LIST,
+                                    subject=debug_email_subject,
+                                    msg_text=DEBUG_EMAIL_TEMPLATE % "New pointing same as old pointing. Not triggering.",
+                                    attachments=[('voevent.xml', voeventparse.dumps(v))])
+                return
+
     if gw.first_trig_time is not None:
-      req_time_s -= (Time.now()-gw.first_trig_time).sec
-    
+        req_time_s -= (Time.now()-gw.first_trig_time).sec
 
     emaildict = {'triggerid':gw.trigger_id,
                  'trigtime':Time.now().iso,
