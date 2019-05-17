@@ -26,12 +26,16 @@ log = logging.getLogger('voevent.handlers.GRB_fermi_swift')   # Inherit the logg
 
 # Settings
 FERMI_POBABILITY_THRESHOLD = 50  # Trigger on Fermi events that have most-likely-prob > this number
-LONG_SHORT_LIMIT = 2.05 #seconds
+LONG_SHORT_LIMIT = 2.05  # seconds
 
 PROJECT_ID = 'G0055'
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
 
-NOTIFY_LIST = ["Paul.Hancock@curtin.edu.au", "Gemma.Anderson@curtin.edu.au"]
+# Email these addresses when we trigger on an event
+NOTIFY_LIST = ["Paul.Hancock@curtin.edu.au", "Gemma.Anderson@curtin.edu.au", "Andrew.Williams@curtin.edu.au"]
+
+# Email these addresses when we handle an event that is a GRB, but we don't trigger on it.
+DEBUG_NOTIFY_LIST = ["Paul.Hancock@curtin.edu.au", "Gemma.Anderson@curtin.edu.au", "Andrew.Williams@curtin.edu.au"]
 
 EMAIL_TEMPLATE = """
 The GRB Fermi+Swift handler triggered an MWA observation for a
@@ -42,6 +46,14 @@ Trigger ID: %(triggerid)s
 RA:         %(ra)s hours
 Dec:        %(dec)s deg
 Error Rad:  %(err)7.3f deg
+
+"""
+
+DEBUG_EMAIL_TEMPLATE = """
+The GRB Fermi+Swift handler did NOT trigger an MWA observation for a
+Fermi/Swift GRB. Log messages are:
+
+%s
 
 """
 
@@ -97,11 +109,11 @@ def is_grb(v):
     trig_swift = ("ivo://nasa.gsfc.gcn/SWIFT#BAT_GRB_Pos",  # Swift positions
                   )
 
-    trig_fermi =(# "ivo://nasa.gsfc.gcn/Fermi#GBM_Alert",  # Ignore these as they always have ra/dec = 0/0
-                 "ivo://nasa.gsfc.gcn/Fermi#GBM_Flt_Pos",  # Fermi positions
-                 "ivo://nasa.gsfc.gcn/Fermi#GBM_Gnd_Pos",
-                 "ivo://nasa.gsfc.gcn/Fermi#GBM_Fin_Pos"
-                 )
+    # Ignore "ivo://nasa.gsfc.gcn/Fermi#GBM_Alert" as they always have ra/dec = 0/0
+    trig_fermi = ("ivo://nasa.gsfc.gcn/Fermi#GBM_Flt_Pos",  # Fermi positions
+                  "ivo://nasa.gsfc.gcn/Fermi#GBM_Gnd_Pos",
+                  "ivo://nasa.gsfc.gcn/Fermi#GBM_Fin_Pos",
+                  )
 
     swift = False
     fermi = False
@@ -131,7 +143,6 @@ def is_grb(v):
     return True
 
 
-
 def handle_grb(v, pretend=False):
     """
     Handles the actual VOEvent parsing, generating observations if appropriate.
@@ -148,6 +159,12 @@ def handle_grb(v, pretend=False):
         grbid = v.find(".//Param[@name='GRB_Identified']").attrib['value']
         if grbid != 'true':
             log.debug("SWIFT alert but not a GRB")
+            handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                                to_addresses=DEBUG_NOTIFY_LIST,
+                                subject='GRB_fermi_swift debug notification',
+                                msg_text=DEBUG_EMAIL_TEMPLATE % "SWIFT alert but not a GRB",
+                                attachments=[('voevent.xml', voeventparse.dumps(v))])
+
             return
         log.debug("SWIFT GRB trigger detected")
         this_trig_type = "SWIFT"
@@ -196,8 +213,14 @@ def handle_grb(v, pretend=False):
                 grb.short = True
                 grb.debug("Possibly a short GRB: t={0}".format(trig_time))
             else:
-                grb.debug("Probably not a short GRB: t={0}".format(trig_time))
+                msg = "Probably not a short GRB: t={0}".format(trig_time)
+                grb.debug(msg)
                 grb.debug("Not Triggering")
+                handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                                    to_addresses=DEBUG_NOTIFY_LIST,
+                                    subject='GRB_fermi_swift debug notification',
+                                    msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in grb.loglist]),
+                                    attachments=[('voevent.xml', voeventparse.dumps(v))])
                 return  # don't trigger
 
             most_likely = int(v.find(".//Param[@name='Most_Likely_Index']").attrib['value'])
@@ -212,24 +235,47 @@ def handle_grb(v, pretend=False):
                     grb.debug("Prob(GRB): {0}% > {1}".format(prob, FERMI_POBABILITY_THRESHOLD))
                     trigger = True
                 else:
-                    grb.debug("Prob(GRB): {0}% <{1}".format(prob, FERMI_POBABILITY_THRESHOLD))
+                    msg = "Prob(GRB): {0}% <{1}".format(prob, FERMI_POBABILITY_THRESHOLD)
+                    grb.debug(msg)
                     grb.debug("Not Triggering")
+                    handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                                        to_addresses=DEBUG_NOTIFY_LIST,
+                                        subject='GRB_fermi_swift debug notification',
+                                        msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in grb.loglist]),
+                                        attachments=[('voevent.xml', voeventparse.dumps(v))])
                     return
             else:
-                grb.debug("MOST_LIKELY != GRB")
+                msg = "MOST_LIKELY != GRB"
+                grb.debug(msg)
                 grb.debug("Not Triggering")
+                handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                                    to_addresses=DEBUG_NOTIFY_LIST,
+                                    subject='GRB_fermi_swift debug notification',
+                                    msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in grb.loglist]),
+                                    attachments=[('voevent.xml', voeventparse.dumps(v))])
                 return
         else:
             # for Gnd/Fin we trigger if we already triggered on the Flt position
             grb.debug("Gnd/Flt message -> reverting to Flt trigger")
             trigger = grb.triggered
     else:
-        log.debug("Not a Fermi or SWIFT GRB.")
+        msg = "Not a Fermi or SWIFT GRB."
+        log.debug(msg)
         log.debug("Not Triggering")
+        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                            to_addresses=DEBUG_NOTIFY_LIST,
+                            subject='GRB_fermi_swift debug notification',
+                            msg_text=DEBUG_EMAIL_TEMPLATE % msg,
+                            attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
 
     if not trigger:
         grb.debug("Not Triggering")
+        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                            to_addresses=DEBUG_NOTIFY_LIST,
+                            subject='GRB_fermi_swift debug notification',
+                            msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in grb.loglist]),
+                            attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
 
     # get current position
@@ -263,12 +309,24 @@ def handle_grb(v, pretend=False):
             elif "Fermi" in trig_id:
                 prev_type = grb.last_trig_type
                 if this_trig_type == 'Flt' and (prev_type in ['Gnd','Fin']):
-                    grb.info("{0} positions have precedence over {1}".format(prev_type, this_trig_type))
+                    msg = "{0} positions have precedence over {1}".format(prev_type, this_trig_type)
+                    grb.info(msg)
                     grb.info("Not triggering")
+                    handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                                        to_addresses=DEBUG_NOTIFY_LIST,
+                                        subject='GRB_fermi_swift debug notification',
+                                        msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in grb.loglist]),
+                                        attachments=[('voevent.xml', voeventparse.dumps(v))])
                     return
                 elif this_trig_type == 'Gnd' and prev_type == 'Fin':
-                    grb.info("{0} positions have precedence over {1}".format(prev_type, this_trig_type))
+                    msg = "{0} positions have precedence over {1}".format(prev_type, this_trig_type)
+                    grb.info(msg)
                     grb.info("Not triggering")
+                    handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                                        to_addresses=DEBUG_NOTIFY_LIST,
+                                        subject='GRB_fermi_swift debug notification',
+                                        msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in grb.loglist]),
+                                        attachments=[('voevent.xml', voeventparse.dumps(v))])
                     return
                 else:
                     grb.info("Triggering {0} to replace {1}".format(this_trig_type, prev_type))
@@ -291,10 +349,20 @@ def handle_grb(v, pretend=False):
                 if grb.short and not prev_short:
                     grb.info("Interrupting with a short SWIFT GRB")
                 else:
-                    grb.info("Not interrupting previous obs")
+                    grb.info("Not interrupting previous observation")
+                    handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                                        to_addresses=DEBUG_NOTIFY_LIST,
+                                        subject='GRB_fermi_swift debug notification',
+                                        msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in grb.loglist]),
+                                        attachments=[('voevent.xml', voeventparse.dumps(v))])
                     return
             else:
                 grb.info("Not interrupting previous obs")
+                handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                                    to_addresses=DEBUG_NOTIFY_LIST,
+                                    subject='GRB_fermi_swift debug notification',
+                                    msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in grb.loglist]),
+                                    attachments=[('voevent.xml', voeventparse.dumps(v))])
                 return
 
         # if we are observing a FERMI trigger but not the trigger we just received
@@ -304,6 +372,11 @@ def handle_grb(v, pretend=False):
                 grb.info("Replacing a Fermi trigger with a SWIFT trigger")
             else:
                 grb.info("Currently observing a different Fermi trigger, not interrupting")
+                handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                                    to_addresses=DEBUG_NOTIFY_LIST,
+                                    subject='GRB_fermi_swift debug notification',
+                                    msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in grb.loglist]),
+                                    attachments=[('voevent.xml', voeventparse.dumps(v))])
                 return
 
         else:
@@ -319,12 +392,19 @@ def handle_grb(v, pretend=False):
     email_text = EMAIL_TEMPLATE % emaildict
     email_subject = EMAIL_SUBJECT_TEMPLATE % grb.trigger_id
     # Do the trigger
-    grb.trigger_observation(ttype=this_trig_type,
-                            obsname=trig_id,
-                            time_min=req_time_min,
-                            pretend=pretend,
-                            project_id=PROJECT_ID,
-                            secure_key=SECURE_KEY,
-                            email_tolist=NOTIFY_LIST,
-                            email_text=email_text,
-                            email_subject=email_subject)
+    result = grb.trigger_observation(ttype=this_trig_type,
+                                     obsname=trig_id,
+                                     time_min=req_time_min,
+                                     pretend=pretend,
+                                     project_id=PROJECT_ID,
+                                     secure_key=SECURE_KEY,
+                                     email_tolist=NOTIFY_LIST,
+                                     email_text=email_text,
+                                     email_subject=email_subject,
+                                     voevent=voeventparse.dumps(v))
+    if result is None:
+        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                            to_addresses=DEBUG_NOTIFY_LIST,
+                            subject='GRB_fermi_swift debug notification',
+                            msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in grb.loglist]),
+                            attachments=[('voevent.xml', voeventparse.dumps(v))])

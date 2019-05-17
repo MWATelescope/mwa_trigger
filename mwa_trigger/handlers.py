@@ -141,7 +141,8 @@ class TriggerEvent(object):
                             secure_key="",
                             email_tolist=None,
                             email_text="",
-                            email_subject=""):
+                            email_subject="",
+                            voevent=""):
         """
         Tell the MWA to observe the target of interest - override this method in your handler as desired if you
         want some other observation parameters.
@@ -150,12 +151,13 @@ class TriggerEvent(object):
         :param obsname: Arbitrary string for the name of the observation in the schedule.
         :param time_min: Total length of observation time, in minutes.
         :param pretend: Boolean, True if we don't want to actually schedule the observations.
-        :param project_id: The project ID requesting the triggered observation
-        :param secure_key: The password specific to that project ID
+        :param project_id: The project ID requesting the triggered observation.
+        :param secure_key: The password specific to that project ID.
         :param email_tolist: list of email addresses to send the notification email to.
-        :param email_text: Base email message - success string, errors, and other data will be appended and attached
-        :param email_subject: string containing email subject line
-        :return: The full results dictionary returned by the triggerservice API (see triggerservice.trigger)
+        :param email_text: Base email message - success string, errors, and other data will be appended and attached.
+        :param email_subject: string containing email subject line.
+        :param voevent: string containing the full XML text of the VOEvent.
+        :return: The full results dictionary returned by the triggerservice API (see triggerservice.trigger).
         """
 
         self.triggered = True
@@ -196,14 +198,17 @@ class TriggerEvent(object):
                                             ra=ra, dec=dec,
                                             creator='VOEvent_Auto_Trigger_{0}'.format(__version__),
                                             obsname=obsname, nobs=nobs,
-                                            freqspecs=self.freqspecs, avoidsun=self.avoidsun,
+                                            freqspecs=self.freqspecs,
+                                            avoidsun=self.avoidsun,
                                             inttime=self.inttime, freqres=self.freqres,
                                             exptime=self.exptime,
                                             calibrator=self.calibrator, calexptime=self.calexptime,
-                                            vcsmode=self.vcsmode, buffered=self.buffered)
+                                            vcsmode=self.vcsmode,
+                                            buffered=self.buffered,
+                                            logger=self)
             # self.debug("Response: {0}".format(result))
             if result is None:
-                self.logger.error("Trigger Service Error: triggerservice.trigger() returned None")
+                self.error("Trigger Service Error: triggerservice.trigger() returned None")
                 return
             if email_tolist:
                 if result['success']:
@@ -228,6 +233,7 @@ class TriggerEvent(object):
                     attachments.append(('clear_%s.txt' % self.trigger_id, clear_data, 'text/plain'))
                 log_data = '\n'.join([str(x) for x in self.loglist])
                 attachments.append(('log_%s.txt' % self.trigger_id, log_data, 'text/plain'))
+                attachments.append(('voevent.xml', voevent, 'text/xml'))
 
                 send_email(from_address='mwa@telemetry.mwa128t.org',
                            to_addresses=email_tolist,
@@ -308,7 +314,7 @@ def send_email(from_address='', to_addresses=None, msg_text='', subject='', atta
     :param attachments: A list of (filename, payload, mimetype) tuples, where:
                             -filename is the name the attachment will be saved as on the client, not a local file name.
                             -payload is the entire content of the attachment (a PNG image, zip file, etc)
-                            -mimetype is the type string, eg 'file/text'
+                            -mimetype is the type string, and defaults to 'text/plain' if omitted from the tuple
     :param logger: An optional logger object to use for logging messages, instead of the default logger.
     :return:
     """
@@ -332,12 +338,20 @@ def send_email(from_address='', to_addresses=None, msg_text='', subject='', atta
             return False
 
         try:
-            filename, payload, mimetype = attachspec
+            if len(attachspec) == 2:
+                filename, payload = attachspec
+                if filename.endswith('.xml'):
+                    mimetype = 'text/xml'
+                else:
+                    mimetype = 'text/plain'
+            else:
+                filename, payload, mimetype = attachspec
+
             if mimetype:
                 mimemain, mimesub = mimetype.split('/')
             else:
-                mimemain = 'application'
-                mimesub = 'octet-stream'
+                mimemain = 'text'
+                mimesub = 'plain'
         except ValueError:
             logger.error('attachments must be a tuple of (filename, payload, mimetype), where payload is the file contents.')
             return False

@@ -25,6 +25,14 @@ import voeventparse
 
 IVORN_LIST = []    # Maintain list of ivorn names that have already been processed by the queue
 
+EXCEPTION_NOTIFY_LIST = ["Andrew.Williams@curtin.edu.au"]
+
+EXCEPTION_EMAIL_TEMPLATE = """
+The VOEvent handler thre an exception:
+
+%s
+
+"""
 
 ############### set up the logging before importing Pyro4
 class MWALogFormatter(object):
@@ -56,11 +64,12 @@ import Pyro4
 sys.excepthook = Pyro4.util.excepthook
 Pyro4.config.DETAILED_TRACEBACK = True
 
-from mwa_trigger import GRB_fermi_swift, FlareStar_swift_maxi  # , GW_LIGO
+from mwa_trigger import handlers
+from mwa_trigger import GRB_fermi_swift, FlareStar_swift_maxi, GW_LIGO
 
 PRETEND = False   # Set to true to trigger event in 'pretend' mode, not actually schedule observations.
 
-EVENTHANDLERS = [GRB_fermi_swift.processevent, FlareStar_swift_maxi.processevent]   # , GW_LIGO.processevent]    # One or more handler functions - all will be called in turn on each XML event.
+EVENTHANDLERS = [GRB_fermi_swift.processevent, FlareStar_swift_maxi.processevent, GW_LIGO.processevent]    # One or more handler functions - all will be called in turn on each XML event.
 
 Pyro4.config.COMMTIMEOUT = 10.0
 Pyro4.config.THREADPOOL_SIZE_MIN = 8
@@ -179,6 +188,10 @@ class VOEventHandler(object):
             except Exception:
                 if not EXITING:
                     self.logger.error("Exception in VOEventHandler Pyro4 start. Retrying in 10 sec: %s" % (traceback.format_exc(),))
+                    handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                                        to_addresses=EXCEPTION_NOTIFY_LIST,
+                                        subject='Exception in Pyro4 daemon request loop',
+                                        msg_text=EXCEPTION_EMAIL_TEMPLATE % traceback.format_exc())
                     time.sleep(10)
                 else:
                     self.logger.error("Exception in VOEventHandler, EXITING true, shutting down: %s" % (traceback.format_exc(),))
@@ -191,6 +204,10 @@ class VOEventHandler(object):
                 except Exception:
                     if not EXITING:
                         self.logger.error("Exception in VOEventHandler Pyro4 server. Restarting in 10 sec: %s" % (traceback.format_exc(),))
+                        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                                            to_addresses=EXCEPTION_NOTIFY_LIST,
+                                            subject='Exception in Pyro4 daemon request loop',
+                                            msg_text=EXCEPTION_EMAIL_TEMPLATE % traceback.format_exc())
                         time.sleep(10)
                     else:
                         self.logger.error("Exception in VOEventHandler Pyro4 server, EXITING true, shutting down: %s" % (traceback.format_exc(),))
@@ -208,21 +225,28 @@ def QueueWorker():
     """
     global EXITING
     global IVORN_LIST
-    while not EXITING:
-        eventxml = EventQueue.get()
-        v = voeventparse.loads(str(eventxml))
-        if v.attrib['ivorn'] in IVORN_LIST:
-            DEFAULTLOGGER.info("Already seen event %s, discarding. Current queue size is %d" % (v.attrib['ivorn'],
-                                                                                                EventQueue.qsize()))
-        else:
-            DEFAULTLOGGER.info("Processing event %s. Current queue size is %d" % (v.attrib['ivorn'],
-                                                                                  EventQueue.qsize()))
-            IVORN_LIST.append(v.attrib['ivorn'])
-            for hfunc in EVENTHANDLERS:
-                handled = hfunc(event=eventxml, pretend=PRETEND)
-                if handled:   # One of the handlers accepted this event
-                    break    # Don't try any more event handlers.
-        EventQueue.task_done()
+    try:
+        while not EXITING:
+            eventxml = EventQueue.get()
+            v = voeventparse.loads(str(eventxml))
+            if v.attrib['ivorn'] in IVORN_LIST:
+                DEFAULTLOGGER.info("Already seen event %s, discarding. Current queue size is %d" % (v.attrib['ivorn'],
+                                                                                                    EventQueue.qsize()))
+            else:
+                DEFAULTLOGGER.info("Processing event %s. Current queue size is %d" % (v.attrib['ivorn'],
+                                                                                      EventQueue.qsize()))
+                IVORN_LIST.append(v.attrib['ivorn'])
+                for hfunc in EVENTHANDLERS:
+                    handled = hfunc(event=eventxml, pretend=PRETEND)
+                    if handled:   # One of the handlers accepted this event
+                        break    # Don't try any more event handlers.
+            EventQueue.task_done()
+    except Exception:
+        DEFAULTLOGGER.error("Exception in QueueWorker. Restarting in 10 sec: %s" % (traceback.format_exc(),))
+        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                            to_addresses=EXCEPTION_NOTIFY_LIST,
+                            subject='Exception in QueueWorker loop',
+                            msg_text=EXCEPTION_EMAIL_TEMPLATE % traceback.format_exc())
 
 
 if __name__ == '__main__':
@@ -252,6 +276,10 @@ if __name__ == '__main__':
                 time.sleep(5)
                 if not pyro_thread.is_alive():
                     DEFAULTLOGGER.error('Pyro request handler thread has died - restarting.')
+                    handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                                        to_addresses=EXCEPTION_NOTIFY_LIST,
+                                        subject='Exception in Pyro4 daemon request loop',
+                                        msg_text=EXCEPTION_EMAIL_TEMPLATE % 'Pyro request handler thread has died - restarting.')
                     break
                 if not queue_thread.is_alive():
                     DEFAULTLOGGER.error('Queue handler thread has died - restarting.')
