@@ -278,7 +278,7 @@ class GW(handlers.TriggerEvent):
 
         # figure out what fraction is above horizon
         if (pointingmap).sum() < minprob:
-            self.info('Insufficient power above horizon\n')
+            self.info('Insufficient power (%.3f) above horizon (>%.3f required)\n'%(pointingmap.sum(), minprob)
             return None, None
 
         # first go from altitude to zenith angle
@@ -375,7 +375,7 @@ class GW(handlers.TriggerEvent):
 
         # figure out what fraction is above horizon
         if (gwmap * (AltAz.alt > 0)).sum() < minprob:
-            self.info('Insufficient power above horizon\n')
+            self.info('Insufficient power (%.3f) above horizon (>%.3f required)\n'%(pointingmap.sum(), minprob)
             if not (returndelays or returnpower):
                 return None
             else:
@@ -423,10 +423,10 @@ class GW(handlers.TriggerEvent):
                          mapsum[igrid]))
 
         if mapsum[igrid] < minprob:
-            msg = 'Pointing at Az,El=%.1f,%.1f has power=%.3f < min power\n'
+            msg = 'Pointing at Az,El=%.1f,%.1f has power=%.3f < min power (%.3f)\n'
             self.info(msg % (self.MWA_grid.data['azimuth'][igrid],
                              self.MWA_grid.data['elevation'][igrid],
-                             mapsum[igrid]))
+                             mapsum[igrid], minprob))
 
             if not (returndelays or returnpower):
                 return None
@@ -538,22 +538,7 @@ def handle_gw(v, pretend=False, time=None):
 #                            attachments=[('voevent.xml', voeventparse.dumps(v))])
 #        return
 
-    time_string = v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Time.TimeInstant.ISOTime.text
     
-    merger_time = Time(time_string)
-    delta_T = Time.now() - merger_time
-    delta_T_sec = delta_T.sec
-    
-    if delta_T_sec > MAX_RESPONSE_TIME:
-        log_message = "Time since merger (%d s) greater than max response time (%d s). Not triggering" % (delta_T_sec, MAX_RESPONSE_TIME)
-        log.info(log_message)
-        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
-                            to_addresses=DEBUG_NOTIFY_LIST,
-                            subject=debug_email_subject,
-                            msg_text=DEBUG_EMAIL_TEMPLATE % log_message,
-                            attachments=[('voevent.xml', voeventparse.dumps(v))])
-                            
-        return
 
 #    if params['Group'] != 'CBC':
 #        log.debug("Event not CBC")
@@ -565,7 +550,7 @@ def handle_gw(v, pretend=False, time=None):
 #        return
 
     if float(params['HasNS']) < HAS_NS_THRESH:
-        msg = "Event below NS threshold (%.1f). Not triggering." % (HAS_NS_THRESH)
+        msg = "P_HasNS (%.2f) below threshold (%.2f). Not triggering." % (float(params['HasNS']), HAS_NS_THRESH)
         log.debug(msg)
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                             to_addresses=DEBUG_NOTIFY_LIST,
@@ -596,13 +581,14 @@ def handle_gw(v, pretend=False, time=None):
         return
 
     ra, dec = RADecgrid.ra, RADecgrid.dec
-    gw.debug("Coordinate: %s, %s" % (ra, dec))
+    gw.debug("Pointing at %s, %s" % (ra, dec))
     gw.add_pos((ra, dec, 0.0))
 
     req_time_s = OBS_LENGTH
 
     obslist = triggerservice.obslist(obstime=req_time_s)
 
+    currently_observing = False
     if obslist is not None and len(obslist) > 0:
         gw.debug("Currently observing:")
         gw.debug(str(obslist))
@@ -611,6 +597,7 @@ def handle_gw(v, pretend=False, time=None):
         gw.debug("obs {0}, trig {1}".format(obs, trig_id))
         
         if obs == trig_id:
+            currently_observing = True
             gw.info("Already observing this GW event")
             
             last_pos = gw.get_pos(-2)
@@ -626,9 +613,34 @@ def handle_gw(v, pretend=False, time=None):
                                     msg_text=DEBUG_EMAIL_TEMPLATE % "New pointing same as old pointing. Not triggering.",
                                     attachments=[('voevent.xml', voeventparse.dumps(v))])
                 return
+            
+            else:
+              gw.info("Updating pointing.")
+        
+    if not currently_observing:
+        #If this event is not currently being observed, check whether time since merger exceeds max response time
+        time_string = v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Time.TimeInstant.ISOTime.text
 
+        merger_time = Time(time_string)
+        delta_T = Time.now() - merger_time
+        delta_T_sec = delta_T.sec
+        
+        if delta_T_sec > MAX_RESPONSE_TIME:
+            log_message = "Time since merger (%d s) greater than max response time (%d s). Not triggering" % (delta_T_sec, MAX_RESPONSE_TIME)
+            log.info(log_message)
+            handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                                to_addresses=DEBUG_NOTIFY_LIST,
+                                subject=debug_email_subject,
+                                msg_text=DEBUG_EMAIL_TEMPLATE % log_message,
+                                attachments=[('voevent.xml', voeventparse.dumps(v))])
+                                
+            return
+        
+    #Check if this event has been triggered on before
     if gw.first_trig_time is not None:
+        #If it has been triggered, update the required time for the updated observation
         req_time_s -= (Time.now()-gw.first_trig_time).sec
+        gw.info("Required observing time: %.0f s"%(req_time_s))
 
     emaildict = {'triggerid':gw.trigger_id,
                  'trigtime':Time.now().iso,
