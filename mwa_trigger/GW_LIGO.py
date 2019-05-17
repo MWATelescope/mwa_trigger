@@ -589,7 +589,7 @@ def handle_gw(v, pretend=False, time=None):
 
     gw.load_skymap(params['skymap_fits'], time=time)    
 
-    RADecgrid = gw.get_mwapointing_grid(returndelays=False, returnpower=False, minprob=MIN_PROB)
+    RADecgrid, delays, power = gw.get_mwapointing_grid(returndelays=True, returnpower=True, minprob=MIN_PROB)
     if RADecgrid is None:
         gw.info("No pointing from skymap, not triggering")
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
@@ -600,7 +600,8 @@ def handle_gw(v, pretend=False, time=None):
         return
 
     ra, dec = RADecgrid.ra, RADecgrid.dec
-    gw.debug("Pointing at %s, %s" % (ra, dec))
+    gw.info("Pointing at %s, %s" % (ra, dec))
+    gw.info("Pointing contains %.3f of the localisation"%(power))
     gw.add_pos((ra, dec, 0.0))
 
     req_time_s = OBS_LENGTH
@@ -668,6 +669,10 @@ def handle_gw(v, pretend=False, time=None):
 
     email_text = EMAIL_TEMPLATE % emaildict
     gw.info(email_text)
+    
+    gw.info("Template GCN text:")
+    gcn_text = GCN_TEMPLATE%(trig_id, Time.now().iso, delta_T_sec, ra, dec, power)
+    gw.info(gcn_text)
 
     email_subject = EMAIL_SUBJECT_TEMPLATE % gw.trigger_id
     # Do the trigger
