@@ -669,7 +669,7 @@ def handle_gw(v, pretend=False, time=None):
     gw.info(email_text)
     
     gw.info("Template GCN text:")
-    gcn_text = GCN_TEMPLATE%(trig_id, Time.now().iso, delta_T_sec, ra, dec, power)
+    gcn_text = GCN_TEMPLATE % (trig_id, Time.now().iso, delta_T_sec, ra, dec, power)
     gw.info(gcn_text)
 
     email_subject = EMAIL_SUBJECT_TEMPLATE % gw.trigger_id
