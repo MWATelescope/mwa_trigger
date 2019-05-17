@@ -597,10 +597,10 @@ def handle_gw(v, pretend=False, time=None):
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
 
-    ra, dec = RADecgrid.ra.deg, RADecgrid.dec.deg
+    ra, dec = RADecgrid.ra, RADecgrid.dec
     gw.info("Pointing at %s, %s" % (ra, dec))
     gw.info("Pointing contains %.3f of the localisation"%(power))
-    gw.add_pos((ra, dec, 0.0))
+    gw.add_pos((ra.deg, dec.deg, 0.0))
 
     req_time_s = OBS_LENGTH
 
