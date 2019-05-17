@@ -32,15 +32,34 @@ log = logging.getLogger('voevent.handlers.LVC_GW')  # Inherit the logging setup 
 GW_PRETEND = True    # Override incoming 'pretend' parameter
 
 # Settings
-DEC_LIMIT = 15.
+"""
+Define triggering settings
+
+:param HAS_NS_THRESH: a float. The minimum probability that one of the merger objects is a neutron star
+
+:param MAX_RESPONSE_TIME: a float. The maximum allowable delay between the merger and triggering observations in seconds
+
+:param OBS_LENGTH: an int. The length of the triggered observation in seconds
+
+:param MIN_PROB: a float. The minimum probability required above the horizon for an observation to be triggered
+
+:param PROJECT_ID: a string. The MWA project ID
+
+"""
 
 HAS_NS_THRESH = 0.5
 
-MAX_RESPONSE_TIME = 900  # seconds - just for testing purposes
+MAX_RESPONSE_TIME = 900
 
 OBS_LENGTH = 1800 # length of the observation in seconds
 
+MIN_PROB = 0.01
+
 PROJECT_ID = 'D0011'
+
+DEC_LIMIT = 15.
+
+
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
 
 
@@ -62,7 +81,7 @@ Dec:        %(dec)s deg
 
 DEBUG_EMAIL_TEMPLATE = """
 The LIGO-GW handler did NOT trigger an MWA observation for a
-LIGO-GW GRB. Log messages are:
+LIGO-GW event. Log messages are:
 
 %s
 
@@ -347,10 +366,7 @@ class GW(handlers.TriggerEvent):
                     return None, None
 
         # has it been downsampled already
-        # npix = self.npix_down
-        # nside = self.nside_down
         gwmap = self.gwmap_down
-        # RADec = self.RADec_down
         AltAz = self.AltAz_down
 
         gridRADec = self.MWA_grid.get_radec()
@@ -428,7 +444,7 @@ class GW(handlers.TriggerEvent):
             else:
                 return gridRADec[igrid], self.MWA_grid.data[igrid]['delays'], mapsum[igrid]
 
-            ################################################################################
+################################################################################
 
 
 def processevent(event='', pretend=True):
@@ -569,7 +585,7 @@ def handle_gw(v, pretend=False, time=None):
 
     gw.load_skymap(params['skymap_fits'], time=time)    
 
-    RADecgrid = gw.get_mwapointing_grid(returndelays=False, returnpower=False)
+    RADecgrid = gw.get_mwapointing_grid(returndelays=False, returnpower=False, minprob=MIN_PROB)
     if RADecgrid is None:
         gw.info("No pointing from skymap, not triggering")
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
