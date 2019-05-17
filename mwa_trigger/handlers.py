@@ -198,14 +198,17 @@ class TriggerEvent(object):
                                             ra=ra, dec=dec,
                                             creator='VOEvent_Auto_Trigger_{0}'.format(__version__),
                                             obsname=obsname, nobs=nobs,
-                                            freqspecs=self.freqspecs, avoidsun=self.avoidsun,
+                                            freqspecs=self.freqspecs,
+                                            avoidsun=self.avoidsun,
                                             inttime=self.inttime, freqres=self.freqres,
                                             exptime=self.exptime,
                                             calibrator=self.calibrator, calexptime=self.calexptime,
-                                            vcsmode=self.vcsmode, buffered=self.buffered)
+                                            vcsmode=self.vcsmode,
+                                            buffered=self.buffered,
+                                            logger=self)
             # self.debug("Response: {0}".format(result))
             if result is None:
-                self.logger.error("Trigger Service Error: triggerservice.trigger() returned None")
+                self.error("Trigger Service Error: triggerservice.trigger() returned None")
                 return
             if email_tolist:
                 if result['success']:

@@ -512,15 +512,15 @@ def handle_gw(v, pretend=False, time=None):
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
 
-    alert_type = params['AlertType']
-    if alert_type != 'Preliminary':
-        log.debug("Alert type is not Preliminary. Not triggering.")
-        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
-                            to_addresses=DEBUG_NOTIFY_LIST,
-                            subject='GW_LIGO debug notification',
-                            msg_text=DEBUG_EMAIL_TEMPLATE % "Alert type is not Preliminary. Not triggering.",
-                            attachments=[('voevent.xml', voeventparse.dumps(v))])
-        return
+#    alert_type = params['AlertType']
+#    if alert_type != 'Preliminary':
+#        log.debug("Alert type is not Preliminary. Not triggering.")
+#        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+#                            to_addresses=DEBUG_NOTIFY_LIST,
+#                            subject='GW_LIGO debug notification',
+#                            msg_text=DEBUG_EMAIL_TEMPLATE % "Alert type is not Preliminary. Not triggering.",
+#                            attachments=[('voevent.xml', voeventparse.dumps(v))])
+#        return
 
     time_string = v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Time.TimeInstant.ISOTime.text
     
