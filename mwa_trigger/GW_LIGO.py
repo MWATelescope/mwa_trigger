@@ -278,7 +278,7 @@ class GW(handlers.TriggerEvent):
 
         # figure out what fraction is above horizon
         if (pointingmap).sum() < minprob:
-            self.info('Insufficient power above horizon\n')
+            self.info('Insufficient power (%.3f) above horizon (>%.3f required)\n'%(pointingmap.sum(), minprob)
             return None, None
 
         # first go from altitude to zenith angle
@@ -375,7 +375,7 @@ class GW(handlers.TriggerEvent):
 
         # figure out what fraction is above horizon
         if (gwmap * (AltAz.alt > 0)).sum() < minprob:
-            self.info('Insufficient power above horizon\n')
+            self.info('Insufficient power (%.3f) above horizon (>%.3f required)\n'%(pointingmap.sum(), minprob)
             if not (returndelays or returnpower):
                 return None
             else:
@@ -423,10 +423,10 @@ class GW(handlers.TriggerEvent):
                          mapsum[igrid]))
 
         if mapsum[igrid] < minprob:
-            msg = 'Pointing at Az,El=%.1f,%.1f has power=%.3f < min power\n'
+            msg = 'Pointing at Az,El=%.1f,%.1f has power=%.3f < min power (%.3f)\n'
             self.info(msg % (self.MWA_grid.data['azimuth'][igrid],
                              self.MWA_grid.data['elevation'][igrid],
-                             mapsum[igrid]))
+                             mapsum[igrid], minprob))
 
             if not (returndelays or returnpower):
                 return None
@@ -565,7 +565,7 @@ def handle_gw(v, pretend=False, time=None):
 #        return
 
     if float(params['HasNS']) < HAS_NS_THRESH:
-        msg = "Event below NS threshold (%.1f). Not triggering." % (HAS_NS_THRESH)
+        msg = "P_HasNS (%.2f) below threshold (%.2f). Not triggering." % (float(params['HasNS']), HAS_NS_THRESH)
         log.debug(msg)
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                             to_addresses=DEBUG_NOTIFY_LIST,
@@ -596,7 +596,7 @@ def handle_gw(v, pretend=False, time=None):
         return
 
     ra, dec = RADecgrid.ra, RADecgrid.dec
-    gw.debug("Coordinate: %s, %s" % (ra, dec))
+    gw.debug("Pointing at %s, %s" % (ra, dec))
     gw.add_pos((ra, dec, 0.0))
 
     req_time_s = OBS_LENGTH
@@ -626,9 +626,13 @@ def handle_gw(v, pretend=False, time=None):
                                     msg_text=DEBUG_EMAIL_TEMPLATE % "New pointing same as old pointing. Not triggering.",
                                     attachments=[('voevent.xml', voeventparse.dumps(v))])
                 return
+            
+            else:
+              gw.info("Updating pointing.")
 
     if gw.first_trig_time is not None:
         req_time_s -= (Time.now()-gw.first_trig_time).sec
+        gw.info("Required observing time: %.0f s"%(req_time_s))
 
     emaildict = {'triggerid':gw.trigger_id,
                  'trigtime':Time.now().iso,
