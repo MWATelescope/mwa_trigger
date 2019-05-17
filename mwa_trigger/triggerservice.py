@@ -5,6 +5,7 @@
 
 import base64
 import json
+import traceback
 import urllib
 import urllib2
 
@@ -72,6 +73,7 @@ def web_api(url='', urldict=None, postdict=None, username=None, password=None, l
             data = resobj.read()
         except (ValueError, urllib2.URLError):
             logger.error('urlopen failed, or there was an error reading from the opened request object')
+            logger.error(traceback.format_exc())
             return None
 
         try:
@@ -82,10 +84,12 @@ def web_api(url='', urldict=None, postdict=None, username=None, password=None, l
     except urllib2.HTTPError as error:
         logger.error("HTTP error from server: code=%d, response:\n %s" % (error.code, error.read()))
         logger.error('Unable to retrieve %s' % (url))
+        logger.error(traceback.format_exc())
         return None
     except urllib2.URLError as error:
         logger.error("URL or network error: %s" % error.reason)
         logger.error('Unable to retrieve %s' % (url))
+        logger.error(traceback.format_exc())
         return None
 
 
@@ -267,6 +271,9 @@ def trigger(project_id=None, secure_key=None,
         postdict['pretend'] = pretend
     if vcsmode is not None:
         postdict['vcsmode'] = vcsmode
+
+    logger.debug('urldict=%s' % urldict)
+    logger.debug('postdict=%s' % postdict)
 
     if vcsmode:
         result = web_api(url=BASEURL + 'triggervcs', urldict=urldict, postdict=postdict, logger=logger)

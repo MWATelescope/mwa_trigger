@@ -51,7 +51,7 @@ HAS_NS_THRESH = 0.5
 
 MAX_RESPONSE_TIME = 900
 
-OBS_LENGTH = 1800 # length of the observation in seconds
+OBS_LENGTH = 1800   # length of the observation in seconds
 
 MIN_PROB = 0.01
 
@@ -297,7 +297,7 @@ class GW(handlers.TriggerEvent):
 
         # figure out what fraction is above horizon
         if (pointingmap).sum() < minprob:
-            self.info('Insufficient power (%.3f) above horizon (>%.3f required)\n'%(pointingmap.sum(), minprob)
+            self.info('Insufficient power (%.3f) above horizon (>%.3f required)\n' % (pointingmap.sum(), minprob))
             return None, None
 
         # first go from altitude to zenith angle
@@ -394,7 +394,7 @@ class GW(handlers.TriggerEvent):
 
         # figure out what fraction is above horizon
         if (gwmap * (AltAz.alt > 0)).sum() < minprob:
-            self.info('Insufficient power (%.3f) above horizon (>%.3f required)\n'%(pointingmap.sum(), minprob)
+            self.info('Insufficient power (%.3f) above horizon (>%.3f required)\n' % (gwmap.sum(), minprob))
             if not (returndelays or returnpower):
                 return None
             else:
@@ -557,8 +557,6 @@ def handle_gw(v, pretend=False, time=None):
 #                            attachments=[('voevent.xml', voeventparse.dumps(v))])
 #        return
 
-    
-
 #    if params['Group'] != 'CBC':
 #        log.debug("Event not CBC")
 #        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
@@ -638,7 +636,7 @@ def handle_gw(v, pretend=False, time=None):
               gw.info("Updating pointing.")
         
     if not currently_observing:
-        #If this event is not currently being observed, check whether time since merger exceeds max response time
+        #  If this event is not currently being observed, check whether time since merger exceeds max response time
         time_string = v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Time.TimeInstant.ISOTime.text
 
         merger_time = Time(time_string)
@@ -656,11 +654,11 @@ def handle_gw(v, pretend=False, time=None):
                                 
             return
         
-    #Check if this event has been triggered on before
+    #  Check if this event has been triggered on before
     if gw.first_trig_time is not None:
-        #If it has been triggered, update the required time for the updated observation
+        #  If it has been triggered, update the required time for the updated observation
         req_time_s -= (Time.now()-gw.first_trig_time).sec
-        gw.info("Required observing time: %.0f s"%(req_time_s))
+        gw.info("Required observing time: %.0f s" % (req_time_s))
 
     emaildict = {'triggerid':gw.trigger_id,
                  'trigtime':Time.now().iso,
