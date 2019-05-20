@@ -623,8 +623,8 @@ def handle_gw(v, pretend=False, time=None):
             last_dec = last_pos[1]
             gw.info("Old position: RA {0}, Dec {1}".format(last_ra,last_dec))
           
-            if (ra == last_ra) and (dec == last_dec):
-                gw.info("New pointing same as old pointing. Not triggering.")
+            if (abs(ra.deg - last_ra) < 5.0) and (abs(dec.deg - last_dec) < 5.0):
+                gw.info("New pointing ver close to old pointing. Not triggering.")
                 handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                                     to_addresses=DEBUG_NOTIFY_LIST,
                                     subject=debug_email_subject,
@@ -669,7 +669,7 @@ def handle_gw(v, pretend=False, time=None):
     gw.info(email_text)
 
     gw.info("Template GCN text:")
-    gcn_text = GCN_TEMPLATE % (trig_id, Time.now().iso, delta_T_sec, ra, dec, power)
+    gcn_text = GCN_TEMPLATE % (trig_id, Time.now().iso, delta_T_sec, ra.deg, dec.deg, power)
     gw.info(gcn_text)
 
     email_subject = EMAIL_SUBJECT_TEMPLATE % gw.trigger_id
