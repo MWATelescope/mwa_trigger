@@ -8,6 +8,7 @@ from astropy.coordinates import Angle
 from astropy.time import Time
 # import re
 import voeventparse
+import time
 
 import handlers
 import triggerservice
@@ -584,8 +585,14 @@ def handle_gw(v, pretend=False, time=None):
                             msg_text=DEBUG_EMAIL_TEMPLATE % "No skymap in VOEvent. Not triggering.",
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
-
-    gw.load_skymap(params['skymap_fits'], time=time)    
+        
+    try:
+        gw.load_skymap(params['skymap_fits'], time=time)
+    except:
+        gw.debug("Failed to load skymap. Retrying in 10 seconds")
+        time.sleep(10)    
+        
+        gw.load_skymap(params['skymap_fits'], time=time)
 
     RADecgrid, delays, power = gw.get_mwapointing_grid(returndelays=True, returnpower=True, minprob=MIN_PROB)
     if RADecgrid is None:
