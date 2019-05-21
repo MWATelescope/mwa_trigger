@@ -50,7 +50,7 @@ Define triggering settings
 
 HAS_NS_THRESH = 0.5
 
-MAX_RESPONSE_TIME = 900
+MAX_RESPONSE_TIME = 600
 
 OBS_LENGTH = 1800   # length of the observation in seconds
 
