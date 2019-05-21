@@ -30,7 +30,7 @@ from timeit import default_timer as timer
 
 log = logging.getLogger('voevent.handlers.LVC_GW')  # Inherit the logging setup from handlers.py
 
-GW_PRETEND = True    # Override incoming 'pretend' parameter
+GW_PRETEND = False    # Override incoming 'pretend' parameter
 
 # Settings
 """
