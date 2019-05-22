@@ -3,34 +3,31 @@ __author__ = ["Dougal Dobie", "David Kaplan"]
 
 import logging
 import os
-import astropy
-from astropy.coordinates import Angle
-from astropy.time import Time
-# import re
-import voeventparse
 import time
+from timeit import default_timer as timer
 
-import handlers
-import triggerservice
+import astropy
+from astropy.coordinates import Angle, SkyCoord, EarthLocation
+from astropy.time import Time
+from astropy.table import Table
+import astropy.utils.data
+import astropy.units as u
 
 import healpy
 
-import astropy.utils.data
-# import lxml.etree
-
-from astropy.coordinates import SkyCoord, EarthLocation   # , AltAz
-from astropy.time import Time
-from astropy.table import Table   # , Column
-import astropy.units as u
 import numpy as np
 
 from mwa_pb import primary_beam
 
-from timeit import default_timer as timer
+import voeventparse
+
+import handlers
+import triggerservice
+
 
 log = logging.getLogger('voevent.handlers.LVC_GW')  # Inherit the logging setup from handlers.py
 
-GW_PRETEND = False    # Override incoming 'pretend' parameter
+GW_PRETEND = True    # Override incoming 'pretend' parameter
 
 # Settings
 """
@@ -211,7 +208,7 @@ class GW(handlers.TriggerEvent):
         handlers.TriggerEvent.__init__(self, event=event, logger=logger)
 
     ##################################################
-    def load_skymap(self, gwfile, nside=64, time=None):
+    def load_skymap(self, gwfile, nside=64, calc_time=None):
         self.gwfile = gwfile
         try:
             self.gwmap, gwheader = healpy.read_map(self.gwfile, h=True, nest=True, verbose=False)
@@ -225,8 +222,8 @@ class GW(handlers.TriggerEvent):
             self.header[gwheader[i][0]] = gwheader[i][1]
 
         # compute the pointings for a specified time if provided
-        if time:
-            self.obstime = time
+        if calc_time:
+            self.obstime = calc_time
         # otherwise computer the pointings for the current time
         else:
             self.obstime = astropy.time.Time.now()
@@ -513,13 +510,13 @@ def is_gw(v):
     return ligo
 
 
-def handle_gw(v, pretend=False, time=None):
+def handle_gw(v, pretend=False, calc_time=None):
     """
     Handles the parsing of the VOEvent and generates observations.
     
     :param v: string in VOEvent XML format
     :param pretend: Boolean, True if we don't want to schedule observations (automatically switches to True for test events)
-    :param time: astropy.time.Time object for calculations
+    :param calc_time: astropy.time.Time object for calculations
     :return: None
     
     """
@@ -549,15 +546,15 @@ def handle_gw(v, pretend=False, time=None):
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
 
-#    alert_type = params['AlertType']
-#    if alert_type != 'Preliminary':
-#        log.debug("Alert type is not Preliminary. Not triggering.")
-#        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
-#                            to_addresses=DEBUG_NOTIFY_LIST,
-#                            subject='GW_LIGO debug notification',
-#                            msg_text=DEBUG_EMAIL_TEMPLATE % "Alert type is not Preliminary. Not triggering.",
-#                            attachments=[('voevent.xml', voeventparse.dumps(v))])
-#        return
+    alert_type = params['AlertType']
+    if alert_type != 'Preliminary':
+        log.debug("Alert type is not Preliminary. Not triggering.")
+        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                            to_addresses=DEBUG_NOTIFY_LIST,
+                            subject='GW_LIGO debug notification',
+                            msg_text=DEBUG_EMAIL_TEMPLATE % "Alert type is not Preliminary. Not triggering.",
+                            attachments=[('voevent.xml', voeventparse.dumps(v))])
+        return
 
 #    if params['Group'] != 'CBC':
 #        log.debug("Event not CBC")
@@ -588,12 +585,12 @@ def handle_gw(v, pretend=False, time=None):
         return
         
     try:
-        gw.load_skymap(params['skymap_fits'], time=time)
+        gw.load_skymap(params['skymap_fits'], calc_time=calc_time)
     except:
         gw.debug("Failed to load skymap. Retrying in 10 seconds")
         time.sleep(10)    
         
-        gw.load_skymap(params['skymap_fits'], time=time)
+        gw.load_skymap(params['skymap_fits'], calc_time=calc_time)
 
     RADecgrid, delays, power = gw.get_mwapointing_grid(returndelays=True, returnpower=True, minprob=MIN_PROB)
     if RADecgrid is None:
@@ -607,7 +604,7 @@ def handle_gw(v, pretend=False, time=None):
 
     ra, dec = RADecgrid.ra, RADecgrid.dec
     gw.info("Pointing at %s, %s" % (ra, dec))
-    gw.info("Pointing contains %.3f of the localisation"%(power))
+    gw.info("Pointing contains %.3f of the localisation" % (power))
     gw.add_pos((ra.deg, dec.deg, 0.0))
 
     req_time_s = OBS_LENGTH
@@ -642,15 +639,15 @@ def handle_gw(v, pretend=False, time=None):
             
             else:
               gw.info("Updating pointing.")
-        
+
+    time_string = v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Time.TimeInstant.ISOTime.text
+    merger_time = Time(time_string)
+    delta_T = Time.now() - merger_time
+    delta_T_sec = delta_T.sec
+
     if not currently_observing:
         #  If this event is not currently being observed, check whether time since merger exceeds max response time
-        time_string = v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Time.TimeInstant.ISOTime.text
 
-        merger_time = Time(time_string)
-        delta_T = Time.now() - merger_time
-        delta_T_sec = delta_T.sec
-        
         if delta_T_sec > MAX_RESPONSE_TIME:
             log_message = "Time since merger (%d s) greater than max response time (%d s). Not triggering" % (delta_T_sec, MAX_RESPONSE_TIME)
             log.info(log_message)
@@ -716,7 +713,7 @@ def test_event(filepath='../test_events/MS190410a-1-Preliminary.xml', test_time=
 #    isgw = is_gw(v)
 #    log.debug("GW? {0}".format(isgw))
 #    if isgw:
-#        handle_gw(v, pretend=(pretend or GW_PRETEND), time=test_time)
+#        handle_gw(v, pretend=(pretend or GW_PRETEND), calc_time=test_time)
 #    end = timer()
 #    log.info("Finished. Response time: %.1f s" % (end - start))
 
@@ -724,7 +721,7 @@ def test_event(filepath='../test_events/MS190410a-1-Preliminary.xml', test_time=
 def test_skymap():
     test_time = Time('2018-4-03 19:00:00')
     event = GW()
-    event.load_skymap('../test_events/bayestar.fits.gz', time=test_time)
+    event.load_skymap('../test_events/bayestar.fits.gz', calc_time=test_time)
 
     event.get_mwapointing_grid()
 
