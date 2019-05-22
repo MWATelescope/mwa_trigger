@@ -394,8 +394,9 @@ class GW(handlers.TriggerEvent):
         self.debug('Computing pointing for %s' % (self.obstime))
 
         # figure out what fraction is above horizon
-        if (gwmap * (AltAz.alt > 0)).sum() < minprob:
-            self.info('Insufficient power (%.3f) above horizon (>%.3f required)\n' % (gwmap.sum(), minprob))
+        pointingmap = (gwmap * (AltAz.alt > 0)).sum()
+        if pointingmap < minprob:
+            self.info('Insufficient power (%.3f) above horizon (>%.3f required)\n' % (pointingmap, minprob))
             if not (returndelays or returnpower):
                 return None
             else:
