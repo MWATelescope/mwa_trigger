@@ -68,7 +68,7 @@ SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
 NOTIFY_LIST = ['ddob1600@uni.sydney.edu.au', 'kaplan@uwm.edu', 'tara@physics.usyd.edu.au', "Andrew.Williams@curtin.edu.au"]
 
 # Email these addresses when we handle an event that is a GRB, but we don't trigger on it.
-DEBUG_NOTIFY_LIST = ["Andrew.Williams@curtin.edu.au", 'ddob1600@uni.sydney.edu.au', 'kaplan@uwm.edu']
+DEBUG_NOTIFY_LIST = ["Andrew.Williams@curtin.edu.au"]
 
 EMAIL_TEMPLATE = """
 The LIGO-GW handler triggered an
