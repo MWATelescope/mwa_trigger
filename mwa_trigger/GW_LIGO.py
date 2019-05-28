@@ -516,9 +516,10 @@ def handle_gw(v, pretend=False, calc_time=None):
 
     if v.attrib['role'] == 'test':  # There's a 'test' event every hour, and half of these are followed by a retraction.
         if random.random() < TEST_PROB:   # Some events, at random, generate a 'pretend' trigger.
-            log.info('Test event, not triggering.')
+            log.info('Test event, pretending to trigger.')
             pretend = True
         else:
+            log.info('Test event, not triggering.')
             return
 
     params = {elem.attrib['name']:elem.attrib['value'] for elem in v.iterfind('.//Param')}
