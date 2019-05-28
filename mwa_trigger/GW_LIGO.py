@@ -3,6 +3,7 @@ __author__ = ["Dougal Dobie", "David Kaplan"]
 
 import logging
 import os
+import random
 import time
 from timeit import default_timer as timer
 
@@ -27,35 +28,27 @@ import triggerservice
 
 log = logging.getLogger('voevent.handlers.LVC_GW')  # Inherit the logging setup from handlers.py
 
-GW_PRETEND = True    # Override incoming 'pretend' parameter
+GW_PRETEND = False    # Override incoming 'pretend' parameter
 
 # Settings
 """
-Define triggering settings
+Define triggering settings - use these global constants defined below:
 
-:param HAS_NS_THRESH: a float. The minimum probability that one of the merger objects is a neutron star
-
-:param MAX_RESPONSE_TIME: a float. The maximum allowable delay between the merger and triggering observations in seconds
-
-:param OBS_LENGTH: an int. The length of the triggered observation in seconds
-
-:param MIN_PROB: a float. The minimum probability required above the horizon for an observation to be triggered
-
-:param PROJECT_ID: a string. The MWA project ID
+HAS_NS_THRESH: a float. The minimum probability that one of the merger objects is a neutron star
+MAX_RESPONSE_TIME: a float. The maximum allowable delay between the merger and triggering observations in seconds
+OBS_LENGTH: an int. The length of the triggered observation in seconds
+MIN_PROB: a float. The minimum probability required above the horizon for an observation to be triggered
+PROJECT_ID: a string. The MWA project ID
+TEST_PROB: a float. The probability that an incoming test event (one per hour) will trigger a 'pretend' observation.
 
 """
 
 HAS_NS_THRESH = 0.5
-
 MAX_RESPONSE_TIME = 600
-
-OBS_LENGTH = 1800   # length of the observation in seconds
-
+OBS_LENGTH = 1800     # length of the observation in seconds
 MIN_PROB = 0.1
-
 PROJECT_ID = 'D0011'
-
-DEC_LIMIT = 15.
+TEST_PROB = 0.01      # Roughly one test event every four days will generate a 'pretend' trigger
 
 
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
@@ -520,10 +513,13 @@ def handle_gw(v, pretend=False, calc_time=None):
     :return: None
     
     """
-    
-    if v.attrib['role'] == 'test':
-        pretend = True
-        
+
+    if v.attrib['role'] == 'test':  # There's a 'test' event every hour, and half of these are followed by a retraction.
+        if random.random() < TEST_PROB:   # Some events, at random, generate a 'pretend' trigger.
+            pretend = True
+        else:
+            return
+
     params = {elem.attrib['name']:elem.attrib['value'] for elem in v.iterfind('.//Param')}
     
     trig_id = params['GraceID']
@@ -546,15 +542,15 @@ def handle_gw(v, pretend=False, calc_time=None):
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
 
-    alert_type = params['AlertType']
-    if alert_type != 'Preliminary':
-        log.debug("Alert type is not Preliminary. Not triggering.")
-        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
-                            to_addresses=DEBUG_NOTIFY_LIST,
-                            subject='GW_LIGO debug notification',
-                            msg_text=DEBUG_EMAIL_TEMPLATE % "Alert type is not Preliminary. Not triggering.",
-                            attachments=[('voevent.xml', voeventparse.dumps(v))])
-        return
+#    alert_type = params['AlertType']
+#    if alert_type != 'Preliminary':
+#        log.debug("Alert type is not Preliminary. Not triggering.")
+#        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+#                            to_addresses=DEBUG_NOTIFY_LIST,
+#                            subject='GW_LIGO debug notification',
+#                            msg_text=DEBUG_EMAIL_TEMPLATE % "Alert type is not Preliminary. Not triggering.",
+#                            attachments=[('voevent.xml', voeventparse.dumps(v))])
+#        return
 
 #    if params['Group'] != 'CBC':
 #        log.debug("Event not CBC")
