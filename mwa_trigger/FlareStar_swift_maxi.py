@@ -146,11 +146,13 @@ def is_flarestar(v):
         v.Why.Inference.Name = name
         log.debug("Found {0} in MAXI format".format(name))
 
-    if str(name).lower() in flare_stars:
-        # check if this is a sub_sub_threshold event and ignore if it is
-        if swift and 'sub-sub-threshold' in str(v.What.Description):
-            return False
-        return True
+    for f in flare_stars:
+        # check if the name is within the "name" string since MAXI does stupid things sometimes
+        if f in str(name).lower():
+            # check if this is a sub_sub_threshold event and ignore if it is
+            if swift and 'sub-sub-threshold' in str(v.What.Description):
+                return False
+            return True
     return False
 
 
