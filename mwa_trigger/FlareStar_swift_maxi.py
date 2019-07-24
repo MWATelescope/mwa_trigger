@@ -34,7 +34,7 @@ SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
 NOTIFY_LIST = ["Paul.Hancock@curtin.edu.au", "Gemma.Anderson@curtin.edu.au", "Andrew.Williams@curtin.edu.au", "jun.tian@postgrad.curtin.edu.au"]
 
 # Email these addresses when we handle an event that is a GRB, but we don't trigger on it.
-DEBUG_NOTIFY_LIST = ["Paul.Hancock@curtin.edu.au", "Gemma.Anderson@curtin.edu.au", "Andrew.Williams@curtin.edu.au"]
+DEBUG_NOTIFY_LIST = ["Paul.Hancock@curtin.edu.au", "Gemma.Anderson@curtin.edu.au", "Andrew.Williams@curtin.edu.au", "jun.tian@postgrad.curtin.edu.au"]
 
 EMAIL_TEMPLATE = """
 The Flare Star MAXI+Swift handler triggered an MWA observation for
@@ -176,7 +176,7 @@ def handle_flarestar(v, pretend=False):
         log.debug("Not triggering")
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                             to_addresses=DEBUG_NOTIFY_LIST,
-                            subject='GRB_fermi_swift debug notification',
+                            subject='GRB_fermi_swift debug notification for trigger: %s' % trig_id,
                             msg_text=DEBUG_EMAIL_TEMPLATE % msg,
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
@@ -211,7 +211,7 @@ def handle_flarestar(v, pretend=False):
             fs.info("not triggering again")
             handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                                 to_addresses=DEBUG_NOTIFY_LIST,
-                                subject='GRB_fermi_swift debug notification',
+                                subject='GRB_fermi_swift debug notification for trigger: %s' % trig_id,
                                 msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in fs.loglist]),
                                 attachments=[('voevent.xml', voeventparse.dumps(v))])
             return
@@ -243,7 +243,7 @@ def handle_flarestar(v, pretend=False):
     if result is None:
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                             to_addresses=DEBUG_NOTIFY_LIST,
-                            subject='GRB_fermi_swift debug notification',
+                            subject='GRB_fermi_swift debug notification for trigger: %s' % trig_id,
                             msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in fs.loglist]),
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
 
