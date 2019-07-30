@@ -538,6 +538,7 @@ def handle_gw(v, pretend=False, calc_time=None):
     if trig_id not in xml_cache:
         gw = GW(event=v)
         gw.trigger_id = trig_id
+        gw.info("Received trigger %s"%trig_id)
         
         if is_test:
             gw.info("****This is a test event****")
@@ -630,7 +631,7 @@ def handle_gw(v, pretend=False, calc_time=None):
                 return
             
             else:
-              gw.info("Updating pointing.")
+              gw.info("New pointing far from old pointing. Updating and triggering.")
 
     time_string = v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Time.TimeInstant.ISOTime.text
     merger_time = Time(time_string)
@@ -654,6 +655,7 @@ def handle_gw(v, pretend=False, calc_time=None):
     #  Check if this event has been triggered on before
     if gw.first_trig_time is not None:
         #  If it has been triggered, update the required time for the updated observation
+        gw.info("This event has already been triggered.")
         req_time_s -= (Time.now()-gw.first_trig_time).sec
         gw.info("Required observing time: %.0f s" % (req_time_s))
 
@@ -671,6 +673,7 @@ def handle_gw(v, pretend=False, calc_time=None):
 
     email_subject = EMAIL_SUBJECT_TEMPLATE % gw.trigger_id
     # Do the trigger
+    gw.info("Sending trigger.")
     result = gw.trigger_observation(ttype="LVC",
                                     obsname=trig_id,
                                     time_min=req_time_s / 60,
