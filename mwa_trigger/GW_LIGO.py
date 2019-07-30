@@ -621,7 +621,7 @@ def handle_gw(v, pretend=False, calc_time=None):
             gw.info("Old position: RA {0}, Dec {1}".format(last_ra,last_dec))
           
             if (abs(ra.deg - last_ra) < 5.0) and (abs(dec.deg - last_dec) < 5.0):
-                gw.info("New pointing ver close to old pointing. Not triggering.")
+                gw.info("New pointing very close to old pointing. Not triggering.")
                 handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                                     to_addresses=event_debug_list,
                                     subject=debug_email_subject,
