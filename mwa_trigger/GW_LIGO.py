@@ -536,7 +536,7 @@ def handle_gw(v, pretend=False, calc_time=None):
         gw.add_event(v)  
 
     if params['Packet_Type'] == "164":
-        log.info("Alert is an event retraction. Not triggering.")
+        gw.info("Alert is an event retraction. Not triggering.")
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                             to_addresses=DEBUG_NOTIFY_LIST,
                             subject=debug_email_subject,
@@ -565,7 +565,7 @@ def handle_gw(v, pretend=False, calc_time=None):
 
     if float(params['HasNS']) < HAS_NS_THRESH:
         msg = "P_HasNS (%.2f) below threshold (%.2f). Not triggering." % (float(params['HasNS']), HAS_NS_THRESH)
-        log.debug(msg)
+        gw.debug(msg)
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                             to_addresses=DEBUG_NOTIFY_LIST,
                             subject=debug_email_subject,
@@ -574,7 +574,7 @@ def handle_gw(v, pretend=False, calc_time=None):
         return
 
     if 'skymap_fits' not in params:
-        log.debug("No skymap in VOEvent. Not triggering.")
+        gw.debug("No skymap in VOEvent. Not triggering.")
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                             to_addresses=DEBUG_NOTIFY_LIST,
                             subject=debug_email_subject,
@@ -648,7 +648,7 @@ def handle_gw(v, pretend=False, calc_time=None):
 
         if delta_T_sec > MAX_RESPONSE_TIME:
             log_message = "Time since merger (%d s) greater than max response time (%d s). Not triggering" % (delta_T_sec, MAX_RESPONSE_TIME)
-            log.info(log_message)
+            gw.info(log_message)
             handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                                 to_addresses=DEBUG_NOTIFY_LIST,
                                 subject=debug_email_subject,
