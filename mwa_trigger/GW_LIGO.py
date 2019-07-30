@@ -514,7 +514,9 @@ def handle_gw(v, pretend=False, calc_time=None):
     
     """
 
-    if v.attrib['role'] == 'test':  # There's a 'test' event every hour, and half of these are followed by a retraction.
+    is_test = v.attrib['role'] == 'test'
+
+    if is_test:  # There's a 'test' event every hour, and half of these are followed by a retraction.
         if random.random() < TEST_PROB:   # Some events, at random, generate a 'pretend' trigger.
             log.info('Test event, pretending to trigger.')
             pretend = True
@@ -530,6 +532,10 @@ def handle_gw(v, pretend=False, calc_time=None):
     if trig_id not in xml_cache:
         gw = GW(event=v)
         gw.trigger_id = trig_id
+        
+        if is_test:
+            gw.info("****This is a test event****")
+        
         xml_cache[trig_id] = gw 
     else:
         gw = xml_cache[trig_id]
