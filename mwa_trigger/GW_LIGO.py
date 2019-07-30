@@ -579,8 +579,8 @@ def handle_gw(v, pretend=False, calc_time=None):
     try:
         gw.load_skymap(params['skymap_fits'], calc_time=calc_time)
     except:
-        gw.debug("Failed to load skymap. Retrying in 10 seconds")
-        time.sleep(10)    
+        gw.debug("Failed to load skymap. Retrying in 1 minute")
+        time.sleep(60)    
         
         gw.load_skymap(params['skymap_fits'], calc_time=calc_time)
 
