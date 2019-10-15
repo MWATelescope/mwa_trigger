@@ -27,6 +27,7 @@ log = logging.getLogger('voevent.handlers.GRB_fermi_swift')   # Inherit the logg
 # Settings
 FERMI_POBABILITY_THRESHOLD = 50  # Trigger on Fermi events that have most-likely-prob > this number
 LONG_SHORT_LIMIT = 2.05  # seconds
+REPOINTING_LIMIT = 10 # only update the observation if the new pointing information has shifted by more than this amount
 
 PROJECT_ID = 'G0055'
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
@@ -301,6 +302,18 @@ def handle_grb(v, pretend=False):
             grb.info("Already observing this GRB")
             last_pos = grb.get_pos(-2)
             grb.info("Old position: RA {0}, Dec {1}, err {2}".format(*last_pos))
+
+            pos_diff = SkyCoord(ra=last_pos[0], dec=lats_pos[1], units=astropy.units.degree, frame='icrs').separation(
+                       SkyCoord(ra=ra, dec=dec, unts=astropy.units.degree, frame='icrs') ).degree
+            if pos_diff < REPOINTING_LIMIT:
+                grb.info("New position is {0} deg from previous (less than constraint of {1} deg)".format(pos_diff, REPOINTING_LIMIT))
+                grb.info("Not triggering")
+                handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                                    to_addresses=DEBUG_NOTIFY_LIST,
+                                    subject='GRB_fermi_swift debug notification',
+                                    msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in grb.loglist]),
+                                    attachments=[('voevent.xml', voeventparse.dumps(v))])
+                return
 
             if "SWIFT" in trig_id:
                 grb.info("Updating SWIFT observation with new coords")
