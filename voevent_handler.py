@@ -28,11 +28,12 @@ IVORN_LIST = []    # Maintain list of ivorn names that have already been process
 EXCEPTION_NOTIFY_LIST = ["Andrew.Williams@curtin.edu.au"]
 
 EXCEPTION_EMAIL_TEMPLATE = """
-The VOEvent handler thre an exception:
+The VOEvent handler threw an exception:
 
 %s
 
 """
+
 
 ############### set up the logging before importing Pyro4
 class MWALogFormatter(object):
