@@ -311,7 +311,6 @@ def handle_grb(v, pretend=False):
     #         grb.info("Attempting trigger")
     # end tests
 
-
     # look at the schedule
     obslist = triggerservice.obslist(obstime=1800)
     if obslist is not None and len(obslist) > 0:
