@@ -29,6 +29,7 @@ log = logging.getLogger('voevent.handlers.GRB_fermi_swift')   # Inherit the logg
 FERMI_POBABILITY_THRESHOLD = 50  # Trigger on Fermi events that have most-likely-prob > this number
 LONG_SHORT_LIMIT = 2.05  # seconds
 REPOINTING_LIMIT = 10  # degrees
+SWIFT_SHORT_TRIGGERS_IN_VCSMODE = True  # Trigger swift triggers of short GRBs in vcsmode
 
 PROJECT_ID = 'G0055'
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
@@ -185,6 +186,7 @@ def handle_grb(v, pretend=False):
         if trig_time < LONG_SHORT_LIMIT:
             grb.debug("Probably a short GRB: t={0} < 2".format(trig_time))
             grb.short = True
+            grb.vcsmode = SWIFT_SHORT_TRIGGERS_IN_VCSMODE
             trigger = True
 
         else:
