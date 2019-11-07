@@ -188,8 +188,16 @@ class TriggerEvent(object):
         alt = obs_source_altaz.alt.deg
         self.debug("Triggered observation at an elevation of {0}".format(alt))
 
-        # how many observations are required
-        nobs = int(time_min*60 // self.exptime)
+        # Determine the number and duration of observations
+        if self.vcsmode:
+            # VCS mode uses a single observation only
+            nobs = 1
+            exptime = time_min
+        else:
+            # normal observations split this time into 2 min chunks
+            nobs = int(time_min*60 // self.exptime)
+            exptime = self.exptime
+
         # trigger if we are above the horizon limit
         if alt > HORIZON_LIMIT:
             self.info("Triggering at gps time %d ..." % (t.gps,))
@@ -201,7 +209,7 @@ class TriggerEvent(object):
                                             freqspecs=self.freqspecs,
                                             avoidsun=self.avoidsun,
                                             inttime=self.inttime, freqres=self.freqres,
-                                            exptime=self.exptime,
+                                            exptime=exptime,
                                             calibrator=self.calibrator, calexptime=self.calexptime,
                                             vcsmode=self.vcsmode,
                                             buffered=self.buffered,
@@ -369,7 +377,7 @@ def send_email(from_address='', to_addresses=None, msg_text='', subject='', atta
         for destaddress, sending_error in errordict.items():
             logger.error('Error sending email to %s: %s' % (destaddress, sending_error))
     except smtplib.SMTPException:
-        logger.error('Email could not be sent: %s' % traceback.format_exc())
+        logger.error('Email could not be sent:')
     finally:
         if smtp is not None:
             smtp.close()
