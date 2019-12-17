@@ -527,7 +527,7 @@ def handle_gw(v, pretend=False, calc_time=None):
         event_debug_list = DEBUG_NOTIFY_LIST
         
     else:
-        #This is a real event, send debug email to entire mailing list
+        # This is a real event, send debug email to entire mailing list
         event_debug_list = NOTIFY_LIST
 
     params = {elem.attrib['name']:elem.attrib['value'] for elem in v.iterfind('.//Param')}
@@ -538,7 +538,7 @@ def handle_gw(v, pretend=False, calc_time=None):
     if trig_id not in xml_cache:
         gw = GW(event=v)
         gw.trigger_id = trig_id
-        gw.info("Received trigger %s"%trig_id)
+        gw.info("Received trigger %s" % trig_id)
         
         if is_test:
             gw.info("****This is a test event****")
@@ -556,7 +556,6 @@ def handle_gw(v, pretend=False, calc_time=None):
                             msg_text=DEBUG_EMAIL_TEMPLATE % "Alert is an event retraction. Not triggering.",
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
-
 
     if float(params['HasNS']) < HAS_NS_THRESH:
         msg = "P_HasNS (%.2f) below threshold (%.2f). Not triggering." % (float(params['HasNS']), HAS_NS_THRESH)
