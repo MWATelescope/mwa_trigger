@@ -56,6 +56,7 @@ Files
 | SWIFT_2018_03_1402.xml | GRB_fermi_swift.py | unknown |
 | SWIFT_2018_03_25.xml | GRB_fermi_swift.py | unknown |
 | Swift_CFTUC_sub_sub_threshold.xml | FlareStar_swift_maxi.py | unknown |
+| SWIFT_Lost_starlock.xml | GRB_fermi_swift.py | Ensure that triggers are not generated when the SWIFT StarTracker has no lock |
 | SWIFT_short_ra185.xml | GRB_fermi_swift.py | unknown |
 | SWIFT_short_ra95.xml | GRB_fermi_swift.py | unknown |
 | SWIFT_short.xml | GRB_fermi_swift.py | unknown |
