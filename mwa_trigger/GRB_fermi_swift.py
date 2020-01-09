@@ -172,6 +172,17 @@ def handle_grb(v, pretend=False):
         log.debug("SWIFT GRB trigger detected")
         this_trig_type = "SWIFT"
 
+        # If the star tracker looses it's lock then we can't trust any of the locations so we ignore this alert.
+        startrack_lost_lock = v.find(".//Param[@name='StarTrack_Lost_Lock']").attrib['value']
+        if startrack_lost_lock:
+            log.debug("The SWIFT star tracker lost it's lock")
+            handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                                to_addresses=DEBUG_NOTIFY_LIST,
+                                subject='GRB_fermi_swift debug notification for trigger: %s' % grbid,
+                                msg_text=DEBUG_EMAIL_TEMPLATE % "SWIFT alert for GRB, but with StarTrack_Lost_Lock",
+                                attachments=[('voevent.xml', voeventparse.dumps(v))])
+            return
+
         # cache the event using the trigger id
         trig_id = "SWIFT_" + v.attrib['ivorn'].split('_')[-1].split('-')[0]
         if trig_id not in xml_cache:
