@@ -29,6 +29,7 @@ log = logging.getLogger('voevent.handlers.GRB_fermi_swift')   # Inherit the logg
 FERMI_POBABILITY_THRESHOLD = 50  # Trigger on Fermi events that have most-likely-prob > this number
 LONG_SHORT_LIMIT = 2.05  # seconds
 REPOINTING_LIMIT = 10  # degrees
+SWIFT_SHORT_TRIGGERS_IN_VCSMODE = True  # Trigger swift triggers of short GRBs in vcsmode
 
 PROJECT_ID = 'G0055'
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
@@ -171,6 +172,17 @@ def handle_grb(v, pretend=False):
         log.debug("SWIFT GRB trigger detected")
         this_trig_type = "SWIFT"
 
+        # If the star tracker looses it's lock then we can't trust any of the locations so we ignore this alert.
+        startrack_lost_lock = v.find(".//Param[@name='StarTrack_Lost_Lock']").attrib['value']
+        if startrack_lost_lock:
+            log.debug("The SWIFT star tracker lost it's lock")
+            handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                                to_addresses=DEBUG_NOTIFY_LIST,
+                                subject='GRB_fermi_swift debug notification for trigger: %s' % grbid,
+                                msg_text=DEBUG_EMAIL_TEMPLATE % "SWIFT alert for GRB, but with StarTrack_Lost_Lock",
+                                attachments=[('voevent.xml', voeventparse.dumps(v))])
+            return
+
         # cache the event using the trigger id
         trig_id = "SWIFT_" + v.attrib['ivorn'].split('_')[-1].split('-')[0]
         if trig_id not in xml_cache:
@@ -185,6 +197,7 @@ def handle_grb(v, pretend=False):
         if trig_time < LONG_SHORT_LIMIT:
             grb.debug("Probably a short GRB: t={0} < 2".format(trig_time))
             grb.short = True
+            grb.vcsmode = SWIFT_SHORT_TRIGGERS_IN_VCSMODE
             trigger = True
 
         else:
