@@ -159,16 +159,21 @@ def handle_grb(v, pretend=False):
     # trigger = False
 
     if 'SWIFT' in v.attrib['ivorn']:
-        grbid = v.find(".//Param[@name='GRB_Identified']").attrib['value']
-        if grbid != 'true':
-            log.debug("SWIFT alert but not a GRB")
-            handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
-                                to_addresses=DEBUG_NOTIFY_LIST,
-                                subject='GRB_fermi_swift debug notification for trigger: %s' % grbid,
-                                msg_text=DEBUG_EMAIL_TEMPLATE % "SWIFT alert but not a GRB",
-                                attachments=[('voevent.xml', voeventparse.dumps(v))])
+        # compute the trigger id
+        trig_id = "SWIFT_" + v.attrib['ivorn'].split('_')[-1].split('-')[0]
 
-            return
+        # #The following should never be hit because of the checks made in is_grb.
+        # grbid = v.find(".//Param[@name='GRB_Identified']").attrib['value']
+        # if grbid != 'true':
+        #     log.debug("SWIFT alert but not a GRB")
+        #     handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+        #                         to_addresses=DEBUG_NOTIFY_LIST,
+        #                         subject='GRB_fermi_swift debug notification for trigger: %s' % trig_id,
+        #                         msg_text=DEBUG_EMAIL_TEMPLATE % "SWIFT alert but not a GRB",
+        #                         attachments=[('voevent.xml', voeventparse.dumps(v))])
+        #
+        #     return
+
         log.debug("SWIFT GRB trigger detected")
         this_trig_type = "SWIFT"
 
@@ -181,13 +186,12 @@ def handle_grb(v, pretend=False):
             log.debug("The SWIFT star tracker lost it's lock")
             handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                                 to_addresses=DEBUG_NOTIFY_LIST,
-                                subject='GRB_fermi_swift debug notification for trigger: %s' % grbid,
+                                subject='GRB_fermi_swift debug notification for trigger: %s' % trig_id,
                                 msg_text=DEBUG_EMAIL_TEMPLATE % "SWIFT alert for GRB, but with StarTrack_Lost_Lock",
                                 attachments=[('voevent.xml', voeventparse.dumps(v))])
             return
 
         # cache the event using the trigger id
-        trig_id = "SWIFT_" + v.attrib['ivorn'].split('_')[-1].split('-')[0]
         if trig_id not in xml_cache:
             grb = GRB(event=v)
             grb.trigger_id = trig_id
