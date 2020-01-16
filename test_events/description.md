@@ -47,10 +47,10 @@ Files
 | SWIFT01.xml | GRB_fermi_swift.py | short swift grb |
 | SWIFT02.xml | GRB_fermi_swift.py | not a grb or flare star |
 | SWIFT03.xml | GRB_fermi_swift.py | unknown |
-| SWIFT04.xml | GRB_fermi_swift.py | unknown |
-| SWIFT05.xml | GRB_fermi_swift.py | unknown |
-| SWIFT06.xml | GRB_fermi_swift.py | unknown |
-| SWIFT07.xml | GRB_fermi_swift.py | unknown |
+| SWIFT04.xml | GRB_fermi_swift.py | not a grb or flare star - lost StarTracker lock |
+| SWIFT05.xml | GRB_fermi_swift.py | unknown - lost StarTracker lock |
+| SWIFT06.xml | GRB_fermi_swift.py | unknown - lost StarTracker lock |
+| SWIFT07.xml | GRB_fermi_swift.py | unknown - lost StarTracker lock |
 | SWIFT_2018_03_1400.xml | GRB_fermi_swift.py | unknown |
 | SWIFT_2018_03_1401.xml | GRB_fermi_swift.py | unknown |
 | SWIFT_2018_03_1402.xml | GRB_fermi_swift.py | unknown |
