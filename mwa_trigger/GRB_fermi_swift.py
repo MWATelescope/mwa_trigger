@@ -174,6 +174,9 @@ def handle_grb(v, pretend=False):
 
         # If the star tracker looses it's lock then we can't trust any of the locations so we ignore this alert.
         startrack_lost_lock = v.find(".//Param[@name='StarTrack_Lost_Lock']").attrib['value']
+        # convert 'true' to True, and everything else to false
+        startrack_lost_lock = startrack_lost_lock.lower() == 'true'
+        log.debug("StarLock OK? {0}".format(not startrack_lost_lock))
         if startrack_lost_lock:
             log.debug("The SWIFT star tracker lost it's lock")
             handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
