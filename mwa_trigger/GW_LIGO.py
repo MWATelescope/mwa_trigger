@@ -557,7 +557,16 @@ def handle_gw(v, pretend=False, calc_time=None):
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
 
-    if float(params['HasNS']) < HAS_NS_THRESH:
+    if 'HasNS' not in params:
+        msg = "HasNS not in params. Not triggering."
+        gw.debug(msg)
+        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                            to_addresses=event_debug_list,
+                            subject=debug_email_subject,
+                            msg_text=DEBUG_EMAIL_TEMPLATE % msg,
+                            attachments=[('voevent.xml', voeventparse.dumps(v))])
+        return
+    elif float(params['HasNS']) < HAS_NS_THRESH:
         msg = "P_HasNS (%.2f) below threshold (%.2f). Not triggering." % (float(params['HasNS']), HAS_NS_THRESH)
         gw.debug(msg)
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
