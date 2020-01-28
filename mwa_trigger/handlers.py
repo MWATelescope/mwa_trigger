@@ -9,23 +9,32 @@ inside the processevent() function, to save time.
 __version__ = "0.3"
 __author__ = ["Paul Hancock", "Andrew Williams", "Gemma Anderson"]
 
-import ConfigParser
 import os
-import traceback
+import sys
+
+if sys.version_info.major == 2:
+    from ConfigParser import SafeConfigParser as conparser
+else:
+    from configparser import ConfigParser as conparser
 
 import smtplib
+
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email.utils import formatdate
-from email import Encoders
+if sys.version_info.major == 2:
+    from email.Encoders import encode_base64
+else:
+    from email.encoders import encode_base64
+
 import logging
 
 import astropy
 from astropy.coordinates import SkyCoord, EarthLocation
 from astropy.time import Time
 
-import triggerservice
+from . import triggerservice
 
 log = logging.getLogger('voevent.handlers')  # Inherit the logging setup from voevent_handler.py
 
@@ -35,7 +44,7 @@ FERMI_POBABILITY_THRESHOLD = 50  # Trigger on Fermi events that have most-likely
 
 
 CPPATH = ['/usr/local/etc/trigger.conf', 'mwa_trigger/trigger.conf', './trigger.conf']   # Path list to look for configuration file
-CP = ConfigParser.SafeConfigParser()
+CP = conparser()
 CP.read(CPPATH)
 
 if CP.has_option(section='mail', option='mailhost'):
@@ -89,7 +98,7 @@ class TriggerEvent(object):
         self.freqres = 10  # khz
         self.exptime = 120  # seconds
         self.calibrator = True
-        self.calexptime  = 120  # seconds
+        self.calexptime = 120  # seconds
         self.vcsmode = False
         self.buffered = False
 
@@ -366,7 +375,7 @@ def send_email(from_address='', to_addresses=None, msg_text='', subject='', atta
 
         part = MIMEBase(mimemain, mimesub)
         part.set_payload(payload)
-        Encoders.encode_base64(part)
+        encode_base64(part)
         part.add_header('Content-Disposition', 'attachment; filename="%s"' % os.path.basename(filename))
         msg.attach(part)
 
