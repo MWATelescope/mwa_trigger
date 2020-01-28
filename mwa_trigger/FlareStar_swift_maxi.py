@@ -17,10 +17,11 @@ import astropy
 from astropy.coordinates import Angle
 from astropy.time import Time
 import re
+import sys
 import voeventparse
 
-import handlers
-import triggerservice
+from . import handlers
+from . import triggerservice
 
 log = logging.getLogger('voevent.handlers.FlareStar_swift_maxi')   # Inherit the logging setup from handlers.py
 
@@ -103,8 +104,11 @@ def processevent(event='', pretend=True):
     :return: Boolean, True if this handler processed this event, False to pass it to another handler function.
     """
 
-    # event arrives as a unicode string but loads requires a non-unicode string.
-    v = voeventparse.loads(str(event))
+    if sys.version_info.major == 2:
+        # event arrives as a unicode string but loads requires a non-unicode string.
+        v = voeventparse.loads(str(event))
+    else:
+        v = voeventparse.loads(event.encode('latin-1'))
 
     # only respond to SWIFT and MAXI evetnts
     ivorn = v.attrib['ivorn']
