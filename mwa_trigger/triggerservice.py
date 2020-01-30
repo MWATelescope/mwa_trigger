@@ -5,12 +5,20 @@
 
 import base64
 import json
+import sys
 import traceback
-import urllib
-import urllib2
 
 import logging
 logging.basicConfig()
+
+if sys.version_info.major == 3:  # Python3
+    from urllib.parse import urlencode
+    from urllib.request import Request, urlopen
+    from urllib.error import HTTPError, URLError
+else:  # Python2
+    from urllib import urlencode
+    from urllib2 import urlopen, HTTPError, URLError, Request
+
 
 DEFAULTLOGGER = logging.getLogger()
 DEFAULTLOGGER.level = logging.DEBUG
@@ -41,14 +49,14 @@ def web_api(url='', urldict=None, postdict=None, username=None, password=None, l
              .get_param() to extract values) or None.
     """
     if urldict is not None:
-        urldata = '?' + urllib.urlencode(urldict)
+        urldata = '?' + urlencode(urldict)
     else:
         urldata = ''
 
     url += urldata
 
     if postdict is not None:
-        postdata = urllib.urlencode(postdict)
+        postdata = urlencode(postdict)
     else:
         postdata = None
 
@@ -61,17 +69,24 @@ def web_api(url='', urldict=None, postdict=None, username=None, password=None, l
         logger.debug('Data: %s' % postdict)
     try:
         if (username is not None) and (password is not None):
-            base64string = base64.b64encode('%s:%s' % (username, password))
-            req = urllib2.Request(url, postdata, {'Content-Type':'application/json',
-                                                  'Accept':'application/json',
-                                                  'Authorization':'Basic %s' % base64string})
+            if sys.version_info.major > 2:
+                base64string = base64.b64encode(('%s:%s' % (username, password)).encode('latin-1'))
+                base64string = base64string.decode('latin-1')
+                postdata = postdata.encode('latin-1')
+            else:
+                base64string = base64.b64encode('%s:%s' % (username, password))
+            req = Request(url, postdata, {'Content-Type':'application/json',
+                                          'Accept':'application/json',
+                                          'Authorization':'Basic %s' % base64string})
         else:
-            req = urllib2.Request(url, postdata, {'Content-Type': 'application/json',
-                                                  'Accept': 'application/json'})
+            req = Request(url, postdata, {'Content-Type': 'application/json',
+                                          'Accept': 'application/json'})
         try:
-            resobj = urllib2.urlopen(req)
+            resobj = urlopen(req)
             data = resobj.read()
-        except (ValueError, urllib2.URLError):
+            if sys.version_info.major > 2:
+                data = data.decode(resobj.headers.get_content_charset())
+        except (ValueError, URLError):
             logger.error('urlopen failed, or there was an error reading from the opened request object')
             logger.error(traceback.format_exc())
             return None
@@ -81,12 +96,12 @@ def web_api(url='', urldict=None, postdict=None, username=None, password=None, l
         except ValueError:
             result = data
         return result
-    except urllib2.HTTPError as error:
+    except HTTPError as error:
         logger.error("HTTP error from server: code=%d, response:\n %s" % (error.code, error.read()))
         logger.error('Unable to retrieve %s' % (url))
         logger.error(traceback.format_exc())
         return None
-    except urllib2.URLError as error:
+    except URLError as error:
         logger.error("URL or network error: %s" % error.reason)
         logger.error('Unable to retrieve %s' % (url))
         logger.error(traceback.format_exc())

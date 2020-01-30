@@ -12,7 +12,6 @@
    cat test.xml | ./push_voevent.py
 """
 
-import ConfigParser
 import datetime
 import logging
 import os
@@ -21,9 +20,14 @@ import sys
 import traceback
 import warnings
 
+if sys.version_info.major == 2:
+    from ConfigParser import SafeConfigParser as conparser
+else:
+    from configparser import ConfigParser as conparser
+
 
 ############### set up the logging before importing Pyro4
-class MWALogFormatter(object):
+class MWALogFormatter(logging.Formatter):
     """
     Add a time string to the start of any log messages sent to the log file.
     """
@@ -47,13 +51,14 @@ DEFAULTLOGGER.setLevel(logging.DEBUG)
 DEFAULTLOGGER.addHandler(filehandler)
 
 import Pyro4
+import Pyro4.errors
 
 CPPATH = ['/usr/local/etc/trigger.conf', './trigger.conf']   # Path list to look for configuration file
 
 
 ############## Point to a running Pyro nameserver #####################
 # If not on site, start one before running this code, using pyro_nameserver.py
-CP = ConfigParser.SafeConfigParser()
+CP = conparser()
 CP.read(CPPATH)
 
 if CP.has_option(section='pyro', option='ns_host'):

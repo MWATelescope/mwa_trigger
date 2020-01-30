@@ -2,28 +2,22 @@ __version__ = "0.1"
 __author__ = ["Dougal Dobie", "David Kaplan"]
 
 import logging
-import os
-import astropy
-from astropy.coordinates import Angle
-from astropy.time import Time
-import re
+import sys
+
 import voeventparse
-
-import handlers
-import triggerservice
-
-import healpy as hp
 
 import astropy.utils.data
 import lxml.etree
 
-from astropy.coordinates import SkyCoord, EarthLocation, AltAz
+import astropy
+from astropy.coordinates import EarthLocation
 from astropy.time import Time
-from astropy.table import Table, Column
 import astropy.units as u
-import numpy as np
 
 from timeit import default_timer as timer
+
+from . import handlers
+from . import triggerservice
 
 
 log = logging.getLogger('voevent.handlers.antares')   # Inherit the logging setup from handlers.py
@@ -77,8 +71,11 @@ def processevent(event='', pretend=True):
     :return: Boolean, True if this handler processed this event, False to pass it to another handler function.
     """
 
-    # event arrives as a unicode string but loads requires a non-unicode string.
-    v = voeventparse.loads(str(event))
+    if sys.version_info.major == 2:
+        # event arrives as a unicode string but loads requires a non-unicode string.
+        v = voeventparse.loads(str(event))
+    else:
+        v = voeventparse.loads(event.encode('latin-1'))
     log.info("Working on: %s" % v.attrib['ivorn'])
     isneutrino = is_neutrino(v)
     log.debug("Neutrino detection? {0}".format(isneutrino))
@@ -86,7 +83,7 @@ def processevent(event='', pretend=True):
         handle_neutrino(v, pretend=pretend)
 
     log.info("Finished.")
-    return isgw     # True if we're handling this event, False if we're rejecting it
+    return isneutrino     # True if we're handling this event, False if we're rejecting it
 
 
 def is_neutrino(v):
@@ -96,7 +93,7 @@ def is_neutrino(v):
     :return: Boolean, True if this event is a GW.
     """
     ivorn = v.attrib['ivorn']
-    log.debug("ivorn: %s"%(ivorn))
+    log.debug("ivorn: %s" % (ivorn))
 
     trig_antares = "ivo://nasa.gsfc.gcn/Antares"
     
@@ -125,18 +122,18 @@ def handle_neutrino(v, pretend=False):
     # Note: this should ultimately be made more complex than selecting simply on ranking
     ranking = v.find(".//Param[@name='ranking']").attrib['value']
     if ranking < 2:
-      log.info("Event ranking (%d) below trigger threshold. Not triggering."%(ranking))
+      log.info("Event ranking (%d) below trigger threshold. Not triggering." % (ranking))
       return
     
     neutrino = Neutrino(event=v)
 
     trig_id = v.find(".//Param[@name='TrigID']").attrib['value']
     neutrino.trigger_id = trig_id
-    log.info("Trigger id: %s"%(trig_id))
+    log.info("Trigger id: %s" % (trig_id))
     
     ra, dec, err = handlers.get_position_info(v)
     
-    log.info("Neutrino detected at: RA=%.2f, Dec=%.2f (%.2f deg error circle)"%(ra, dec, err))
+    log.info("Neutrino detected at: RA=%.2f, Dec=%.2f (%.2f deg error circle)" % (ra, dec, err))
     
     neutrino.add_pos((ra, dec, err))
     
@@ -157,21 +154,21 @@ def handle_neutrino(v, pretend=False):
     email_subject = EMAIL_SUBJECT_TEMPLATE % neutrino.trigger_id
     # Do the trigger
     neutrino.trigger_observation(ttype="Antares",
-                           obsname=trig_id,
-                           time_min=req_time_s/60,
-                           pretend=pretend,
-                           project_id=PROJECT_ID,
-                           secure_key=SECURE_KEY,
-                           email_tolist=NOTIFY_LIST,
-                           email_text=email_text,
-                           email_subject=email_subject)
+                                 obsname=trig_id,
+                                 time_min=req_time_s / 60,
+                                 pretend=pretend,
+                                 project_id=PROJECT_ID,
+                                 secure_key=SECURE_KEY,
+                                 email_tolist=NOTIFY_LIST,
+                                 email_text=email_text,
+                                 email_subject=email_subject)
   
 
 def test_event(filepath='../test_events/Antares_observation.xml'):
 
-  pretend=True
+  pretend = True
   
-  log.info('Running test event from %s'%(filepath))
+  log.info('Running test event from %s' % (filepath))
   
   payload = astropy.utils.data.get_file_contents(filepath)
   v = lxml.etree.fromstring(payload)
@@ -186,7 +183,7 @@ def test_event(filepath='../test_events/Antares_observation.xml'):
 
   end = timer()
 
-  log.info("Finished. Response time: %.1f s"%(end-start))
+  log.info("Finished. Response time: %.1f s" % (end-start))
   
   
 if __name__ == '__main__':
