@@ -345,7 +345,8 @@ def handle_grb(v, pretend=False):
         grb.debug("obs {0}, trig {1}".format(obs, trig_id))
 
         # Same GRB trigger from same telescope
-        if obs == trig_id:
+        if trig_id in obs:
+#        if obs == trig_id:
             #  update the schedule!
             grb.info("Already observing this GRB")
             last_pos = grb.get_pos(-2)
