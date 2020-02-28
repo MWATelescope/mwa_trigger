@@ -201,10 +201,10 @@ class TriggerEvent(object):
         if self.vcsmode:
             # VCS mode uses a single observation only
             nobs = 1
-            exptime = time_min
+            exptime = time_min * 60
         else:
             # normal observations split this time into 2 min chunks
-            nobs = int(time_min*60 // self.exptime)
+            nobs = int(time_min * 60 / self.exptime)
             exptime = self.exptime
 
         # trigger if we are above the horizon limit
