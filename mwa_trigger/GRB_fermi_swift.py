@@ -454,6 +454,11 @@ def handle_grb(v, pretend=False):
                  'err': grb.err[-1]}
     email_text = EMAIL_TEMPLATE % emaildict
     email_subject = EMAIL_SUBJECT_TEMPLATE % grb.trigger_id
+
+    # Hack to drop the requested VCS time to 5 minutes for the last few weeks of 2019B
+    if grb.vcsmode:
+        req_time_min = 5.0   # TODO - remove this hack after 2020-03-16
+
     # Do the trigger
     result = grb.trigger_observation(ttype=this_trig_type,
                                      obsname=trig_id,
