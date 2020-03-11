@@ -135,6 +135,23 @@ def busy(project_id=None, obstime=None, logger=DEFAULTLOGGER):
     return result
 
 
+def vcsfree(logger=DEFAULTLOGGER):
+    """
+    This function will return the maximum number of seconds that a VCS trigger will be allowed to request,
+    given the current free space, and upcoming VCS observations in the schedule.
+
+    Note that this doesn't guarantee a later call to trigger() will succeed, as new VCS observations may have been
+    added to the schedule in the meantime.
+
+    :param logger: optional logging.logger object
+    :return: int
+    """
+    urldict = {}
+
+    result = web_api(url=BASEURL + 'vcsfree', urldict=urldict, logger=logger)
+    return result
+
+
 def obslist(obstime=None, logger=DEFAULTLOGGER):
     """
     Call with a desired observing time. This function will return a list of tuples containing

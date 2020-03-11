@@ -48,6 +48,10 @@ with a set of parameters:
   return 'True' if that science project is authorised to remove all of the observations already in the
   schedule over that time period.
 
+  - vcsfree() - returns the maximum number of seconds of observime time in VCS mode that an incoming
+  trigger would be allowed to request at the current time, given the current free disk space, and all
+  upcoming VCS observations in the schedule.
+
   - obslist() - when given a desired override time, return a summary of all observations already in the
   schedule over that time period.
 
@@ -68,6 +72,12 @@ with a set of parameters:
   'catch up' to real time. After the observing time specified, a VOLTAGE_STOP observation is inserted
   into the schedule, unless the requested observing time extends past an existing VOLTAGE_STOP
   observation.
+
+All of these web services are wrapped in functions of the same name in mwa_trigger/triggerservice.py.
+
+Note that the 'triggerobs()' and 'triggervcs' web services (different calls to the backend) are merged
+into one call - mwa_trigger.triggerservice.trigger(). Which one of the backend web services is called
+depends on whether the 'vcsmode' argument to trigger() is True or False.
 
 The back end of the triggering system ONLY cares about the science project code asking for an override,
 the science project codes of the observations in the schedule, and the supplied password. Which transient
