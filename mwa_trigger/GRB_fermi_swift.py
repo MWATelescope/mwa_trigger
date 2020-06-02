@@ -27,7 +27,8 @@ log = logging.getLogger('voevent.handlers.GRB_fermi_swift')   # Inherit the logg
 
 # Settings
 FERMI_POBABILITY_THRESHOLD = 50  # Trigger on Fermi events that have most-likely-prob > this number
-LONG_SHORT_LIMIT = 2.05  # seconds
+SWIFT_LONG_SHORT_LIMIT = 2.05  # seconds
+FERMI_LONG_SHORT_LIMIT = 0.513  # seconds
 REPOINTING_LIMIT = 10  # degrees
 SWIFT_SHORT_TRIGGERS_IN_VCSMODE = True  # Trigger swift triggers of short GRBs in vcsmode
 
@@ -201,7 +202,7 @@ def handle_grb(v, pretend=False):
             grb.add_event(v)
 
         trig_time = float(v.find(".//Param[@name='Integ_Time']").attrib['value'])
-        if trig_time < LONG_SHORT_LIMIT:
+        if trig_time < SWIFT_LONG_SHORT_LIMIT:
             grb.debug("Probably a short GRB: t={0} < 2".format(trig_time))
             grb.short = True
             grb.vcsmode = SWIFT_SHORT_TRIGGERS_IN_VCSMODE
@@ -231,7 +232,7 @@ def handle_grb(v, pretend=False):
         # eg Fermi#GBM_Gnd_Pos
         if this_trig_type == 'Flt':
             trig_time = float(v.find(".//Param[@name='Trig_Timescale']").attrib['value'])
-            if trig_time < LONG_SHORT_LIMIT:
+            if trig_time < FERMI_LONG_SHORT_LIMIT:
                 grb.short = True
                 grb.debug("Possibly a short GRB: t={0}".format(trig_time))
             else:
