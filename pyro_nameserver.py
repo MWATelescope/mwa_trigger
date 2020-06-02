@@ -4,17 +4,21 @@
 This scripts starts a Pyro4 RPC nameserver daemon, which other processes can use to register a network
 RPC service, or for a client to find a registered network service.
 """
-
-import ConfigParser
+import sys
 
 import Pyro4
 from Pyro4 import naming
+
+if sys.version_info.major == 2:
+    from ConfigParser import SafeConfigParser as conparser
+else:
+    from configparser import ConfigParser as conparser
 
 CPPATH = ['/usr/local/etc/trigger.conf', './trigger.conf']   # Path list to look for configuration file
 
 
 if __name__ == '__main__':
-    CP = ConfigParser.SafeConfigParser()
+    CP = conparser()
     CP.read(CPPATH)
 
     if CP.has_option(section='pyro', option='ns_host'):
@@ -27,5 +31,5 @@ if __name__ == '__main__':
     else:
         ns_port = 9090
 
-    print "Pyro4 nameserver started."
+    print("Pyro4 nameserver started.")
     Pyro4.naming.startNSloop(host=ns_host, port=ns_port, enableBroadcast=False)

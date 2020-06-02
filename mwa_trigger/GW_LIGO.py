@@ -4,6 +4,7 @@ __author__ = ["Dougal Dobie", "David Kaplan"]
 import logging
 import os
 import random
+import sys
 import time
 from timeit import default_timer as timer
 
@@ -22,8 +23,8 @@ from mwa_pb import primary_beam
 
 import voeventparse
 
-import handlers
-import triggerservice
+from . import handlers
+from . import triggerservice
 
 
 log = logging.getLogger('voevent.handlers.LVC_GW')  # Inherit the logging setup from handlers.py
@@ -110,7 +111,7 @@ xml_cache = {}
 
 ################################################################################
 class MWA_grid_points(object):
-    libpath = os.path.join(os.path.split(__file__)[:-1])[0]
+    libpath = os.path.join(*os.path.split(__file__)[:-1])
     grid_file = os.path.join(libpath, '..', 'data', 'grid_points.fits')
 
     def __init__(self, frame, logger=None):
@@ -211,7 +212,7 @@ class GW(handlers.TriggerEvent):
             return
 
         self.header = {}
-        for i in xrange(len(gwheader)):
+        for i in range(len(gwheader)):
             self.header[gwheader[i][0]] = gwheader[i][1]
 
         # compute the pointings for a specified time if provided
@@ -401,7 +402,7 @@ class GW(handlers.TriggerEvent):
 
         mapsum = np.zeros((len(self.MWA_grid.data)))
         start = timer()
-        for igrid in xrange(len(self.MWA_grid.data)):
+        for igrid in range(len(self.MWA_grid.data)):
             beamX, beamY = primary_beam.MWA_Tile_analytic(theta_horz, phi_horz,
                                                           freq=frequency,
                                                           delays=self.MWA_grid.data[igrid]['delays'],
@@ -470,8 +471,11 @@ def processevent(event='', pretend=True):
     
     """
 
-    # event arrives as a unicode string but loads requires a non-unicode string.
-    v = voeventparse.loads(str(event))
+    if sys.version_info.major == 2:
+        # event arrives as a unicode string but loads requires a non-unicode string.
+        v = voeventparse.loads(str(event))
+    else:
+        v = voeventparse.loads(event.encode('latin-1'))
     log.info("Working on: %s" % v.attrib['ivorn'])
     isgw = is_gw(v)
     log.debug("GW? {0}".format(isgw))
@@ -706,7 +710,11 @@ def test_event(filepath='../test_events/MS190410a-1-Preliminary.xml', test_time=
     log.info('Mock time: %s' % (test_time))
 
     payload = astropy.utils.data.get_file_contents(filepath)
-    v = voeventparse.loads(str(payload))
+    if sys.version_info.major == 2:
+        # event arrives as a unicode string but loads requires a non-unicode string.
+        v = voeventparse.loads(str(payload))
+    else:
+        v = voeventparse.loads(payload.encode('latin-1'))
     
     params = {elem.attrib['name']:elem.attrib['value'] for elem in v.iterfind('.//Param')}
 

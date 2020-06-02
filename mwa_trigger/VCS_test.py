@@ -12,6 +12,7 @@ __version__ = "0.3"
 __author__ = ["Paul Hancock", "Andrew Williams", "Steven Tremblay"]
 
 import logging
+import sys
 
 import astropy
 from astropy.coordinates import Angle
@@ -19,14 +20,14 @@ from astropy.time import Time
 
 import voeventparse
 
-import handlers
-import triggerservice
+from . import handlers
+from . import triggerservice
 
 log = logging.getLogger('voevent.handlers.VCS_test')   # Inherit the logging setup from handlers.py
 
 # Settings
 FERMI_POBABILITY_THRESHOLD = 50  # Trigger on Fermi events that have most-likely-prob > this number
-LONG_SHORT_LIMIT = 2.05 #seconds
+LONG_SHORT_LIMIT = 2.05    # seconds
 
 PROJECT_ID = 'D0009'
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
@@ -59,7 +60,6 @@ class GRB(handlers.TriggerEvent):
         handlers.TriggerEvent.__init__(self, event=event)
         self.short = False  # True if short
 
-
     # Override or add GRB specific methods here if desired.
 
 
@@ -74,8 +74,11 @@ def processevent(event='', pretend=True):
     :return: Boolean, True if this handler processed this event, False to pass it to another handler function.
     """
 
-    # event arrives as a unicode string but loads requires a non-unicode string.
-    v = voeventparse.loads(str(event))
+    if sys.version_info.major == 2:
+        # event arrives as a unicode string but loads requires a non-unicode string.
+        v = voeventparse.loads(str(event))
+    else:
+        v = voeventparse.loads(event.encode('latin-1'))
     log.info("Working on: %s" % v.attrib['ivorn'])
     isgrb = is_grb(v)
     log.debug("GRB? {0}".format(isgrb))

@@ -8,7 +8,6 @@
    sent.
 """
 
-import ConfigParser
 import logging
 import os
 import pwd
@@ -17,7 +16,13 @@ import sys
 import threading
 import time
 import traceback
-import Queue
+
+if sys.version_info.major == 2:
+    from ConfigParser import SafeConfigParser as conparser
+    import Queue
+else:
+    from configparser import ConfigParser as conparser
+    import queue as Queue
 
 from astropy.time import Time
 
@@ -36,7 +41,7 @@ The VOEvent handler threw an exception:
 
 
 ############### set up the logging before importing Pyro4
-class MWALogFormatter(object):
+class MWALogFormatter(logging.Formatter):
     """
     Add a time string to the start of any log messages sent to the log file.
     """
@@ -61,6 +66,8 @@ DEFAULTLOGGER.addHandler(filehandler)
 ##############
 
 import Pyro4
+import Pyro4.errors
+import Pyro4.socketutil
 
 sys.excepthook = Pyro4.util.excepthook
 Pyro4.config.DETAILED_TRACEBACK = True
@@ -85,7 +92,7 @@ CPPATH = ['/usr/local/etc/trigger.conf', './trigger.conf']   # Path list to look
 
 ############## Point to a running Pyro nameserver #####################
 # If not on site, start one before running this code, using pyro_nameserver.py
-CP = ConfigParser.SafeConfigParser()
+CP = conparser()
 CP.read(CPPATH)
 
 if CP.has_option(section='pyro', option='ns_host'):
@@ -229,7 +236,11 @@ def QueueWorker():
     try:
         while not EXITING:
             eventxml = EventQueue.get()
-            v = voeventparse.loads(str(eventxml))
+            if sys.version_info.major == 2:
+                # event arrives as a unicode string but loads requires a non-unicode string.
+                v = voeventparse.loads(str(eventxml))
+            else:
+                v = voeventparse.loads(eventxml.encode('latin-1'))
             if v.attrib['ivorn'] in IVORN_LIST:
                 DEFAULTLOGGER.info("Already seen event %s, discarding. Current queue size is %d" % (v.attrib['ivorn'],
                                                                                                     EventQueue.qsize()))
