@@ -241,6 +241,13 @@ def trigger(project_id=None, secure_key=None,
     :return: dictionary structure describing the processing (see above for more information).
     """
 
+    # Test to see how much vcs time can actually be saved to disk.
+    if vcsmode:
+        exptime = min(exptime, vcsfree())
+        if exptime <= 0:
+            logger.error('min(exptime, vcsfree()) <= 0 seconds, nothing to trigger')
+            return None
+
     if vcsmode and buffered:
         return triggerbuffer(project_id=project_id,
                              secure_key=secure_key,
