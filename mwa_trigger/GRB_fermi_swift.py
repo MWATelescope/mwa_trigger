@@ -212,6 +212,9 @@ def handle_grb(v, pretend=False):
             grb.debug("Probably a long GRB: t={0} > 2".format(trig_time))
             grb.short = False
             trigger = True
+        # Temporary fix to make ALL swift triggers happen in VCSMODE
+        # This is as per ticket #17
+        grb.vcsmode = True
 
     elif "Fermi" in v.attrib['ivorn']:
         log.debug("Fermi GRB notice detected")
