@@ -207,13 +207,13 @@ def handle_grb(v, pretend=False):
 
         trig_time = float(v.find(".//Param[@name='Integ_Time']").attrib['value'])
         if trig_time < SWIFT_LONG_SHORT_LIMIT:
-            grb.debug("Probably a short GRB: t={0} < 2".format(trig_time))
+            grb.debug("Probably a short GRB: t={0} < {1}".format(trig_time, SWIFT_LONG_SHORT_LIMIT))
             grb.short = True
             grb.vcsmode = SWIFT_SHORT_TRIGGERS_IN_VCSMODE
             trigger = True
 
         else:
-            grb.debug("Probably a long GRB: t={0} > 2".format(trig_time))
+            grb.debug("Probably a long GRB: t={0} > {1}".format(trig_time, SWIFT_LONG_SHORT_LIMIT))
             grb.short = False
             trigger = True
         # Temporary fix to make ALL swift triggers happen in VCSMODE
@@ -241,9 +241,9 @@ def handle_grb(v, pretend=False):
             trig_time = float(v.find(".//Param[@name='Trig_Timescale']").attrib['value'])
             if trig_time < FERMI_LONG_SHORT_LIMIT:
                 grb.short = True
-                grb.debug("Possibly a short GRB: t={0}".format(trig_time))
+                grb.debug("Possibly a short GRB: t={0} < {1}".format(trig_time, FERMI_LONG_SHORT_LIMIT))
             else:
-                msg = "Probably not a short GRB: t={0}".format(trig_time)
+                msg = "Probably not a short GRB: t={0} > {1}".format(trig_time, FERMI_LONG_SHORT_LIMIT)
                 grb.debug(msg)
                 grb.debug("Not Triggering")
                 handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
