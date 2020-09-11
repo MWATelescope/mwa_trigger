@@ -148,11 +148,11 @@ def handle_neutrino(v, pretend=False):
         # Note: this should ultimately be made more complex than selecting simply on ranking
         ranking = int(params.get("ranking")["value"])
         if ranking < MINIMUM_RANKING:
-            log.info("Event ranking {} below trigger threshold {}. Not triggering.".format(ranking, MINIMUM_RANKING))
+            log.info("Event ranking %s below trigger threshold %s. Not triggering." % (ranking, MINIMUM_RANKING))
             handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                                 to_addresses=DEBUG_NOTIFY_LIST,
                                 subject='DEBUG Neutrino alert for: %s - below minimum ranking to trigger' % trig_id,
-                                msg_text=DEBUG_EMAIL_TEMPLATE % ("Event ranking {} below trigger threshold {}. Not triggering.".format(ranking, MINIMUM_RANKING)),
+                                msg_text=DEBUG_EMAIL_TEMPLATE % ("Event ranking %s below trigger threshold %s. Not triggering." % (ranking, MINIMUM_RANKING)),
                                 attachments=[('voevent.xml', voeventparse.dumps(v))])
             return
 
