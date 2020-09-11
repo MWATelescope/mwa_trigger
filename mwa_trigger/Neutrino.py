@@ -47,12 +47,10 @@ Dec:        %(dec)s deg
 
 DEBUG_EMAIL_TEMPLATE = """
 The Neutrino handler DID NOT trigger an
-MWA observation at %(trigtime)s UTC.
+MWA observation.
 
-Details are:
-Trigger ID: %(triggerid)s
-RA:         %(ra)s hours
-Dec:        %(dec)s deg
+Reason is:
+%s
 """
 
 EMAIL_SUBJECT_TEMPLATE = "Neutrino handler trigger for %s"
