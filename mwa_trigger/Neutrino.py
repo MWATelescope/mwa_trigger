@@ -248,13 +248,16 @@ def handle_neutrino(v, pretend=False):
                                           secure_key=SECURE_KEY,
                                           email_tolist=NOTIFY_LIST,
                                           email_text=email_text,
-                                          email_subject=email_subject)
+                                          email_subject=email_subject,
+                                          creator='VOEvent_Auto_Trigger: Neutrino=%s' % __version__,
+                                          voevent=voeventparse.dumps(v))
     if result is None:    # Trigger failed:
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                             to_addresses=DEBUG_NOTIFY_LIST,
                             subject='DEBUG Neutrino alert - Trigger failed',
                             msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in neutrino.loglist]),
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
+
 
 def test_event(filepath='../test_events/Antares_observation.xml'):
 

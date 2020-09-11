@@ -694,7 +694,9 @@ def handle_gw(v, pretend=False, calc_time=None):
                                     secure_key=SECURE_KEY,
                                     email_tolist=NOTIFY_LIST,
                                     email_text=email_text,
-                                    email_subject=email_subject)
+                                    email_subject=email_subject,
+                                    creator='VOEvent_Auto_Trigger: GW_LIGO=%s' % __version__,
+                                    voevent=voeventparse.dumps(v))
     if result is None:
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
                             to_addresses=event_debug_list,

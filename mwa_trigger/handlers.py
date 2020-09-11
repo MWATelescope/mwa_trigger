@@ -151,6 +151,7 @@ class TriggerEvent(object):
                             email_tolist=None,
                             email_text="",
                             email_subject="",
+                            creator=None,
                             voevent=""):
         """
         Tell the MWA to observe the target of interest - override this method in your handler as desired if you
@@ -165,6 +166,7 @@ class TriggerEvent(object):
         :param email_tolist: list of email addresses to send the notification email to.
         :param email_text: Base email message - success string, errors, and other data will be appended and attached.
         :param email_subject: string containing email subject line.
+        :param creator: string containing text to put in creator field for new observation
         :param voevent: string containing the full XML text of the VOEvent.
         :return: The full results dictionary returned by the triggerservice API (see triggerservice.trigger).
         """
@@ -207,13 +209,17 @@ class TriggerEvent(object):
             nobs = int(time_min * 60 / self.exptime)
             exptime = self.exptime
 
+        if creator is None:
+            crstring = 'VOEvent_Auto_Trigger: handlers=%s' % __version__
+        else:
+            crstring = creator + ' handlers=%s' % __version__
         # trigger if we are above the horizon limit
         if alt > HORIZON_LIMIT:
             self.info("Triggering at gps time %d ..." % (t.gps,))
             result = triggerservice.trigger(project_id=project_id, secure_key=secure_key,
                                             pretend=pretend,
                                             ra=ra, dec=dec,
-                                            creator='VOEvent_Auto_Trigger_{0}'.format(__version__),
+                                            creator=crstring,
                                             obsname=obsname, nobs=nobs,
                                             freqspecs=self.freqspecs,
                                             avoidsun=self.avoidsun,

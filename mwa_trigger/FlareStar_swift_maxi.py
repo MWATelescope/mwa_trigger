@@ -243,6 +243,7 @@ def handle_flarestar(v, pretend=False):
                                     email_tolist=NOTIFY_LIST,
                                     email_text=email_text,
                                     email_subject=email_subject,
+                                    creator='VOEvent_Auto_Trigger: FlareStar_swift_maxi=%s' % __version__,
                                     voevent=voeventparse.dumps(v))
     if result is None:
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',

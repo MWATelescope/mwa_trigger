@@ -465,6 +465,7 @@ def handle_grb(v, pretend=False):
                                      email_tolist=NOTIFY_LIST,
                                      email_text=email_text,
                                      email_subject=email_subject,
+                                     creator='VOEvent_Auto_Trigger: GRB_Fermi_swift=%s' % __version__,
                                      voevent=voeventparse.dumps(v))
     if result is None:
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
