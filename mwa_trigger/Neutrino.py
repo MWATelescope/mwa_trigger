@@ -1,5 +1,5 @@
 __version__ = "0.1"
-__author__ = ["Dougal Dobie", "David Kaplan"]
+__author__ = ["Dougal Dobie", "David Kaplan", "Mieke Bouwhuis"]
 
 import logging
 import sys
@@ -23,13 +23,17 @@ log = logging.getLogger('voevent.handlers.neutrino')   # Inherit the logging set
 
 # Settings
 MINIMUM_RANKING = 2     # selection criterion for Antares
-REPOINTING_LIMIT = 10   # maximum allowed difference in neutrino direction for different alerts with common trigger ID,
-                        # in degrees
+REPOINTING_LIMIT = 10   # maximum allowed difference in neutrino direction for different alerts with common trigger ID, in degrees
+PRETEND = True          # If True, force all to be in 'pretend' mode
 
-PROJECT_ID = 'XXXXXXX'
+PROJECT_ID = 'G0072'
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
 
-NOTIFY_LIST = ['ddob1600@uni.sydney.edu.au', 'kaplan@uwm.edu']
+# Email these addresses when we trigger on an event
+NOTIFY_LIST = ['Andrew.Williams@curtin.edu.au', 'ddob1600@uni.sydney.edu.au', 'kaplan@uwm.edu', 'Mieke.Bouwhuis@csiro.au']
+
+# Email these addresses when we handle a neutrino event, but we don't trigger on it.
+DEBUG_NOTIFY_LIST = ["Andrew.Williams@curtin.edu.au"]
 
 EMAIL_TEMPLATE = """
 The Neutrino handler triggered an
@@ -41,8 +45,17 @@ RA:         %(ra)s hours
 Dec:        %(dec)s deg
 """
 
-EMAIL_SUBJECT_TEMPLATE = "Neutrino handler trigger for %s"
+DEBUG_EMAIL_TEMPLATE = """
+The Neutrino handler DID NOT trigger an
+MWA observation at %(trigtime)s UTC.
 
+Details are:
+Trigger ID: %(triggerid)s
+RA:         %(ra)s hours
+Dec:        %(dec)s deg
+"""
+
+EMAIL_SUBJECT_TEMPLATE = "Neutrino handler trigger for %s"
 
 # observatory location
 MWA = EarthLocation(lat='-26:42:11.95', lon='116:40:14.93', height=377.8*u.m)
@@ -122,18 +135,26 @@ def handle_neutrino(v, pretend=False):
         log.info("This is a test event. Setting pretend=True")
         pretend = True
 
+    if PRETEND:
+        log.info("Global PRETEND is True, setting pretend=True")
+        pretend = True
+
     # Fetch params from the What section
     params = voeventparse.convenience.get_toplevel_params(v)
+
     if 'Antares' in v.attrib['ivorn']:
+        trig_id = params.get("TrigID")["value"]
         # Determine if the event satisfies trigger criteria
         # Note: this should ultimately be made more complex than selecting simply on ranking
         ranking = int(params.get("ranking")["value"])
         if ranking < MINIMUM_RANKING:
-            log.info(
-                "Event ranking {} below trigger threshold. Not triggering.".format(ranking))
+            log.info("Event ranking {} below trigger threshold {}. Not triggering.".format(ranking, MINIMUM_RANKING))
+            handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                                to_addresses=DEBUG_NOTIFY_LIST,
+                                subject='DEBUG Neutrino alert for: %s - below minimum ranking to trigger' % trig_id,
+                                msg_text=DEBUG_EMAIL_TEMPLATE % ("Event ranking {} below trigger threshold {}. Not triggering.".format(ranking, MINIMUM_RANKING)),
+                                attachments=[('voevent.xml', voeventparse.dumps(v))])
             return
-
-        trig_id = params.get("TrigID")["value"]
 
         if trig_id not in xml_cache:
             neutrino = Neutrino(event=v)
@@ -147,7 +168,6 @@ def handle_neutrino(v, pretend=False):
             xml_cache[trig_id] = neutrino
         else:
             neutrino = xml_cache[trig_id]
-
 
     elif 'ICECUBE' in v.attrib['ivorn']:
         trig_id = params.get("AMON_ID")["value"]
@@ -168,12 +188,16 @@ def handle_neutrino(v, pretend=False):
     else:
         log.debug("Not an ICECUBE or ANTARES neutrino.")
         log.debug("Not Triggering")
+        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                            to_addresses=DEBUG_NOTIFY_LIST,
+                            subject='DEBUG Neutrino alert - Not an ICECUBE or ANTARES event, not triggering',
+                            msg_text=DEBUG_EMAIL_TEMPLATE % ("Unknown event type, not triggering"),
+                            attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
 
     position = voeventparse.convenience.get_event_position(v)
 
-    log.info("Neutrino detected at: RA={:.2f}, Dec={:.2f} ({:.2f} deg error circle)"
-             .format(position.ra, position.dec, position.err))
+    log.info("Neutrino detected at: RA={:.2f}, Dec={:.2f} ({:.2f} deg error circle)".format(position.ra, position.dec, position.err))
 
     neutrino.add_pos((position.ra, position.dec, position.err))
 
