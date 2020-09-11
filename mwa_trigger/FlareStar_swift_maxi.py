@@ -8,7 +8,7 @@ inside the processevent() function, to save time.
 This module only handles MAXI and SWIFT VOEvents for Flare Stars.
 """
 
-__version__ = "0.1"
+__version__ = "0.1.1"
 __author__ = ["Paul Hancock", "Andrew Williams", "Gemma Anderson"]
 
 import logging

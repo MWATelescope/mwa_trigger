@@ -8,7 +8,7 @@ inside the processevent() function, to save time.
 This library only handles Fermi and SWIFT VOEvents, other types of event would be handled in a separate library.
 """
 
-__version__ = "0.4"
+__version__ = "0.4.1"
 __author__ = ["Paul Hancock", "Andrew Williams", "Gemma Anderson"]
 
 import logging

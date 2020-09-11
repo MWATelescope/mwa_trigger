@@ -6,7 +6,7 @@ be imported by a long running process, so you can load large data files, etc, at
 inside the processevent() function, to save time.
 """
 
-__version__ = "0.3"
+__version__ = "0.3.1"
 __author__ = ["Paul Hancock", "Andrew Williams", "Gemma Anderson"]
 
 import os
