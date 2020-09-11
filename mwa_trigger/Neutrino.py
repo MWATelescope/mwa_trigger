@@ -240,16 +240,21 @@ def handle_neutrino(v, pretend=False):
     email_text = EMAIL_TEMPLATE % emaildict
     email_subject = EMAIL_SUBJECT_TEMPLATE % neutrino.trigger_id
     # Do the trigger
-    neutrino.trigger_observation(ttype=neutrino.voe_source,
-                                 obsname=trig_id,
-                                 time_min=req_time_min,
-                                 pretend=pretend,
-                                 project_id=PROJECT_ID,
-                                 secure_key=SECURE_KEY,
-                                 email_tolist=NOTIFY_LIST,
-                                 email_text=email_text,
-                                 email_subject=email_subject)
-  
+    result = neutrino.trigger_observation(ttype=neutrino.voe_source,
+                                          obsname=trig_id,
+                                          time_min=req_time_min,
+                                          pretend=pretend,
+                                          project_id=PROJECT_ID,
+                                          secure_key=SECURE_KEY,
+                                          email_tolist=NOTIFY_LIST,
+                                          email_text=email_text,
+                                          email_subject=email_subject)
+    if result is None:    # Trigger failed:
+        handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
+                            to_addresses=DEBUG_NOTIFY_LIST,
+                            subject='DEBUG Neutrino alert - Trigger failed',
+                            msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in neutrino.loglist]),
+                            attachments=[('voevent.xml', voeventparse.dumps(v))])
 
 def test_event(filepath='../test_events/Antares_observation.xml'):
 
