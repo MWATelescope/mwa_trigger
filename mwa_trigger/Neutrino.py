@@ -30,10 +30,10 @@ PROJECT_ID = 'G0072'
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
 
 # Email these addresses when we trigger on an event
-NOTIFY_LIST = ['Andrew.Williams@curtin.edu.au', 'ddob1600@uni.sydney.edu.au', 'kaplan@uwm.edu', 'Mieke.Bouwhuis@csiro.au']
+NOTIFY_LIST = ['Andrew.Williams@curtin.edu.au', 'ddob1600@uni.sydney.edu.au', 'kaplan@uwm.edu', 'Mieke.Bouwhuis@csiro.au', 'clancy.james@curtin.edu.au']
 
 # Email these addresses when we handle a neutrino event, but we don't trigger on it.
-DEBUG_NOTIFY_LIST = ["Andrew.Williams@curtin.edu.au"]
+DEBUG_NOTIFY_LIST = ["Andrew.Williams@curtin.edu.au", 'Mieke.Bouwhuis@csiro.au', 'clancy.james@curtin.edu.au']
 
 EMAIL_TEMPLATE = """
 The Neutrino handler triggered an
