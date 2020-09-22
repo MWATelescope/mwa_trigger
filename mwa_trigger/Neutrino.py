@@ -130,7 +130,7 @@ def handle_neutrino(v, pretend=False):
     """
     
     if v.attrib['role'] != "observation":
-        log.info("This is a test event. Setting pretend=True")
+        log.info("Attribute role != 'observation'. Setting pretend=True")
         pretend = True
 
     if PRETEND:
@@ -139,6 +139,15 @@ def handle_neutrino(v, pretend=False):
 
     # Fetch params from the What section
     params = voeventparse.convenience.get_toplevel_params(v)
+
+    try:
+        is_real = params.get("isRealAlert")["value"]
+    except:
+        is_real = True
+
+    if not is_real:
+        log.info("Parameter isRealAlert is not True, setting pretend=True")
+        pretend = True
 
     if 'Antares' in v.attrib['ivorn']:
         trig_id = params.get("TrigID")["value"]
