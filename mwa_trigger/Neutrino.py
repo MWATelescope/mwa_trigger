@@ -24,7 +24,7 @@ log = logging.getLogger('voevent.handlers.neutrino')   # Inherit the logging set
 # Settings
 MINIMUM_RANKING = 2     # selection criterion for Antares
 REPOINTING_LIMIT = 10   # maximum allowed difference in neutrino direction for different alerts with common trigger ID, in degrees
-PRETEND = True          # If True, force all to be in 'pretend' mode
+PRETEND = False         # If True, force all to be in 'pretend' mode
 
 PROJECT_ID = 'G0072'
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
