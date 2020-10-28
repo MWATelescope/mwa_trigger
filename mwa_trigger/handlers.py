@@ -147,6 +147,7 @@ class TriggerEvent(object):
                             time_min=30,
                             pretend=False,
                             project_id="",
+                            group_id=None,
                             secure_key="",
                             email_tolist=None,
                             email_text="",
@@ -217,6 +218,7 @@ class TriggerEvent(object):
         if alt > HORIZON_LIMIT:
             self.info("Triggering at gps time %d ..." % (t.gps,))
             result = triggerservice.trigger(project_id=project_id, secure_key=secure_key,
+                                            group_id=group_id,
                                             pretend=pretend,
                                             ra=ra, dec=dec,
                                             creator=crstring,
