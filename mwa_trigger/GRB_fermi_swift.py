@@ -342,6 +342,7 @@ def handle_grb(v, pretend=False):
         grb.debug(str(obslist))
         # are we currently observing *this* GRB?
         obs = str(obslist[0][1])  # in case the obslist is returning unicode strings
+        obs_group_id = obslist[0][5]   # The group ID of the first observation in the list returned
         grb.debug("obs {0}, trig {1}".format(obs, trig_id))
 
         # Same GRB trigger from same telescope
