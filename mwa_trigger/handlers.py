@@ -163,6 +163,7 @@ class TriggerEvent(object):
         :param time_min: Total length of observation time, in minutes.
         :param pretend: Boolean, True if we don't want to actually schedule the observations.
         :param project_id: The project ID requesting the triggered observation.
+        :param group_id: optional group ID - the start time of a previously triggered observation of the same event
         :param secure_key: The password specific to that project ID.
         :param email_tolist: list of email addresses to send the notification email to.
         :param email_text: Base email message - success string, errors, and other data will be appended and attached.
