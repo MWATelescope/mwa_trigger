@@ -170,7 +170,7 @@ def obslist(obstime=None, logger=DEFAULTLOGGER):
     return result
 
 
-def trigger(project_id=None, secure_key=None,
+def trigger(project_id=None, secure_key=None, group_id=None,
             ra=None, dec=None, alt=None, az=None, source=None, freqspecs=None,
             creator=None, obsname=None, nobs=None, exptime=None,
             calexptime=None, calibrator=None,
@@ -219,6 +219,7 @@ def trigger(project_id=None, secure_key=None,
 
     :param project_id: eg 'C001' - project ID for the triggered observations
     :param secure_key: password associated with that project_id
+    :param group_id: optional group ID - the start time of a previously triggered observation of the same event
     :param ra: Either one RA (float, in hours), or a list of RA floats. Eg 12.234, or [11.0, 12.0]
     :param dec: Either one Dec (float, in degrees), or a list of Dec floats. Eg -12.234, or [-26.0, -36.0]
     :param alt: Either one Alt (float, in degrees), or a list of Alt floats. Eg 80.0, or [70.0, 90.0]
@@ -262,6 +263,8 @@ def trigger(project_id=None, secure_key=None,
         logger.error('triggering.trigger() must be passed a valid secure_key')
         return None
 
+    if group_id is not None:
+        postdict['group_id'] = group_id
     if ra is not None:
         postdict['ra'] = ra
     if dec is not None:
