@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 """Handler daemon, runs continuously and accepts VO-Events in XML format via Pyro from the push_voevent.py
    script (called by the COMET event broker, possibly multiple times in parallel). XML packets are serialised
