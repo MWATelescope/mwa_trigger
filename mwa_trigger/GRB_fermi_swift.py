@@ -314,6 +314,7 @@ def handle_grb(v, pretend=False):
     if not grb.vcsmode:
         req_time_min = 30
     else:
+        grb.debug('Reducing request time to %d for VCS observation' % SWIFT_SHORT_VCS_TIME)
         req_time_min = SWIFT_SHORT_VCS_TIME
 
     # check repointing just for tests
@@ -405,6 +406,7 @@ def handle_grb(v, pretend=False):
             # length of a VCS trigger.
             if (grb.first_trig_time is not None) and not grb.vcsmode:
                 req_time_min = 30 - (Time.now() - grb.first_trig_time).sec // 60
+                grb.debug('Set requested time to %d' % req_time_min)
 
         # if we are observing a SWIFT trigger but not the trigger we just received
         elif 'SWIFT' in obs:
