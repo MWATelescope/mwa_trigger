@@ -31,6 +31,7 @@ FERMI_POBABILITY_THRESHOLD = 50  # Trigger on Fermi events that have most-likely
 LONG_SHORT_LIMIT = 2.05  # seconds
 REPOINTING_LIMIT = 10  # degrees
 SWIFT_SHORT_TRIGGERS_IN_VCSMODE = True  # Trigger swift triggers of short GRBs in vcsmode
+SWIFT_SHORT_VCS_TIME = 15   # How many minutes to request if this is a VCS trigger
 
 PROJECT_ID = 'G0055'
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
@@ -310,7 +311,10 @@ def handle_grb(v, pretend=False):
     grb.add_pos((ra, dec, err))
     grb.debug("RA {0}, Dec {1}, err {2}".format(ra, dec, err))
 
-    req_time_min = 30
+    if not grb.vcsmode:
+        req_time_min = 30
+    else:
+        req_time_min = SWIFT_SHORT_VCS_TIME
 
     # check repointing just for tests
     # last_pos = grb.get_pos(-2)
@@ -395,11 +399,12 @@ def handle_grb(v, pretend=False):
                 else:
                     grb.info("Triggering {0} to replace {1}".format(this_trig_type, prev_type))
 
-            # shorten the observing time requested so we are ~30mins total.
-            if grb.first_trig_time is not None:
+            # shorten the observing time requested so we are ~30mins total (for non VCS).
+            # If this is a VCS mode observation, don't shorten the time - if the previous trigger was
+            # in VCS mode, we won't be able to interrupt it, and if it wasn't, we still want the normal
+            # length of a VCS trigger.
+            if (grb.first_trig_time is not None) and not grb.vcsmode:
                 req_time_min = 30 - (Time.now() - grb.first_trig_time).sec // 60
-            else:
-                req_time_min = 30
 
         # if we are observing a SWIFT trigger but not the trigger we just received
         elif 'SWIFT' in obs:
