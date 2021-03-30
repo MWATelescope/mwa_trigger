@@ -31,6 +31,7 @@ FERMI_POBABILITY_THRESHOLD = 50  # Trigger on Fermi events that have most-likely
 LONG_SHORT_LIMIT = 2.05  # seconds
 REPOINTING_LIMIT = 10  # degrees
 SWIFT_SHORT_TRIGGERS_IN_VCSMODE = True  # Trigger swift triggers of short GRBs in vcsmode
+SWIFT_LONG_TRIGGERS_IN_VCSMODE = True   # Trigger swift triggers of long GRBs in vcsmode
 SWIFT_SHORT_VCS_TIME = 15   # How many minutes to request if this is a VCS trigger
 
 PROJECT_ID = 'G0055'
@@ -147,7 +148,8 @@ def is_grb(v):
             if grbid != 'true':
                 return False
         elif fermi:
-            pass  # all fermi triggers are GRB triggers (for now)
+            return False   # Ignore all Fermi triggers
+
     return True
 
 
@@ -211,10 +213,10 @@ def handle_grb(v, pretend=False):
             grb.short = True
             grb.vcsmode = SWIFT_SHORT_TRIGGERS_IN_VCSMODE
             trigger = True
-
         else:
             grb.debug("Probably a long GRB: t={0} > 2".format(trig_time))
             grb.short = False
+            grb.vcsmode = SWIFT_LONG_TRIGGERS_IN_VCSMODE
             trigger = True
 
     elif "Fermi" in v.attrib['ivorn']:
