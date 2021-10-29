@@ -78,8 +78,12 @@ from mwa_trigger import GRB_fermi_swift, FlareStar_swift_maxi, GW_LIGO, Neutrino
 PRETEND = False   # Set to true to trigger event in 'pretend' mode, not actually schedule observations.
 
 # One or more handler functions - all will be called in turn on each XML event.
-EVENTHANDLERS = [GRB_fermi_swift.processevent,    # FlareStar_swift_maxi.processevent,
-                 GW_LIGO.processevent, Neutrino.processevent]
+EVENTHANDLERS = [
+                 GRB_fermi_swift.processevent,
+#                 FlareStar_swift_maxi.processevent,
+#                 GW_LIGO.processevent,
+#                 Neutrino.processevent,
+                 ]
 
 Pyro4.config.COMMTIMEOUT = 10.0
 Pyro4.config.THREADPOOL_SIZE_MIN = 8
