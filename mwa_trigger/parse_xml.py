@@ -26,13 +26,17 @@ def get_telescope(ivorn):
 
 
 class Trigger_Event:
-    def __init__(self, xml):
+    def __init__(self, xml, packet=None):
         self.xml = xml
+        self.packet = packet
 
     def parse(self):
         # Read in xml
-        with open(self.xml, 'rb') as f:
-            v = voeventparse.load(f)
+        if self.packet is None:
+            with open(self.xml, 'rb') as f:
+                v = voeventparse.load(f)
+        else:
+            v = voeventparse.loads(self.packet.encode())
 
         # Work out which telescope the trigger is from
         telescope = get_telescope(v.attrib['ivorn'])

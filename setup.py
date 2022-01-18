@@ -6,6 +6,7 @@ from setuptools import setup
 
 reqs = ['numpy',
         'voevent-parse',
+        'comet',
        ]
 
 
