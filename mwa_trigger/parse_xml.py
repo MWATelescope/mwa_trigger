@@ -71,6 +71,16 @@ class parsed_VOEvent:
             self.this_trig_type = v.attrib['ivorn'].split('_')[1]  # Flt, Gnd, or Fin
             self.sequence_num = int(v.find(".//Param[@name='Sequence_Num']").attrib['value'])
         elif self.telescope == 'SWIFT':
+            # Check if SWIFT tracking fails
+            startrack_lost_lock = v.find(".//Param[@name='StarTrack_Lost_Lock']").attrib['value']
+            # convert 'true' to True, and everything else to false
+            startrack_lost_lock = startrack_lost_lock.lower() == 'true'
+            logger.debug("StarLock OK? {0}".format(not startrack_lost_lock))
+            if startrack_lost_lock:
+                logger.warning("The SWIFT star tracker lost it's lock so ignoringe event")
+                self.this_trig_type = "SWIFT lost star tracker"
+                self.ignore = True
+                return
             self.trig_time = float(v.find(".//Param[@name='Integ_Time']").attrib['value'])
             self.this_trig_type = "SWIFT"
             self.sequence_num = None
