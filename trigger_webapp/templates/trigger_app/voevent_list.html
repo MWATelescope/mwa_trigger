@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {% load static %}
+    <meta charset="utf-8">
+    <title>Trigger Log</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/pretty_table.css' %}"/>
+  </head>
+  <body>
+    <table class="fl-table">
+    <thead>
+    <tr>
+        <th>Trigger ID</th>
+        <th>Duration</th>
+        <th>Trigger Type</th>
+        <th>Right Acension</th>
+        <th>Declination</th>
+        <th>Position Error</th>
+        <th>XML File</th>
+    </tr>
+    </thead>
+    <!-- Iterate over object_list -->
+    {% for object in object_list %}
+    <!-- Display Objects -->
+    <tr>
+        <td>{{ object.trigger_id }}</td>
+        <td>{{ object.duration }}</td>
+        <td>{{ object.trigger_type }}</td>
+        <td>{{ object.ra }}</td>
+        <td>{{ object.dec }}</td>
+        <td>{{ object.pos_error }}</td>
+        <!-- <td>{{ object.xml }}</td> -->
+        <td><a href="/voevent_view/{{ object.id }}" style="text-decoration:None">View xml</a></td>
+    </tr>
+    <!-- If object_list is empty  -->
+    {% empty %}
+    <li>No objects yet.</li>
+    {% endfor %}
+    </table>
+  </body>
+</html>
