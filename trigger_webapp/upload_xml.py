@@ -9,32 +9,35 @@ import django
 # Import settings
 django.setup()
 
+from trigger_app.models import VOEvent
+
+
 import sys
 import voeventparse
-import requests
 
-from trigger_app.models import Trigger
-from mwa_trigger.parse_xml import Trigger_Event
+#from django.test import Client
+from mwa_trigger.parse_xml import parsed_VOEvent
+
 
 def write_and_upload(xml_string):
     # Parse
-    trig = Trigger_Event(None, packet=xml_string)
+    trig = parsed_VOEvent(None, packet=xml_string)
     trig.parse()
 
-    xml_file_name = f'{trig.trig_id}.xml'
-    with open(xml_file_name, 'w') as f:
-        f.write(xml_string)
-
     # Upload
-    Trigger.objects.get_or_create(xml=xml_file_name,
+    VOEvent.objects.get_or_create(telescope=trig.telescope,
+                                  xml_packet=xml_string,
                                   duration=trig.trig_time,
                                   trigger_id=trig.trig_id,
+                                  sequence_num=trig.sequence_num,
                                   trigger_type=trig.this_trig_type,
                                   ra=trig.ra,
                                   dec=trig.dec,
-                                  pos_error=trig.err)
+                                  pos_error=trig.err,
+                                  ignored=trig.ignore)
+    # v = voeventparse.loads(xml_string.encode())
+    # print(voeventparse.prettystr(v))
 
 if __name__ == '__main__':
     xml_string = sys.stdin.read()
-    print(xml_string)
     write_and_upload(xml_string)

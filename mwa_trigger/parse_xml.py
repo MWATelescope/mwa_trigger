@@ -30,15 +30,22 @@ def get_telescope(ivorn):
         if ivorn.startswith(t):
             return 'Antares'
 
-
     # Not found so return None
     return None
 
 
-class VOEvent:
+class parsed_VOEvent:
     def __init__(self, xml, packet=None):
         self.xml = xml
         self.packet = packet
+        # Make default Nones if unknown telescope found
+        self.trig_time = None
+        self.this_trig_type = None
+        self.sequence_num = None
+        self.trig_id = None
+        self.ra = None
+        self.dec = None
+        self.err = None
 
     def parse(self):
         # Read in xml
@@ -49,19 +56,25 @@ class VOEvent:
             v = voeventparse.loads(self.packet.encode())
 
         # Work out which telescope the trigger is from
-        telescope = get_telescope(v.attrib['ivorn'])
-        logger.debug(telescope)
+        self.telescope = get_telescope(v.attrib['ivorn'])
+        logger.debug(self.telescope)
+        if self.telescope is None:
+            # Unknown telescope so ignoring
+            self.ignore = True
+            return
+        else:
+            self.ignore = False
 
         # Parse trigger info (telescope dependent)
-        if telescope == 'Fermi':
+        if self.telescope == 'Fermi':
             self.trig_time = float(v.find(".//Param[@name='Trig_Timescale']").attrib['value'])
             self.this_trig_type = v.attrib['ivorn'].split('_')[1]  # Flt, Gnd, or Fin
             self.sequence_num = int(v.find(".//Param[@name='Sequence_Num']").attrib['value'])
-        elif telescope == 'SWIFT':
+        elif self.telescope == 'SWIFT':
             self.trig_time = float(v.find(".//Param[@name='Integ_Time']").attrib['value'])
             self.this_trig_type = "SWIFT"
             self.sequence_num = None
-        elif telescope == 'Antares':
+        elif self.telescope == 'Antares':
             self.trig_time = None
             self.this_trig_type = 'Antares'
             self.sequence_num = None
