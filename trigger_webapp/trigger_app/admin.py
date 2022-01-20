@@ -1,5 +1,5 @@
 from django.contrib import admin
-from trigger_app.models import Trigger
+from trigger_app.models import VOEvent
 
 # Register your models here.
-admin.site.register(Trigger)
+admin.site.register(VOEvent)

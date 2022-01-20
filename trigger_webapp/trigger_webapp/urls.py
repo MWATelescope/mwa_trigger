@@ -15,9 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
 from trigger_app import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.TriggerList.as_view()),
-]
+    path('', views.VOEventList.as_view()),
+    #path('<str:filepath>/', views.download_file),
+    path('voevent_view/<int:id>/', views.voevent_view)
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
