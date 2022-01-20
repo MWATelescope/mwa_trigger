@@ -12,6 +12,7 @@
     <tr>
         <th>ID</th>
         <th>Decision</th>
+        <th>Decision Reason</th>
         <th>Telescope</th>
         <th>Trigger ID</th>
         <th>Trigger Type</th>
@@ -27,6 +28,7 @@
     <tr>
         <td>{{ object.id }}</td>
         <td>{{ object.get_decision_display }}</td>
+        <td>{{ object.decision_reason }}</td>
         <td>{{ object.telescope }}</td>
         <td>{{ object.trigger_id }}</td>
         <td>{{ object.trigger_type }}</td>

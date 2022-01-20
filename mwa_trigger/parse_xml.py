@@ -46,6 +46,8 @@ class parsed_VOEvent:
         self.ra = None
         self.dec = None
         self.err = None
+        self.most_likely_index = None
+        self.detect_prob = None
 
     def parse(self):
         # Read in xml
@@ -70,7 +72,20 @@ class parsed_VOEvent:
             self.trig_time = float(v.find(".//Param[@name='Trig_Timescale']").attrib['value'])
             self.this_trig_type = v.attrib['ivorn'].split('_')[1]  # Flt, Gnd, or Fin
             self.sequence_num = int(v.find(".//Param[@name='Sequence_Num']").attrib['value'])
+            # Fermi triggers have likely hood statistics
+            self.most_likely_index = int(v.find(".//Param[@name='Most_Likely_Index']").attrib['value'])
+            self.detect_prob = int(v.find(".//Param[@name='Most_Likely_Prob']").attrib['value'])
         elif self.telescope == 'SWIFT':
+            # Check if SWIFT tracking fails
+            startrack_lost_lock = v.find(".//Param[@name='StarTrack_Lost_Lock']").attrib['value']
+            # convert 'true' to True, and everything else to false
+            startrack_lost_lock = startrack_lost_lock.lower() == 'true'
+            logger.debug("StarLock OK? {0}".format(not startrack_lost_lock))
+            if startrack_lost_lock:
+                logger.warning("The SWIFT star tracker lost it's lock so ignoringe event")
+                self.this_trig_type = "SWIFT lost star tracker"
+                self.ignore = True
+                return
             self.trig_time = float(v.find(".//Param[@name='Integ_Time']").attrib['value'])
             self.this_trig_type = "SWIFT"
             self.sequence_num = None
