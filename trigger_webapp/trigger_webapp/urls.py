@@ -23,5 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.VOEventList.as_view()),
     #path('<str:filepath>/', views.download_file),
-    path('voevent_view/<int:id>/', views.voevent_view)
+    path('voevent_view/<int:id>/', views.voevent_view),
+    path('voevent_create/', views.voevent_create),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

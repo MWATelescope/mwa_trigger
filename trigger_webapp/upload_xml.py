@@ -11,9 +11,9 @@ django.setup()
 
 from trigger_app.models import VOEvent
 
-
 import sys
 import voeventparse
+import requests
 
 #from django.test import Client
 from mwa_trigger.parse_xml import parsed_VOEvent
@@ -25,16 +25,32 @@ def write_and_upload(xml_string):
     trig.parse()
 
     # Upload
-    VOEvent.objects.get_or_create(telescope=trig.telescope,
-                                  xml_packet=xml_string,
-                                  duration=trig.trig_time,
-                                  trigger_id=trig.trig_id,
-                                  sequence_num=trig.sequence_num,
-                                  trigger_type=trig.this_trig_type,
-                                  ra=trig.ra,
-                                  dec=trig.dec,
-                                  pos_error=trig.err,
-                                  ignored=trig.ignore)
+    session = requests.session()
+    session.auth = ("nick", "test123")
+    url = 'http://127.0.0.1:8000/voevent_create/'
+    data = {'telescope' : trig.telescope,
+            'xml_packet' : xml_string,
+            'duration' : trig.trig_time,
+            'trigger_id' : trig.trig_id,
+            'sequence_num' : trig.sequence_num,
+            'trigger_type' : trig.this_trig_type,
+            'ra' : trig.ra,
+            'dec' : trig.dec,
+            'pos_error' : trig.err,
+            'ignored' : trig.ignore}
+    r = session.post(url, data=data)
+
+    # Upload
+    # VOEvent.objects.get_or_create(telescope=trig.telescope,
+    #                               xml_packet=xml_string,
+    #                               duration=trig.trig_time,
+    #                               trigger_id=trig.trig_id,
+    #                               sequence_num=trig.sequence_num,
+    #                               trigger_type=trig.this_trig_type,
+    #                               ra=trig.ra,
+    #                               dec=trig.dec,
+    #                               pos_error=trig.err,
+    #                               ignored=trig.ignore)
     # v = voeventparse.loads(xml_string.encode())
     # print(voeventparse.prettystr(v))
 

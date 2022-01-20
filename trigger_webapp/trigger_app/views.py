@@ -2,13 +2,19 @@
 from django.views.generic.list import ListView
 from django.conf import settings
 from django.http import HttpResponse
+from django.db import transaction
+
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from . import models, serializers
 import mimetypes
+
+from . import models, serializers
+
 import os
 import voeventparse as vp
+import logging
+logger = logging.getLogger(__name__)
 
 class VOEventList(ListView):
     # specify the model for list view
@@ -20,6 +26,16 @@ def voevent_view(request, id):
     xml_pretty_str = vp.prettystr(v)
     print(xml_pretty_str)
     return HttpResponse(xml_pretty_str, content_type='text/xml')
+
+@api_view(['POST'])
+@transaction.atomic
+def voevent_create(request):
+    voe = serializers.VOEventSerializer(data=request.data)
+    if voe.is_valid():
+        voe.save()
+        return Response(voe.data, status=status.HTTP_201_CREATED)
+    logger.debug(request.data)
+    return Response(voe.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # def download_file(request, filepath):
 #     # fill these variables with real values
