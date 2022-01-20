@@ -2,6 +2,9 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from .models import VOEvent, TriggerEvent
 
+from mwa_trigger.parse_xml import parsed_VOEvent
+from mwa_trigger.trigger_logic import worth_observing
+import voeventparse
 
 
 @receiver(pre_save, sender=VOEvent)
@@ -28,4 +31,18 @@ def group_trigger(sender, instance, **kwargs):
                                   pos_error=instance.pos_error)
             # Link the VOEvent
             instance.trigger_group_id = new_trig
+
+            # Check if it's worth triggering an obs
+            vo = parsed_VOEvent(None, packet=str(instance.xml_packet))
+            vo.parse()
+            trigger_bool, debug_bool, short_bool, trigger_message = worth_observing(vo)
+            new_trig.decision_reason = trigger_message
+            if trigger_bool:
+                new_trig.decision = 'T'
+                #TODO Put send of trigger here
+            else:
+                new_trig.decision = 'I'
+            new_trig.save()
+
+            #TODO add debug message to admins here
 

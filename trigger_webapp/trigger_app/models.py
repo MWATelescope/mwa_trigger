@@ -12,6 +12,7 @@ class TriggerEvent(models.Model):
         ('T', 'Triggered'),
     )
     decision = models.CharField(max_length=32, choices=CHOICES, default=P)
+    decision_reason = models.CharField(max_length=256, blank=True, null=True)
     telescope = models.CharField(max_length=64, blank=True, null=True)
     trigger_id = models.IntegerField(blank=True, null=True)
     trigger_type = models.CharField(max_length=64, blank=True, null=True)
