@@ -5,6 +5,7 @@ import os
 from numpy.testing import assert_almost_equal
 
 from mwa_trigger.parse_xml import parsed_VOEvent
+from mwa_trigger.trigger_logic import worth_observing
 import voeventparse
 
 import logging
@@ -21,6 +22,7 @@ def test_trigger_event():
                 ]
 
     for xml_file, xml_packet in xml_tests:
+        # Parse the file
         if xml_file is None:
             print(f'\n{xml_packet[:10]}')
             xml_loc = None
@@ -35,6 +37,10 @@ def test_trigger_event():
         print(f"Type: {trig.this_trig_type}")
         print(f"Trig position: {trig.ra} {trig.dec} {trig.err}")
 
+        # Send it through trigger logic
+        trigger_bool, debug_bool, short_bool, trigger_message = worth_observing(trig)
+        print(f"{trigger_bool}, {debug_bool}, {short_bool}")
+        print(f"{trigger_message}")
 
 def test_grouped_events():
     test_group = ['Fermi01.xml',
