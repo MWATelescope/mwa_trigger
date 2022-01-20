@@ -3,12 +3,15 @@ from django.db import models
 # Create your models here.
 class TriggerEvent(models.Model):
     id = models.AutoField(primary_key=True)
+    P = 'P'
+    I = 'I'
+    T = 'T'
     CHOICES = (
         ('P', 'Pending'),
         ('I', 'Ignored'),
         ('T', 'Triggered'),
     )
-    decision = models.CharField(max_length=32, choices=CHOICES, default='P')
+    decision = models.CharField(max_length=32, choices=CHOICES, default=P)
     telescope = models.CharField(max_length=64, blank=True, null=True)
     trigger_id = models.IntegerField(blank=True, null=True)
     trigger_type = models.CharField(max_length=64, blank=True, null=True)

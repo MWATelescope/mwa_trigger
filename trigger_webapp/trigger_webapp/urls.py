@@ -21,7 +21,9 @@ from trigger_app import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.VOEventList.as_view()),
+    path('', views.home_page),
+    path('trigger_log/', views.TriggerEventList.as_view()),
+    path('voevent_log/', views.VOEventList.as_view()),
     #path('<str:filepath>/', views.download_file),
     path('voevent_view/<int:id>/', views.voevent_view),
     path('voevent_create/', views.voevent_create),

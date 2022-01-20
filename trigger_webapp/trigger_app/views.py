@@ -3,6 +3,7 @@ from django.views.generic.list import ListView
 from django.conf import settings
 from django.http import HttpResponse
 from django.db import transaction
+from django.shortcuts import render
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -19,6 +20,13 @@ logger = logging.getLogger(__name__)
 class VOEventList(ListView):
     # specify the model for list view
     model = models.VOEvent
+
+class TriggerEventList(ListView):
+    # specify the model for list view
+    model = models.TriggerEvent
+
+def home_page(request):
+    return render(request, 'trigger_app/home_page.html', {})
 
 def voevent_view(request, id):
     voevent = models.VOEvent.objects.get(id=id)
