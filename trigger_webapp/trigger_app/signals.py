@@ -1,10 +1,18 @@
 from django.db.models.signals import pre_save
-from django.dispatch import receiver
-from .models import VOEvent, TriggerEvent
+from django.dispatch import receiver, Signal
+from .models import VOEvent, TriggerEvent, CometLog
 
 from mwa_trigger.parse_xml import parsed_VOEvent
 from mwa_trigger.trigger_logic import worth_observing
 import voeventparse
+
+import threading
+import time
+import schedule
+from subprocess import PIPE, Popen
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 @receiver(pre_save, sender=VOEvent)
@@ -46,3 +54,56 @@ def group_trigger(sender, instance, **kwargs):
 
             #TODO add debug message to admins here
 
+
+def output_popen_stdout(process):
+    output = process.stdout.readline()
+    print("Checking output")
+    if output:
+        print(output.strip())
+        CometLog.objects.create(log=output.strip())
+
+
+def run_continuously(self, interval=10):
+    """Got from
+    https://stackoverflow.com/questions/44896618/django-run-a-function-every-x-seconds
+
+    Continuously run, while executing pending jobs at each elapsed
+    time interval.
+    @return cease_continuous_run: threading.Event which can be set to
+    cease continuous run.
+    Please note that it is *intended behavior that run_continuously()
+    does not run missed jobs*. For example, if you've registered a job
+    that should run every minute and you set a continuous run interval
+    of one hour then your job won't be run 60 times at each interval but
+    only once.
+    """
+
+    cease_continuous_run = threading.Event()
+
+    class ScheduleThread(threading.Thread):
+
+        @classmethod
+        def run(cls):
+            while not cease_continuous_run.is_set():
+                self.run_pending()
+                time.sleep(interval)
+
+    continuous_thread = ScheduleThread()
+    continuous_thread.setDaemon(True)
+    continuous_thread.start()
+    return cease_continuous_run
+
+
+schedule.Scheduler.run_continuously = run_continuously
+
+
+# Getting a signal from views.py which indicates that the server has started
+startup_signal = Signal()
+
+def on_startup(sender, **kwargs):
+    print("Starting twistd")
+    process = Popen("twistd -n comet --local-ivo=ivo://hotwired.org/test --remote=voevent.4pisky.org --cmd=/home/nick/code/mwa_trigger/trigger_webapp/upload_xml.py", shell=True, stdout=PIPE)
+
+    schedule.every(1).minutes.do(output_popen_stdout, process=process)
+
+startup_signal.connect(on_startup, dispatch_uid='models-startup')

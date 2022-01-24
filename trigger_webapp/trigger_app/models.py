@@ -43,3 +43,10 @@ class VOEvent(models.Model):
 
     class Meta:
         ordering = ['-id']
+
+
+class CometLog(models.Model):
+    id = models.AutoField(primary_key=True)
+    log = models.CharField(max_length=256, blank=True, null=True)
+    class Meta:
+        ordering = ['-id']
