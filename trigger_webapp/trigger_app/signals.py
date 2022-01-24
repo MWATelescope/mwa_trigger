@@ -8,7 +8,7 @@ import voeventparse
 
 import threading
 import time
-import schedule
+from schedule import Scheduler
 from subprocess import PIPE, Popen
 
 import logging
@@ -57,10 +57,8 @@ def group_trigger(sender, instance, **kwargs):
 
 def output_popen_stdout(process):
     output = process.stdout.readline()
-    print("Checking output")
     if output:
-        print(output.strip())
-        CometLog.objects.create(log=output.strip())
+        CometLog.objects.create(log=output.strip().decode())
 
 
 def run_continuously(self, interval=10):
@@ -93,8 +91,7 @@ def run_continuously(self, interval=10):
     continuous_thread.start()
     return cease_continuous_run
 
-
-schedule.Scheduler.run_continuously = run_continuously
+Scheduler.run_continuously = run_continuously
 
 
 # Getting a signal from views.py which indicates that the server has started
@@ -103,7 +100,8 @@ startup_signal = Signal()
 def on_startup(sender, **kwargs):
     print("Starting twistd")
     process = Popen("twistd -n comet --local-ivo=ivo://hotwired.org/test --remote=voevent.4pisky.org --cmd=/home/nick/code/mwa_trigger/trigger_webapp/upload_xml.py", shell=True, stdout=PIPE)
-
-    schedule.every(1).minutes.do(output_popen_stdout, process=process)
+    scheduler = Scheduler()
+    scheduler.every(1).minutes.do(output_popen_stdout, process=process)
+    scheduler.run_continuously()
 
 startup_signal.connect(on_startup, dispatch_uid='models-startup')
