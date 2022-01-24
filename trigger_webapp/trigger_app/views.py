@@ -40,7 +40,8 @@ class CometLogList(ListView):
 
 
 def home_page(request):
-    return render(request, 'trigger_app/home_page.html', {})
+    comet_status = models.Status.objects.get(name='twistd_comet')
+    return render(request, 'trigger_app/home_page.html', {'twistd_comet_status': comet_status})
 
 
 def voevent_view(request, id):

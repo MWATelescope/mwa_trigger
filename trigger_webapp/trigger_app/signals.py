@@ -1,6 +1,6 @@
 from django.db.models.signals import pre_save
 from django.dispatch import receiver, Signal
-from .models import VOEvent, TriggerEvent, CometLog
+from .models import VOEvent, TriggerEvent, CometLog, Status
 
 from mwa_trigger.parse_xml import parsed_VOEvent
 from mwa_trigger.trigger_logic import worth_observing
@@ -58,7 +58,20 @@ def group_trigger(sender, instance, **kwargs):
 def output_popen_stdout(process):
     output = process.stdout.readline()
     if output:
+        # New output so send it to the log
         CometLog.objects.create(log=output.strip().decode())
+    comet_status = Status.objects.get(name='twistd_comet')
+    poll = process.poll()
+    if poll is None:
+        # Process is still running
+        comet_status.status = 0
+    elif poll == 0:
+        # Finished for some reason
+        comet_status.status = 2
+    else:
+        # Broken
+        comet_status.status = 1
+
 
 
 def run_continuously(self, interval=10):
@@ -103,5 +116,7 @@ def on_startup(sender, **kwargs):
     scheduler = Scheduler()
     scheduler.every(1).minutes.do(output_popen_stdout, process=process)
     scheduler.run_continuously()
+    # Create status model if not already made
+    Status.objects.get_or_create(name='twistd_comet', status=0)
 
 startup_signal.connect(on_startup, dispatch_uid='models-startup')

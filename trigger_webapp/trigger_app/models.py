@@ -50,3 +50,16 @@ class CometLog(models.Model):
     log = models.CharField(max_length=256, blank=True, null=True)
     class Meta:
         ordering = ['-id']
+
+
+class Status(models.Model):
+    RUNNING = 0
+    BROKEN = 1
+    STOPPED = 2
+    STATUS_CHOICES = (
+        (RUNNING, 'Running'),
+        (BROKEN, 'Broken'),
+        (STOPPED, 'Stopped')
+    )
+    name = models.CharField(max_length=64, blank=True, null=True)
+    status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES)
