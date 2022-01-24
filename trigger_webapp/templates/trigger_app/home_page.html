@@ -4,9 +4,19 @@
     {% load static %}
     <meta charset="utf-8">
     <title>Home Page</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/colours_pos_neg.css' %}"/>
   </head>
   <body>
     <header>MWA Trigger Home Page</header>
+    <h3>Trigger Receiving Status (twistd comet)</h3>
+    {% if twistd_comet_status.status < 0 %}
+    <p class="NegativeTransaction">
+    {% else %}
+    <p class="PositiveTransaction">
+    {% endif %}
+       {{ twistd_comet_status.get_status_display }} </p>
+    <p><a href="/comet_log/" style="text-decoration:None">View Comet Log</a></p>
+    <h3>Event Logs</h3>
     <p><a href="/trigger_log/" style="text-decoration:None">View Trigger Log</a></p>
     <p><a href="/voevent_log/" style="text-decoration:None">View Raw VOEvent Log</a></p>
   </body>

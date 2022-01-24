@@ -22,6 +22,9 @@ class TriggerEvent(models.Model):
     pos_error = models.FloatField(blank=True, null=True)
     recieved_data = models.DateTimeField(auto_now_add=True, blank=True)
 
+    class Meta:
+        ordering = ['-id']
+
 
 class VOEvent(models.Model):
     id = models.AutoField(primary_key=True)
@@ -37,3 +40,26 @@ class VOEvent(models.Model):
     recieved_data = models.DateTimeField(auto_now_add=True, blank=True)
     xml_packet = models.CharField(max_length=10000)
     ignored = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['-id']
+
+
+class CometLog(models.Model):
+    id = models.AutoField(primary_key=True)
+    log = models.CharField(max_length=256, blank=True, null=True)
+    class Meta:
+        ordering = ['-id']
+
+
+class Status(models.Model):
+    RUNNING = 0
+    BROKEN = 1
+    STOPPED = 2
+    STATUS_CHOICES = (
+        (RUNNING, 'Running'),
+        (BROKEN, 'Broken'),
+        (STOPPED, 'Stopped')
+    )
+    name = models.CharField(max_length=64, blank=True, null=True)
+    status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES)

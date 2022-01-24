@@ -13,9 +13,18 @@ import mimetypes
 from . import models, serializers
 
 import os
+import sys
 import voeventparse as vp
 import logging
 logger = logging.getLogger(__name__)
+
+# Create a startup signal
+from trigger_app.signals import startup_signal
+
+if len(sys.argv) >= 2:
+    if sys.argv[1] == 'runserver':
+        # Send off start up signal because server is launching
+        startup_signal.send(sender=startup_signal)
 
 class VOEventList(ListView):
     # specify the model for list view
@@ -25,15 +34,22 @@ class TriggerEventList(ListView):
     # specify the model for list view
     model = models.TriggerEvent
 
+class CometLogList(ListView):
+    # specify the model for list view
+    model = models.CometLog
+
+
 def home_page(request):
-    return render(request, 'trigger_app/home_page.html', {})
+    comet_status = models.Status.objects.get(name='twistd_comet')
+    return render(request, 'trigger_app/home_page.html', {'twistd_comet_status': comet_status})
+
 
 def voevent_view(request, id):
     voevent = models.VOEvent.objects.get(id=id)
     v = vp.loads(voevent.xml_packet.encode())
     xml_pretty_str = vp.prettystr(v)
-    print(xml_pretty_str)
     return HttpResponse(xml_pretty_str, content_type='text/xml')
+
 
 @api_view(['POST'])
 @transaction.atomic
