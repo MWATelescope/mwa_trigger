@@ -1,6 +1,7 @@
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver, Signal
-from .models import VOEvent, TriggerEvent, CometLog, Status
+from django.contrib.auth.models import User
+from .models import VOEvent, TriggerEvent, CometLog, Status, AdminAlerts
 
 from mwa_trigger.parse_xml import parsed_VOEvent
 from mwa_trigger.trigger_logic import worth_observing
@@ -53,6 +54,13 @@ def group_trigger(sender, instance, **kwargs):
             new_trig.save()
 
             #TODO add debug message to admins here
+
+
+@receiver(post_save, sender=User)
+def create_admin_alerts(sender, instance, **kwargs):
+    if kwargs.get('created'):
+        s = AdminAlerts(user=instance)
+        s.save()
 
 
 def output_popen_stdout(process):

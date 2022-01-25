@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 class TriggerEvent(models.Model):
@@ -63,3 +64,12 @@ class Status(models.Model):
     )
     name = models.CharField(max_length=64, blank=True, null=True)
     status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES)
+
+
+class AdminAlerts(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    alert = models.BooleanField(default=True)
+    debug = models.BooleanField(default=False)
+    approval = models.BooleanField(default=False)
+    def __str__(self):
+        return "{}_Alerts".format(self.user)
