@@ -77,15 +77,15 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, trigger_message):
         for ua in user_alerts:
             # Check if user can recieve each type of alert
             # Trigger alert
-            if aa.alert and ua.alert:
+            if aa.alert and ua.alert and trigger_bool:
                 send_alert_type(ua.type, ua.address, trigger_message)
 
             # Debug Alert
-            if aa.debug and ua.debug:
+            if aa.debug and ua.debug and debug_bool:
                 send_alert_type(ua.type, ua.address, trigger_message)
 
             # Pending Alert
-            if aa.approval and ua.approval:
+            if aa.approval and ua.approval and pending_bool:
                 send_alert_type(ua.type, ua.address, trigger_message)
 
 def send_alert_type(alert_type, address, trigger_message):
