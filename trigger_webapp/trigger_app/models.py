@@ -23,6 +23,9 @@ class TriggerEvent(models.Model):
     pos_error = models.FloatField(blank=True, null=True)
     recieved_data = models.DateTimeField(auto_now_add=True, blank=True)
 
+    def __str__(self):
+        return str(self.id)
+
     class Meta:
         ordering = ['-id']
 
