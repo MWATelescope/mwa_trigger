@@ -21,7 +21,7 @@
     {% for ua in user_alerts %}
     <!-- Display Objects -->
     <tr>
-        <td>{{ ua.type }}</td>
+        <td>{{ ua.get_type_display }}</td>
         <td>{{ ua.address }}</td>
 
         <!-- Check if the user recieves this type of alert -->
