@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {% load static %}
+    <meta charset="utf-8">
+    <title>User Alert Status</title>
+  </head>
+  <body>
+    <p>N/A mean the admin has not given you permission to recieve this trigger type. Send them a message if you would like this changed.</p>
+    <table class="fl-table">
+    <thead>
+    <tr>
+        <th>Type</th>
+        <th>Address</th>
+        <th>Trigger</th>
+        <th>Debug</th>
+        <th>Pending Approval</th>
+    </tr>
+    </thead>
+    <!-- Iterate over ther alerts the user has made -->
+    {% for ua in user_alerts %}
+    <!-- Display Objects -->
+    <tr>
+        <td>{{ ua.type }}</td>
+        <td>{{ ua.address }}</td>
+
+        <!-- Check if the user recieves this type of alert -->
+        {% if admin_alerts.alert %}
+          <!-- True so show what the user has -->
+          <td>{{ ua.alert }}</td>
+        {% else %}
+          <!-- False so show N/A because the user can't get this type of alert -->
+          <td>N/A</td>
+        {% endif %}
+
+        {% if admin_alerts.debug %}
+          <td>{{ ua.debug  }}</td>
+        {% else %}
+          <td>N/A</td>
+        {% endif %}
+
+        {% if admin_alerts.approval %}
+          <td>{{ ua.approval }}</td>
+        {% else %}
+          <td>N/A</td>
+        {% endif %}
+
+        <td><a href="/user_alert_delete/{{ ua.id }}/" style="color:Red;">Delete Alert?</a></td>
+    </tr>
+    <!-- If object_list is empty  -->
+    {% empty %}
+    <li>No objects yet.</li>
+    {% endfor %}
+    </table>
+  </body>
+</html>

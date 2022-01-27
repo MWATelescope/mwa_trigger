@@ -4,6 +4,7 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.db import transaction
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -42,6 +43,23 @@ class CometLogList(ListView):
 def home_page(request):
     comet_status = models.Status.objects.get(name='twistd_comet')
     return render(request, 'trigger_app/home_page.html', {'twistd_comet_status': comet_status})
+
+
+@login_required
+def user_alert_status(request):
+    u = request.user
+    admin_alerts = models.AdminAlerts.objects.get(user=u)
+    user_alerts = models.UserAlerts.objects.filter(user=u)
+    return render(request, 'trigger_app/user_alert_status.html', {'admin_alerts': admin_alerts,
+                                                                  'user_alerts' : user_alerts})
+
+
+@login_required
+def user_alert_delete(request, id):
+    u = request.user
+    user_alert = models.UserAlerts.objects.get(user=u, id=id)
+    user_alert.delete()
+    return render(request, 'trigger_app/user_alert_status.html')
 
 
 def voevent_view(request, id):
