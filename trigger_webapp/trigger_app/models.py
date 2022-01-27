@@ -73,3 +73,21 @@ class AdminAlerts(models.Model):
     approval = models.BooleanField(default=False)
     def __str__(self):
         return "{}_Alerts".format(self.user)
+
+
+class UserAlerts(models.Model):
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    EMAIL = 0
+    SMS = 1
+    PHONE_CALL = 2
+    TYPE_CHOICES = (
+        (EMAIL, 'Email'),
+        (SMS, 'SMS'),
+        (PHONE_CALL, 'Phone Call')
+    )
+    type = models.PositiveSmallIntegerField(choices=TYPE_CHOICES)
+    address = models.CharField(max_length=64, blank=True, null=True)
+    alert = models.BooleanField(default=True)
+    debug = models.BooleanField(default=True)
+    approval = models.BooleanField(default=True)

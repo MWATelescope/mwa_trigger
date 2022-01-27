@@ -1,16 +1,17 @@
 
 from django.views.generic.list import ListView
 from django.conf import settings
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.db import transaction
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 import mimetypes
 
-from . import models, serializers
+from . import models, serializers, forms
 
 import os
 import sys
@@ -42,6 +43,43 @@ class CometLogList(ListView):
 def home_page(request):
     comet_status = models.Status.objects.get(name='twistd_comet')
     return render(request, 'trigger_app/home_page.html', {'twistd_comet_status': comet_status})
+
+
+@login_required
+def user_alert_status(request):
+    u = request.user
+    admin_alerts = models.AdminAlerts.objects.get(user=u)
+    user_alerts = models.UserAlerts.objects.filter(user=u)
+    return render(request, 'trigger_app/user_alert_status.html', {'admin_alerts': admin_alerts,
+                                                                  'user_alerts' : user_alerts})
+
+
+@login_required
+def user_alert_delete(request, id):
+    u = request.user
+    user_alert = models.UserAlerts.objects.get(user=u, id=id)
+    user_alert.delete()
+    return HttpResponseRedirect('/user_alert_status/')
+
+
+@login_required
+def user_alert_create(request):
+    if request.POST:
+        # Create UserAlert that already includes user
+        u = request.user
+        ua = models.UserAlerts(user=u)
+        # Let user update everything else
+        form = forms.UserAlertForm(request.POST, instance=ua)
+        if form.is_valid():
+            try:
+                form.save()
+                # on success, the request is redirected as a GET
+                return HttpResponseRedirect('/user_alert_status/')
+            except:
+                pass # handling can go here
+    else:
+        form = forms.UserAlertForm()
+    return render(request, 'trigger_app/form.html', {'form':form})
 
 
 def voevent_view(request, id):

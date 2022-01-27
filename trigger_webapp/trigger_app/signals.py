@@ -1,19 +1,27 @@
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver, Signal
 from django.contrib.auth.models import User
-from .models import VOEvent, TriggerEvent, CometLog, Status, AdminAlerts
+from django.core.mail import send_mail
+from django.conf import settings
+
+from .models import UserAlerts, VOEvent, TriggerEvent, CometLog, Status, AdminAlerts
 
 from mwa_trigger.parse_xml import parsed_VOEvent
 from mwa_trigger.trigger_logic import worth_observing
 import voeventparse
 
+import os
 import threading
 import time
 from schedule import Scheduler
 from subprocess import PIPE, Popen
+from twilio.rest import Client
 
 import logging
 logger = logging.getLogger(__name__)
+
+account_sid = os.environ['TWILIO_ACCOUNT_SID']
+auth_token = os.environ['TWILIO_AUTH_TOKEN']
 
 
 @receiver(pre_save, sender=VOEvent)
@@ -53,7 +61,61 @@ def group_trigger(sender, instance, **kwargs):
                 new_trig.decision = 'I'
             new_trig.save()
 
-            #TODO add debug message to admins here
+            # send off alert messages to users and admins
+            send_all_alerts(trigger_bool, debug_bool, False, trigger_message)
+
+
+def send_all_alerts(trigger_bool, debug_bool, pending_bool, trigger_message):
+    # Get all admin alert permissions
+    admin_alerts = AdminAlerts.objects.all()
+    for aa in admin_alerts:
+        # Grab user
+        user = aa.user
+        user_alerts = UserAlerts.objects.filter(user=user)
+
+        # Send off the alerts of types user defined
+        for ua in user_alerts:
+            # Check if user can recieve each type of alert
+            # Trigger alert
+            if aa.alert and ua.alert and trigger_bool:
+                send_alert_type(ua.type, ua.address, trigger_message)
+
+            # Debug Alert
+            if aa.debug and ua.debug and debug_bool:
+                send_alert_type(ua.type, ua.address, trigger_message)
+
+            # Pending Alert
+            if aa.approval and ua.approval and pending_bool:
+                send_alert_type(ua.type, ua.address, trigger_message)
+
+def send_alert_type(alert_type, address, trigger_message):
+    # Set up twillo client for SMS and calls
+    client = Client(account_sid, auth_token)
+
+    if alert_type == 0:
+        # Send an email
+        send_mail(
+            'MWA Trigger Alert',
+            trigger_message,
+            settings.EMAIL_HOST_USER,
+            [address],
+            #fail_silently=False,
+        )
+    elif alert_type == 1:
+        # Send an SMS
+        message = client.messages.create(
+                    to=address,
+                    from_='+17755216557',
+                    body=trigger_message,
+        )
+    elif alert_type == 2:
+        # Make a call
+        call = client.calls.create(
+                    url='http://demo.twilio.com/docs/voice.xml',
+                    to=address,
+                    from_='+17755216557',
+        )
+
 
 
 @receiver(post_save, sender=User)

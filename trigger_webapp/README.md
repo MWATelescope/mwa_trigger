@@ -19,3 +19,13 @@ ALTER ROLE $DB_USER SET timezone TO 'UTC';
 python manage.py makemigrations
 python manage.py migrate --run-syncdb
 python manage.py createsuperuser
+
+
+## Create a non admin
+Use
+
+BASE_URL/admin/auth/user/add/
+
+To make a new user then if they would like alerts make them fill out
+
+BASE_URL/user_alert_status/

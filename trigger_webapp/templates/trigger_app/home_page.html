@@ -7,8 +7,15 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/colours_pos_neg.css' %}"/>
   </head>
   <body>
-    <header>MWA Trigger Home Page</header>
-    <h3>Trigger Receiving Status (twistd comet)</h3>
+    <h1>MWA Trigger Home Page</h1>
+    {% if user.is_authenticated %}
+      Hi {{ user.username }}!
+      <p><a href="{% url 'logout' %}">Log Out</a></p>
+    {% else %}
+      <p>You are not logged in</p>
+      <a href="{% url 'login' %}">Log In</a>
+    {% endif %}
+    <h3>VOEvent Receiving Status (twistd comet)</h3>
     {% if twistd_comet_status.status < 0 %}
     <p class="NegativeTransaction">
     {% else %}
@@ -20,6 +27,7 @@
     <p><a href="/trigger_log/" style="text-decoration:None">View Trigger Log</a></p>
     <p><a href="/voevent_log/" style="text-decoration:None">View Raw VOEvent Log</a></p>
     <h3>Other</h3>
+    <p><a href="/user_alert_status/" style="text-decoration:None">User Alert Control</a></p>
     <p><a href="/admin/trigger_app/adminalerts/" style="text-decoration:None">Admin Alert Control</a></p>
   </body>
 </html>
