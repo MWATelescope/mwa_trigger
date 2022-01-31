@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import UserAlerts, VOEvent, TriggerEvent, CometLog, Status, AdminAlerts
+from .models import UserAlerts, VOEvent, TriggerEvent, CometLog, Status, AdminAlerts,  MWAObservations
 from .mwa_observe import trigger_mwa_observation
 
 from mwa_trigger.parse_xml import parsed_VOEvent
@@ -25,13 +25,13 @@ account_sid = os.environ['TWILIO_ACCOUNT_SID']
 auth_token = os.environ['TWILIO_AUTH_TOKEN']
 
 
-@receiver(pre_save, sender=VOEvent)
+@receiver(post_save, sender=VOEvent)
 def group_trigger(sender, instance, **kwargs):
     """Check if the latest VOEvent has already been observered or if it is new and update the models accordingly
     """
-    new_voevent = instance
-    if not new_voevent.ignored:
-        trigger_id = new_voevent.trigger_id
+    # instance is the new VOEvent
+    if not instance.ignored:
+        trigger_id = instance.trigger_id
         if TriggerEvent.objects.filter(trigger_id=trigger_id).exists():
             # Trigger event already exists so link the new VOEvent
             prev_trig = TriggerEvent.objects.get(trigger_id=trigger_id)
@@ -49,6 +49,7 @@ def group_trigger(sender, instance, **kwargs):
                                   pos_error=instance.pos_error)
             # Link the VOEvent
             instance.trigger_group_id = new_trig
+            instance.save()
 
             # Check if it's worth triggering an obs
             vo = parsed_VOEvent(None, packet=str(instance.xml_packet))
@@ -56,12 +57,24 @@ def group_trigger(sender, instance, **kwargs):
             trigger_bool, debug_bool, short_bool, trigger_message = worth_observing(vo)
             if trigger_bool:
                 # Check if you can observer and if so send off mwa observation
-                decision, trigger_message = trigger_mwa_observation(instance, trigger_message)
+                decision, trigger_message, obsids = trigger_mwa_observation(instance, trigger_message)
+                if decision == 'E':
+                    # Error observing so send off debug
+                    debug_bool = True
                 new_trig.decision = decision
+                new_trig.decision_reason = trigger_message
+                new_trig.save()
+                for obsid in obsids:
+                    # Create new obsid model
+                    mwa_obs = MWAObservations.objects.create(obsid=obsid,
+                                                   trigger_group_id=new_trig,
+                                                   voevent_id=instance,
+                                                   reason="First Observation")
+
             else:
                 new_trig.decision = 'I'
-            new_trig.decision_reason = trigger_message
-            new_trig.save()
+                new_trig.decision_reason = trigger_message
+                new_trig.save()
 
             # send off alert messages to users and admins
             send_all_alerts(trigger_bool, debug_bool, False, trigger_message)

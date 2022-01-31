@@ -33,7 +33,7 @@ def trigger_mwa_observation(voevent, trigger_message,
     if alt < horizion_limit:
         horizon_message = f" Not triggering due to horizon limit: alt {alt} < {horizion_limit}"
         logger.debug(horizon_message)
-        return 'I', trigger_message + horizon_message, None
+        return 'I', trigger_message + horizon_message, []
 
     # Not below horizon limit so observer
     logger.info(f"Triggering at gps time {t.gps} ...")
@@ -55,17 +55,28 @@ def trigger_mwa_observation(voevent, trigger_message,
                         vcsmode=True, #TODO for now this is always true but should make a setting to change it
                         buffered=False,
                     )
+    # Check if succesful
+    if not result['success']:
+        # Observation not succesful so record why
+        for err_id in result['error']:
+            trigger_message += f" {result['error'][err_id]}"
+        # Return an error as the trigger status
+        return 'E', trigger_message, []
+
     # Output the results
     logger.info(f"Trigger sent: {result['success']}")
     logger.info(f"Trigger params: {result['success']}")
-    if result['schedule']['stdout']:
-        logger.info(f"schedule' stdout: {result['schedule']['stdout']}")
-    if result['schedule']['stderr']:
-        logger.info(f"schedule' stderr: {result['schedule']['stderr']}")
+    if 'stdout' in result['schedule'].keys():
+        if result['schedule']['stdout']:
+            logger.info(f"schedule' stdout: {result['schedule']['stdout']}")
+    if 'stderr' in result['schedule'].keys():
+        if result['schedule']['stderr']:
+            logger.info(f"schedule' stderr: {result['schedule']['stderr']}")
 
-    # Grab the obsid
+    # Grab the obsids (sometimes we will send of several observations)
+    obsids = []
     for r in result['schedule']['stderr'].split("\n"):
         if r.startswith("INFO:Schedule metadata for"):
-            obsid = r.split(" for ")[1][:-1]
+            obsids.append(r.split(" for ")[1][:-1])
 
-    return 'T', trigger_message, obsid
+    return 'T', trigger_message, obsids
