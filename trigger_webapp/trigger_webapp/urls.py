@@ -27,6 +27,7 @@ urlpatterns = [
     path('user_alert_delete/<int:id>/', views.user_alert_delete),
     path('user_alert_create/', views.user_alert_create),
     path('trigger_log/', views.TriggerEventList.as_view()),
+    path('triggerevent_details/<int:tid>/', views.TriggerEvent_details),
     path('voevent_log/', views.VOEventList.as_view()),
     path('comet_log/', views.CometLogList.as_view()),
     #path('<str:filepath>/', views.download_file),

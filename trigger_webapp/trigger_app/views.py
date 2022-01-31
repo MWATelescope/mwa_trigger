@@ -45,6 +45,15 @@ def home_page(request):
     return render(request, 'trigger_app/home_page.html', {'twistd_comet_status': comet_status})
 
 
+def TriggerEvent_details(request, tid):
+    trigger_event = models.TriggerEvent.objects.get(id=tid)
+    voevents = models.VOEvent.objects.filter(trigger_group_id=trigger_event)
+    print(trigger_event)
+    print(voevents)
+    return render(request, 'trigger_app/triggerevent_details.html', {'trigger_event':trigger_event,
+                                                                     'voevents':voevents})
+
+
 @login_required
 def user_alert_status(request):
     u = request.user
