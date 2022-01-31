@@ -8,6 +8,7 @@ from .models import UserAlerts, VOEvent, TriggerEvent, CometLog, Status, AdminAl
 
 from mwa_trigger.parse_xml import parsed_VOEvent
 from mwa_trigger.trigger_logic import worth_observing
+from mwa_trigger.triggerservice import trigger
 import voeventparse
 
 import os
@@ -57,6 +58,26 @@ def group_trigger(sender, instance, **kwargs):
             if trigger_bool:
                 new_trig.decision = 'T'
                 #TODO Put send of trigger here
+                #logger.info("Triggering at gps time %d ..." % (t.gps,))
+                result = trigger(project_id='C002',
+                                 secure_key=os.environ['MWA_SECURE_KEY'],
+                                 group_id=instance.trigger_id,
+                                 pretend=True, #TODO turn this off after testing
+                                 ra=instance.ra, dec=instance.dec,
+                                 creator='VOEvent_Auto_Trigger', #TODO grab version
+                                 obsname=f'{instance.telescope}_{instance.trigger_id}',
+                                 nobs=1, # Changes if not in VCS
+                                 freqspecs='145,24',
+                                 avoidsun=True,
+                                 inttime=0.5,
+                                 freqres=10,
+                                 exptime=15, # Default VCS time
+                                 calibrator=True,
+                                 calexptime=120,
+                                 vcsmode=True, #TODO for now this is always true but should make a setting to change it
+                                 buffered=False,
+                                )
+                logger.info(f"Trigger sent: {result}")
             else:
                 new_trig.decision = 'I'
             new_trig.save()
