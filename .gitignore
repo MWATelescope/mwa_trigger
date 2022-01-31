@@ -3,3 +3,4 @@
 .eggs
 trigger_webapp/trigger_app/migrations/
 tests/_trial_temp/
+.voevent_env/
