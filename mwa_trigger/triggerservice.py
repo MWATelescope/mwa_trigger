@@ -483,8 +483,8 @@ def trigger_atca(
         The logger to use.
     """
 
-    ra_str = Angle(ra * u.deg).to_string(sep=":")
-    dec_str = Angle(dec * u.deg).to_string(sep=":")
+    ra_str = Angle(ra * u.deg).to_string(unit=u.hour, sep=":")
+    dec_str = Angle(dec * u.deg).to_string(unit=u.deg, sep=":")
 
     schedule = cabb.schedule()
     # currentFreqs = cabb.monica_information.getFrequencies()
