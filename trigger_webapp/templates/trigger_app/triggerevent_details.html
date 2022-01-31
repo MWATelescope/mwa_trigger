@@ -81,5 +81,27 @@
       <li>No objects yet.</li>
       {% endfor %}
       </table>
+
+    <h2>MWA Observations</h2>
+
+    <table class="fl-table">
+      <thead>
+      <tr>
+        <th>Observation ID</th>
+        <th>Reason</th>
+      </tr>
+      </thead>
+      <!-- Iterate over object_list -->
+      {% for ob in mwa_obs %}
+      <!-- Display Objects -->
+      <tr>
+        <td><a href="http://ws.mwatelescope.org/observation/obs/?obsid={{ ob.obsid }}" style="text-decoration:None">{{ ob.obsid }}</a></td>
+        <td>{{ ob.reason }}</td>
+      </tr>
+      <!-- If object_list is empty  -->
+      {% empty %}
+      <p>No observations yet.</p>
+      {% endfor %}
+      </table>
   </body>
 </html>

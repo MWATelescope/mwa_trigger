@@ -48,10 +48,10 @@ def home_page(request):
 def TriggerEvent_details(request, tid):
     trigger_event = models.TriggerEvent.objects.get(id=tid)
     voevents = models.VOEvent.objects.filter(trigger_group_id=trigger_event)
-    print(trigger_event)
-    print(voevents)
+    mwa_obs = models.MWAObservations.objects.filter(trigger_group_id=trigger_event)
     return render(request, 'trigger_app/triggerevent_details.html', {'trigger_event':trigger_event,
-                                                                     'voevents':voevents})
+                                                                     'voevents':voevents,
+                                                                     'mwa_obs':mwa_obs})
 
 
 @login_required
