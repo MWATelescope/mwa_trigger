@@ -246,7 +246,7 @@ def QueueWorker():
                 # event arrives as a unicode string but loads requires a non-unicode string.
                 v = voeventparse.loads(str(eventxml))
             else:
-                v = voeventparse.loads(eventxml.encode('latin-1'))
+                v = voeventparse.loads(eventxml.encode())
             if v.attrib['ivorn'] in IVORN_LIST:
                 DEFAULTLOGGER.info("Already seen event %s, discarding. Current queue size is %d" % (v.attrib['ivorn'],
                                                                                                     EventQueue.qsize()))

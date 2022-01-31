@@ -67,14 +67,16 @@ def web_api(url='', urldict=None, postdict=None, username=None, password=None, l
     logger.debug("Request: %s %s." % (reqtype, url))
     if postdict:
         logger.debug('Data: %s' % postdict)
+    # Encode data
+    if sys.version_info.major > 2:
+        base64string = base64.b64encode(('%s:%s' % (username, password)).encode())
+        base64string = base64string.decode('latin-1')
+        postdata = postdata.encode()
+    else:
+        base64string = base64.b64encode('%s:%s' % (username, password))
+
     try:
         if (username is not None) and (password is not None):
-            if sys.version_info.major > 2:
-                base64string = base64.b64encode(('%s:%s' % (username, password)).encode('latin-1'))
-                base64string = base64string.decode('latin-1')
-                postdata = postdata.encode('latin-1')
-            else:
-                base64string = base64.b64encode('%s:%s' % (username, password))
             req = Request(url, postdata, {'Content-Type':'application/json',
                                           'Accept':'application/json',
                                           'Authorization':'Basic %s' % base64string})

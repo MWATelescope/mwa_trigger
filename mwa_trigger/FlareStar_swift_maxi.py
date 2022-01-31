@@ -108,7 +108,7 @@ def processevent(event='', pretend=True):
         # event arrives as a unicode string but loads requires a non-unicode string.
         v = voeventparse.loads(str(event))
     else:
-        v = voeventparse.loads(event.encode('latin-1'))
+        v = voeventparse.loads(event.encode())
 
     # only respond to SWIFT and MAXI evetnts
     ivorn = v.attrib['ivorn']

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {% load static %}
+    <meta charset="utf-8">
+    <title>Trigger Event Details</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/pretty_table.css' %}"/>
+  </head>
+  <body>
+    <h2>Trigger Event</h2>
+    <table class="fl-table">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Decision</th>
+        <th>Decision Reason</th>
+        <th>Telescope</th>
+        <th>Trigger ID</th>
+        <th>Trigger Type</th>
+        <th>Duration</th>
+        <th>Right Acension</th>
+        <th>Declination</th>
+        <th>Position Error</th>
+    </tr>
+    </thead>
+    <tr>
+        <td>{{ trigger_event.id }}</td>
+        <td>{{ trigger_event.get_decision_display }}</td>
+        <td>{{ trigger_event.decision_reason }}</td>
+        <td>{{ trigger_event.telescope }}</td>
+        <td>{{ trigger_event.trigger_id }}</td>
+        <td>{{ trigger_event.trigger_type }}</td>
+        <td>{{ trigger_event.duration }}</td>
+        <td>{{ trigger_event.ra }}</td>
+        <td>{{ trigger_event.dec }}</td>
+        <td>{{ trigger_event.pos_error }}</td>
+    </tr>
+    </table>
+
+    <h2>VOEvents</h2>
+
+    <table class="fl-table">
+      <thead>
+      <tr>
+          <th>ID</th>
+          <th>Recieved</th>
+          <th>Ignored</th>
+          <th>Trigger Group ID</th>
+          <th>Telescope</th>
+          <th>Event Type</th>
+          <th>Event ID</th>
+          <th>Sequence number</th>
+          <th>Duration</th>
+          <th>Right Acension</th>
+          <th>Declination</th>
+          <th>Position Error</th>
+          <th>XML File</th>
+      </tr>
+      </thead>
+      <!-- Iterate over object_list -->
+      {% for voevent in voevents %}
+      <!-- Display Objects -->
+      <tr>
+          <td>{{ voevent.id }}</td>
+          <td>{{ voevent.recieved_data }}</td>
+          <td>{{ voevent.ignored }}</td>
+          <td>{{ voevent.trigger_group_id }}</td>
+          <td>{{ voevent.telescope }}</td>
+          <td>{{ voevent.trigger_type }}</td>
+          <td>{{ voevent.trigger_id }}</td>
+          <td>{{ voevent.sequence_num }}</td>
+          <td>{{ voevent.duration }}</td>
+          <td>{{ voevent.ra }}</td>
+          <td>{{ voevent.dec }}</td>
+          <td>{{ voevent.pos_error }}</td>
+          <!-- <td>{{ voevents.xml }}</td> -->
+          <td><a href="/voevent_view/{{ voevent.id }}" style="text-decoration:None">View xml</a></td>
+      </tr>
+      <!-- If object_list is empty  -->
+      {% empty %}
+      <li>No objects yet.</li>
+      {% endfor %}
+      </table>
+
+    <h2>MWA Observations</h2>
+
+    <table class="fl-table">
+      <thead>
+      <tr>
+        <th>Observation ID</th>
+        <th>Reason</th>
+      </tr>
+      </thead>
+      <!-- Iterate over object_list -->
+      {% for ob in mwa_obs %}
+      <!-- Display Objects -->
+      <tr>
+        <td><a href="http://ws.mwatelescope.org/observation/obs/?obsid={{ ob.obsid }}" style="text-decoration:None">{{ ob.obsid }}</a></td>
+        <td>{{ ob.reason }}</td>
+      </tr>
+      <!-- If object_list is empty  -->
+      {% empty %}
+      <p>No observations yet.</p>
+      {% endfor %}
+      </table>
+  </body>
+</html>

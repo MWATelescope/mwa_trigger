@@ -6,11 +6,13 @@ class TriggerEvent(models.Model):
     id = models.AutoField(primary_key=True)
     P = 'P'
     I = 'I'
+    E = 'E'
     T = 'T'
     CHOICES = (
-        ('P', 'Pending'),
-        ('I', 'Ignored'),
-        ('T', 'Triggered'),
+        (P, 'Pending'),
+        (I, 'Ignored'),
+        (E, 'Error'),
+        (T, 'Triggered'),
     )
     decision = models.CharField(max_length=32, choices=CHOICES, default=P)
     decision_reason = models.CharField(max_length=256, blank=True, null=True)
@@ -94,3 +96,10 @@ class UserAlerts(models.Model):
     alert = models.BooleanField(default=True)
     debug = models.BooleanField(default=True)
     approval = models.BooleanField(default=True)
+
+
+class MWAObservations(models.Model):
+    obsid = models.IntegerField(primary_key=True)
+    trigger_group_id = models.ForeignKey(TriggerEvent, on_delete=models.SET_NULL, blank=True, null=True)
+    voevent_id = models.ForeignKey(VOEvent, on_delete=models.SET_NULL, blank=True, null=True)
+    reason = models.CharField(max_length=256, blank=True, null=True)
