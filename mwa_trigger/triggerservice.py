@@ -1,4 +1,3 @@
-
 """Library to simplify calls to the 'trigger' web services running on mro.mwa128t.org, used to
    interrupt current MWA observations as a result of an incoming trigger.
 """
@@ -7,8 +6,15 @@ import base64
 import json
 import sys
 import traceback
+from time import gmtime, strftime
+from astropy.coordinates import Angle
+import astropy.units as u
+
+import cabb_scheduler as cabb
+import atca_rapid_response_api as arrApi
 
 import logging
+
 logging.basicConfig()
 
 if sys.version_info.major == 3:  # Python3
@@ -26,7 +32,14 @@ DEFAULTLOGGER.level = logging.DEBUG
 BASEURL = "http://mro.mwa128t.org/trigger/"
 
 
-def web_api(url='', urldict=None, postdict=None, username=None, password=None, logger=DEFAULTLOGGER):
+def web_api(
+    url="",
+    urldict=None,
+    postdict=None,
+    username=None,
+    password=None,
+    logger=DEFAULTLOGGER,
+):
     """
     Given a url, an optional dictionary for URL arguments, and an optional dictionary
     containing data to POST, open the appropriate URL, POST data if supplied, and
@@ -49,9 +62,9 @@ def web_api(url='', urldict=None, postdict=None, username=None, password=None, l
              .get_param() to extract values) or None.
     """
     if urldict is not None:
-        urldata = '?' + urlencode(urldict)
+        urldata = "?" + urlencode(urldict)
     else:
-        urldata = ''
+        urldata = ""
 
     url += urldata
 
@@ -61,26 +74,37 @@ def web_api(url='', urldict=None, postdict=None, username=None, password=None, l
         postdata = None
 
     if postdict:
-        reqtype = 'POST'
+        reqtype = "POST"
     else:
-        reqtype = 'GET'
+        reqtype = "GET"
     logger.debug("Request: %s %s." % (reqtype, url))
     if postdict:
-        logger.debug('Data: %s' % postdict)
+        logger.debug("Data: %s" % postdict)
     try:
         if (username is not None) and (password is not None):
             if sys.version_info.major > 2:
-                base64string = base64.b64encode(('%s:%s' % (username, password)).encode('latin-1'))
-                base64string = base64string.decode('latin-1')
-                postdata = postdata.encode('latin-1')
+                base64string = base64.b64encode(
+                    ("%s:%s" % (username, password)).encode("latin-1")
+                )
+                base64string = base64string.decode("latin-1")
+                postdata = postdata.encode("latin-1")
             else:
-                base64string = base64.b64encode('%s:%s' % (username, password))
-            req = Request(url, postdata, {'Content-Type':'application/json',
-                                          'Accept':'application/json',
-                                          'Authorization':'Basic %s' % base64string})
+                base64string = base64.b64encode("%s:%s" % (username, password))
+            req = Request(
+                url,
+                postdata,
+                {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    "Authorization": "Basic %s" % base64string,
+                },
+            )
         else:
-            req = Request(url, postdata, {'Content-Type': 'application/json',
-                                          'Accept': 'application/json'})
+            req = Request(
+                url,
+                postdata,
+                {"Content-Type": "application/json", "Accept": "application/json"},
+            )
         try:
             resobj = urlopen(req)
             data = resobj.read()
@@ -92,7 +116,9 @@ def web_api(url='', urldict=None, postdict=None, username=None, password=None, l
                 else:
                     data = data.decode(resobj.headers.get_content_charset())
         except (ValueError, URLError):
-            logger.error('urlopen failed, or there was an error reading from the opened request object')
+            logger.error(
+                "urlopen failed, or there was an error reading from the opened request object"
+            )
             logger.error(traceback.format_exc())
             return None
 
@@ -102,13 +128,16 @@ def web_api(url='', urldict=None, postdict=None, username=None, password=None, l
             result = data
         return result
     except HTTPError as error:
-        logger.error("HTTP error from server: code=%d, response:\n %s" % (error.code, error.read()))
-        logger.error('Unable to retrieve %s' % (url))
+        logger.error(
+            "HTTP error from server: code=%d, response:\n %s"
+            % (error.code, error.read())
+        )
+        logger.error("Unable to retrieve %s" % (url))
         logger.error(traceback.format_exc())
         return None
     except URLError as error:
         logger.error("URL or network error: %s" % error.reason)
-        logger.error('Unable to retrieve %s' % (url))
+        logger.error("Unable to retrieve %s" % (url))
         logger.error(traceback.format_exc())
         return None
 
@@ -128,15 +157,15 @@ def busy(project_id=None, obstime=None, logger=DEFAULTLOGGER):
     """
     urldict = {}
     if project_id is not None:
-        urldict['project_id'] = project_id
+        urldict["project_id"] = project_id
     else:
-        logger.error('triggering.trigger() must be passed a valid project_id')
+        logger.error("triggering.trigger() must be passed a valid project_id")
         return None
 
     if obstime is not None:
-        urldict['obstime'] = obstime
+        urldict["obstime"] = obstime
 
-    result = web_api(url=BASEURL + 'busy', urldict=urldict, logger=logger)
+    result = web_api(url=BASEURL + "busy", urldict=urldict, logger=logger)
     return result
 
 
@@ -153,7 +182,7 @@ def vcsfree(logger=DEFAULTLOGGER):
     """
     urldict = {}
 
-    result = web_api(url=BASEURL + 'vcsfree', urldict=urldict, logger=logger)
+    result = web_api(url=BASEURL + "vcsfree", urldict=urldict, logger=logger)
     return result
 
 
@@ -169,22 +198,36 @@ def obslist(obstime=None, logger=DEFAULTLOGGER):
     """
     urldict = {}
     if obstime is not None:
-        urldict['obstime'] = obstime
+        urldict["obstime"] = obstime
 
-    result = web_api(url=BASEURL + 'obslist', urldict=urldict, logger=logger)
+    result = web_api(url=BASEURL + "obslist", urldict=urldict, logger=logger)
     return result
 
 
-def trigger(project_id=None, secure_key=None, group_id=None,
-            ra=None, dec=None, alt=None, az=None, source=None, freqspecs=None,
-            creator=None, obsname=None, nobs=None, exptime=None,
-            calexptime=None, calibrator=None,
-            freqres=None, inttime=None,
-            avoidsun=None,
-            vcsmode=None,
-            buffered=None,
-            pretend=None,
-            logger=DEFAULTLOGGER):
+def trigger(
+    project_id=None,
+    secure_key=None,
+    group_id=None,
+    ra=None,
+    dec=None,
+    alt=None,
+    az=None,
+    source=None,
+    freqspecs=None,
+    creator=None,
+    obsname=None,
+    nobs=None,
+    exptime=None,
+    calexptime=None,
+    calibrator=None,
+    freqres=None,
+    inttime=None,
+    avoidsun=None,
+    vcsmode=None,
+    buffered=None,
+    pretend=None,
+    logger=DEFAULTLOGGER,
+):
     """
     Call with the parameters that describe the observation/s to schedule, and those observations will
     be added to the schedule immediately, starting 'now'.
@@ -248,85 +291,97 @@ def trigger(project_id=None, secure_key=None, group_id=None,
     """
 
     if vcsmode and buffered:
-        return triggerbuffer(project_id=project_id,
-                             secure_key=secure_key,
-                             pretend=pretend,
-                             obstime=nobs*exptime,
-                             logger=logger)
+        return triggerbuffer(
+            project_id=project_id,
+            secure_key=secure_key,
+            pretend=pretend,
+            obstime=nobs * exptime,
+            logger=logger,
+        )
 
     urldict = {}
     postdict = {}
     if project_id is not None:
-        urldict['project_id'] = project_id
+        urldict["project_id"] = project_id
     else:
-        logger.error('triggering.trigger() must be passed a valid project_id')
+        logger.error("triggering.trigger() must be passed a valid project_id")
         return None
 
     if secure_key is not None:
-        postdict['secure_key'] = secure_key
+        postdict["secure_key"] = secure_key
     else:
-        logger.error('triggering.trigger() must be passed a valid secure_key')
+        logger.error("triggering.trigger() must be passed a valid secure_key")
         return None
 
     if group_id is not None:
-        postdict['group_id'] = group_id
+        postdict["group_id"] = group_id
     if ra is not None:
-        postdict['ra'] = ra
+        postdict["ra"] = ra
     if dec is not None:
-        postdict['dec'] = dec
+        postdict["dec"] = dec
     if alt is not None:
-        postdict['alt'] = alt
+        postdict["alt"] = alt
     if az is not None:
-        postdict['az'] = az
+        postdict["az"] = az
     if source is not None:
-        postdict['source'] = source
+        postdict["source"] = source
     if freqspecs is not None:
         if type(freqspecs) == list:
-            postdict['freqspecs'] = json.dumps(freqspecs)
+            postdict["freqspecs"] = json.dumps(freqspecs)
         else:
-            postdict['freqspecs'] = freqspecs
+            postdict["freqspecs"] = freqspecs
 
     if creator is not None:
-        postdict['creator'] = creator
+        postdict["creator"] = creator
     if obsname is not None:
-        urldict['obsname'] = obsname
+        urldict["obsname"] = obsname
     if nobs is not None:
-        postdict['nobs'] = nobs
+        postdict["nobs"] = nobs
     if exptime is not None:
-        postdict['exptime'] = exptime
+        postdict["exptime"] = exptime
     if calexptime is not None:
-        postdict['calexptime'] = calexptime
+        postdict["calexptime"] = calexptime
     if (freqres is not None) and (inttime is not None):
-        postdict['freqres'] = freqres
-        postdict['inttime'] = inttime
+        postdict["freqres"] = freqres
+        postdict["inttime"] = inttime
     else:
         if (freqres is None) != (inttime is None):
-            logger.error('triggering.trigger() must be passed BOTH inttime AND freqres, or neither of them.')
+            logger.error(
+                "triggering.trigger() must be passed BOTH inttime AND freqres, or neither of them."
+            )
             return None
     if calibrator is not None:
-        postdict['calibrator'] = calibrator
+        postdict["calibrator"] = calibrator
     if avoidsun is not None:
-        postdict['avoidsun'] = avoidsun
+        postdict["avoidsun"] = avoidsun
     if pretend is not None:
-        postdict['pretend'] = pretend
+        postdict["pretend"] = pretend
     if vcsmode is not None:
-        postdict['vcsmode'] = vcsmode
+        postdict["vcsmode"] = vcsmode
 
-    logger.debug('urldict=%s' % urldict)
-    logger.debug('postdict=%s' % postdict)
+    logger.debug("urldict=%s" % urldict)
+    logger.debug("postdict=%s" % postdict)
 
     if vcsmode:
-        result = web_api(url=BASEURL + 'triggervcs', urldict=urldict, postdict=postdict, logger=logger)
+        result = web_api(
+            url=BASEURL + "triggervcs",
+            urldict=urldict,
+            postdict=postdict,
+            logger=logger,
+        )
     else:
-        result = web_api(url=BASEURL + 'triggerobs', urldict=urldict, postdict=postdict, logger=logger)
+        result = web_api(
+            url=BASEURL + "triggerobs",
+            urldict=urldict,
+            postdict=postdict,
+            logger=logger,
+        )
     return result
 
 
-def triggerbuffer(project_id=None,
-                  secure_key=None,
-                  pretend=None,
-                  obstime=None,
-                  logger=DEFAULTLOGGER):
+def triggerbuffer(
+    project_id=None, secure_key=None, pretend=None, obstime=None, logger=DEFAULTLOGGER
+):
     """
     If the correlator is in VOLTAGE_BUFFER mode, trigger an immediate dump of the memory buffers to
     disk, and start capturing voltage data for obstime seconds (after which a 16 second VOLTAGE_STOP observation is
@@ -360,22 +415,135 @@ def triggerbuffer(project_id=None,
     urldict = {}
     postdict = {}
     if project_id is not None:
-        urldict['project_id'] = project_id
+        urldict["project_id"] = project_id
     else:
-        logger.error('triggering.trigger() must be passed a valid project_id')
+        logger.error("triggering.trigger() must be passed a valid project_id")
         return None
 
     if secure_key is not None:
-        postdict['secure_key'] = secure_key
+        postdict["secure_key"] = secure_key
     else:
-        logger.error('triggering.trigger() must be passed a valid secure_key')
+        logger.error("triggering.trigger() must be passed a valid secure_key")
         return None
 
     if pretend is not None:
-        postdict['pretend'] = pretend
+        postdict["pretend"] = pretend
 
     if obstime is not None:
-        postdict['obstime'] = obstime
+        postdict["obstime"] = obstime
 
-    result = web_api(url=BASEURL + 'triggerbuffer', urldict=urldict, postdict=postdict, logger=logger)
+    result = web_api(
+        url=BASEURL + "triggerbuffer", urldict=urldict, postdict=postdict, logger=logger
+    )
     return result
+
+
+# Wrapper for naming consitency
+def trigger_mwa(args, **kwargs):
+    return trigger(args, **kwargs)
+
+
+def trigger_atca(
+    project_id=None,
+    secure_key=None,
+    ra=None,
+    dec=None,
+    source=None,
+    freqspecs=[5500, 9000],
+    nobs=32,
+    exptime=20,
+    calexptime=2,
+    pretend=False,
+    logger=DEFAULTLOGGER,
+):
+    """
+    Create a schedule for the ATCA and try to trigger an observation.
+
+    parameters
+    ----------
+    project_id : str
+        Project id
+    secure_key : str
+        filename for authentication token to use
+    ra, dec : float, float
+        RA/DEC pointing in degrees.
+    source : str
+        Name of the source to be observed (<= 10 chars)
+    freqspecs : [int, int] Default=[5500,9000]
+        The [f1,f2] frequencies to observe in MHz.
+    nobs : int Default=32
+        Number of observations to schedule
+    exptime : int Default=20
+        Exposure time per observation in minutes
+    calexptime : int Default=2
+        Exposure time per (phase) calibration in minutes
+    pretend : bool Default=False
+        If true, don't actually do any obs.
+    logger : logging.logger
+        The logger to use.
+    """
+
+    ra_str = Angle(ra * u.deg).to_string(sep=":")
+    dec_str = Angle(dec * u.deg).to_string(sep=":")
+
+    schedule = cabb.schedule()
+    # currentFreqs = cabb.monica_information.getFrequencies()
+    scan1 = schedule.addScan(
+        {
+            "source": source,
+            "rightAscension": ra_str,
+            "declination": dec_str,
+            "freq1": freqspecs[0],
+            "freq2": freqspecs[1],
+            "project": project_id,
+            "scanLength": "00:20:00",  # TODO: convert exptime to hh:mm:ss
+            "scanType": "Dwell",
+        }
+    )
+    schedule.disablePriorCalibration()
+    calList = scan1.findCalibrator()
+    currentArray = cabb.monica_information.getArray()
+    bestCal = calList.getBestCalibrator(currentArray)
+    logger.info(
+        f"Calibrator chosen: {bestCal['calibrator'].getName():%s}, {bestCal['distance']:%.1f} degrees away"
+    )
+    calScan = schedule.addCalibrator(
+        bestCal["calibrator"],
+        scan1,
+        {"scanLength": "00:02:00"},  # TODO: convert calexptime to hh:mm:ss
+    )
+
+    for _ in range(nobs - 1):
+        schedule.copyScans([scan1.getId()])
+
+    schedule.setLooping(False)
+
+    if logger.is_enabled_for(logging.DEBUG):
+        fname = strftime("%Y-%m-%d-T%H:%M", gmtime())
+        fname = f"{project_id}_{fname}.sch"
+        schedule.write(name=fname)
+
+    schedString = schedule.toString()
+
+    # We have our schedule now, so we need to craft the service request to submit it to
+    # the rapid response service.
+    rapidObj = {"schedule": schedString}
+    rapidObj["authenticationTokenFile"] = secure_key
+    # The name of the main target needs to be specified.
+    rapidObj["nameTarget"] = source
+    rapidObj["nameCalibrator"] = bestCal["calibrator"].getName()
+    rapidObj["email"] = "test@example.com"
+    rapidObj["usePreviousFrequencies"] = False
+
+    if pretend:
+        rapidObj["test"] = True
+        rapidObj["noTimeLimit"] = True
+        rapidObj["noScoreLimit"] = True
+        rapidObj["minimumTime"] = 2.0
+
+    request = arrApi.api(rapidObj)
+    try:
+        response = request.send()
+    except arrApi.responseError as r:
+        logger.error(f"ATCA return message: {r}")
+    return
