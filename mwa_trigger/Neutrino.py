@@ -70,10 +70,10 @@ class Neutrino(handlers.TriggerEvent):
         self.voe_source = None  # the source of the VOEvent message
         handlers.TriggerEvent.__init__(self, event=event)
 
-                  
+
 ################################################################################
 
-    
+
 def processevent(event='', pretend=True):
     """
     Called externally by the voevent_handler script when a new VOEvent is received. Return True if
@@ -88,7 +88,7 @@ def processevent(event='', pretend=True):
         # event arrives as a unicode string but loads requires a non-unicode string.
         v = voeventparse.loads(str(event))
     else:
-        v = voeventparse.loads(event.encode('latin-1'))
+        v = voeventparse.loads(event.encode())
     log.info("Working on: {}".format(v.attrib['ivorn']))
     isneutrino = is_neutrino(v)
     log.debug("Neutrino detection? {0}".format(isneutrino))
@@ -123,12 +123,12 @@ def is_neutrino(v):
 def handle_neutrino(v, pretend=False):
     """
     Handles the parsing of the VOEvent and generates observations.
-    
+
     :param v: string in VOEvent XML format
     :param pretend: Boolean, True if we don't want to schedule observations (automatically switches to True for test events)
     :return: None
     """
-    
+
     if v.attrib['role'] != "observation":
         log.info("Attribute role != 'observation'. Setting pretend=True")
         pretend = True
@@ -245,7 +245,7 @@ def handle_neutrino(v, pretend=False):
                  'trigtime': Time.now().iso,
                  'ra': position.ra,
                  'dec': position.dec}
-    
+
     email_text = EMAIL_TEMPLATE % emaildict
     email_subject = EMAIL_SUBJECT_TEMPLATE % neutrino.trigger_id
     # Do the trigger
@@ -271,24 +271,24 @@ def handle_neutrino(v, pretend=False):
 def test_event(filepath='../test_events/Antares_observation.xml'):
 
   pretend = True
-  
+
   log.info('Running test event from %s' % (filepath))
-  
+
   payload = astropy.utils.data.get_file_contents(filepath)
   v = lxml.etree.fromstring(payload)
-  
+
   start = timer()
-  
+
   isneutrino = is_neutrino(v)
   log.debug("Neutrino detection? {0}".format(isneutrino))
-  
+
   if isneutrino:
       handle_neutrino(v, pretend=pretend)
 
   end = timer()
 
   log.info("Finished. Response time: %.1f s" % (end-start))
-  
-  
+
+
 if __name__ == '__main__':
   test_event()
