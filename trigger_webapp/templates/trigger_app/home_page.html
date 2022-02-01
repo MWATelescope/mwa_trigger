@@ -4,7 +4,7 @@
     {% load static %}
     <meta charset="utf-8">
     <title>Home Page</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/colours_pos_neg.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/home_page.css' %}"/>
   </head>
   <body>
     <h1>MWA Trigger Home Page</h1>
@@ -15,17 +15,48 @@
       <p>You are not logged in</p>
       <a href="{% url 'login' %}">Log In</a>
     {% endif %}
+
     <h3>VOEvent Receiving Status (twistd comet)</h3>
     {% if twistd_comet_status.status < 0 %}
-    <p class="NegativeTransaction">
+      <p class="NegativeTransaction">
     {% else %}
-    <p class="PositiveTransaction">
+      <p class="PositiveTransaction">
     {% endif %}
-       {{ twistd_comet_status.get_status_display }} </p>
+    {{ twistd_comet_status.get_status_display }} </p>
     <p><a href="/comet_log/" style="text-decoration:None">View Comet Log</a></p>
+
+    <h3>Current Observing Settings</h3>
+    <table class="fl-table">
+      <thead>
+      <tr>
+        <th>Telescope</th>
+        <th>Max duration (s)</th>
+        <th>Minimum Fermi Probability</th>
+        <th>Repointing Limit</th>
+        <th>Observe in VCS?</th>
+      </tr>
+      </thead>
+      <!-- Iterate over object_list -->
+      {% for setting in settings %}
+      <!-- Display Objects -->
+      <tr>
+        <td>{{ setting.telescope }}</td>
+        <td>{{ setting.max_duration }}</td>
+        <td>{{ setting.fermi_prob }}</td>
+        <td>{{ setting.repointing_limit }}</td>
+        <td>{{ setting.vcs_mode }}</td>
+      </tr>
+      <!-- If object_list is empty  -->
+      {% empty %}
+      <li>No Settings yet.</li>
+      {% endfor %}
+      </table>
+      <p><a href="/admin/trigger_app/triggersettings/" style="text-decoration:None">Edit Observation Settings</a></p>
+
     <h3>Event Logs</h3>
     <p><a href="/trigger_log/" style="text-decoration:None">View Trigger Log</a></p>
     <p><a href="/voevent_log/" style="text-decoration:None">View Raw VOEvent Log</a></p>
+
     <h3>Other</h3>
     <p><a href="/user_alert_status/" style="text-decoration:None">User Alert Control</a></p>
     <p><a href="/admin/trigger_app/adminalerts/" style="text-decoration:None">Admin Alert Control</a></p>

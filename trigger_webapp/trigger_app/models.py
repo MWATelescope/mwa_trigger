@@ -1,3 +1,4 @@
+from os import sched_get_priority_max
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -103,3 +104,14 @@ class MWAObservations(models.Model):
     trigger_group_id = models.ForeignKey(TriggerEvent, on_delete=models.SET_NULL, blank=True, null=True)
     voevent_id = models.ForeignKey(VOEvent, on_delete=models.SET_NULL, blank=True, null=True)
     reason = models.CharField(max_length=256, blank=True, null=True)
+
+
+class TriggerSettings(models.Model):
+    telescope = models.CharField(max_length=64, blank=True, null=True)
+    max_duration = models.FloatField(blank=True, null=True)
+    fermi_prob = models.FloatField(blank=True, null=True)
+    vcs_mode = models.BooleanField(default=True, null=True)
+    repointing_limit = models.FloatField(blank=True, null=True)
+    testing = models.BooleanField(default=False, null=True)
+    def __str__(self):
+        return "{}".format(self.telescope)
