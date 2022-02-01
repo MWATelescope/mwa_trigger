@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import UserAlerts, VOEvent, TriggerEvent, CometLog, Status, AdminAlerts,  MWAObservations
+from .models import UserAlerts, VOEvent, TriggerEvent, CometLog, Status, AdminAlerts,  MWAObservations, TriggerSettings
 from .mwa_observe import trigger_mwa_observation
 
 from mwa_trigger.parse_xml import parsed_VOEvent
@@ -54,7 +54,13 @@ def group_trigger(sender, instance, **kwargs):
             # Check if it's worth triggering an obs
             vo = parsed_VOEvent(None, packet=str(instance.xml_packet))
             vo.parse()
-            trigger_bool, debug_bool, short_bool, trigger_message = worth_observing(vo)
+
+            # Loop over settings
+            observations_settings = TriggerSettings.objects.all()
+            for obs_set in observations_settings:
+                trigger_bool, debug_bool, short_bool, trigger_message = worth_observing(vo, max_duration=obs_set.max_duration, fermi_prob=obs_set.fermi_prob)
+                # TODO do something smart with these results to decide which telescope to observe with. For now just using last choice
+
             if trigger_bool:
                 # Check if you can observer and if so send off mwa observation
                 decision, trigger_message, obsids = trigger_mwa_observation(instance, trigger_message)
@@ -70,7 +76,6 @@ def group_trigger(sender, instance, **kwargs):
                                                    trigger_group_id=new_trig,
                                                    voevent_id=instance,
                                                    reason="First Observation")
-
             else:
                 new_trig.decision = 'I'
                 new_trig.decision_reason = trigger_message
