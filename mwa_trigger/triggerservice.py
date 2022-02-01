@@ -505,7 +505,7 @@ def trigger_atca(
     currentArray = cabb.monica_information.getArray()
     bestCal = calList.getBestCalibrator(currentArray)
     logger.info(
-        f"Calibrator chosen: {bestCal['calibrator'].getName():%s}, {bestCal['distance']:%.1f} degrees away"
+        f"Calibrator chosen: {bestCal['calibrator'].getName():s}, {bestCal['distance']:.1f} degrees away"
     )
     calScan = schedule.addCalibrator(
         bestCal["calibrator"],
@@ -518,8 +518,8 @@ def trigger_atca(
 
     schedule.setLooping(False)
 
-    if logger.is_enabled_for(logging.DEBUG):
-        fname = strftime("%Y-%m-%d-T%H:%M", gmtime())
+    if pretend:
+        fname = strftime("%Y-%m-%d_%H%M", gmtime())
         fname = f"{project_id}_{fname}.sch"
         schedule.write(name=fname)
 
