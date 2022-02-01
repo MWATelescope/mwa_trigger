@@ -1,15 +1,11 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    {% load static %}
-    <meta charset="utf-8">
-    <title>VOEvent Log</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/pretty_table.css' %}"/>
-  </head>
-  <body>
-    <table class="fl-table">
+{% extends 'trigger_app/header.html' %}
+
+{% block content %}
+<title>VOEvent Log</title>
+<div class="container-fluid">
+  <table class="fl-table">
     <thead>
-    <tr>
+      <tr>
         <th>ID</th>
         <th>Recieved</th>
         <th>Ignored</th>
@@ -23,36 +19,36 @@
         <th>Declination</th>
         <th>Position Error</th>
         <th>XML File</th>
-    </tr>
+      </tr>
     </thead>
     <!-- Iterate over object_list -->
     {% for object in object_list %}
     <!-- Display Objects -->
     <tr>
-        <td>{{ object.id }}</td>
-        <td>{{ object.recieved_data }}</td>
-        <td>{{ object.ignored }}</td>
-        {% if object.trigger_group_id is None %}
-          <!-- Don't make a link because there is no trigger event -->
-          <td>{{ object.trigger_group_id }}</td>
-        {% else %}
-          <td><a href="/triggerevent_details/{{ object.trigger_group_id }}/" style="text-decoration:None">{{ object.trigger_group_id }}</a></td>
-        {% endif %}
-        <td>{{ object.telescope }}</td>
-        <td>{{ object.trigger_type }}</td>
-        <td>{{ object.trigger_id }}</td>
-        <td>{{ object.sequence_num }}</td>
-        <td>{{ object.duration }}</td>
-        <td>{{ object.ra }}</td>
-        <td>{{ object.dec }}</td>
-        <td>{{ object.pos_error }}</td>
-        <!-- <td>{{ object.xml }}</td> -->
-        <td><a href="/voevent_view/{{ object.id }}" style="text-decoration:None">View xml</a></td>
+      <td>{{ object.id }}</td>
+      <td>{{ object.recieved_data }}</td>
+      <td>{{ object.ignored }}</td>
+      {% if object.trigger_group_id is None %}
+        <!-- Don't make a link because there is no trigger event -->
+        <td>{{ object.trigger_group_id }}</td>
+      {% else %}
+        <td><a href="/triggerevent_details/{{ object.trigger_group_id }}/" style="text-decoration:None">{{ object.trigger_group_id }}</a></td>
+      {% endif %}
+      <td>{{ object.telescope }}</td>
+      <td>{{ object.trigger_type }}</td>
+      <td>{{ object.trigger_id }}</td>
+      <td>{{ object.sequence_num }}</td>
+      <td>{{ object.duration }}</td>
+      <td>{{ object.ra }}</td>
+      <td>{{ object.dec }}</td>
+      <td>{{ object.pos_error }}</td>
+      <!-- <td>{{ object.xml }}</td> -->
+      <td><a href="/voevent_view/{{ object.id }}" style="text-decoration:None">View xml</a></td>
     </tr>
     <!-- If object_list is empty  -->
     {% empty %}
-    <li>No objects yet.</li>
+      <li>No objects yet.</li>
     {% endfor %}
-    </table>
-  </body>
-</html>
+  </table>
+</div>
+{% endblock %}

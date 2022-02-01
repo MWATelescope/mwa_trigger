@@ -1,18 +1,13 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    {% load static %}
-    <meta charset="utf-8">
-    <title>Comet Log</title>
-  </head>
-  <body>
-    <!-- Iterate over object_list -->
-    {% for object in object_list %}
-    <!-- Display Objects -->
-    <p class="no-breaks">{{ object.log }}</p>
-    <!-- If object_list is empty  -->
-    {% empty %}
-    <p class="no-breaks">No objects yet.</p>
-    {% endfor %}
-  </body>
-</html>
+{% extends 'trigger_app/header.html' %}
+
+{% block content %}
+  <title>Comet Log</title>
+  <!-- Iterate over object_list -->
+  {% for object in object_list %}
+  <!-- Display Objects -->
+  <p class="no-breaks">{{ object.log }}</p>
+  <!-- If object_list is empty  -->
+  {% empty %}
+  <p class="no-breaks">No objects yet.</p>
+  {% endfor %}
+{% endblock %}

@@ -1,13 +1,9 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    {% load static %}
-    <meta charset="utf-8">
-    <title>Trigger Log</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/pretty_table.css' %}"/>
-  </head>
-  <body>
-    <table class="fl-table">
+{% extends 'trigger_app/header.html' %}
+
+{% block content %}
+<title>Trigger Event Log</title>
+<div class="container-fluid">
+  <table class="fl-table">
     <thead>
     <tr>
       <th>ID</th>
@@ -41,6 +37,6 @@
     {% empty %}
     <li>No objects yet.</li>
     {% endfor %}
-    </table>
-  </body>
-</html>
+  </table>
+</div>
+{% endblock %}
