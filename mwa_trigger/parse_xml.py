@@ -30,8 +30,8 @@ def get_telescope(ivorn):
     if ivorn.startswith("ivo://gwnet/LVC#"):
         return 'LVC'
 
-    # Not found so return None
-    return None
+    # Not found a know telescope so trying some simple logic
+    return ivorn.split("//")[1].split("/")[1].splot("#")[0]
 
 def get_trigger_type(telescope, ivorn):
     trig_type_str = ivorn.split("#")[1]

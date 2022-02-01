@@ -32,7 +32,12 @@
         <td>{{ object.id }}</td>
         <td>{{ object.recieved_data }}</td>
         <td>{{ object.ignored }}</td>
-        <td>{{ object.trigger_group_id }}</td>
+        {% if object.trigger_group_id is None %}
+          <!-- Don't make a link because there is no trigger event -->
+          <td>{{ object.trigger_group_id }}</td>
+        {% else %}
+          <td><a href="/triggerevent_details/{{ object.trigger_group_id }}/" style="text-decoration:None">{{ object.trigger_group_id }}</a></td>
+        {% endif %}
         <td>{{ object.telescope }}</td>
         <td>{{ object.trigger_type }}</td>
         <td>{{ object.trigger_id }}</td>

@@ -136,7 +136,7 @@ class MWA_grid_points(object):
         """
         Calculate the celestial coordinates of MWA grid points in the MWA frame
         :param frame: An astropy coordinate frame. By default: MWA frame at current time
-        
+
         :return: An astropy SkyCoord with the celestial coordinates
         """
 
@@ -153,12 +153,12 @@ class MWA_grid_points(object):
         """
         Returns the grid pointing that is closest to the requested position (Ra,Dec) in degrees
         along with the distance to that point in degrees
-        
+
         :param RADec: An astropy SkyCoord with the celestial coordinates of the requested position
-        
+
         :return closest: An astropy Row with the closest gridpoint to RADec
         :return closest_distance: An astropy Angle with the distance from the closest gridpoint to the requested position
-        
+
         """
 
         if RADec is None:
@@ -248,7 +248,7 @@ class GW(handlers.TriggerEvent):
         """
         Convert the coordinates of the downsampled skymap to RA,Dec.
         Then convert RA,Dec to Alt,Az in the current observatory frame.
-        
+
         """
         # theta is co-latitude
         # phi is longitude
@@ -268,10 +268,10 @@ class GW(handlers.TriggerEvent):
         """
         Compute the bilinear interpolation value of a sky position
         using the 4 nearest points on the skymap
-        
+
         :param RADec: An astropy SkyCoord with the requested sky position
         :return: The interpolated value as a float
-        
+
         """
         return healpy.get_interp_val(self.gwmap_down, np.radians(90 - RADec.Dec.value), np.radians(RADec.ra.value),
                                      nest=True)
@@ -361,7 +361,7 @@ class GW(handlers.TriggerEvent):
         returndelays=False, returnpower=False)
         if returndelays=True, returns:
         RADec,delays
-        
+
         if returnpower=True, returns:
         RADec,delays,power
         """
@@ -464,18 +464,18 @@ def processevent(event='', pretend=True):
     Called externally by the voevent_handler script when a new VOEvent is received. Return True if
     the event was parsed by this handler, False if it was another type of event that should be
     examined by a different handler.
-    
+
     :param event: A string containg the XML string in VOEvent format
     :param pretend: Boolean, True if we don't want to actually schedule the observations.
     :return: Boolean, True if this handler processed this event, False to pass it to another handler function.
-    
+
     """
 
     if sys.version_info.major == 2:
         # event arrives as a unicode string but loads requires a non-unicode string.
         v = voeventparse.loads(str(event))
     else:
-        v = voeventparse.loads(event.encode('latin-1'))
+        v = voeventparse.loads(event.encode())
     log.info("Working on: %s" % v.attrib['ivorn'])
     isgw = is_gw(v)
     log.debug("GW? {0}".format(isgw))
@@ -489,10 +489,10 @@ def processevent(event='', pretend=True):
 def is_gw(v):
     """
     Tests to see if this XML packet is a Gravitational Wave event (LIGO OpenLVEM alert).
-    
+
     :param v: string in VOEvent XML format
     :return: Boolean, True if this event is a GW.
-    
+
     """
     ivorn = v.attrib['ivorn']
     log.debug("ivorn: %s" % (ivorn))
@@ -510,12 +510,12 @@ def is_gw(v):
 def handle_gw(v, pretend=False, calc_time=None):
     """
     Handles the parsing of the VOEvent and generates observations.
-    
+
     :param v: string in VOEvent XML format
     :param pretend: Boolean, True if we don't want to schedule observations (automatically switches to True for test events)
     :param calc_time: astropy.time.Time object for calculations
     :return: None
-    
+
     """
 
     is_test = v.attrib['role'] == 'test'
@@ -527,30 +527,30 @@ def handle_gw(v, pretend=False, calc_time=None):
         else:
             log.info('Test event, not triggering.')
             return
-        
+
         event_debug_list = DEBUG_NOTIFY_LIST
-        
+
     else:
         # This is a real event, send debug email to entire mailing list
         event_debug_list = NOTIFY_LIST
 
     params = {elem.attrib['name']:elem.attrib['value'] for elem in v.iterfind('.//Param')}
-    
+
     trig_id = params['GraceID']
     debug_email_subject = DEBUG_EMAIL_SUBJECT_TEMPLATE % trig_id
-    
+
     if trig_id not in xml_cache:
         gw = GW(event=v)
         gw.trigger_id = trig_id
         gw.info("Received trigger %s" % trig_id)
-        
+
         if is_test:
             gw.info("****This is a test event****")
-        
-        xml_cache[trig_id] = gw 
+
+        xml_cache[trig_id] = gw
     else:
         gw = xml_cache[trig_id]
-        gw.add_event(v)  
+        gw.add_event(v)
 
     if params['Packet_Type'] == "164":
         gw.info("Alert is an event retraction. Not triggering.")
@@ -588,13 +588,13 @@ def handle_gw(v, pretend=False, calc_time=None):
                             msg_text=DEBUG_EMAIL_TEMPLATE % "No skymap in VOEvent. Not triggering.",
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
-        
+
     try:
         gw.load_skymap(params['skymap_fits'], calc_time=calc_time)
     except:
         gw.debug("Failed to load skymap. Retrying in 1 minute")
-        time.sleep(60)    
-        
+        time.sleep(60)
+
         gw.load_skymap(params['skymap_fits'], calc_time=calc_time)
 
     RADecgrid, delays, power = gw.get_mwapointing_grid(returndelays=True, returnpower=True, minprob=MIN_PROB)
@@ -620,19 +620,19 @@ def handle_gw(v, pretend=False, calc_time=None):
     if obslist is not None and len(obslist) > 0:
         gw.debug("Currently observing:")
         gw.debug(str(obslist))
-        
+
         obs = str(obslist[0][1])
         gw.debug("obs {0}, trig {1}".format(obs, trig_id))
-        
+
         if obs == trig_id:
             currently_observing = True
             gw.info("Already observing this GW event")
-            
+
             last_pos = gw.get_pos(-2)
             last_ra = last_pos[0]
             last_dec = last_pos[1]
             gw.info("Old position: RA {0}, Dec {1}".format(last_ra,last_dec))
-          
+
             if (abs(ra.deg - last_ra) < 5.0) and (abs(dec.deg - last_dec) < 5.0):
                 gw.info("New pointing very close to old pointing. Not triggering.")
                 handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
@@ -641,7 +641,7 @@ def handle_gw(v, pretend=False, calc_time=None):
                                     msg_text=DEBUG_EMAIL_TEMPLATE % "New pointing same as old pointing. Not triggering.",
                                     attachments=[('voevent.xml', voeventparse.dumps(v))])
                 return
-            
+
             else:
               gw.info("New pointing far from old pointing. Updating and triggering.")
 
@@ -661,9 +661,9 @@ def handle_gw(v, pretend=False, calc_time=None):
                                 subject=debug_email_subject,
                                 msg_text=DEBUG_EMAIL_TEMPLATE % log_message,
                                 attachments=[('voevent.xml', voeventparse.dumps(v))])
-                                
+
             return
-        
+
     #  Check if this event has been triggered on before
     if gw.first_trig_time is not None:
         #  If it has been triggered, update the required time for the updated observation
@@ -716,8 +716,8 @@ def test_event(filepath='../test_events/MS190410a-1-Preliminary.xml', test_time=
         # event arrives as a unicode string but loads requires a non-unicode string.
         v = voeventparse.loads(str(payload))
     else:
-        v = voeventparse.loads(payload.encode('latin-1'))
-    
+        v = voeventparse.loads(payload.encode())
+
     params = {elem.attrib['name']:elem.attrib['value'] for elem in v.iterfind('.//Param')}
 
     return
