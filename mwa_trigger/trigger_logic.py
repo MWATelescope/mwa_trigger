@@ -46,14 +46,37 @@ def worth_observing(voevent, max_duration=2.05, fermi_prob=50):
     return trigger_bool, debug_bool, short_bool, trigger_message
 
 
-def worth_observing_atca_short_grb(voevent):
+def worth_observing_atca_short_grb(
+    voevent, magnetar_limit=0.033, short_limit=0.257, mid_limit=1.025, rate_signif=0.0
+):
     """
-    Decide if an event is worth observing as part of the ATCA sGRB project
+    Decide if an event is worth observing as part of the ATCA sGRB project.
+
+    An event needs to be a SWIFT event, with GRB_identified=True.
+
+    magnetars and long GRBs don't cause a trigger.
+
+    Short GRBs do cause a trigger.
+
+    "mid" GRBs cause a trigger but are put on hold for user intervention.
 
     Parameters
     ----------
     voevent : :obj:`mwa_trigger.parse_xml.parsed_VOEvent`
       The VOEvent to consider.
+
+    magnetar_limit : float, default 0.033
+      Break point for the magnetar -> short grb transition
+
+    short_limit : float, default 0.257
+      Break point for the short -> mid grb transition
+
+    mid_limit : float, default 1.025
+      Break point for the mid -> long grb transition
+
+    rate_signif : float, default 0.0
+      Lower limit on the rate significance (sigmas) for trigger events to be accepted
+
 
     Return
     ------
@@ -66,12 +89,6 @@ def worth_observing_atca_short_grb(voevent):
     trigger = False
     hold = False
     trigger_message = ""
-
-    # TODO: Move these to a table in the database
-    MAGNETAR_LIMIT = 0.033
-    SHORT_LIMIT = 0.257
-    MID_LIMIT = 1.025
-    RATE_SIGNIF = 0.0
 
     if not voevent.telescope == "SWIFT":
         return False, False, "Not a SWIFT event."
@@ -86,25 +103,25 @@ def worth_observing_atca_short_grb(voevent):
 
     # Check the duration of the event
     if voevent.trig_time is not None:
-        if voevent.trig_time < MAGNETAR_LIMIT:
+        if voevent.trig_time < magnetar_limit:
             trigger = False
-            trigger_message += f"Likely magnetar (trig_time < {MAGNETAR_LIMIT:.3f} s). "
-        elif voevent.rate_signif <= RATE_SIGNIF:
+            trigger_message += f"Likely magnetar (trig_time < {magnetar_limit:.3f} s). "
+        elif voevent.rate_signif <= rate_signif:
             trigger = False
-            trigger_message += f"Rate_signif < {RATE_SIGNIF:.3f} sigma. "
-        elif voevent.trig_time < SHORT_LIMIT:
+            trigger_message += f"Rate_signif < {rate_signif:.3f} sigma. "
+        elif voevent.trig_time < short_limit:
             trigger = True
             trigger_message += (
-                f"Probably short duration (trig_time < {SHORT_LIMIT:.3f} s). "
+                f"Probably short duration (trig_time < {short_limit:.3f} s). "
             )
-        elif voevent.trig_time < MID_LIMIT:
+        elif voevent.trig_time < mid_limit:
             trigger = True
             hold = True
-            trigger_message += f"Maybe short duration (trig_time < {MID_LIMIT:.3f} s). "
+            trigger_message += f"Maybe short duration (trig_time < {mid_limit:.3f} s). "
         else:
             trigger = False
             trigger_message += (
-                f"Probably long duration (trig_time > {MID_LIMIT:.3f} s. "
+                f"Probably long duration (trig_time > {mid_limit:.3f} s. "
             )
     else:
         trigger_message += "Trigger has no trig_time"
