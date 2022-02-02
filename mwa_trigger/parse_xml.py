@@ -31,7 +31,7 @@ def get_telescope(ivorn):
         return 'LVC'
 
     # Not found a know telescope so trying some simple logic
-    return ivorn.split("//")[1].split("/")[1].splot("#")[0]
+    return ivorn.split("//")[1].split("/")[1].split("#")[0]
 
 def get_trigger_type(telescope, ivorn):
     trig_type_str = ivorn.split("#")[1]
