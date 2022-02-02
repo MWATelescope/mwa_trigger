@@ -59,6 +59,8 @@ class parsed_VOEvent:
         self.most_likely_index = None
         self.detect_prob = None
         self.rate_signif = None
+        self.grb_ident = None
+        self.telescope = None
         # TODO: Consider calling self.parse() at the end of this constructor
 
     def parse(self):
@@ -115,7 +117,7 @@ class parsed_VOEvent:
             logger.debug("StarLock OK? {0}".format(not startrack_lost_lock))
             if startrack_lost_lock:
                 logger.warning(
-                    "The SWIFT star tracker lost it's lock so ignoringe event"
+                    "The SWIFT star tracker lost it's lock so ignoring event"
                 )
                 self.this_trig_type += " SWIFT lost star tracker"
                 self.ignore = True
@@ -128,6 +130,9 @@ class parsed_VOEvent:
             self.rate_signif = float(
                 v.find(".//Param[@name='Rate_Signif']").attrib["value"]
             )
+            self.grb_ident = v.find(".//Param[@name='GRB_Identified']").attrib["value"]
+            self.grb_ident = self.grb_ident == "true"
+
         elif self.telescope == "Antares":
             self.trig_time = None
             # self.this_trig_type = 'Antares'
