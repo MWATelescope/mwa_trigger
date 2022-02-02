@@ -4,12 +4,6 @@
 from setuptools import setup
 
 
-reqs = ['numpy',
-        'voevent-parse',
-        'comet',
-       ]
-
-
 setup(name="mwa_trigger",
       version=0.1,
       description="VOEvent handling daemon and library for generating triggered MWA observations",
@@ -18,7 +12,13 @@ setup(name="mwa_trigger",
       packages=['mwa_trigger'],
       #package_data={},
       python_requires='>=3.6',
-      install_requires=reqs,
+      install_requires=[
+            'numpy',
+            'voevent-parse',
+            # The below is only required with GW_LIGO.py which we will likely remove soon
+            'healpy',
+            'mwa_pb'
+      ],
       scripts=[],
       setup_requires=['pytest-runner'],
       tests_require=['pytest']
