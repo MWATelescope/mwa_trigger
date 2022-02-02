@@ -16,10 +16,6 @@ setup(name="mwa_trigger",
             'numpy',
             'voevent-parse',
             'healpy',
-            'cabb-scheduler-api',
-      ],
-      dependency_links=[
-            'git+https://github.com/ste616/cabb-schedule-api.git#subdirectory=python'
       ],
       scripts=[],
       setup_requires=['pytest-runner'],
