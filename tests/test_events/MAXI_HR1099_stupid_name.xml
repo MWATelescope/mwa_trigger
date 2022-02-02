@@ -1,3 +1,88 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<voe:VOEvent xmlns:voe="http://www.ivoa.net/xml/VOEvent/v2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ivorn="ivo://nasa.gsfc.gcn/MAXI#Known_source_Pos_2019-04-10T23:37:05.00_8583849999-0-167" role="observation" version="2.0" xsi:schemaLocation="http://www.ivoa.net/xml/VOEvent/v2.0  http://www.ivoa.net/xml/VOEvent/VOEvent-v2.0.xsd"><Who><AuthorIVORN>ivo://nasa.gsfc.tan/gcn</AuthorIVORN><Author><shortName>MAXI (via VO-GCN)</shortName><contactName>Motoko Serino</contactName><contactEmail>motoko@crab.riken.jp</contactEmail></Author><Date>2019-04-11T06:07:16</Date><Description>This VOEvent message was created with GCN VOE version: 1.35 29mar19</Description></Who><What><Param name="Packet_Type" value="135"/><Param name="Pkt_Ser_Num" value="1"/><Param name="TrigID" value="5838849999" ucd="meta.id"/><Param name="Source_TJD" value="18583" unit="days" ucd="time"/><Param name="Source_SOD" value="85025.00" unit="sec" ucd="time"/><Param name="Source_Flux" value="32.0" unit="mCrab" ucd="phot.flux"/><Param name="Source_LoBand_Flux" value="8.0" unit="mCrab" ucd="phot.flux"/><Param name="Source_MeBand_Flux" value="13.0" unit="mCrab" ucd="phot.flux"/><Param name="Source_HiBand_Flux" value="11.0" unit="mCrab" ucd="phot.flux"/><Param name="Bkg_LoBand_Flux" value="10.0" unit="mCrab" ucd="phot.flux"/><Param name="Bkg_MeBand_Flux" value="12.0" unit="mCrab" ucd="phot.flux"/><Param name="Bkg_HiBand_Flux" value="18.0" unit="mCrab" ucd="phot.flux"/><Param name="Source_TimeScale" value="1s" ucd="meta.id"/><Param name="Source_EBand" value="Low, 2-4 keV" ucd="meta.id"/><Param name="Event_Class" value="x-ray-star" ucd="meta.id"/><Param name="Source_Name" value=" flare from HR1099" ucd="meta.id"/><Param name="Trigger_ID" value="0x4"/><Param name="Misc_flags" value="0x40000008"/><Param name="SC_Long" value="330.51" unit="deg" ucd="pos.earth.lon"/><Param name="SC_Lat" value="644.93" unit="deg" ucd="pos.earth.lat"/><Group name="Trigger_ID"><Param name="Spatial_Prox_Match" value="false"/><Param name="Temporal_Prox_Match" value="false"/><Param name="Test_Submission" value="false"/></Group><Group name="Misc_Flags"><Param name="Values_Out_of_Range" value="false"/><Param name="Gnd_Generated" value="true"/></Group><Param name="Coords_Type" value="1" unit="dn"/><Param name="Coords_String" value="source_object"/><Group name="Obs_Support_Info"><Description>The Sun and Moon values are valid at the time the VOEvent XML message was created.</Description><Param name="Sun_RA" value="19.48" unit="deg" ucd="pos.eq.ra"/><Param name="Sun_Dec" value="8.22" unit="deg" ucd="pos.eq.dec"/><Param name="Sun_Distance" value="35.65" unit="deg" ucd="pos.angDistance"/><Param name="Sun_Hr_Angle" value="-2.33" unit="hr"/><Param name="Moon_RA" value="91.53" unit="deg" ucd="pos.eq.ra"/><Param name="Moon_Dec" value="21.69" unit="deg" ucd="pos.eq.dec"/><Param name="MOON_Distance" value="41.81" unit="deg" ucd="pos.angDistance"/><Param name="Moon_Illum" value="33.22" unit="%" ucd="arith.ratio"/><Param name="Galactic_Long" value="184.91" unit="deg" ucd="pos.galactic.lon"/><Param name="Galactic_Lat" value="-41.57" unit="deg" ucd="pos.galactic.lat"/><Param name="Ecliptic_Long" value="51.98" unit="deg" ucd="pos.ecliptic.lon"/><Param name="Ecliptic_Lat" value="-18.25" unit="deg" ucd="pos.ecliptic.lat"/></Group><Description>The MAXI detection flare from a known-source transient.</Description></What><WhereWhen><ObsDataLocation><ObservatoryLocation id="GEOLUN"/><ObservationLocation><AstroCoordSystem id="UTC-FK5-GEO"/><AstroCoords coord_system_id="UTC-FK5-GEO"><Time unit="s"><TimeInstant><ISOTime>2019-04-10T23:37:05.00</ISOTime></TimeInstant></Time><Position2D unit="deg"><Name1>RA</Name1><Name2>Dec</Name2><Value2><C1>54.1970</C1><C2>0.5879</C2></Value2><Error2Radius>0.5000</Error2Radius></Position2D></AstroCoords></ObservationLocation></ObsDataLocation><Description>The RA,Dec coordinates are of the type: source_object.</Description></WhereWhen><How><Description>MAXI Instrument, ISS</Description><Reference uri="http://gcn.gsfc.nasa.gov/maxi.html" type="url"/></How><Why importance="0.9"><Inference probability="0.9"><Concept>process.variation;em.gamma</Concept></Inference></Why><Description>
-  </Description></voe:VOEvent>
+<voe:VOEvent xmlns:voe="http://www.ivoa.net/xml/VOEvent/v2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ivorn="ivo://nasa.gsfc.gcn/MAXI#Known_source_Pos_2019-04-10T23:37:05.00_8583849999-0-167" role="observation" version="2.0" xsi:schemaLocation="http://www.ivoa.net/xml/VOEvent/v2.0  http://www.ivoa.net/xml/VOEvent/VOEvent-v2.0.xsd">
+    <Who>
+        <AuthorIVORN>ivo://nasa.gsfc.tan/gcn</AuthorIVORN>
+        <Author>
+            <shortName>MAXI (via VO-GCN)</shortName><contactName>Motoko Serino</contactName><contactEmail>motoko@crab.riken.jp</contactEmail>
+        </Author>
+        <Date>2019-04-11T06:07:16</Date><Description>This VOEvent message was created with GCN VOE version: 1.35 29mar19</Description>
+    </Who>
+    <What>
+        <Param name="Packet_Type" value="135"/><Param name="Pkt_Ser_Num" value="1"/>
+        <Param name="TrigID" value="5838849999" ucd="meta.id"/>
+        <Param name="Source_TJD" value="18583" unit="days" ucd="time"/>
+        <Param name="Source_SOD" value="85025.00" unit="sec" ucd="time"/>
+        <Param name="Source_Flux" value="32.0" unit="mCrab" ucd="phot.flux"/>
+        <Param name="Source_LoBand_Flux" value="8.0" unit="mCrab" ucd="phot.flux"/>
+        <Param name="Source_MeBand_Flux" value="13.0" unit="mCrab" ucd="phot.flux"/>
+        <Param name="Source_HiBand_Flux" value="11.0" unit="mCrab" ucd="phot.flux"/>
+        <Param name="Bkg_LoBand_Flux" value="10.0" unit="mCrab" ucd="phot.flux"/>
+        <Param name="Bkg_MeBand_Flux" value="12.0" unit="mCrab" ucd="phot.flux"/>
+        <Param name="Bkg_HiBand_Flux" value="18.0" unit="mCrab" ucd="phot.flux"/>
+        <Param name="Source_TimeScale" value="1s" ucd="meta.id"/>
+        <Param name="Source_EBand" value="Low, 2-4 keV" ucd="meta.id"/>
+        <Param name="Event_Class" value="x-ray-star" ucd="meta.id"/>
+        <Param name="Source_Name" value=" flare from HR1099" ucd="meta.id"/>
+        <Param name="Trigger_ID" value="0x4"/>
+        <Param name="Misc_flags" value="0x40000008"/>
+        <Param name="SC_Long" value="330.51" unit="deg" ucd="pos.earth.lon"/>
+        <Param name="SC_Lat" value="644.93" unit="deg" ucd="pos.earth.lat"/>
+        <Group name="Trigger_ID">
+            <Param name="Spatial_Prox_Match" value="false"/><Param name="Temporal_Prox_Match" value="false"/>
+            <Param name="Test_Submission" value="false"/>
+        </Group>
+        <Group name="Misc_Flags">
+            <Param name="Values_Out_of_Range" value="false"/><Param name="Gnd_Generated" value="true"/>
+        </Group>
+        <Param name="Coords_Type" value="1" unit="dn"/>
+        <Param name="Coords_String" value="source_object"/>
+        <Group name="Obs_Support_Info">
+            <Description>The Sun and Moon values are valid at the time the VOEvent XML message was created.</Description><Param name="Sun_RA" value="19.48" unit="deg" ucd="pos.eq.ra"/>
+            <Param name="Sun_Dec" value="8.22" unit="deg" ucd="pos.eq.dec"/>
+            <Param name="Sun_Distance" value="35.65" unit="deg" ucd="pos.angDistance"/>
+            <Param name="Sun_Hr_Angle" value="-2.33" unit="hr"/>
+            <Param name="Moon_RA" value="91.53" unit="deg" ucd="pos.eq.ra"/>
+            <Param name="Moon_Dec" value="21.69" unit="deg" ucd="pos.eq.dec"/>
+            <Param name="MOON_Distance" value="41.81" unit="deg" ucd="pos.angDistance"/>
+            <Param name="Moon_Illum" value="33.22" unit="%" ucd="arith.ratio"/>
+            <Param name="Galactic_Long" value="184.91" unit="deg" ucd="pos.galactic.lon"/>
+            <Param name="Galactic_Lat" value="-41.57" unit="deg" ucd="pos.galactic.lat"/>
+            <Param name="Ecliptic_Long" value="51.98" unit="deg" ucd="pos.ecliptic.lon"/>
+            <Param name="Ecliptic_Lat" value="-18.25" unit="deg" ucd="pos.ecliptic.lat"/>
+        </Group>
+        <Description>The MAXI detection flare from a known-source transient.</Description>
+    </What>
+    <WhereWhen>
+        <ObsDataLocation>
+            <ObservatoryLocation id="GEOLUN"/>
+            <ObservationLocation>
+                <AstroCoordSystem id="UTC-FK5-GEO"/>
+                <AstroCoords coord_system_id="UTC-FK5-GEO">
+                    <Time unit="s">
+                        <TimeInstant>
+                            <ISOTime>2019-04-10T23:37:05.00</ISOTime>
+                        </TimeInstant>
+                    </Time>
+                    <Position2D unit="deg">
+                        <Name1>RA</Name1><Name2>Dec</Name2>
+                        <Value2>
+                            <C1>54.1970</C1><C2>0.5879</C2>
+                        </Value2>
+                        <Error2Radius>0.5000</Error2Radius>
+                    </Position2D>
+                </AstroCoords>
+            </ObservationLocation>
+        </ObsDataLocation>
+        <Description>The RA,Dec coordinates are of the type: source_object.</Description>
+    </WhereWhen>
+    <How>
+        <Description>MAXI Instrument, ISS</Description><Reference uri="http://gcn.gsfc.nasa.gov/maxi.html" type="url"/>
+    </How>
+    <Why importance="0.9">
+        <Inference probability="0.9">
+            <Concept>process.variation;em.gamma</Concept>
+        </Inference>
+    </Why>
+    <Description>
+    </Description>
+</voe:VOEvent>

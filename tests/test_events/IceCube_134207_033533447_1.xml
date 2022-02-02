@@ -51,23 +51,25 @@
         </Param>
         <Param name="Trigger_ID" value="0x0"/>
         <Param name="Misc_flags" value="0x19000000"/>
-            <Group name="Trigger_ID">
-                <Param name="SubType" value="indi"/>
-                <Param name="Test" value="false"/>
-                <Param name="RADec_valid" value="false"/>
-                <Param name="Retraction" value="false"/>
-                <Param name="InternalTest" value="false"/>
-            </Group>
+        <Group name="Trigger_ID">
+            <Param name="SubType" value="indi"/>
+            <Param name="Test" value="false"/>
+            <Param name="RADec_valid" value="false"/>
+            <Param name="Retraction" value="false"/>
+            <Param name="InternalTest" value="false"/>
+        </Group>
         <Group name="Misc_flags"></Group>
     </What>
     <WhereWhen>
         <ObsDataLocation>
-        <ObservatoryLocation id="GEOLUN"/>
+            <ObservatoryLocation id="GEOLUN"/>
             <ObservationLocation>
                 <AstroCoordSystem id="UTC-FK5-GEO"/>
                 <AstroCoords coord_system_id="UTC-FK5-GEO">
                     <Time unit="s">
-                        <TimeInstant><ISOTime>2020-06-20T03:03:32.28</ISOTime></TimeInstant>
+                        <TimeInstant>
+                            <ISOTime>2020-06-20T03:03:32.28</ISOTime>
+                        </TimeInstant>
                     </Time>
                     <Position2D unit="deg">
                         <Name1>RA</Name1>
