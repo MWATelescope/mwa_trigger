@@ -1,13 +1,10 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    {% load static %}
-    <meta charset="utf-8">
-    <title>User Alert Status</title>
-  </head>
-  <body>
-    <p>N/A mean the admin has not given you permission to recieve this trigger type. Send them a message if you would like this changed.</p>
-    <table class="fl-table">
+{% extends 'trigger_app/header.html' %}
+
+{% block content %}
+<title>User Alert Status</title>
+<div class="container py-4">
+  <p>N/A mean the admin has not given you permission to recieve this trigger type. Send them a message if you would like this changed.</p>
+  <table class="fl-table">
     <thead>
     <tr>
         <th>Type</th>
@@ -51,7 +48,7 @@
     {% empty %}
     <p>No objects yet.</p>
     {% endfor %}
-    </table>
-    <p><a href="/user_alert_create/">Create a new alert?</a></p>
-  </body>
-</html>
+  </table>
+  <p><a href="/user_alert_create/">Create a new alert?</a></p>
+</div>
+{% endblock %}
