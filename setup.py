@@ -4,13 +4,6 @@
 from setuptools import setup
 
 
-reqs = ['numpy',
-        'voevent-parse',
-        'healpy',
-        'git+https://github.com/ste616/cabb-schedule-api.git#subdirectory=python',
-       ]
-
-
 setup(name="mwa_trigger",
       version=0.1,
       description="VOEvent handling daemon and library for generating triggered MWA observations",
@@ -19,7 +12,15 @@ setup(name="mwa_trigger",
       packages=['mwa_trigger'],
       #package_data={},
       python_requires='>=3.6',
-      install_requires=reqs,
+      install_requires=[
+            'numpy',
+            'voevent-parse',
+            'healpy',
+            'cabb_scheduler',
+      ],
+      dependency_links=[
+            'git+https://github.com/ste616/cabb-schedule-api.git#subdirectory=python'
+      ],
       scripts=[],
       setup_requires=['pytest-runner'],
       tests_require=['pytest']
