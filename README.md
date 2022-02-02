@@ -1,8 +1,18 @@
+# VOEvent trigger front end for scheduling MWA observations.
 
-VOEvent trigger front end for scheduling MWA observations. This repository is made up of:
+## Credit
+This repository was developed for use on the MWA telescope by Andrew Williams with contributions from Paul Hancock.
+The triggering logic for individual handlers were developed by various project groups - see the `__author__` fields in the scripts in the `mwa_trigger/` directory.
 
-/README.txt - this file
-/trigger.conf.example - sample configuration file
+If you use this code to generate observations for your research please cite the description paper [Hancock et al, 2019](https://ui.adsabs.harvard.edu/abs/2019PASA...36...46H/abstract), and [Anderson et al, 2021](https://ui.adsabs.harvard.edu/abs/2021PASA...38...26A/abstract)
+
+## Contents
+
+This repository is made up of:
+```
+README.md - this file
+
+trigger.conf.example - sample configuration file
 
 pyro_nameserver.py - simple script to start a Pyro4 Remote Procedure Call (RPC) nameserver running,
                      to allow push_voevent.py to communicate with voevent_handler.py.
@@ -22,9 +32,9 @@ voevent_handler.py - This daemon runs continuously once it's started, and accept
     handlers.py - library containing classes and functions useful for parsing VOEvents and generating
                   triggers.
     GRB_fermi_swift.py - library containing the handler function to parse and trigger on Fermi/Swift VOEvents.
+```
 
-
-Software overview:
+## Software overview
 
 The triggering system is divided into two parts. The back-end is a web service, on an on-site server, and
 part of the telescope Monitor and Control system. It accepts stateless requests from clients, anywhere on
@@ -75,7 +85,7 @@ with a set of parameters:
 
 All of these web services are wrapped in functions of the same name in mwa_trigger/triggerservice.py.
 
-Note that the 'triggerobs()' and 'triggervcs' web services (different calls to the backend) are merged
+Note that the 'triggerobs()' and 'triggervcs()' web services (different calls to the backend) are merged
 into one call - mwa_trigger.triggerservice.trigger(). Which one of the backend web services is called
 depends on whether the 'vcsmode' argument to trigger() is True or False.
 
@@ -115,7 +125,7 @@ parameters that can be passed, to satisfy different science requirements. These 
   choose a calibrator source automatically. If more than one one frequency specifier was given, then
   the calibrator will also be observed at each of the given frequencies.
 
-Latency:
+## Latency
 
 The MWA observing schedule is stored in a set of database tables on a PostgreSQL server on-site, with
 start and stop times stored as the number of seconds since the GPS epoch ('GPS seconds'). All
@@ -129,11 +139,11 @@ in the future. Including other processing delays, this gives a latency period of
 the trigger time and the start
 of a triggered observation.
 
-
+## Setup
 
 To get a trigger handler running, you will need to:
 
-- Copy trigger.conf.example to mwa_trigger/trigger.conf (or /usr/local/etc/trigger.conf) and edit
+- Copy `trigger.conf.example` to `mwa_trigger/trigger.conf` (or `/usr/local/etc/trigger.conf`) and edit
   appropriately. At a minimum, you will need to add a line to the 'auth' section, with the project ID
   code your handler will run as, and the valid secure_key (password) for that project ID. Contact
   Andrew.Williams@curtin.edu.au for a password.
@@ -141,22 +151,22 @@ To get a trigger handler running, you will need to:
 
 - If the trigger handler will not be running on-site, then in one terminal window, run:
 
-      pyro_nameserver.py
+      `pyro_nameserver.py`
 
   This will start a Pyro 'Name service' daemon, allowing push_voevent.py to find the network details
   it needs to contact the voevent_handler.py daemon. If the handler is running on site, this step isn't
   necessary because there is already a name service daemon running on the host mwa-db, but you will need to
-  change the ns_host line in the [pyro] section of trigger.conf.
+  change the ns_host line in the `[pyro]` section of trigger.conf.
 
 
 - In another terminal window, run:
 
-      python voevent_handler.py
+      `python voevent_handler.py`
 
   This will start the daemon that waits for VOEvent messages to be sent to it using Pyro RPC calls, and
   queues them, to pass to a handler function.
 
-  (You may want to use python voevent_handler.py within a virtual environment)
+  (You may want to use `python voevent_handler.py` within a virtual environment)
 
 
 - If you want to respond to actual broadcast VOEvents (as opposed to manually pushing VOEvent XML
