@@ -15,7 +15,9 @@ setup(name="mwa_trigger",
       install_requires=[
             'numpy',
             'voevent-parse',
+            # The below is only required with GW_LIGO.py which we will likely remove soon
             'healpy',
+            'mwa_pb'
       ],
       scripts=[],
       setup_requires=['pytest-runner'],
