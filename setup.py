@@ -6,6 +6,8 @@ from setuptools import setup
 
 reqs = ['numpy',
         'voevent-parse',
+        'healpy',
+        'git+https://github.com/ste616/cabb-schedule-api.git#subdirectory=python',
        ]
 
 
