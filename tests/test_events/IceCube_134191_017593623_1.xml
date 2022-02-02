@@ -67,7 +67,11 @@
             <ObservationLocation>
                 <AstroCoordSystem id="UTC-FK5-GEO"/>
                 <AstroCoords coord_system_id="UTC-FK5-GEO">
-                    <Time unit="s"><TimeInstant><ISOTime>2020-06-15T14:49:17.37</ISOTime></TimeInstant></Time>
+                    <Time unit="s">
+                        <TimeInstant>
+                            <ISOTime>2020-06-15T14:49:17.37</ISOTime>
+                        </TimeInstant>
+                    </Time>
                     <Position2D unit="deg">
                         <Name1>RA</Name1>
                         <Name2>Dec</Name2>
@@ -88,7 +92,9 @@
         <Reference uri="http://gcn.gsfc.nasa.gov/gcn/amon_events.html" type="url"/>
     </How>
     <Why importance="1.0">
-        <Inference probability="1.0"><Concept>process.variation.burst;em</Concept></Inference>
+        <Inference probability="1.0">
+            <Concept>process.variation.burst;em</Concept>
+        </Inference>
     </Why>
     <Description></Description>
 </voe:VOEvent>
