@@ -22,6 +22,7 @@ import voeventparse
 
 from . import handlers
 from . import triggerservice
+from . import data_load
 
 log = logging.getLogger('voevent.handlers.FlareStar_swift_maxi')   # Inherit the logging setup from handlers.py
 
@@ -72,7 +73,7 @@ def make_flare_star_names():
     None
     """
     global flare_stars
-    data_file = "{0}/FlareStarNames.txt".format(os.path.dirname(__file__))
+    data_file = data_load.FLARE_STAR_NAMES
     flare_stars = [a.strip().lower() for a in open(data_file, 'r').readlines() if not a.startswith("#")]
     # reformat ' ' into either '' or '_' in the list above
     flare_stars.extend([re.sub(' ', '_', f) for f in flare_stars if ' ' in f])

@@ -10,7 +10,7 @@ setup(name="mwa_trigger",
       url="https://github.com/ADACS-Australia/mwa_trigger.git",
       #long_description=read('README.md'),
       packages=['mwa_trigger'],
-      #package_data={},
+      package_data={'mwa_trigger':['data/*.txt',]},
       python_requires='>=3.6',
       install_requires=[
             'numpy',
