@@ -24,7 +24,11 @@
     <!-- Iterate over object_list -->
     {% for object in object_list %}
     <!-- Display Objects -->
-    <tr>
+    {% if object.ignored %}
+      <tr class="grey-tr">
+    {% else %}
+      <tr>
+    {% endif %}
       <td>{{ object.id }}</td>
       <td>{{ object.recieved_data }}</td>
       <td>{{ object.ignored }}</td>

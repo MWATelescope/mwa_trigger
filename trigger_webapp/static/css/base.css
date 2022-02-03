@@ -54,6 +54,10 @@ h3{
     font-size: 14px;
 }
 
+.fl-table .grey-tr {
+    color: #d1caca;
+}
+
 .fl-table thead th {
     color: #ffffff;
     background: #4FC3A1;
