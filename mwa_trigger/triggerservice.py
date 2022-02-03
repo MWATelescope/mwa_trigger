@@ -45,21 +45,27 @@ def web_api(
     containing data to POST, open the appropriate URL, POST data if supplied, and
     return the result of the call converted from JSON format to a Python dictionary.
 
-    :param url:   The full URL to open, minus any trailing ?name=value&name2=value2... arguments
-    :param urldict: Optional Python dictionary to be URL-encoded and appended as
-             ...?name=value&name2=value2&... data in the URL itself
-    :param postdict: Python dictionary to be converted to JSON format and POSTed
-              with the request.
-    :param logger: If a logger object is passed, log activity to it, otherwise use
-              the default logger which will suppress all output.
+    Parameters
+    ----------
+    url : `str`
+        The full URL to open, minus any trailing ?name=value&name2=value2... arguments
+    urldict : `dict`, optional
+        Python dictionary to be URL-encoded and appended as ...?name=value&name2=value2&... data in the URL itself
+    postdict : `dict`
+        Python dictionary to be converted to JSON format and POSTed with the request.
+    logger : `logging`
+        If a logger object is passed, log activity to it, otherwise use the default logger which will suppress all output.
+    username : `str`, optional
+        BASIC auth username
+    password : `str`, optional
+        BASIC auth password
 
-    :param username: Optional BASIC auth username
-
-    :param password: Optional BASIC auth password
-
-    :return: A tuple of (result, header) where result is a Python dict (un-jsoned from the
-             text), the text itself, or None, and 'header' is the HTTP header object (use
-             .get_param() to extract values) or None.
+    Returns
+    -------
+    return : `tuple`
+        A tuple of (result, header) where result is a Python dict (un-jsoned from the
+        text), the text itself, or None, and 'header' is the HTTP header object (use
+        .get_param() to extract values) or None.
     """
     if urldict is not None:
         urldata = "?" + urlencode(urldict)
@@ -144,10 +150,19 @@ def busy(project_id=None, obstime=None, logger=DEFAULTLOGGER):
     Note that a False result doesn't guarantee a later call to trigger() will succeed, as new observations may have been
     added to the schedule in the meantime.
 
-    :param project_id: eg 'C001'
-    :param obstime: eg 1800
-    :param logger: optional logging.logger object
-    :return: boolean
+    Parameters
+    ----------
+    project_id : `str`
+        The MWA project ID, eg 'C001'.
+    obstime : `int`
+        Length of time to check in seconds. eg 1800.
+    logger : `logging`, optional
+        logging.logger object.
+
+    Returns
+    -------
+    return : `boolean`
+        True if the telescope can't be overridden.
     """
     urldict = {}
     if project_id is not None:
@@ -171,8 +186,15 @@ def vcsfree(logger=DEFAULTLOGGER):
     Note that this doesn't guarantee a later call to trigger() will succeed, as new VCS observations may have been
     added to the schedule in the meantime.
 
-    :param logger: optional logging.logger object
-    :return: int
+    Parameters
+    ----------
+    logger : `logging`, optional
+        logging.logger object.
+
+    Returns
+    -------
+    return : `int`
+        Number of seconds the vcs is free.
     """
     urldict = {}
 
@@ -186,9 +208,17 @@ def obslist(obstime=None, logger=DEFAULTLOGGER):
     (starttime, obsname, creator, projectid, mode) for each observation between 'now' and the
     given number of seconds in the future.
 
-    :param obstime: eg 1800
-    :param logger:  optional logging.logger object
-    :return: list of (starttime, obsname, creator, projectid, mode) tuples
+    Parameters
+    ----------
+    obstime : `int`
+        Length of time to check in seconds. eg 1800.
+    logger : `logging`, optional
+        logging.logger object.
+
+    Returns
+    -------
+    return : `list`
+        List of (starttime, obsname, creator, projectid, mode) tuples.
     """
     urldict = {}
     if obstime is not None:
@@ -243,45 +273,86 @@ def trigger(
     If the 'avoidsum' parameter is True, then the coordinates of the target and calibrator are shifted slightly to
     put the Sun in a beam null. For this to work, the target coordinates must be RA/Dec values, not Alt/Az.
 
-    The structure returned is a dictionary, containing the following:
-      result['success'] - a boolean, True if the observations were scheduled successfully, False if there was an error.
-      result['errors'] - a dictionary, containing integer keys from 0-N, where each value is an error message. Normally empty.
-      result['params'] - a dictionary containing all parameters passed to the web service, after parsing, and some extra
-                         parameters calculated by the web service (the name of the automatically chosen calibrator, etc).
-      result['clear'] - the commands used to clear the schedule. It contains the keys/values:
-                           'command': The full clear_schedule.py command line
-                           'retcode': The integer return code from that command
-                           'stderr': The output to STDERR from that command
-                           'stdout': The output to STDOUT from that command
-      result['schedule'] - the commands used to schedule the triggered observations. It contains the keys/values:
-                           'command': A string containing all of the single_observation.py command lines
-                           'retcode':The integer return code from the shell spawned to run those commands
-                           'stderr': The output to STDERR from those commands
-                           'stdout': The output to STDOUT from those commands
+    Parameters
+    ----------
+    project_id : `str`
+        Project ID for the triggered observations, eg 'C001'.
+    secure_key : `str`
+        Password associated with that project_id.
+    group_id : `int`, optional
+        The start time of a previously triggered observation of the same event.
+    ra : `float` or `list`
+        Either one RA (float, in hours), or a list of RA floats. Eg 12.234, or [11.0, 12.0].
+    dec : `float` or `list`
+        Either one Dec (float, in degrees), or a list of Dec floats. Eg -12.234, or [-26.0, -36.0].
+    alt : `float` or `list`
+        Either one Alt (float, in degrees), or a list of Alt floats. Eg 80.0, or [70.0, 90.0].
+    az : `float` or `list`
+        Either one Az (float, in degrees), or a list of Az floats. Eg 250.3, or [90.0, 270.0].
+    source : `str` or `list`
+        Either one source name string, or a list of source name strings. Eg 'Sun', or ['Sun', 'Moon'].
+    freqspecs : `float` or `list`
+        Either one frequency specifier string, or a list of frequency specifier strings. Eg '145,24', or ['121,24', '145,24'].
+    creator : `str`
+        Creator string, eg 'Andrew'.
+    obsname : `str`
+        Observation name string, eg 'Fermi Trigger 20180211.1234'.
+    nobs : `int`
+        Number of observations to schedule for each position/frequency combination.
+    exptime : `int`
+        Exposure time of each observation scheduled, in seconds (must be modulo-8 seconds).
+    calexptime : `int`
+        Exposure time of the trailing calibrator observation, if applicable, in seconds.
+    calibrator : `boolean` or `str`
+        None or False for no calibrator observation, a source name to specify one, or True to have one chosen for you.
+    freqres : `float`
+        Correlator frequency resolution for observations. None to use whatever the current mode is, for lower latency. Eg 40.
+    inttime : `float`
+        Correlator integration time for observations. None to use whatever the current mode is, for lower latency. Eg 0.5.
+    avoidsun : `boolean` or `int`
+        If True, the coordinates of the target and calibrator are shifted slightly to put the Sun in a null.
+    vcsmode : `boolean`
+        If True, the observations are made in 'Voltage Capture' mode instead of normal (HW_LFILES) mode.
+    buffered : `boolean`
+        If True and vcsmode, trigger a Voltage capture using the ring buffer.
+    pretend : `boolean` or `int`
+        If True, the clear_schedule.py and single_observation.py commands will be generated but NOT run.
+    logger : `logging`, optional
+        logging.logger object.
 
-    :param project_id: eg 'C001' - project ID for the triggered observations
-    :param secure_key: password associated with that project_id
-    :param group_id: optional group ID - the start time of a previously triggered observation of the same event
-    :param ra: Either one RA (float, in hours), or a list of RA floats. Eg 12.234, or [11.0, 12.0]
-    :param dec: Either one Dec (float, in degrees), or a list of Dec floats. Eg -12.234, or [-26.0, -36.0]
-    :param alt: Either one Alt (float, in degrees), or a list of Alt floats. Eg 80.0, or [70.0, 90.0]
-    :param az: Either one Az (float, in degrees), or a list of Az floats. Eg 250.3, or [90.0, 270.0]
-    :param source: Either one source name string, or a list of source name strings. Eg 'Sun', or ['Sun', 'Moon']
-    :param freqspecs: Either one frequency specifier string, or a list of frequency specifier strings. Eg '145,24', or ['121,24', '145,24']
-    :param creator: Creator string, eg 'Andrew'
-    :param obsname: Observation name string, eg 'Fermi Trigger 20180211.1234'
-    :param nobs: Number of observations to schedule for each position/frequency combination
-    :param exptime: Exposure time of each observation scheduled, in seconds (must be modulo-8 seconds)
-    :param calexptime: Exposure time of the trailing calibrator observation, if applicable, in seconds
-    :param calibrator: None or False for no calibrator observation, a source name to specify one, or True to have one chosen for you.
-    :param freqres: Correlator frequency resolution for observations. None to use whatever the current mode is, for lower latency. Eg 40
-    :param inttime: Correlator integration time for observations. None to use whatever the current mode is, for lower latency. Eg 0.5
-    :param avoidsun: boolean or integer. If True, the coordinates of the target and calibrator are shifted slightly to put the Sun in a null.
-    :param vcsmode: boolean. If True, the observations are made in 'Voltage Capture' mode instead of normal (HW_LFILES) mode.
-    :param buffered: boolean. If True and vcsmode, trigger a Voltage capture using the ring buffer.
-    :param pretend: boolean or integer. If True, the clear_schedule.py and single_observation.py commands will be generated but NOT run.
-    :param logger: optional logging.logger object
-    :return: dictionary structure describing the processing (see above for more information).
+    Returns
+    -------
+        The structure returned is a dictionary with the following keys:
+
+        ``"success"``
+            True if the observations were scheduled successfully, False if there was an error (`boolean`).
+        ``"errors"``
+            A dictionary, containing integer keys from 0-N, where each value is an error message. Normally empty.
+        ``"params"``
+            A dictionary containing all parameters passed to the web service, after parsing, and some extra
+            parameters calculated by the web service (the name of the automatically chosen calibrator, etc).
+        ``"clear"``
+            the commands used to clear the schedule. It contains the keys/values:
+
+            ``"command"``
+                The full clear_schedule.py command line.
+            ``"retcode"``
+                The integer return code from that command.
+            ``"stderr"``
+                The output to STDERR from that command.
+            ``"stdout"``
+                The output to STDOUT from that command.
+        ``"schedule"``
+            The commands used to schedule the triggered observations. It contains the keys/values:
+
+            ``"command"``
+                A string containing all of the single_observation.py command lines.
+            ``"retcode"``
+                The integer return code from the shell spawned to run those commands.
+            ``"stderr"``
+                The output to STDERR from those commands.
+            ``"stdout"``
+                The output to STDOUT from those commands.
     """
 
     if vcsmode and buffered:
@@ -382,29 +453,52 @@ def triggerbuffer(
     inserted into the schedule), or until the next scheduled VOLTAGE_STOP observation, whichever comes
     first.
 
-    The structure returned is a dictionary, containing the following:
-      result['success'] - a boolean, True if the observations were scheduled successfully, False if there was an error.
-      result['errors'] - a dictionary, containing integer keys from 0-N, where each value is an error message. Normally empty.
-      result['params'] - a dictionary containing all parameters passed to the web service, after parsing, and some extra
-                         parameters calculated by the web service (the name of the automatically chosen calibrator, etc).
-      result['clear'] - the commands used to clear the schedule. It contains the keys/values:
-                           'command': The full clear_schedule.py command line
-                           'retcode': The integer return code from that command
-                           'stderr': The output to STDERR from that command
-                           'stdout': The output to STDOUT from that command
-      result['schedule'] - the commands used to trigger the buffer dump and add a VOLTAGE_STOP observation.
-                           It contains the keys/values:
-                               'command': A string containing all of the single_observation.py command lines
-                               'retcode':The integer return code from the shell spawned to run those commands
-                               'stderr': The output to STDERR from those commands
-                               'stdout': The output to STDOUT from those commands
+    Parameters
+    ----------
+    project_id : `str`
+        Project ID for the triggered observations, eg 'C001'.
+    secure_key : `str`
+        Password associated with that project_id.
+    pretend : `boolean` or `int`
+        If True, the clear_schedule.py and single_observation.py commands will be generated but NOT run.
+    logger : `logging`, optional
+        logging.logger object.
+    obstime : `int`
+        Duration of data capture, in seconds.
 
-    :param project_id: eg 'C001' - project ID for the triggered observations
-    :param secure_key: password associated with that project_id
-    :param pretend: boolean or integer. If True, the triggervcs command will NOT be run.
-    :param logger: optional logging.logger object
-    :param obstime: Duration of data capture, in seconds.
-    :return: dictionary structure describing the processing (see above for more information).
+    Returns
+    -------
+        The structure returned is a dictionary with the following keys:
+
+        ``"success"``
+            True if the observations were scheduled successfully, False if there was an error (`boolean`).
+        ``"errors"``
+            A dictionary, containing integer keys from 0-N, where each value is an error message. Normally empty.
+        ``"params"``
+            A dictionary containing all parameters passed to the web service, after parsing, and some extra
+            parameters calculated by the web service (the name of the automatically chosen calibrator, etc).
+        ``"clear"``
+            the commands used to clear the schedule. It contains the keys/values:
+
+            ``"command"``
+                The full clear_schedule.py command line.
+            ``"retcode"``
+                The integer return code from that command.
+            ``"stderr"``
+                The output to STDERR from that command.
+            ``"stdout"``
+                The output to STDOUT from that command.
+        ``"schedule"``
+            The commands used to schedule the triggered observations. It contains the keys/values:
+
+            ``"command"``
+                A string containing all of the single_observation.py command lines.
+            ``"retcode"``
+                The integer return code from the shell spawned to run those commands.
+            ``"stderr"``
+                The output to STDERR from those commands.
+            ``"stdout"``
+                The output to STDOUT from those commands.
     """
     urldict = {}
     postdict = {}
