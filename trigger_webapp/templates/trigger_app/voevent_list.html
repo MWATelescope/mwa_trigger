@@ -7,41 +7,45 @@
     <thead>
       <tr>
         <th>ID</th>
-        <th>Recieved</th>
+        <th>Recieved (UTC)</th>
         <th>Ignored</th>
         <th>Trigger Group ID</th>
         <th>Telescope</th>
         <th>Event Type</th>
         <th>Event ID</th>
         <th>Sequence number</th>
-        <th>Duration</th>
-        <th>Right Acension</th>
-        <th>Declination</th>
-        <th>Position Error</th>
+        <th>Duration (s)</th>
+        <th>Right Acension (&#176;)</th>
+        <th>Declination (&#176;)</th>
+        <th>Position Error (&#176;)</th>
         <th>XML File</th>
       </tr>
     </thead>
     <!-- Iterate over object_list -->
     {% for object in object_list %}
     <!-- Display Objects -->
-    <tr>
+    {% if object.ignored %}
+      <tr class="grey-tr">
+    {% else %}
+      <tr>
+    {% endif %}
       <td>{{ object.id }}</td>
       <td>{{ object.recieved_data }}</td>
       <td>{{ object.ignored }}</td>
       {% if object.trigger_group_id is None %}
         <!-- Don't make a link because there is no trigger event -->
-        <td>{{ object.trigger_group_id }}</td>
+        <td></td>
       {% else %}
         <td><a href="/triggerevent_details/{{ object.trigger_group_id }}/" style="text-decoration:None">{{ object.trigger_group_id }}</a></td>
       {% endif %}
       <td>{{ object.telescope }}</td>
       <td>{{ object.trigger_type }}</td>
-      <td>{{ object.trigger_id }}</td>
-      <td>{{ object.sequence_num }}</td>
-      <td>{{ object.duration }}</td>
-      <td>{{ object.ra }}</td>
-      <td>{{ object.dec }}</td>
-      <td>{{ object.pos_error }}</td>
+      <td>{% if object.trigger_id   is not None %} {{ object.trigger_id }}   {% endif %}</td>
+      <td>{% if object.sequence_num is not None %} {{ object.sequence_num }} {% endif %}</td>
+      <td>{% if object.duration     is not None %} {{ object.duration }}     {% endif %}</td>
+      <td>{% if object.ra           is not None %} {{ object.ra }}           {% endif %}</td>
+      <td>{% if object.dec          is not None %} {{ object.dec }}          {% endif %}</td>
+      <td>{% if object.pos_error    is not None %} {{ object.pos_error }}    {% endif %}</td>
       <!-- <td>{{ object.xml }}</td> -->
       <td><a href="/voevent_view/{{ object.id }}" style="text-decoration:None">View xml</a></td>
     </tr>
