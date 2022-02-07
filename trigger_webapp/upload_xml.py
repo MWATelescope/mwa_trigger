@@ -29,10 +29,10 @@ def write_and_upload(xml_string):
     url = 'http://127.0.0.1:8000/voevent_create/'
     data = {'telescope' : trig.telescope,
             'xml_packet' : xml_string,
-            'duration' : trig.trig_time,
+            'duration' : trig.trig_duration,
             'trigger_id' : trig.trig_id,
             'sequence_num' : trig.sequence_num,
-            'trigger_type' : trig.this_trig_type,
+            'trigger_type' : trig.event_type,
             'ra' : trig.ra,
             'dec' : trig.dec,
             'pos_error' : trig.err,
@@ -42,7 +42,7 @@ def write_and_upload(xml_string):
     # Upload
     # VOEvent.objects.get_or_create(telescope=trig.telescope,
     #                               xml_packet=xml_string,
-    #                               duration=trig.trig_time,
+    #                               duration=trig.trig_duration,
     #                               trigger_id=trig.trig_id,
     #                               sequence_num=trig.sequence_num,
     #                               trigger_type=trig.this_trig_type,

@@ -50,8 +50,8 @@ class parsed_VOEvent:
         self.packet = packet
         self.trig_pairs = trig_pairs
         # Make default Nones if unknown telescope found
-        self.trig_time = None
-        self.this_trig_type = None
+        self.trig_duration = None
+        self.event_type = None
         self.sequence_num = None
         self.trig_id = None
         self.ra = None
@@ -84,10 +84,10 @@ class parsed_VOEvent:
         # Work out which telescope the trigger is from
         self.telescope = get_telescope(v.attrib["ivorn"])
         logger.debug(self.telescope)
-        self.this_trig_type = get_trigger_type(self.telescope, v.attrib["ivorn"])
+        self.event_type = get_trigger_type(self.telescope, v.attrib["ivorn"])
 
         # Check if this is the type of trigger we're looking for
-        this_pair = f"{self.telescope}_{self.this_trig_type}"
+        this_pair = f"{self.telescope}_{self.event_type}"
         if this_pair in self.trig_pairs:
             self.ignore = False
         else:
@@ -97,10 +97,9 @@ class parsed_VOEvent:
 
         # Parse trigger info (telescope dependent)
         if self.telescope == "Fermi":
-            self.trig_time = float(
+            self.trig_duration = float(
                 v.find(".//Param[@name='Trig_Timescale']").attrib["value"]
             )
-            # self.this_trig_type = v.attrib['ivorn'].split('_')[1]  # Flt, Gnd, or Fin
             self.sequence_num = int(
                 v.find(".//Param[@name='Sequence_Num']").attrib["value"]
             )
@@ -112,7 +111,7 @@ class parsed_VOEvent:
                 v.find(".//Param[@name='Most_Likely_Prob']").attrib["value"]
             )
         elif self.telescope == "SWIFT":
-            if "BAT" in self.this_trig_type:
+            if "BAT" in self.event_type:
                 # Check if SWIFT tracking fails
                 startrack_lost_lock = v.find(
                     ".//Param[@name='StarTrack_Lost_Lock']"
@@ -124,12 +123,12 @@ class parsed_VOEvent:
                     logger.warning(
                         "The SWIFT star tracker lost it's lock so ignoring event"
                     )
-                    self.this_trig_type += " SWIFT lost star tracker"
+                    self.event_type += " SWIFT lost star tracker"
                     self.ignore = True
                     return
 
                 # Get time and significance
-                self.trig_time = float(
+                self.trig_duration = float(
                     v.find(".//Param[@name='Integ_Time']").attrib["value"]
                 )
                 self.sequence_num = None
@@ -139,17 +138,16 @@ class parsed_VOEvent:
                 self.grb_ident = v.find(".//Param[@name='GRB_Identified']").attrib["value"]
 
         elif self.telescope == "Antares":
-            self.trig_time = None
-            # self.this_trig_type = 'Antares'
+            self.trig_duration = None
             self.sequence_num = None
 
         # print(voeventparse.prettystr(v.What))
         self.trig_id = int(v.find(".//Param[@name='TrigID']").attrib["value"])
         logger.debug("Trig details:")
-        logger.debug(f"Dur:  {self.trig_time} s")
+        logger.debug(f"Dur:  {self.trig_duration} s")
         logger.debug(f"ID:   {self.trig_id}")
         logger.debug(f"Seq#: {self.sequence_num}")
-        logger.debug(f"Type: {self.this_trig_type}")
+        logger.debug(f"Type: {self.event_type}")
 
         # Get current position
         self.ra, self.dec, self.err = handlers.get_position_info(v)

@@ -17,8 +17,8 @@ def worth_observing(voevent, max_duration=2.05, fermi_prob=50):
     trigger_message = ""
 
     # Check the duration of the event
-    if voevent.trig_time is not None:
-        if voevent.trig_time < max_duration:
+    if voevent.trig_duration is not None:
+        if voevent.trig_duration < max_duration:
             short_bool = True
             trigger_message += f"Trigger time less than {max_duration} s. "
         else:
@@ -102,29 +102,29 @@ def worth_observing_atca_short_grb(
         trigger_message += "Id-ed as GRB."
 
     # Check the duration of the event
-    if voevent.trig_time is not None:
-        if voevent.trig_time < magnetar_limit:
+    if voevent.trig_duration is not None:
+        if voevent.trig_duration < magnetar_limit:
             trigger = False
-            trigger_message += f"Likely magnetar (trig_time < {magnetar_limit:.3f} s). "
+            trigger_message += f"Likely magnetar (trig_duration < {magnetar_limit:.3f} s). "
         elif voevent.rate_signif <= rate_signif:
             trigger = False
             trigger_message += f"Rate_signif < {rate_signif:.3f} sigma. "
-        elif voevent.trig_time < short_limit:
+        elif voevent.trig_duration < short_limit:
             trigger = True
             trigger_message += (
-                f"Probably short duration (trig_time < {short_limit:.3f} s). "
+                f"Probably short duration (trig_duration < {short_limit:.3f} s). "
             )
-        elif voevent.trig_time < mid_limit:
+        elif voevent.trig_duration < mid_limit:
             trigger = True
             hold = True
-            trigger_message += f"Maybe short duration (trig_time < {mid_limit:.3f} s). "
+            trigger_message += f"Maybe short duration (trig_duration < {mid_limit:.3f} s). "
         else:
             trigger = False
             trigger_message += (
-                f"Probably long duration (trig_time > {mid_limit:.3f} s. "
+                f"Probably long duration (trig_duration > {mid_limit:.3f} s. "
             )
     else:
-        trigger_message += "Trigger has no trig_time"
+        trigger_message += "Trigger has no trig_duration"
         return False, False, trigger_message
 
     return trigger, hold, trigger_message
