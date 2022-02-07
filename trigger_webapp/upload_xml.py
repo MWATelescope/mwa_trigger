@@ -32,11 +32,17 @@ def write_and_upload(xml_string):
             'duration' : trig.trig_duration,
             'trigger_id' : trig.trig_id,
             'sequence_num' : trig.sequence_num,
-            'trigger_type' : trig.event_type,
+            'event_type' : trig.event_type,
             'ra' : trig.ra,
             'dec' : trig.dec,
             'pos_error' : trig.err,
-            'ignored' : trig.ignore}
+            'ignored' : trig.ignore,
+            'source_name' : trig.source_name,
+            'grb' : trig.grb,
+            'flare_star' : trig.flare_star,
+            'gw' : trig.gw,
+            'neutrino' : trig.neutrino,
+    }
     r = session.post(url, data=data)
 
     # Upload
@@ -45,7 +51,7 @@ def write_and_upload(xml_string):
     #                               duration=trig.trig_duration,
     #                               trigger_id=trig.trig_id,
     #                               sequence_num=trig.sequence_num,
-    #                               trigger_type=trig.this_trig_type,
+    #                               event_type=trig.this_trig_type,
     #                               ra=trig.ra,
     #                               dec=trig.dec,
     #                               pos_error=trig.err,

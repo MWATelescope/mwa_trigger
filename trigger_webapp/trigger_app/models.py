@@ -19,7 +19,7 @@ class TriggerEvent(models.Model):
     decision_reason = models.CharField(max_length=256, blank=True, null=True)
     telescope = models.CharField(max_length=64, blank=True, null=True)
     trigger_id = models.IntegerField(blank=True, null=True)
-    trigger_type = models.CharField(max_length=64, blank=True, null=True)
+    event_type = models.CharField(max_length=64, blank=True, null=True)
     duration = models.FloatField(blank=True, null=True)
     ra = models.FloatField(blank=True, null=True)
     dec = models.FloatField(blank=True, null=True)
@@ -39,7 +39,7 @@ class VOEvent(models.Model):
     telescope = models.CharField(max_length=64, blank=True, null=True)
     trigger_id = models.IntegerField(blank=True, null=True)
     sequence_num = models.IntegerField(blank=True, null=True)
-    trigger_type = models.CharField(max_length=64, blank=True, null=True)
+    event_type = models.CharField(max_length=64, blank=True, null=True)
     duration = models.FloatField(blank=True, null=True)
     ra = models.FloatField(blank=True, null=True)
     dec = models.FloatField(blank=True, null=True)
@@ -47,6 +47,11 @@ class VOEvent(models.Model):
     recieved_data = models.DateTimeField(auto_now_add=True, blank=True)
     xml_packet = models.CharField(max_length=10000)
     ignored = models.BooleanField(default=True)
+    source_name = models.CharField(max_length=128, blank=True, null=True)
+    grb = models.BooleanField(default=False)
+    flare_star = models.BooleanField(default=False)
+    gw = models.BooleanField(default=False)
+    neutrino = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-id']

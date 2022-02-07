@@ -44,7 +44,7 @@ def group_trigger(sender, instance, **kwargs):
             # Make a new trigger event
             new_trig = TriggerEvent.objects.create(telescope=instance.telescope,
                                   trigger_id=instance.trigger_id,
-                                  trigger_type=instance.trigger_type,
+                                  event_type=instance.event_type,
                                   duration=instance.duration,
                                   ra=instance.ra,
                                   dec=instance.dec,

@@ -13,11 +13,16 @@
         <th>Telescope</th>
         <th>Event Type</th>
         <th>Event ID</th>
+        <th>Source Name</th>
         <th>Sequence number</th>
         <th>Duration (s)</th>
         <th>Right Acension (&#176;)</th>
         <th>Declination (&#176;)</th>
         <th>Position Error (&#176;)</th>
+        <th>GRB?</th>
+        <th>Flare star?</th>
+        <th>GW?</th>
+        <th>Neutrino?</th>
         <th>XML File</th>
       </tr>
     </thead>
@@ -39,13 +44,18 @@
         <td><a href="/triggerevent_details/{{ object.trigger_group_id }}/" style="text-decoration:None">{{ object.trigger_group_id }}</a></td>
       {% endif %}
       <td>{{ object.telescope }}</td>
-      <td>{{ object.trigger_type }}</td>
+      <td>{{ object.event_type }}</td>
       <td>{% if object.trigger_id   is not None %} {{ object.trigger_id }}   {% endif %}</td>
+      <td>{% if object.source_name  is not None %} {{ object.source_name }}  {% endif %}</td>
       <td>{% if object.sequence_num is not None %} {{ object.sequence_num }} {% endif %}</td>
       <td>{% if object.duration     is not None %} {{ object.duration }}     {% endif %}</td>
       <td>{% if object.ra           is not None %} {{ object.ra }}           {% endif %}</td>
       <td>{% if object.dec          is not None %} {{ object.dec }}          {% endif %}</td>
       <td>{% if object.pos_error    is not None %} {{ object.pos_error }}    {% endif %}</td>
+      <td>{% if object.grb        %} &#10004; {% endif %}</td>
+      <td>{% if object.flare_star %} &#10004; {% endif %}</td>
+      <td>{% if object.gw         %} &#10004; {% endif %}</td>
+      <td>{% if object.neutrino   %} &#10004; {% endif %}</td>
       <!-- <td>{{ object.xml }}</td> -->
       <td><a href="/voevent_view/{{ object.id }}" style="text-decoration:None">View xml</a></td>
     </tr>
