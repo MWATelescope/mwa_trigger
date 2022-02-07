@@ -39,37 +39,47 @@
     <thead>
       <tr>
         <th>ID</th>
-        <th>Recieved</th>
-        <th>Ignored</th>
-        <th>Trigger Group ID</th>
+        <th>Recieved (UTC)</th>
         <th>Telescope</th>
         <th>Event Type</th>
         <th>Event ID</th>
+        <th>Source Name</th>
         <th>Sequence number</th>
-        <th>Duration</th>
-        <th>Right Acension</th>
-        <th>Declination</th>
-        <th>Position Error</th>
+        <th>Duration (s)</th>
+        <th>Right Acension (&#176;)</th>
+        <th>Declination (&#176;)</th>
+        <th>Position Error (&#176;)</th>
+        <th>GRB?</th>
+        <th>Flare star?</th>
+        <th>GW?</th>
+        <th>Neutrino?</th>
         <th>XML File</th>
       </tr>
     </thead>
     <!-- Iterate over object_list -->
     {% for voevent in voevents %}
     <!-- Display Objects -->
-    <tr>
+    {% if voevent.ignored %}
+      <tr class="grey-tr">
+    {% else %}
+      <tr>
+    {% endif %}
       <td>{{ voevent.id }}</td>
       <td>{{ voevent.recieved_data }}</td>
-      <td>{{ voevent.ignored }}</td>
-      <td>{{ voevent.trigger_group_id }}</td>
       <td>{{ voevent.telescope }}</td>
       <td>{{ voevent.event_type }}</td>
-      <td>{{ voevent.trigger_id }}</td>
-      <td>{{ voevent.sequence_num }}</td>
-      <td>{{ voevent.duration }}</td>
-      <td>{{ voevent.ra }}</td>
-      <td>{{ voevent.dec }}</td>
-      <td>{{ voevent.pos_error }}</td>
-      <!-- <td>{{ voevents.xml }}</td> -->
+      <td>{% if voevent.trigger_id   is not None %} {{ voevent.trigger_id }}   {% endif %}</td>
+      <td>{% if voevent.source_name  is not None %} {{ voevent.source_name }}  {% endif %}</td>
+      <td>{% if voevent.sequence_num is not None %} {{ voevent.sequence_num }} {% endif %}</td>
+      <td>{% if voevent.duration     is not None %} {{ voevent.duration }}     {% endif %}</td>
+      <td>{% if voevent.ra           is not None %} {{ voevent.ra }}           {% endif %}</td>
+      <td>{% if voevent.dec          is not None %} {{ voevent.dec }}          {% endif %}</td>
+      <td>{% if voevent.pos_error    is not None %} {{ voevent.pos_error }}    {% endif %}</td>
+      <td>{% if voevent.grb        %} &#10004; {% endif %}</td>
+      <td>{% if voevent.flare_star %} &#10004; {% endif %}</td>
+      <td>{% if voevent.gw         %} &#10004; {% endif %}</td>
+      <td>{% if voevent.neutrino   %} &#10004; {% endif %}</td>
+      <!-- <td>{{ voevent.xml }}</td> -->
       <td><a href="/voevent_view/{{ voevent.id }}" style="text-decoration:None">View xml</a></td>
     </tr>
     <!-- If object_list is empty  -->
