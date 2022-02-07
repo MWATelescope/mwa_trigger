@@ -22,7 +22,6 @@ from mwa_trigger.parse_xml import parsed_VOEvent
 def write_and_upload(xml_string):
     # Parse
     trig = parsed_VOEvent(None, packet=xml_string)
-    trig.parse()
 
     # Upload
     session = requests.session()
@@ -30,23 +29,29 @@ def write_and_upload(xml_string):
     url = 'http://127.0.0.1:8000/voevent_create/'
     data = {'telescope' : trig.telescope,
             'xml_packet' : xml_string,
-            'duration' : trig.trig_time,
+            'duration' : trig.trig_duration,
             'trigger_id' : trig.trig_id,
             'sequence_num' : trig.sequence_num,
-            'trigger_type' : trig.this_trig_type,
+            'event_type' : trig.event_type,
             'ra' : trig.ra,
             'dec' : trig.dec,
             'pos_error' : trig.err,
-            'ignored' : trig.ignore}
+            'ignored' : trig.ignore,
+            'source_name' : trig.source_name,
+            'grb' : trig.grb,
+            'flare_star' : trig.flare_star,
+            'gw' : trig.gw,
+            'neutrino' : trig.neutrino,
+    }
     r = session.post(url, data=data)
 
     # Upload
     # VOEvent.objects.get_or_create(telescope=trig.telescope,
     #                               xml_packet=xml_string,
-    #                               duration=trig.trig_time,
+    #                               duration=trig.trig_duration,
     #                               trigger_id=trig.trig_id,
     #                               sequence_num=trig.sequence_num,
-    #                               trigger_type=trig.this_trig_type,
+    #                               event_type=trig.this_trig_type,
     #                               ra=trig.ra,
     #                               dec=trig.dec,
     #                               pos_error=trig.err,

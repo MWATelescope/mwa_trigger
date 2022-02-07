@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import UserAlerts, VOEvent, TriggerEvent, CometLog, Status, AdminAlerts,  MWAObservations, TriggerSettings
+from .models import UserAlerts, VOEvent, TriggerEvent, CometLog, Status, AdminAlerts,  MWAObservations, ProjectSettings
 from .mwa_observe import trigger_mwa_observation
 
 from mwa_trigger.parse_xml import parsed_VOEvent
@@ -35,14 +35,16 @@ def group_trigger(sender, instance, **kwargs):
         if TriggerEvent.objects.filter(trigger_id=trigger_id).exists():
             # Trigger event already exists so link the new VOEvent
             prev_trig = TriggerEvent.objects.get(trigger_id=trigger_id)
-            instance.trigger_group_id = prev_trig
+            # For some reason can't update with the instance
+            voevent = VOEvent.objects.filter(trigger_id=trigger_id)
+            voevent.update(trigger_group_id=prev_trig)
 
             #TODO add some checks to see if you want to update here
         else:
             # Make a new trigger event
             new_trig = TriggerEvent.objects.create(telescope=instance.telescope,
                                   trigger_id=instance.trigger_id,
-                                  trigger_type=instance.trigger_type,
+                                  event_type=instance.event_type,
                                   duration=instance.duration,
                                   ra=instance.ra,
                                   dec=instance.dec,
@@ -53,13 +55,15 @@ def group_trigger(sender, instance, **kwargs):
 
             # Check if it's worth triggering an obs
             vo = parsed_VOEvent(None, packet=str(instance.xml_packet))
-            vo.parse()
 
             # Loop over settings
-            observations_settings = TriggerSettings.objects.all()
-            for obs_set in observations_settings:
-                trigger_bool, debug_bool, short_bool, trigger_message = worth_observing(vo, max_duration=obs_set.max_duration, fermi_prob=obs_set.fermi_prob)
-                # TODO do something smart with these results to decide which telescope to observe with. For now just using last choice
+            project_settings = ProjectSettings.objects.all()
+            for proj_set in project_settings:
+                if proj_set.grb:
+                    # This project wants to observe GRBs so check if it is worth observing
+                    trigger_bool, debug_bool, short_bool, trigger_message = worth_observing(vo, max_duration=proj_set.max_duration, fermi_prob=proj_set.fermi_prob)
+
+            # TODO do something smart with these results to decide which telescope to observe with.
 
             if trigger_bool:
                 # Check if you can observer and if so send off mwa observation
