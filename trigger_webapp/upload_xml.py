@@ -22,7 +22,6 @@ from mwa_trigger.parse_xml import parsed_VOEvent
 def write_and_upload(xml_string):
     # Parse
     trig = parsed_VOEvent(None, packet=xml_string)
-    trig.parse()
 
     # Upload
     session = requests.session()

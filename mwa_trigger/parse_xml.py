@@ -45,9 +45,10 @@ def get_trigger_type(telescope, ivorn):
 
 
 class parsed_VOEvent:
-    def __init__(self, xml, packet=None):
+    def __init__(self, xml, packet=None, trig_pairs=None):
         self.xml = xml
         self.packet = packet
+        self.trig_pairs = trig_pairs
         # Make default Nones if unknown telescope found
         self.trig_time = None
         self.this_trig_type = None
@@ -61,7 +62,15 @@ class parsed_VOEvent:
         self.rate_signif = None
         self.grb_ident = None
         self.telescope = None
-        # TODO: Consider calling self.parse() at the end of this constructor
+        if self.trig_pairs is None:
+            # use defaults
+            trig_pairs = [
+                "SWIFT_BAT_GRB_Pos",
+                "Fermi_GBM_Flt_Pos",
+                "Fermi_GBM_Gnd_Pos",
+                "Fermi_GBM_Fin_Pos",
+            ]
+        self.parse()
 
     def parse(self):
         # Read in xml

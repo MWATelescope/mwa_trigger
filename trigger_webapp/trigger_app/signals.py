@@ -53,7 +53,6 @@ def group_trigger(sender, instance, **kwargs):
 
             # Check if it's worth triggering an obs
             vo = parsed_VOEvent(None, packet=str(instance.xml_packet))
-            vo.parse()
 
             # Loop over settings
             observations_settings = TriggerSettings.objects.all()

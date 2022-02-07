@@ -34,7 +34,6 @@ def test_trigger_event():
             print(f'\n{xml_file}')
             xml_loc = os.path.join(os.path.dirname(__file__), 'test_events', xml_file)
         trig = parsed_VOEvent(xml_loc, packet=xml_packet)
-        trig.parse()
         print("Trig details:")
         print(trig.__dict__)
         # print(f"Dur:  {trig.trig_time} s")
