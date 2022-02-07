@@ -13,7 +13,7 @@
   {{ twistd_comet_status.get_status_display }} </p>
   <p><a href="/comet_log/" style="text-decoration:None">View Comet Log</a></p>
 
-  <h3>Current Observing Settings</h3>
+  <h3>Current Project Settings</h3>
   <table class="fl-table">
     <thead>
     <tr>
@@ -22,6 +22,11 @@
       <th>Minimum Fermi Probability</th>
       <th>Repointing Limit</th>
       <th>Observe in VCS?</th>
+      <th>Testing?</th>
+      <th>GRB?</th>
+      <th>Flare Stars?</th>
+      <th>GW?</th>
+      <th>Neutrinos?</th>
     </tr>
     </thead>
     <!-- Iterate over object_list -->
@@ -33,13 +38,18 @@
       <td>{{ setting.fermi_prob }}</td>
       <td>{{ setting.repointing_limit }}</td>
       <td>{{ setting.vcs_mode }}</td>
+      <td>{{ setting.testing }}</td>
+      <td>{% if setting.grb        %} &#10004; {% endif %}</td>
+      <td>{% if setting.flare_star %} &#10004; {% endif %}</td>
+      <td>{% if setting.gw         %} &#10004; {% endif %}</td>
+      <td>{% if setting.neutrino   %} &#10004; {% endif %}</td>
     </tr>
     <!-- If object_list is empty  -->
     {% empty %}
     <li>No Settings yet.</li>
     {% endfor %}
     </table>
-    <p><a href="/admin/trigger_app/triggersettings/" style="text-decoration:None">Edit Observation Settings</a></p>
+    <p><a href="/admin/trigger_app/projectsettings/" style="text-decoration:None">Edit Observation Settings</a></p>
 
   <h3>Event Logs</h3>
   <p><a href="/trigger_log/" style="text-decoration:None">View Trigger Log</a></p>

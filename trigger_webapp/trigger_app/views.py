@@ -42,7 +42,7 @@ class CometLogList(ListView):
 
 def home_page(request):
     comet_status = models.Status.objects.get(name='twistd_comet')
-    settings = models.TriggerSettings.objects.all()
+    settings = models.ProjectSettings.objects.all()
     return render(request, 'trigger_app/home_page.html', {'twistd_comet_status': comet_status,
                                                           'settings':settings})
 

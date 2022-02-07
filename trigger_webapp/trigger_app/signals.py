@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import UserAlerts, VOEvent, TriggerEvent, CometLog, Status, AdminAlerts,  MWAObservations, TriggerSettings
+from .models import UserAlerts, VOEvent, TriggerEvent, CometLog, Status, AdminAlerts,  MWAObservations, ProjectSettings
 from .mwa_observe import trigger_mwa_observation
 
 from mwa_trigger.parse_xml import parsed_VOEvent
@@ -57,7 +57,7 @@ def group_trigger(sender, instance, **kwargs):
             vo = parsed_VOEvent(None, packet=str(instance.xml_packet))
 
             # Loop over settings
-            observations_settings = TriggerSettings.objects.all()
+            observations_settings = ProjectSettings.objects.all()
             for obs_set in observations_settings:
                 trigger_bool, debug_bool, short_bool, trigger_message = worth_observing(vo, max_duration=obs_set.max_duration, fermi_prob=obs_set.fermi_prob)
                 # TODO do something smart with these results to decide which telescope to observe with. For now just using last choice

@@ -111,12 +111,19 @@ class MWAObservations(models.Model):
     reason = models.CharField(max_length=256, blank=True, null=True)
 
 
-class TriggerSettings(models.Model):
+class ProjectSettings(models.Model):
     telescope = models.CharField(max_length=64, blank=True, null=True)
+    project_id = models.CharField(max_length=64, blank=True, null=True)
+    project_description = models.CharField(max_length=256, blank=True, null=True)
     max_duration = models.FloatField(blank=True, null=True)
     fermi_prob = models.FloatField(blank=True, null=True)
     vcs_mode = models.BooleanField(default=True, null=True)
     repointing_limit = models.FloatField(blank=True, null=True)
     testing = models.BooleanField(default=False, null=True)
+    grb = models.BooleanField(default=False)
+    flare_star = models.BooleanField(default=False)
+    gw = models.BooleanField(default=False)
+    neutrino = models.BooleanField(default=False)
+
     def __str__(self):
-        return "{}".format(self.telescope)
+        return f"{self.telescope}_{self.project_id}"
