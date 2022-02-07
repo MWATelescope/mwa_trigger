@@ -35,7 +35,9 @@ def group_trigger(sender, instance, **kwargs):
         if TriggerEvent.objects.filter(trigger_id=trigger_id).exists():
             # Trigger event already exists so link the new VOEvent
             prev_trig = TriggerEvent.objects.get(trigger_id=trigger_id)
-            instance.trigger_group_id = prev_trig
+            # For some reason can't update with the instance
+            voevent = VOEvent.objects.filter(trigger_id=trigger_id)
+            voevent.update(trigger_group_id=prev_trig)
 
             #TODO add some checks to see if you want to update here
         else:

@@ -64,8 +64,9 @@ class parsed_VOEvent:
         self.telescope = None
         if self.trig_pairs is None:
             # use defaults
-            trig_pairs = [
+            self.trig_pairs = [
                 "SWIFT_BAT_GRB_Pos",
+                "SWIFT_XRT_Pos",
                 "Fermi_GBM_Flt_Pos",
                 "Fermi_GBM_Gnd_Pos",
                 "Fermi_GBM_Fin_Pos",
@@ -85,15 +86,9 @@ class parsed_VOEvent:
         logger.debug(self.telescope)
         self.this_trig_type = get_trigger_type(self.telescope, v.attrib["ivorn"])
 
-        # Types of trigger we're looking for
-        trig_pairs = [
-            "SWIFT_BAT_GRB_Pos",
-            "Fermi_GBM_Flt_Pos",
-            "Fermi_GBM_Gnd_Pos",
-            "Fermi_GBM_Fin_Pos",
-        ]
+        # Check if this is the type of trigger we're looking for
         this_pair = f"{self.telescope}_{self.this_trig_type}"
-        if this_pair in trig_pairs:
+        if this_pair in self.trig_pairs:
             self.ignore = False
         else:
             # Unknown telescope so ignoring
@@ -117,30 +112,31 @@ class parsed_VOEvent:
                 v.find(".//Param[@name='Most_Likely_Prob']").attrib["value"]
             )
         elif self.telescope == "SWIFT":
-            # Check if SWIFT tracking fails
-            startrack_lost_lock = v.find(
-                ".//Param[@name='StarTrack_Lost_Lock']"
-            ).attrib["value"]
-            # convert 'true' to True, and everything else to false
-            startrack_lost_lock = startrack_lost_lock.lower() == "true"
-            logger.debug("StarLock OK? {0}".format(not startrack_lost_lock))
-            if startrack_lost_lock:
-                logger.warning(
-                    "The SWIFT star tracker lost it's lock so ignoring event"
+            if "BAT" in self.this_trig_type:
+                # Check if SWIFT tracking fails
+                startrack_lost_lock = v.find(
+                    ".//Param[@name='StarTrack_Lost_Lock']"
+                ).attrib["value"]
+                # convert 'true' to True, and everything else to false
+                startrack_lost_lock = startrack_lost_lock.lower() == "true"
+                logger.debug("StarLock OK? {0}".format(not startrack_lost_lock))
+                if startrack_lost_lock:
+                    logger.warning(
+                        "The SWIFT star tracker lost it's lock so ignoring event"
+                    )
+                    self.this_trig_type += " SWIFT lost star tracker"
+                    self.ignore = True
+                    return
+
+                # Get time and significance
+                self.trig_time = float(
+                    v.find(".//Param[@name='Integ_Time']").attrib["value"]
                 )
-                self.this_trig_type += " SWIFT lost star tracker"
-                self.ignore = True
-                return
-            self.trig_time = float(
-                v.find(".//Param[@name='Integ_Time']").attrib["value"]
-            )
-            # self.this_trig_type = "SWIFT"
-            self.sequence_num = None
-            self.rate_signif = float(
-                v.find(".//Param[@name='Rate_Signif']").attrib["value"]
-            )
-            self.grb_ident = v.find(".//Param[@name='GRB_Identified']").attrib["value"]
-            self.grb_ident = self.grb_ident == "true"
+                self.sequence_num = None
+                self.rate_signif = float(
+                    v.find(".//Param[@name='Rate_Signif']").attrib["value"]
+                )
+                self.grb_ident = v.find(".//Param[@name='GRB_Identified']").attrib["value"]
 
         elif self.telescope == "Antares":
             self.trig_time = None
