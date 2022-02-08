@@ -1,0 +1,48 @@
+{% extends 'trigger_app/header.html' %}
+
+{% block content %}
+<title>Current Project Settings</title>
+<div class="container-fluid">
+  <table class="fl-table">
+    <thead>
+    <tr>
+      <th>Telescope</th>
+      <th>Project ID</th>
+      <th>Project Description</th>
+      <th>Trigger Duration range (s)</th>
+      <th>Pending Duration range (s)</th>
+      <th>Minimum Fermi Probability</th>
+      <th>Repointing Limit</th>
+      <th>Observe in VCS?</th>
+      <th>Testing?</th>
+      <th>GRB?</th>
+      <th>Flare Stars?</th>
+      <th>GW?</th>
+      <th>Neutrinos?</th>
+    </tr>
+    </thead>
+    <!-- Iterate over object_list -->
+    {% for object in object_list %}
+    <!-- Display Objects -->
+    <tr>
+      <td>{{ object.telescope }}</td>
+      <td>{{ object.project_id }}</td>
+      <td>{{ object.project_description }}</td>
+      <td>{{ object.trig_min_duration }} - {{ object.trig_max_duration }}</td>
+      <td>{{ object.pending_min_duration }} - {{ object.pending_max_duration }}</td>
+      <td>{{ object.fermi_prob }}</td>
+      <td>{{ object.repointing_limit }}</td>
+      <td>{{ object.vcs_mode }}</td>
+      <td>{{ object.testing }}</td>
+      <td>{% if object.grb        %} &#10004; {% endif %}</td>
+      <td>{% if object.flare_star %} &#10004; {% endif %}</td>
+      <td>{% if object.gw         %} &#10004; {% endif %}</td>
+      <td>{% if object.neutrino   %} &#10004; {% endif %}</td>
+    </tr>
+    <!-- If object_list is empty  -->
+    {% empty %}
+    <li>No Settings yet.</li>
+    {% endfor %}
+    </table>
+</div>
+{% endblock %}

@@ -39,6 +39,9 @@ class CometLogList(ListView):
     # specify the model for list view
     model = models.CometLog
 
+class ProjectSettingsList(ListView):
+    # specify the model for list view
+    model = models.ProjectSettings
 
 def home_page(request):
     comet_status = models.Status.objects.get(name='twistd_comet')
