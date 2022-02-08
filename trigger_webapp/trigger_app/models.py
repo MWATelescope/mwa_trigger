@@ -48,10 +48,17 @@ class VOEvent(models.Model):
     xml_packet = models.CharField(max_length=10000)
     ignored = models.BooleanField(default=True)
     source_name = models.CharField(max_length=128, blank=True, null=True)
-    grb = models.BooleanField(default=False)
-    flare_star = models.BooleanField(default=False)
-    gw = models.BooleanField(default=False)
-    neutrino = models.BooleanField(default=False)
+    GRB = 'GRB'
+    FS = 'FS'
+    NU = 'NU'
+    GW = 'GW'
+    SOURCE_CHOICES = (
+        (GRB, 'Gamma-ray burst'),
+        (FS, 'Flare star'),
+        (NU, 'Neutrino'),
+        (GW, 'Gravitational wave'),
+    )
+    source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, null=True)
 
     class Meta:
         ordering = ['-id']

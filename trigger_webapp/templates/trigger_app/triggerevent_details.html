@@ -49,10 +49,7 @@
         <th>Right Acension (&#176;)</th>
         <th>Declination (&#176;)</th>
         <th>Position Error (&#176;)</th>
-        <th>GRB?</th>
-        <th>Flare star?</th>
-        <th>GW?</th>
-        <th>Neutrino?</th>
+        <th>Source Type</th>
         <th>XML File</th>
       </tr>
     </thead>
@@ -75,10 +72,7 @@
       <td>{% if voevent.ra           is not None %} {{ voevent.ra }}           {% endif %}</td>
       <td>{% if voevent.dec          is not None %} {{ voevent.dec }}          {% endif %}</td>
       <td>{% if voevent.pos_error    is not None %} {{ voevent.pos_error }}    {% endif %}</td>
-      <td>{% if voevent.grb        %} &#10004; {% endif %}</td>
-      <td>{% if voevent.flare_star %} &#10004; {% endif %}</td>
-      <td>{% if voevent.gw         %} &#10004; {% endif %}</td>
-      <td>{% if voevent.neutrino   %} &#10004; {% endif %}</td>
+      <td>{% if voevent.source_type  is not None %} {{ voevent.get_source_type_display }}  {% endif %}</td>
       <!-- <td>{{ voevent.xml }}</td> -->
       <td><a href="/voevent_view/{{ voevent.id }}" style="text-decoration:None">View xml</a></td>
     </tr>
