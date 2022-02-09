@@ -47,10 +47,10 @@ def worth_observing_grb(voevent,
 
     # Check the duration of the event
     if voevent.trig_duration is not None and likely_bool:
-        if trig_min_duration < voevent.trig_duration < trig_max_duration:
+        if trig_min_duration <= voevent.trig_duration <= trig_max_duration:
             trigger_bool = True
             trigger_message += f"Trigger time between {trig_min_duration} and {trig_max_duration} s so triggering. "
-        else:
+        elif pending_min_duration <= voevent.trig_duration <= pending_max_duration:
             pending_bool = True
             debug_bool = True
             trigger_message += f"Trigger time between {pending_min_duration} and {pending_max_duration} s so waiting for a human's decision. "
