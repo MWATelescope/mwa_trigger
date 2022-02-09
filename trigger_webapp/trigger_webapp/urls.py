@@ -31,7 +31,7 @@ urlpatterns = [
     path('voevent_log/', views.VOEventList.as_view()),
     path('comet_log/', views.CometLogList.as_view()),
     path('project_settings/', views.ProjectSettingsList.as_view()),
-    path('project_settings_details/<int:id>/', views.ProjectDecision_details),
+    path('project_decision_details/<int:id>/', views.ProjectDecision_details),
     #path('<str:filepath>/', views.download_file),
     path('voevent_view/<int:id>/', views.voevent_view),
     path('voevent_create/', views.voevent_create),
