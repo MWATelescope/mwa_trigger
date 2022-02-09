@@ -47,6 +47,7 @@ def group_trigger(sender, instance, **kwargs):
                 ra=instance.ra,
                 dec=instance.dec,
                 pos_error=instance.pos_error,
+                source_type=instance.source_type,
             )
             # Link the VOEvent
             instance.trigger_group_id = new_trig
@@ -61,9 +62,10 @@ def group_trigger(sender, instance, **kwargs):
                 # Defaults if not worth observing
                 trigger_bool = debug_bool = pending_bool = False
                 trigger_message = ""
+                proj_source_bool = False
 
                 # Check if this project thinks this event is worth observing
-                if proj_set.grb:
+                if proj_set.grb and instance.source_type == "GRB":
                     # This project wants to observe GRBs so check if it is worth observing
                     trigger_bool, debug_bool, pending_bool, trigger_message = worth_observing_grb(
                         vo,
@@ -74,8 +76,13 @@ def group_trigger(sender, instance, **kwargs):
                         fermi_prob=proj_set.fermi_prob,
                         rate_signif=proj_set.swift_rate_signf,
                     )
+                    proj_source_bool = True
                 # TODO set up other source types here
-                print(trigger_bool, debug_bool, pending_bool, trigger_message)
+
+                if not proj_source_bool:
+                    # Project does not observe this type of source so update message
+                    trigger_message += f"This project does not observe {instance.get_source_type_display()}s. "
+
                 if trigger_bool:
                     # Check if you can observe and if so send off mwa observation
                     decision, trigger_message, obsids = trigger_mwa_observation(instance, trigger_message)
@@ -94,7 +101,6 @@ def group_trigger(sender, instance, **kwargs):
                 else:
                     decision = 'I'
 
-                print(decision)
                 # Create a ProjectDecision object to record what each project does
                 proj_dec = ProjectDecision.objects.create(
                     decision=decision,

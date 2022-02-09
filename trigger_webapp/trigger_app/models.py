@@ -3,6 +3,17 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
+GRB = 'GRB'
+FS = 'FS'
+NU = 'NU'
+GW = 'GW'
+SOURCE_CHOICES = (
+    (GRB, 'Gamma-ray burst'),
+    (FS, 'Flare star'),
+    (NU, 'Neutrino'),
+    (GW, 'Gravitational wave'),
+)
+
 class ProjectSettings(models.Model):
     id = models.AutoField(primary_key=True)
     telescope = models.CharField(max_length=64, blank=True, null=True)
@@ -44,6 +55,7 @@ class TriggerEvent(models.Model):
     dec = models.FloatField(blank=True, null=True)
     pos_error = models.FloatField(blank=True, null=True)
     recieved_data = models.DateTimeField(auto_now_add=True, blank=True)
+    source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, null=True)
 
     def __str__(self):
         return str(self.id)
@@ -97,16 +109,6 @@ class VOEvent(models.Model):
     xml_packet = models.CharField(max_length=10000)
     ignored = models.BooleanField(default=True)
     source_name = models.CharField(max_length=128, blank=True, null=True)
-    GRB = 'GRB'
-    FS = 'FS'
-    NU = 'NU'
-    GW = 'GW'
-    SOURCE_CHOICES = (
-        (GRB, 'Gamma-ray burst'),
-        (FS, 'Flare star'),
-        (NU, 'Neutrino'),
-        (GW, 'Gravitational wave'),
-    )
     source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, null=True)
 
     class Meta:
