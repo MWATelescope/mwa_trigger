@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import UserAlerts, VOEvent, TriggerEvent, CometLog, Status, AdminAlerts,  MWAObservations, ProjectSettings
+from .models import ProjectDecision, UserAlerts, VOEvent, TriggerEvent, CometLog, Status, AdminAlerts,  MWAObservations, ProjectSettings, ProjectDecision
 from .mwa_observe import trigger_mwa_observation
 
 from mwa_trigger.parse_xml import parsed_VOEvent
@@ -42,13 +42,12 @@ def group_trigger(sender, instance, **kwargs):
             #TODO add some checks to see if you want to update here
         else:
             # Make a new trigger event
-            new_trig = TriggerEvent.objects.create(telescope=instance.telescope,
-                                  trigger_id=instance.trigger_id,
-                                  event_type=instance.event_type,
-                                  duration=instance.duration,
-                                  ra=instance.ra,
-                                  dec=instance.dec,
-                                  pos_error=instance.pos_error)
+            new_trig = TriggerEvent.objects.create(trigger_id=instance.trigger_id,
+                duration=instance.duration,
+                ra=instance.ra,
+                dec=instance.dec,
+                pos_error=instance.pos_error,
+            )
             # Link the VOEvent
             instance.trigger_group_id = new_trig
             instance.save()
@@ -59,34 +58,60 @@ def group_trigger(sender, instance, **kwargs):
             # Loop over settings
             project_settings = ProjectSettings.objects.all()
             for proj_set in project_settings:
+                # Defaults if not worth observing
+                trigger_bool = debug_bool = pending_bool = False
+                trigger_message = ""
+
+                # Check if this project thinks this event is worth observing
                 if proj_set.grb:
                     # This project wants to observe GRBs so check if it is worth observing
-                    trigger_bool, debug_bool, pending_bool, trigger_message = worth_observing_grb(vo, max_duration=proj_set.max_duration, fermi_prob=proj_set.fermi_prob)
+                    trigger_bool, debug_bool, pending_bool, trigger_message = worth_observing_grb(
+                        vo,
+                        trig_min_duration=proj_set.trig_min_duration,
+                        trig_max_duration=proj_set.trig_max_duration,
+                        pending_min_duration=proj_set.pending_min_duration,
+                        pending_max_duration=proj_set.pending_max_duration,
+                        fermi_prob=proj_set.fermi_prob,
+                        rate_signif=proj_set.swift_rate_signf,
+                    )
+                # TODO set up other source types here
+                print(trigger_bool, debug_bool, pending_bool, trigger_message)
+                if trigger_bool:
+                    # Check if you can observe and if so send off mwa observation
+                    decision, trigger_message, obsids = trigger_mwa_observation(instance, trigger_message)
+                    if decision == 'E':
+                        # Error observing so send off debug
+                        debug_bool = True
+                    for obsid in obsids:
+                        # Create new obsid model
+                        mwa_obs = MWAObservations.objects.create(obsid=obsid,
+                                                    trigger_group_id=new_trig,
+                                                    voevent_id=instance,
+                                                    reason="First Observation")
+                elif pending_bool:
+                    # Send off a pending decision
+                    decision = 'P'
+                else:
+                    decision = 'I'
 
-            # TODO do something smart with these results to decide which telescope to observe with.
+                print(decision)
+                # Create a ProjectDecision object to record what each project does
+                proj_dec = ProjectDecision.objects.create(
+                    decision=decision,
+                    decision_reason=trigger_message,
+                    project=proj_set,
+                    trigger_group_id=new_trig,
+                    duration=instance.duration,
+                    ra=instance.ra,
+                    dec=instance.dec,
+                    pos_error=instance.pos_error,
+                )
 
-            if trigger_bool:
-                # Check if you can observer and if so send off mwa observation
-                decision, trigger_message, obsids = trigger_mwa_observation(instance, trigger_message)
-                if decision == 'E':
-                    # Error observing so send off debug
-                    debug_bool = True
-                new_trig.decision = decision
-                new_trig.decision_reason = trigger_message
-                new_trig.save()
-                for obsid in obsids:
-                    # Create new obsid model
-                    mwa_obs = MWAObservations.objects.create(obsid=obsid,
-                                                   trigger_group_id=new_trig,
-                                                   voevent_id=instance,
-                                                   reason="First Observation")
-            else:
-                new_trig.decision = 'I'
-                new_trig.decision_reason = trigger_message
-                new_trig.save()
+                # TODO do something smart with these results to decide which telescope to observe with
+                # but hopefully the project settings will describe if you want to observe or not.
 
-            # send off alert messages to users and admins
-            send_all_alerts(trigger_bool, debug_bool, False, trigger_message)
+                # send off alert messages to users and admins
+                send_all_alerts(trigger_bool, debug_bool, False, trigger_message)
 
 
 def send_all_alerts(trigger_bool, debug_bool, pending_bool, trigger_message):

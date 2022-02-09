@@ -16,6 +16,8 @@ from . import models, serializers, forms
 import os
 import sys
 import voeventparse as vp
+from astropy.coordinates import SkyCoord
+from astropy import units as u
 import logging
 logger = logging.getLogger(__name__)
 
@@ -52,11 +54,18 @@ def home_page(request):
 
 def TriggerEvent_details(request, tid):
     trigger_event = models.TriggerEvent.objects.get(id=tid)
+    # covert ra and dec to HH:MM:SS.SS format
+    c = SkyCoord( trigger_event.ra, trigger_event.dec, frame='icrs', unit=(u.deg,u.deg))
+    trigger_event.ra = c.ra.to_string(unit=u.hour, sep=':')
+    trigger_event.dec = c.dec.to_string(unit=u.degree, sep=':')
+
     voevents = models.VOEvent.objects.filter(trigger_group_id=trigger_event)
     mwa_obs = models.MWAObservations.objects.filter(trigger_group_id=trigger_event)
+    proj_decs = models.ProjectDecision.objects.filter(trigger_group_id=trigger_event)
     return render(request, 'trigger_app/triggerevent_details.html', {'trigger_event':trigger_event,
                                                                      'voevents':voevents,
-                                                                     'mwa_obs':mwa_obs})
+                                                                     'mwa_obs':mwa_obs,
+                                                                     'proj_decs':proj_decs})
 
 
 @login_required
