@@ -2,6 +2,29 @@ from os import sched_get_priority_max
 from django.db import models
 from django.contrib.auth.models import User
 
+
+class ProjectSettings(models.Model):
+    id = models.AutoField(primary_key=True)
+    telescope = models.CharField(max_length=64, blank=True, null=True)
+    project_id = models.CharField(max_length=64, blank=True, null=True)
+    project_description = models.CharField(max_length=256, blank=True, null=True)
+    trig_max_duration = models.FloatField(blank=True, null=True)
+    trig_min_duration = models.FloatField(blank=True, null=True)
+    pending_max_duration = models.FloatField(blank=True, null=True)
+    pending_min_duration = models.FloatField(blank=True, null=True)
+    fermi_prob = models.FloatField(blank=True, null=True)
+    swift_rate_signf = models.FloatField(blank=True, null=True)
+    vcs_mode = models.BooleanField(default=True, null=True)
+    repointing_limit = models.FloatField(blank=True, null=True)
+    testing = models.BooleanField(default=False, null=True)
+    grb = models.BooleanField(default=False)
+    flare_star = models.BooleanField(default=False)
+    gw = models.BooleanField(default=False)
+    neutrino = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.telescope}_{self.project_id}"
+
 # Create your models here.
 class TriggerEvent(models.Model):
     id = models.AutoField(primary_key=True)
@@ -16,6 +39,7 @@ class TriggerEvent(models.Model):
         (T, 'Triggered'),
     )
     decision = models.CharField(max_length=32, choices=CHOICES, default=P)
+    project = models.ForeignKey(ProjectSettings, on_delete=models.SET_NULL, blank=True, null=True)
     decision_reason = models.CharField(max_length=256, blank=True, null=True)
     telescope = models.CharField(max_length=64, blank=True, null=True)
     trigger_id = models.IntegerField(blank=True, null=True)
@@ -116,24 +140,3 @@ class MWAObservations(models.Model):
     trigger_group_id = models.ForeignKey(TriggerEvent, on_delete=models.SET_NULL, blank=True, null=True)
     voevent_id = models.ForeignKey(VOEvent, on_delete=models.SET_NULL, blank=True, null=True)
     reason = models.CharField(max_length=256, blank=True, null=True)
-
-
-class ProjectSettings(models.Model):
-    telescope = models.CharField(max_length=64, blank=True, null=True)
-    project_id = models.CharField(max_length=64, blank=True, null=True)
-    project_description = models.CharField(max_length=256, blank=True, null=True)
-    trig_max_duration = models.FloatField(blank=True, null=True)
-    trig_min_duration = models.FloatField(blank=True, null=True)
-    pending_max_duration = models.FloatField(blank=True, null=True)
-    pending_min_duration = models.FloatField(blank=True, null=True)
-    fermi_prob = models.FloatField(blank=True, null=True)
-    vcs_mode = models.BooleanField(default=True, null=True)
-    repointing_limit = models.FloatField(blank=True, null=True)
-    testing = models.BooleanField(default=False, null=True)
-    grb = models.BooleanField(default=False)
-    flare_star = models.BooleanField(default=False)
-    gw = models.BooleanField(default=False)
-    neutrino = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"{self.telescope}_{self.project_id}"

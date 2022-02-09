@@ -3,8 +3,11 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def worth_observing(voevent, max_duration=2.05, fermi_prob=50):
-    """Decide if a VOEvent is worth observing.
+def worth_observing_grb(voevent,
+                        trig_min_duration=0.256, trig_max_duration=1.023,
+                        pending_min_duration=1.024, pending_max_duration=2.048,
+                        fermi_prob=50, rate_signif=0.0):
+    """Decide if a GRB VOEvent is worth observing.
 
     Parameters
     ----------
@@ -13,37 +16,46 @@ def worth_observing(voevent, max_duration=2.05, fermi_prob=50):
     # Setup up defaults
     trigger_bool = False
     debug_bool = False
-    short_bool = False
+    pending_bool = False
     trigger_message = ""
 
-    # Check the duration of the event
-    if voevent.trig_duration is not None:
-        if voevent.trig_duration < max_duration:
-            short_bool = True
-            trigger_message += f"Trigger time less than {max_duration} s. "
-        else:
-            debug_bool = True
-            trigger_message += f"Trigger time greater than {max_duration} s. "
-
+    # Check the events likelyhood data
+    likely_bool = False
     if voevent.most_likely_index is not None:
         # Fermi triggers have their own probability
         if voevent.most_likely_index == 4:
             logger.debug("MOST_LIKELY = GRB")
             # ignore things that don't reach our probability threshold
             if voevent.detect_prob > fermi_prob:
-                trigger_bool = True
+                likely_bool = True
                 trigger_message += f"Fermi GRB probability greater than {fermi_prob}. "
             else:
                 debug_bool = True
-                trigger_message += f"Fermi GRB probability less than {fermi_prob}. "
+                trigger_message += f"Fermi GRB probability less than {fermi_prob} so not triggering. "
         else:
             logger.debug("MOST LIKELY != GRB")
             debug_bool = False
             trigger_message += f"Fermi GRB likely index not 4. "
-    elif short_bool:
-        trigger_bool = True
+    if voevent.rate_signif is not None:
+        # Swift has a rate signif in sigmas
+        if voevent.rate_signif > rate_signif:
+            likely_bool = True
+            trigger_message += f"SWIFT Rate_signif > {rate_signif:.3f} sigma. "
+        else:
+            debug_bool = True
+            trigger_message += f"SWIFT Rate_signif <= {rate_signif:.3f} sigma so not triggering. "
 
-    return trigger_bool, debug_bool, short_bool, trigger_message
+    # Check the duration of the event
+    if voevent.trig_duration is not None and likely_bool:
+        if trig_min_duration < voevent.trig_duration < trig_max_duration:
+            trigger_bool = True
+            trigger_message += f"Trigger time between {trig_min_duration} and {trig_max_duration} s so triggering. "
+        else:
+            pending_bool = True
+            debug_bool = True
+            trigger_message += f"Trigger time between {pending_min_duration} and {pending_max_duration} s so waiting for a human's decision. "
+
+    return trigger_bool, debug_bool, pending_bool, trigger_message
 
 
 def worth_observing_atca_short_grb(

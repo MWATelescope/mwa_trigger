@@ -8,7 +8,7 @@ from .models import UserAlerts, VOEvent, TriggerEvent, CometLog, Status, AdminAl
 from .mwa_observe import trigger_mwa_observation
 
 from mwa_trigger.parse_xml import parsed_VOEvent
-from mwa_trigger.trigger_logic import worth_observing
+from mwa_trigger.trigger_logic import worth_observing_grb
 import voeventparse
 
 import os
@@ -61,7 +61,7 @@ def group_trigger(sender, instance, **kwargs):
             for proj_set in project_settings:
                 if proj_set.grb:
                     # This project wants to observe GRBs so check if it is worth observing
-                    trigger_bool, debug_bool, short_bool, trigger_message = worth_observing(vo, max_duration=proj_set.max_duration, fermi_prob=proj_set.fermi_prob)
+                    trigger_bool, debug_bool, pending_bool, trigger_message = worth_observing_grb(vo, max_duration=proj_set.max_duration, fermi_prob=proj_set.fermi_prob)
 
             # TODO do something smart with these results to decide which telescope to observe with.
 
