@@ -69,6 +69,7 @@ def TriggerEvent_details(request, tid):
 
 def ProjectDecision_details(request, id):
     proj_dec = models.ProjectDecision.objects.get(id=id)
+
     # covert ra and dec to HH:MM:SS.SS format
     c = SkyCoord( proj_dec.ra, proj_dec.dec, frame='icrs', unit=(u.deg,u.deg))
     proj_dec.ra = c.ra.to_string(unit=u.hour, sep=':')
@@ -76,11 +77,17 @@ def ProjectDecision_details(request, id):
 
     # Split message by full stop
     proj_dec.decision_reason = ".\n".join(proj_dec.decision_reason.split(". "))
-    print(proj_dec.decision_reason)
-    #trigger_event = models.TriggerEvent.objects.get(id=tid)
-    #voevents = models.VOEvent.objects.filter(trigger_group_id=trigger_event)
-    #mwa_obs = models.MWAObservations.objects.filter(trigger_group_id=trigger_event)
-    return render(request, 'trigger_app/project_decision_details.html', {'proj_dec':proj_dec})
+
+    # Work out all the telescopes that observed the event
+    voevents = models.VOEvent.objects.filter(trigger_group_id=proj_dec.trigger_group_id)
+    telescopes = []
+    for voevent in voevents:
+        telescopes.append(voevent.telescope)
+    # Make sure they are unique and put each on a new line
+    telescopes = ".\n".join(list(set(telescopes)))
+
+    return render(request, 'trigger_app/project_decision_details.html', {'proj_dec':proj_dec,
+                                                                         'telescopes':telescopes})
 
 @login_required
 def user_alert_status(request):
