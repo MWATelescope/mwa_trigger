@@ -4,7 +4,7 @@ from astropy.coordinates import SkyCoord, EarthLocation
 from astropy.time import Time
 
 from mwa_trigger.triggerservice import trigger
-from .models import MWAObservations, VOEvent
+from .models import Observations, VOEvent
 
 import logging
 logger = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ def trigger_observation(project_decision_model,
             debug_bool = True
         for obsid in obsids:
             # Create new obsid model
-            MWAObservations.objects.create(
+            Observations.objects.create(
                 obsid=obsid,
                 project_decision_id=project_decision_model,
                 reason=reason

@@ -85,6 +85,8 @@ class ProjectDecision(models.Model):
     duration = models.FloatField(blank=True, null=True)
     ra = models.FloatField(blank=True, null=True)
     dec = models.FloatField(blank=True, null=True)
+    raj = models.CharField(max_length=32, blank=True, null=True)
+    decj = models.CharField(max_length=32, blank=True, null=True)
     pos_error = models.FloatField(blank=True, null=True)
     recieved_data = models.DateTimeField(auto_now_add=True, blank=True)
 
@@ -163,7 +165,9 @@ class UserAlerts(models.Model):
     approval = models.BooleanField(default=True)
 
 
-class MWAObservations(models.Model):
+class Observations(models.Model):
     obsid = models.IntegerField(primary_key=True)
+    telescope = models.CharField(max_length=64, blank=True, null=True)
     project_decision_id = models.ForeignKey(ProjectDecision, on_delete=models.SET_NULL, blank=True, null=True)
+    website_link = models.URLField(max_length=256)
     reason = models.CharField(max_length=256, blank=True, null=True)
