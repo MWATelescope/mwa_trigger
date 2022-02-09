@@ -32,7 +32,7 @@ urlpatterns = [
     path('comet_log/', views.CometLogList.as_view()),
     path('project_settings/', views.ProjectSettingsList.as_view()),
     path('project_decision_details/<int:id>/', views.ProjectDecision_details),
-    #path('<str:filepath>/', views.download_file),
+    path('project_decision_result/<int:id>/<int:decision>/', views.ProjectDecision_result),
     path('voevent_view/<int:id>/', views.voevent_view),
     path('voevent_create/', views.voevent_create),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

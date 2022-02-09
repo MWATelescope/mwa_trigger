@@ -12,6 +12,7 @@ from rest_framework.decorators import api_view
 import mimetypes
 
 from . import models, serializers, forms
+from .telescope_observe import trigger_observation
 
 import os
 import sys
@@ -60,8 +61,10 @@ def TriggerEvent_details(request, tid):
     trigger_event.dec = c.dec.to_string(unit=u.degree, sep=':')
 
     voevents = models.VOEvent.objects.filter(trigger_group_id=trigger_event)
-    mwa_obs = models.MWAObservations.objects.filter(trigger_group_id=trigger_event)
     proj_decs = models.ProjectDecision.objects.filter(trigger_group_id=trigger_event)
+    mwa_obs = []
+    for proj_dec in proj_decs:
+        mwa_obs += models.MWAObservations.objects.filter(project_decision_id=proj_dec)
     return render(request, 'trigger_app/triggerevent_details.html', {'trigger_event':trigger_event,
                                                                      'voevents':voevents,
                                                                      'mwa_obs':mwa_obs,
@@ -88,6 +91,29 @@ def ProjectDecision_details(request, id):
 
     return render(request, 'trigger_app/project_decision_details.html', {'proj_dec':proj_dec,
                                                                          'telescopes':telescopes})
+
+
+def ProjectDecision_result(request, id, decision):
+    proj_dec = models.ProjectDecision.objects.get(id=id)
+
+    if decision:
+        # Decision is True (1) so trigger an observation
+        obs_decision, trigger_message = trigger_observation(
+            proj_dec,
+            f"{proj_dec.decision_reason}User decided to trigger. ",
+            horizion_limit=proj_dec.project.horizon_limit,
+            pretend=proj_dec.project.testing,
+            reason="First Observation",
+        )
+        proj_dec.decision_reason = trigger_message
+        proj_dec.decision = obs_decision
+    else:
+        # False (0) so just update decision
+        proj_dec.decision_reason += "User decided not to trigger. "
+        proj_dec.decision = "I"
+    proj_dec.save()
+
+    return HttpResponseRedirect(f'/project_decision_details/{id}/')
 
 @login_required
 def user_alert_status(request):

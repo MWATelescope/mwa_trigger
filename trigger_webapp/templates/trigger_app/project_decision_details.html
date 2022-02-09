@@ -4,6 +4,12 @@
 <title>Project Decision Details</title>
 
 <div class="container-sm">
+  {% if proj_dec.decision == "P" %}
+  <h1>
+  <button type="button" class="btn btn-success btn-lg"   onclick="location.href='/project_decision_result/{{ proj_dec.id }}/1/'">Trigger Observation</button>
+  <button type="button" class="btn btn-secondary btn-lg" onclick="location.href='/project_decision_result/{{ proj_dec.id }}/0/'">Ignore Event</button>
+  </h1>
+  {% endif %}
   <h2>Project Decision ID {{ proj_dec.id }}</h2>
   <table class="table-thin">
     <tr>
@@ -25,6 +31,10 @@
     <tr>
       <td>Detected by</td>
       <td>{{ telescopes }}</td>
+    </tr>
+    <tr>
+      <td>Decision</td>
+      <td>{{ proj_dec.get_decision_display }}</td>
     </tr>
   </table>
   <h3>Log</h3>

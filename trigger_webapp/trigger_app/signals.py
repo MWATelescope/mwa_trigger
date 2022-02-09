@@ -4,8 +4,8 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import ProjectDecision, UserAlerts, VOEvent, TriggerEvent, CometLog, Status, AdminAlerts,  MWAObservations, ProjectSettings, ProjectDecision
-from .mwa_observe import trigger_mwa_observation
+from .models import ProjectDecision, UserAlerts, VOEvent, TriggerEvent, CometLog, Status, AdminAlerts, ProjectSettings, ProjectDecision
+from .telescope_observe import trigger_observation
 
 from mwa_trigger.parse_xml import parsed_VOEvent
 from mwa_trigger.trigger_logic import worth_observing_grb
@@ -59,6 +59,18 @@ def group_trigger(sender, instance, **kwargs):
             # Loop over settings
             project_settings = ProjectSettings.objects.all()
             for proj_set in project_settings:
+                # Create a ProjectDecision object to record what each project does
+                proj_dec = ProjectDecision.objects.create(
+                    #decision=decision,
+                    #decision_reason=trigger_message,
+                    project=proj_set,
+                    trigger_group_id=new_trig,
+                    duration=instance.duration,
+                    ra=instance.ra,
+                    dec=instance.dec,
+                    pos_error=instance.pos_error,
+                )
+
                 # Defaults if not worth observing
                 trigger_bool = debug_bool = pending_bool = False
                 trigger_message = ""
@@ -84,34 +96,24 @@ def group_trigger(sender, instance, **kwargs):
                     trigger_message += f"This project does not observe {instance.get_source_type_display()}s. "
 
                 if trigger_bool:
-                    # Check if you can observe and if so send off mwa observation
-                    decision, trigger_message, obsids = trigger_mwa_observation(instance, trigger_message)
-                    if decision == 'E':
-                        # Error observing so send off debug
-                        debug_bool = True
-                    for obsid in obsids:
-                        # Create new obsid model
-                        mwa_obs = MWAObservations.objects.create(obsid=obsid,
-                                                    trigger_group_id=new_trig,
-                                                    voevent_id=instance,
-                                                    reason="First Observation")
+                    # Check if you can observe and if so send off the observation
+                    decision, trigger_message = trigger_observation(
+                        proj_dec,
+                        trigger_message,
+                        horizion_limit=proj_set.horizon_limit,
+                        pretend=proj_set.testing,
+                        reason="First Observation",
+                    )
                 elif pending_bool:
                     # Send off a pending decision
                     decision = 'P'
                 else:
                     decision = 'I'
 
-                # Create a ProjectDecision object to record what each project does
-                proj_dec = ProjectDecision.objects.create(
-                    decision=decision,
-                    decision_reason=trigger_message,
-                    project=proj_set,
-                    trigger_group_id=new_trig,
-                    duration=instance.duration,
-                    ra=instance.ra,
-                    dec=instance.dec,
-                    pos_error=instance.pos_error,
-                )
+                # Update project decision and log
+                proj_dec.decision = decision
+                proj_dec.decision_reason = trigger_message
+                proj_dec.save()
 
                 # TODO do something smart with these results to decide which telescope to observe with
                 # but hopefully the project settings will describe if you want to observe or not.

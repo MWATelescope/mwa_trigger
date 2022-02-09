@@ -27,6 +27,7 @@ class ProjectSettings(models.Model):
     swift_rate_signf = models.FloatField(blank=True, null=True)
     vcs_mode = models.BooleanField(default=True, null=True)
     repointing_limit = models.FloatField(blank=True, null=True)
+    horizon_limit = models.FloatField(blank=True, null=True)
     testing = models.BooleanField(default=False, null=True)
     grb = models.BooleanField(default=False)
     flare_star = models.BooleanField(default=False)
@@ -78,7 +79,7 @@ class ProjectDecision(models.Model):
         (T, 'Triggered'),
     )
     decision = models.CharField(max_length=32, choices=CHOICES, default=P)
-    decision_reason = models.CharField(max_length=256, blank=True, null=True)
+    decision_reason = models.CharField(max_length=2056, blank=True, null=True)
     project = models.ForeignKey(ProjectSettings, on_delete=models.SET_NULL, blank=True, null=True)
     trigger_group_id = models.ForeignKey(TriggerEvent, on_delete=models.SET_NULL, blank=True, null=True)
     duration = models.FloatField(blank=True, null=True)
@@ -164,6 +165,5 @@ class UserAlerts(models.Model):
 
 class MWAObservations(models.Model):
     obsid = models.IntegerField(primary_key=True)
-    trigger_group_id = models.ForeignKey(TriggerEvent, on_delete=models.SET_NULL, blank=True, null=True)
-    voevent_id = models.ForeignKey(VOEvent, on_delete=models.SET_NULL, blank=True, null=True)
+    project_decision_id = models.ForeignKey(ProjectDecision, on_delete=models.SET_NULL, blank=True, null=True)
     reason = models.CharField(max_length=256, blank=True, null=True)
