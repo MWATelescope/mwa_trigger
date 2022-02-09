@@ -67,6 +67,20 @@ def TriggerEvent_details(request, tid):
                                                                      'mwa_obs':mwa_obs,
                                                                      'proj_decs':proj_decs})
 
+def ProjectDecision_details(request, id):
+    proj_dec = models.ProjectDecision.objects.get(id=id)
+    # covert ra and dec to HH:MM:SS.SS format
+    c = SkyCoord( proj_dec.ra, proj_dec.dec, frame='icrs', unit=(u.deg,u.deg))
+    proj_dec.ra = c.ra.to_string(unit=u.hour, sep=':')
+    proj_dec.dec = c.dec.to_string(unit=u.degree, sep=':')
+
+    # Split message by full stop
+    proj_dec.decision_reason = ".\n".join(proj_dec.decision_reason.split(". "))
+    print(proj_dec.decision_reason)
+    #trigger_event = models.TriggerEvent.objects.get(id=tid)
+    #voevents = models.VOEvent.objects.filter(trigger_group_id=trigger_event)
+    #mwa_obs = models.MWAObservations.objects.filter(trigger_group_id=trigger_event)
+    return render(request, 'trigger_app/project_decision_details.html', {'proj_dec':proj_dec})
 
 @login_required
 def user_alert_status(request):
