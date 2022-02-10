@@ -33,15 +33,24 @@ def group_trigger(sender, instance, **kwargs):
     """
     # instance is the new VOEvent
     if not instance.ignored:
-        trigger_id = instance.trigger_id
-        if TriggerEvent.objects.filter(trigger_id=trigger_id).exists():
+        vo = parsed_VOEvent(None, packet=str(instance.xml_packet))
+
+        if TriggerEvent.objects.filter(trigger_id=instance.trigger_id).exists():
             # Trigger event already exists so link the new VOEvent
-            prev_trig = TriggerEvent.objects.get(trigger_id=trigger_id)
+            prev_trig = TriggerEvent.objects.get(trigger_id=instance.trigger_id)
             # For some reason can't update with the instance
-            voevent = VOEvent.objects.filter(trigger_id=trigger_id)
+            voevent = VOEvent.objects.filter(trigger_id=instance.trigger_id)
             voevent.update(trigger_group_id=prev_trig)
 
-            #TODO add some checks to see if you want to update here
+            # Loop over all projects settings and see if it's worth reobserving
+            project_decisions = ProjectDecision.objects.filter(trigger_group_id=prev_trig)
+            for proj_dec in project_decisions:
+                if proj_dec.decision == "I":
+                    # Previous events were ignored, check if this new one is up to our standards
+                    project_worth_observing(proj_dec, vo, instance)
+                #elif proj_dec.decision == "T":
+                    # TODO put decide when to repoint logic here
+
         else:
             # Make a new trigger event
             new_trig = TriggerEvent.objects.create(trigger_id=instance.trigger_id,
@@ -55,8 +64,6 @@ def group_trigger(sender, instance, **kwargs):
             instance.trigger_group_id = new_trig
             instance.save()
 
-            # Check if it's worth triggering an obs
-            vo = parsed_VOEvent(None, packet=str(instance.xml_packet))
             # covert ra and dec to HH:MM:SS.SS format
             c = SkyCoord( instance.ra, instance.dec, frame='icrs', unit=(u.deg,u.deg))
             raj = c.ra.to_string(unit=u.hour, sep=':')
@@ -78,56 +85,60 @@ def group_trigger(sender, instance, **kwargs):
                     decj=decj,
                     pos_error=instance.pos_error,
                 )
+                # Check if it's worth triggering an obs
+                project_worth_observing(proj_dec, vo, instance)
 
-                # Defaults if not worth observing
-                trigger_bool = debug_bool = pending_bool = False
-                trigger_message = ""
-                proj_source_bool = False
 
-                # Check if this project thinks this event is worth observing
-                if proj_set.grb and instance.source_type == "GRB":
-                    # This project wants to observe GRBs so check if it is worth observing
-                    trigger_bool, debug_bool, pending_bool, trigger_message = worth_observing_grb(
-                        vo,
-                        trig_min_duration=proj_set.trig_min_duration,
-                        trig_max_duration=proj_set.trig_max_duration,
-                        pending_min_duration=proj_set.pending_min_duration,
-                        pending_max_duration=proj_set.pending_max_duration,
-                        fermi_prob=proj_set.fermi_prob,
-                        rate_signif=proj_set.swift_rate_signf,
-                    )
-                    proj_source_bool = True
-                # TODO set up other source types here
+def project_worth_observing(proj_dec, vo, voevent,
+                            trigger_message=""):
+    # Defaults if not worth observing
+    trigger_bool = debug_bool = pending_bool = False
+    proj_source_bool = False
 
-                if not proj_source_bool:
-                    # Project does not observe this type of source so update message
-                    trigger_message += f"This project does not observe {instance.get_source_type_display()}s.\n "
+    # Check if this project thinks this event is worth observing
+    if proj_dec.project.grb and voevent.source_type == "GRB":
+        # This project wants to observe GRBs so check if it is worth observing
+        trigger_bool, debug_bool, pending_bool, trigger_message = worth_observing_grb(
+            vo,
+            trig_min_duration=proj_dec.project.trig_min_duration,
+            trig_max_duration=proj_dec.project.trig_max_duration,
+            pending_min_duration=proj_dec.project.pending_min_duration,
+            pending_max_duration=proj_dec.project.pending_max_duration,
+            fermi_prob=proj_dec.project.fermi_prob,
+            rate_signif=proj_dec.project.swift_rate_signf,
+        )
+        proj_source_bool = True
+    # TODO set up other source types here
 
-                if trigger_bool:
-                    # Check if you can observe and if so send off the observation
-                    decision, trigger_message = trigger_observation(
-                        proj_dec,
-                        trigger_message,
-                        horizion_limit=proj_set.horizon_limit,
-                        pretend=proj_set.testing,
-                        reason="First Observation",
-                    )
-                elif pending_bool:
-                    # Send off a pending decision
-                    decision = 'P'
-                else:
-                    decision = 'I'
+    if not proj_source_bool:
+        # Project does not observe this type of source so update message
+        trigger_message += f"This project does not observe {voevent.get_source_type_display()}s.\n "
 
-                # Update project decision and log
-                proj_dec.decision = decision
-                proj_dec.decision_reason = trigger_message
-                proj_dec.save()
+    if trigger_bool:
+        # Check if you can observe and if so send off the observation
+        decision, trigger_message = trigger_observation(
+            proj_dec,
+            trigger_message,
+            horizion_limit=proj_dec.project.horizon_limit,
+            pretend=proj_dec.project.testing,
+            reason="First Observation",
+        )
+    elif pending_bool:
+        # Send off a pending decision
+        decision = 'P'
+    else:
+        decision = 'I'
 
-                # TODO do something smart with these results to decide which telescope to observe with
-                # but hopefully the project settings will describe if you want to observe or not.
+    # Update project decision and log
+    proj_dec.decision = decision
+    proj_dec.decision_reason = trigger_message
+    proj_dec.save()
 
-                # send off alert messages to users and admins
-                send_all_alerts(trigger_bool, debug_bool, pending_bool, proj_dec)
+    # TODO do something smart with these results to decide which telescope to observe with
+    # but hopefully the project settings will describe if you want to observe or not.
+
+    # send off alert messages to users and admins
+    send_all_alerts(trigger_bool, debug_bool, pending_bool, proj_dec)
 
 
 def send_all_alerts(trigger_bool, debug_bool, pending_bool, project_decision_model):
