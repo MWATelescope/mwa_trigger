@@ -61,7 +61,7 @@ h3{
 }
 
 .fl-table td, .fl-table th {
-    text-align: center;
+    text-align: left;
     padding: 8px;
 }
 

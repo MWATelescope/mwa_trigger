@@ -46,6 +46,11 @@ class ProjectSettingsList(ListView):
     # specify the model for list view
     model = models.ProjectSettings
 
+class ProjectDecisionList(ListView):
+    # specify the model for list view
+    model = models.ProjectDecision
+
+
 def home_page(request):
     comet_status = models.Status.objects.get(name='twistd_comet')
     settings = models.ProjectSettings.objects.all()
@@ -69,6 +74,7 @@ def TriggerEvent_details(request, tid):
                                                                      'voevents':voevents,
                                                                      'mwa_obs':mwa_obs,
                                                                      'proj_decs':proj_decs})
+
 
 def ProjectDecision_details(request, id):
     proj_dec = models.ProjectDecision.objects.get(id=id)
@@ -109,6 +115,7 @@ def ProjectDecision_result(request, id, decision):
     proj_dec.save()
 
     return HttpResponseRedirect(f'/project_decision_details/{id}/')
+
 
 @login_required
 def user_alert_status(request):
@@ -163,13 +170,3 @@ def voevent_create(request):
         return Response(voe.data, status=status.HTTP_201_CREATED)
     logger.debug(request.data)
     return Response(voe.errors, status=status.HTTP_400_BAD_REQUEST)
-
-# def download_file(request, filepath):
-#     # fill these variables with real values
-#     fl_path = os.path.join(settings.MEDIA_ROOT, filepath)
-
-#     fl = open(fl_path, 'r')
-#     mime_type, _ = mimetypes.guess_type(fl_path)
-#     response = HttpResponse(fl, content_type=mime_type)
-#     response['Content-Disposition'] = "attachment; filename=%s" % filepath
-#     return response

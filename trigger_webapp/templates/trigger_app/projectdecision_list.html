@@ -1,0 +1,45 @@
+{% extends 'trigger_app/header.html' %}
+
+{% block content %}
+<title>Project Decision Log</title>
+
+<div class="container-fluid">
+  <h1>Project Decision Log</h1>
+  <table class="fl-table">
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Project Telsecoe</th>
+      <th>Project ID</th>
+      <th>Decision</th>
+      <th>Decision Reason</th>
+      <th>First Duration (s)</th>
+      <th>Best Right Acension</th>
+      <th>Best Declination</th>
+      <th>Best Position Error (&#176;)</th>
+    </tr>
+  </thead>
+    {% for object in object_list %}
+    {% if object.decision == "I" %}
+      <tr class="grey-tr">
+    {% else %}
+      <tr>
+    {% endif %}
+      <td><a href="/project_decision_details/{{ object.id }}/" style="text-decoration:None">{{ object.id }}</a></td>
+      <td>{{ object.project.telescope }}</td>
+      <td>{{ object.project.project_id }}</td>
+      <td>{{ object.get_decision_display }}</td>
+      <td>{{ object.decision_reason }}</td>
+      <td>{{ object.duration }}</td>
+      <td>{{ object.raj }}</td>
+      <td>{{ object.decj }}</td>
+      <td>{{ object.pos_error }}</td>
+    </tr>
+    {% empty %}
+    <li>No objects yet.</li>
+    {% endfor %}
+  </table>
+  <h3>Log</h3>
+  <p style="white-space: pre-wrap">{{ proj_dec.decision_reason }}<p>
+</div>
+{% endblock %}
