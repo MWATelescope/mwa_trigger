@@ -38,10 +38,7 @@ def write_and_upload(xml_string):
             'pos_error' : trig.err,
             'ignored' : trig.ignore,
             'source_name' : trig.source_name,
-            'grb' : trig.grb,
-            'flare_star' : trig.flare_star,
-            'gw' : trig.gw,
-            'neutrino' : trig.neutrino,
+            'source_type' : trig.source_type,
     }
     r = session.post(url, data=data)
 

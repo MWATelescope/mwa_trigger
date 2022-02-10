@@ -48,6 +48,29 @@ def get_event_type(ivorn):
 def get_source_types(telescope, event_type, source_name, v):
     """
     """
+    #Check for Gravitational Waves
+    if telescope == "LVC":
+        return "GW"
+
+    # Check for neutrinos
+    if telescope == "Antares" or ( telescope == "AMON" and event_type == "ICECUBE_GOLD" ):
+        return "NU"
+
+    # Check for Flare Stars
+    data_file = data_load.FLARE_STAR_NAMES
+    flare_stars = [a.strip().lower() for a in open(data_file, 'r').readlines() if not a.startswith("#")]
+    # Check if this is a sub_sub_threshold event and ignore if it is
+    if telescope == "SWIFT" and 'sub-sub-threshold' in str(v.What.Description):
+        flare_star = False
+    else:
+        flare_star = False
+        for f in flare_stars:
+            # Check if the name is within the "name" string since MAXI does stupid things sometimes
+            if f in str(source_name).lower():
+                flare_star =True
+    if flare_star:
+        return "FS"
+
     # Check for GRB
     grb = False
     if telescope == "SWIFT":
@@ -62,34 +85,11 @@ def get_source_types(telescope, event_type, source_name, v):
         #grb = False   # Ignore all Fermi triggers
         grb = True
         # I could put the most likely index here but it's easier to log in the trigger logic
+    if grb:
+        return "GRB"
 
-    # Check for Flare Stars
-    data_file = data_load.FLARE_STAR_NAMES
-    flare_stars = [a.strip().lower() for a in open(data_file, 'r').readlines() if not a.startswith("#")]
-    # Check if this is a sub_sub_threshold event and ignore if it is
-    if telescope == "SWIFT" and 'sub-sub-threshold' in str(v.What.Description):
-        flare_star = False
-    else:
-        flare_star = False
-        for f in flare_stars:
-            # Check if the name is within the "name" string since MAXI does stupid things sometimes
-            if f in str(source_name).lower():
-                flare_star =True
-
-    #Check for Gravitational Waves
-    if telescope == "LVC":
-        gw = True
-    else:
-        gw = False
-
-    # Check for neutrinos
-    neutrino = False
-    if telescope == "Antares":
-        neutrino = True
-    elif telescope == "AMON" and event_type == "ICECUBE_GOLD":
-        neutrino = True
-
-    return grb, flare_star, gw, neutrino
+    # No type found so return None
+    return None
 
 
 class parsed_VOEvent:
@@ -111,10 +111,7 @@ class parsed_VOEvent:
         self.grb_ident = None
         self.telescope = None
         self.source_name = None
-        self.grb = False
-        self.flare_star = False
-        self.gw = False
-        self.neutrino = False
+        self.source_type = None
         if self.trig_pairs is None:
             # use defaults
             self.trig_pairs = [
@@ -150,8 +147,8 @@ class parsed_VOEvent:
                 self.source_name = src.attrib['value'].strip()
 
         # Work out what type of source it is
-        self.grb, self.flare_star, self.gw, self.neutrino = get_source_types(self.telescope, self.event_type, self.source_name, v)
-        logger.debug(f"source types(grb, flare_star, gw, neutrino): {self.grb}, {self.flare_star}, {self.gw}, {self.neutrino}")
+        self.source_type = get_source_types(self.telescope, self.event_type, self.source_name, v)
+        logger.debug(f"source types: {self.source_type}")
 
         # Check if this is the type of trigger we're looking for
         this_pair = f"{self.telescope}_{self.event_type}"

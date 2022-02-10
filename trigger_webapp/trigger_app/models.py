@@ -2,8 +2,60 @@ from os import sched_get_priority_max
 from django.db import models
 from django.contrib.auth.models import User
 
+
+GRB = 'GRB'
+FS = 'FS'
+NU = 'NU'
+GW = 'GW'
+SOURCE_CHOICES = (
+    (GRB, 'Gamma-ray burst'),
+    (FS, 'Flare star'),
+    (NU, 'Neutrino'),
+    (GW, 'Gravitational wave'),
+)
+
+class ProjectSettings(models.Model):
+    id = models.AutoField(primary_key=True)
+    telescope = models.CharField(max_length=64, blank=True, null=True)
+    project_id = models.CharField(max_length=64, blank=True, null=True)
+    project_description = models.CharField(max_length=256, blank=True, null=True)
+    trig_max_duration = models.FloatField(blank=True, null=True)
+    trig_min_duration = models.FloatField(blank=True, null=True)
+    pending_max_duration = models.FloatField(blank=True, null=True)
+    pending_min_duration = models.FloatField(blank=True, null=True)
+    fermi_prob = models.FloatField(blank=True, null=True)
+    swift_rate_signf = models.FloatField(blank=True, null=True)
+    repointing_limit = models.FloatField(blank=True, null=True)
+    horizon_limit = models.FloatField(blank=True, null=True)
+    testing = models.BooleanField(default=False, null=True)
+    grb = models.BooleanField(default=False)
+    flare_star = models.BooleanField(default=False)
+    gw = models.BooleanField(default=False)
+    neutrino = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.telescope}_{self.project_id}"
+
 # Create your models here.
 class TriggerEvent(models.Model):
+    id = models.AutoField(primary_key=True)
+    trigger_id = models.IntegerField(blank=True, null=True)
+    duration = models.FloatField(blank=True, null=True)
+    ra = models.FloatField(blank=True, null=True)
+    dec = models.FloatField(blank=True, null=True)
+    pos_error = models.FloatField(blank=True, null=True)
+    recieved_data = models.DateTimeField(auto_now_add=True, blank=True)
+    source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, null=True)
+
+    def __str__(self):
+        return str(self.id)
+
+    class Meta:
+        ordering = ['-id']
+
+
+# Create your models here.
+class ProjectDecision(models.Model):
     id = models.AutoField(primary_key=True)
     P = 'P'
     I = 'I'
@@ -16,13 +68,14 @@ class TriggerEvent(models.Model):
         (T, 'Triggered'),
     )
     decision = models.CharField(max_length=32, choices=CHOICES, default=P)
-    decision_reason = models.CharField(max_length=256, blank=True, null=True)
-    telescope = models.CharField(max_length=64, blank=True, null=True)
-    trigger_id = models.IntegerField(blank=True, null=True)
-    event_type = models.CharField(max_length=64, blank=True, null=True)
+    decision_reason = models.CharField(max_length=2056, blank=True, null=True)
+    project = models.ForeignKey(ProjectSettings, on_delete=models.SET_NULL, blank=True, null=True)
+    trigger_group_id = models.ForeignKey(TriggerEvent, on_delete=models.SET_NULL, blank=True, null=True)
     duration = models.FloatField(blank=True, null=True)
     ra = models.FloatField(blank=True, null=True)
     dec = models.FloatField(blank=True, null=True)
+    raj = models.CharField(max_length=32, blank=True, null=True)
+    decj = models.CharField(max_length=32, blank=True, null=True)
     pos_error = models.FloatField(blank=True, null=True)
     recieved_data = models.DateTimeField(auto_now_add=True, blank=True)
 
@@ -48,10 +101,7 @@ class VOEvent(models.Model):
     xml_packet = models.CharField(max_length=10000)
     ignored = models.BooleanField(default=True)
     source_name = models.CharField(max_length=128, blank=True, null=True)
-    grb = models.BooleanField(default=False)
-    flare_star = models.BooleanField(default=False)
-    gw = models.BooleanField(default=False)
-    neutrino = models.BooleanField(default=False)
+    source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, null=True)
 
     class Meta:
         ordering = ['-id']
@@ -104,26 +154,9 @@ class UserAlerts(models.Model):
     approval = models.BooleanField(default=True)
 
 
-class MWAObservations(models.Model):
+class Observations(models.Model):
     obsid = models.IntegerField(primary_key=True)
-    trigger_group_id = models.ForeignKey(TriggerEvent, on_delete=models.SET_NULL, blank=True, null=True)
-    voevent_id = models.ForeignKey(VOEvent, on_delete=models.SET_NULL, blank=True, null=True)
-    reason = models.CharField(max_length=256, blank=True, null=True)
-
-
-class ProjectSettings(models.Model):
     telescope = models.CharField(max_length=64, blank=True, null=True)
-    project_id = models.CharField(max_length=64, blank=True, null=True)
-    project_description = models.CharField(max_length=256, blank=True, null=True)
-    max_duration = models.FloatField(blank=True, null=True)
-    fermi_prob = models.FloatField(blank=True, null=True)
-    vcs_mode = models.BooleanField(default=True, null=True)
-    repointing_limit = models.FloatField(blank=True, null=True)
-    testing = models.BooleanField(default=False, null=True)
-    grb = models.BooleanField(default=False)
-    flare_star = models.BooleanField(default=False)
-    gw = models.BooleanField(default=False)
-    neutrino = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"{self.telescope}_{self.project_id}"
+    project_decision_id = models.ForeignKey(ProjectDecision, on_delete=models.SET_NULL, blank=True, null=True)
+    website_link = models.URLField(max_length=256)
+    reason = models.CharField(max_length=256, blank=True, null=True)

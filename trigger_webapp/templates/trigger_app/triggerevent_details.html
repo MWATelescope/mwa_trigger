@@ -2,35 +2,68 @@
 
 {% block content %}
 <title>Trigger Event Details</title>
+
+<div class="container-sm">
+  <h2>Trigger Event ID {{ trigger_event.id }}</h2>
+  <table class="table-thin">
+    <tr>
+      <td>First Trigger ID</td>
+      <td>{{ trigger_event.trigger_id }}</td>
+    </tr>
+    <tr>
+      <td>First Duration (s)</td>
+      <td>{{ trigger_event.duration }}</td>
+    </tr>
+    <tr>
+      <td>Best Right Acension</td>
+      <td>{{ trigger_event.ra }}</td>
+    </tr>
+    <tr>
+      <td>Best Declination</td>
+      <td>{{ trigger_event.dec }}</td>
+    </tr>
+    <tr>
+      <td>Best Position Error (&#176;)</td>
+      <td>{{ trigger_event.pos_error }}</td>
+    </tr>
+  </table>
+</div>
+
 <div class="container-fluid">
-  <h2>Trigger Event</h2>
+  <h2>Project Decisions</h2>
   <table class="fl-table">
     <thead>
       <tr>
         <th>ID</th>
+        <th>Project Telsecoe</th>
+        <th>Project ID</th>
         <th>Decision</th>
         <th>Decision Reason</th>
-        <th>Telescope</th>
-        <th>Trigger ID</th>
-        <th>Trigger Type</th>
-        <th>Duration</th>
-        <th>Right Acension</th>
-        <th>Declination</th>
-        <th>Position Error</th>
+        <th>Duration (s)</th>
+        <th>Right Acension (&#176;)</th>
+        <th>Declination (&#176;)</th>
+        <th>Position Error (&#176;)</th>
       </tr>
     </thead>
-    <tr>
-      <td>{{ trigger_event.id }}</td>
-      <td>{{ trigger_event.get_decision_display }}</td>
-      <td>{{ trigger_event.decision_reason }}</td>
-      <td>{{ trigger_event.telescope }}</td>
-      <td>{{ trigger_event.trigger_id }}</td>
-      <td>{{ trigger_event.event_type }}</td>
-      <td>{{ trigger_event.duration }}</td>
-      <td>{{ trigger_event.ra }}</td>
-      <td>{{ trigger_event.dec }}</td>
-      <td>{{ trigger_event.pos_error }}</td>
+    {% for proj_dec in proj_decs %}
+    {% if proj_dec.decision == "I" %}
+      <tr class="grey-tr">
+    {% else %}
+      <tr>
+    {% endif %}
+      <td><a href="/project_decision_details/{{ proj_dec.id }}" style="text-decoration:None">{{ proj_dec.id }}</a</td>
+      <td>{{ proj_dec.project.telescope }}</td>
+      <td>{{ proj_dec.project.project_id }}</td>
+      <td>{{ proj_dec.get_decision_display }}</td>
+      <td>{{ proj_dec.decision_reason }}</td>
+      <td>{{ proj_dec.duration }}</td>
+      <td>{{ proj_dec.ra }}</td>
+      <td>{{ proj_dec.dec }}</td>
+      <td>{{ proj_dec.pos_error }}</td>
     </tr>
+    {% empty %}
+    <li>No objects yet.</li>
+    {% endfor %}
   </table>
 
   <h2>VOEvents</h2>
@@ -49,10 +82,7 @@
         <th>Right Acension (&#176;)</th>
         <th>Declination (&#176;)</th>
         <th>Position Error (&#176;)</th>
-        <th>GRB?</th>
-        <th>Flare star?</th>
-        <th>GW?</th>
-        <th>Neutrino?</th>
+        <th>Source Type</th>
         <th>XML File</th>
       </tr>
     </thead>
@@ -75,10 +105,7 @@
       <td>{% if voevent.ra           is not None %} {{ voevent.ra }}           {% endif %}</td>
       <td>{% if voevent.dec          is not None %} {{ voevent.dec }}          {% endif %}</td>
       <td>{% if voevent.pos_error    is not None %} {{ voevent.pos_error }}    {% endif %}</td>
-      <td>{% if voevent.grb        %} &#10004; {% endif %}</td>
-      <td>{% if voevent.flare_star %} &#10004; {% endif %}</td>
-      <td>{% if voevent.gw         %} &#10004; {% endif %}</td>
-      <td>{% if voevent.neutrino   %} &#10004; {% endif %}</td>
+      <td>{% if voevent.source_type  is not None %} {{ voevent.get_source_type_display }}  {% endif %}</td>
       <!-- <td>{{ voevent.xml }}</td> -->
       <td><a href="/voevent_view/{{ voevent.id }}" style="text-decoration:None">View xml</a></td>
     </tr>

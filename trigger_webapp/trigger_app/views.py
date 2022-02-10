@@ -12,10 +12,13 @@ from rest_framework.decorators import api_view
 import mimetypes
 
 from . import models, serializers, forms
+from .telescope_observe import trigger_observation
 
 import os
 import sys
 import voeventparse as vp
+from astropy.coordinates import SkyCoord
+from astropy import units as u
 import logging
 logger = logging.getLogger(__name__)
 
@@ -39,6 +42,14 @@ class CometLogList(ListView):
     # specify the model for list view
     model = models.CometLog
 
+class ProjectSettingsList(ListView):
+    # specify the model for list view
+    model = models.ProjectSettings
+
+class ProjectDecisionList(ListView):
+    # specify the model for list view
+    model = models.ProjectDecision
+
 
 def home_page(request):
     comet_status = models.Status.objects.get(name='twistd_comet')
@@ -49,11 +60,58 @@ def home_page(request):
 
 def TriggerEvent_details(request, tid):
     trigger_event = models.TriggerEvent.objects.get(id=tid)
+    # covert ra and dec to HH:MM:SS.SS format
+    c = SkyCoord( trigger_event.ra, trigger_event.dec, frame='icrs', unit=(u.deg,u.deg))
+    trigger_event.ra = c.ra.to_string(unit=u.hour, sep=':')
+    trigger_event.dec = c.dec.to_string(unit=u.degree, sep=':')
+
     voevents = models.VOEvent.objects.filter(trigger_group_id=trigger_event)
-    mwa_obs = models.MWAObservations.objects.filter(trigger_group_id=trigger_event)
+    proj_decs = models.ProjectDecision.objects.filter(trigger_group_id=trigger_event)
+    mwa_obs = []
+    for proj_dec in proj_decs:
+        mwa_obs += models.Observations.objects.filter(project_decision_id=proj_dec)
     return render(request, 'trigger_app/triggerevent_details.html', {'trigger_event':trigger_event,
                                                                      'voevents':voevents,
-                                                                     'mwa_obs':mwa_obs})
+                                                                     'mwa_obs':mwa_obs,
+                                                                     'proj_decs':proj_decs})
+
+
+def ProjectDecision_details(request, id):
+    proj_dec = models.ProjectDecision.objects.get(id=id)
+
+    # Work out all the telescopes that observed the event
+    voevents = models.VOEvent.objects.filter(trigger_group_id=proj_dec.trigger_group_id)
+    telescopes = []
+    for voevent in voevents:
+        telescopes.append(voevent.telescope)
+    # Make sure they are unique and put each on a new line
+    telescopes = ".\n".join(list(set(telescopes)))
+
+    return render(request, 'trigger_app/project_decision_details.html', {'proj_dec':proj_dec,
+                                                                         'telescopes':telescopes})
+
+
+def ProjectDecision_result(request, id, decision):
+    proj_dec = models.ProjectDecision.objects.get(id=id)
+
+    if decision:
+        # Decision is True (1) so trigger an observation
+        obs_decision, trigger_message = trigger_observation(
+            proj_dec,
+            f"{proj_dec.decision_reason}User decided to trigger. ",
+            horizion_limit=proj_dec.project.horizon_limit,
+            pretend=proj_dec.project.testing,
+            reason="First Observation",
+        )
+        proj_dec.decision_reason = trigger_message
+        proj_dec.decision = obs_decision
+    else:
+        # False (0) so just update decision
+        proj_dec.decision_reason += "User decided not to trigger. "
+        proj_dec.decision = "I"
+    proj_dec.save()
+
+    return HttpResponseRedirect(f'/project_decision_details/{id}/')
 
 
 @login_required
@@ -109,13 +167,3 @@ def voevent_create(request):
         return Response(voe.data, status=status.HTTP_201_CREATED)
     logger.debug(request.data)
     return Response(voe.errors, status=status.HTTP_400_BAD_REQUEST)
-
-# def download_file(request, filepath):
-#     # fill these variables with real values
-#     fl_path = os.path.join(settings.MEDIA_ROOT, filepath)
-
-#     fl = open(fl_path, 'r')
-#     mime_type, _ = mimetypes.guess_type(fl_path)
-#     response = HttpResponse(fl, content_type=mime_type)
-#     response['Content-Disposition'] = "attachment; filename=%s" % filepath
-#     return response
