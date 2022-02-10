@@ -101,7 +101,7 @@ def group_trigger(sender, instance, **kwargs):
 
                 if not proj_source_bool:
                     # Project does not observe this type of source so update message
-                    trigger_message += f"This project does not observe {instance.get_source_type_display()}s. "
+                    trigger_message += f"This project does not observe {instance.get_source_type_display()}s.\n "
 
                 if trigger_bool:
                     # Check if you can observe and if so send off the observation
@@ -178,7 +178,6 @@ def send_alert_type(alert_type, address, subject, message_type_text, project_dec
     client = Client(account_sid, auth_token)
 
     # Set up message text
-    logs = ".\n".join(project_decision_model.decision_reason.split(". "))
     message_text = f"""{message_type_text}
 
 Event Details are:
@@ -189,7 +188,7 @@ Error Rad:   {project_decision_model.pos_error} deg
 Detected by: {telescopes}
 
 Decision log:
-{logs}
+{project_decision_model.decision_reason}
 
 Project decision can be seen here:
 http://127.0.0.1:8000/project_decision_details/{project_decision_model.id}/

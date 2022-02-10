@@ -79,9 +79,6 @@ def TriggerEvent_details(request, tid):
 def ProjectDecision_details(request, id):
     proj_dec = models.ProjectDecision.objects.get(id=id)
 
-    # Split message by full stop
-    proj_dec.decision_reason = ".\n".join(proj_dec.decision_reason.split(". "))
-
     # Work out all the telescopes that observed the event
     voevents = models.VOEvent.objects.filter(trigger_group_id=proj_dec.trigger_group_id)
     telescopes = []

@@ -100,7 +100,7 @@ def trigger_mwa_observation(project_decision_model,
     if not result['success']:
         # Observation not succesful so record why
         for err_id in result['error']:
-            trigger_message += f" {result['error'][err_id]}"
+            trigger_message += f"{result['error'][err_id]}.\n "
         # Return an error as the trigger status
         return 'E', trigger_message, []
 
