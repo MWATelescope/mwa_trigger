@@ -1,6 +1,7 @@
 from os import sched_get_priority_max
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib import admin
 
 
 GRB = 'GRB'
@@ -16,27 +17,64 @@ SOURCE_CHOICES = (
 
 class ProjectSettings(models.Model):
     id = models.AutoField(primary_key=True)
-    telescope = models.CharField(max_length=64, blank=True, null=True)
-    project_id = models.CharField(max_length=64, blank=True, null=True)
-    project_description = models.CharField(max_length=256, blank=True, null=True)
-    trig_max_duration = models.FloatField(blank=True, null=True)
-    trig_min_duration = models.FloatField(blank=True, null=True)
-    pending_max_duration = models.FloatField(blank=True, null=True)
-    pending_min_duration = models.FloatField(blank=True, null=True)
-    fermi_prob = models.FloatField(blank=True, null=True)
-    swift_rate_signf = models.FloatField(blank=True, null=True)
-    repointing_limit = models.FloatField(blank=True, null=True)
-    horizon_limit = models.FloatField(blank=True, null=True)
-    testing = models.BooleanField(default=False, null=True)
-    grb = models.BooleanField(default=False)
-    flare_star = models.BooleanField(default=False)
-    gw = models.BooleanField(default=False)
-    neutrino = models.BooleanField(default=False)
+    telescope = models.CharField(max_length=64, blank=True, null=True, verbose_name="Telescope name", help_text="E.g. MWA_VCS, MWA_correlate or ATCA.")
+    project_id = models.CharField(max_length=64, blank=True, null=True, help_text="This will be used to schedule observations.")
+    project_description = models.CharField(max_length=256, blank=True, null=True, help_text="A brief description of the project. Only needs to be enough to distinguish it from the other projects.")
+    trig_min_duration = models.FloatField(blank=True, null=True, verbose_name="Min")
+    trig_max_duration = models.FloatField(blank=True, null=True, verbose_name="Max")
+    pending_min_duration = models.FloatField(blank=True, null=True, verbose_name="Min")
+    pending_max_duration = models.FloatField(blank=True, null=True, verbose_name="Max")
+    fermi_prob = models.FloatField(blank=True, null=True, help_text="The minimum probability to observe for Fermi sources (it appears to be a percentage, e.g. 50).")
+    swift_rate_signf = models.FloatField(blank=True, null=True, help_text="The minimum \"RATE_SIGNIF\" (appears to be a signal-to-noise ratio) to observe for SWIFT sources (in sigma).")
+    repointing_limit = models.FloatField(blank=True, null=True, help_text="An updated position must be at least this far away from a current observation before repointing (in degrees).")
+    horizon_limit = models.FloatField(blank=True, null=True, help_text="The minimum elevation of the source to observe (in degrees).")
+    testing = models.BooleanField(default=False, help_text="If testing, will not schedule any observations.")
+    grb = models.BooleanField(default=False, verbose_name="Observe Gamma-ray Bursts?")
+    flare_star = models.BooleanField(default=False, verbose_name="Observe Flare Stars?")
+    gw = models.BooleanField(default=False, verbose_name="Observe Gravitational Waves?")
+    neutrino = models.BooleanField(default=False, verbose_name="Observe Neutrinos?")
 
     def __str__(self):
-        return f"{self.telescope}_{self.project_id}"
+        return f"{self.id}_{self.telescope}_{self.project_id}"
 
-# Create your models here.
+class ProjectSettingsAdmin(admin.ModelAdmin):
+    model = ProjectSettings
+    fieldsets = (
+        ("Telescope Settings", {
+            'fields':(
+                'telescope',
+                'project_id',
+                'project_description',
+                'repointing_limit',
+                'horizon_limit',
+                'testing',
+            ),
+        }),
+        ("Trigger Duration Range (s)", {
+            'fields':(
+                ('trig_min_duration', 'trig_max_duration'),
+            ),
+            'description': "The inclusive duration range of an event that will automatically trigger an observation.",
+        }),
+        ("Pending Duration Range (s)", {
+            'fields':(
+                ('pending_min_duration', 'pending_max_duration'),
+            ),
+            'description': "The inclusive duration range of an event that will notify users and let them decided if an observations should be triggered.",
+        }),
+        ('Source Settings', {
+            'fields': (
+                'fermi_prob',
+                'swift_rate_signf',
+                'grb',
+                'flare_star',
+                'gw',
+                'neutrino',
+            ),
+        }),
+    )
+
+
 class TriggerEvent(models.Model):
     id = models.AutoField(primary_key=True)
     trigger_id = models.IntegerField(blank=True, null=True)
@@ -54,7 +92,6 @@ class TriggerEvent(models.Model):
         ordering = ['-id']
 
 
-# Create your models here.
 class ProjectDecision(models.Model):
     id = models.AutoField(primary_key=True)
     P = 'P'
