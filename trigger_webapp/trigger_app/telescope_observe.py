@@ -16,13 +16,17 @@ def trigger_observation(project_decision_model,
                         reason="First Observation"):
     """Wrap the differente observation functions
     """
-    if project_decision_model.project.telescope == "MWA":
+    if project_decision_model.project.telescope.startswith("MWA"):
+        # If telescope ends in VCS then this project is for observing in VCS mode
+        vcsmode = project_decision_model.project.telescope.endswith("VCS")
+
         # Check if you can observe and if so send off mwa observation
         decision, trigger_message, obsids = trigger_mwa_observation(
             project_decision_model,
             trigger_message,
             horizion_limit=horizion_limit,
             pretend=pretend,
+            vcsmode=vcsmode,
         )
         if decision == 'E':
             # Error observing so send off debug
@@ -39,7 +43,8 @@ def trigger_observation(project_decision_model,
 def trigger_mwa_observation(project_decision_model,
                             trigger_message,
                             horizion_limit=30,
-                            pretend=True):
+                            pretend=True,
+                            vcsmode=False):
     """Check if the mwa can observe then send it off the observation.
     """
     # set up the target, observer, and time
@@ -85,10 +90,10 @@ def trigger_mwa_observation(project_decision_model,
                         avoidsun=True,
                         inttime=0.5,
                         freqres=10,
-                        exptime=15, # Default VCS time
+                        exptime=15, # TODO (Default VCS time) change this for non vcs observing
                         calibrator=True,
                         calexptime=120,
-                        vcsmode=True, #TODO for now this is always true but should make a setting to change it
+                        vcsmode=vcsmode,
                         buffered=False,
                     )
     # Check if succesful

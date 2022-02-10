@@ -25,7 +25,6 @@ class ProjectSettings(models.Model):
     pending_min_duration = models.FloatField(blank=True, null=True)
     fermi_prob = models.FloatField(blank=True, null=True)
     swift_rate_signf = models.FloatField(blank=True, null=True)
-    vcs_mode = models.BooleanField(default=True, null=True)
     repointing_limit = models.FloatField(blank=True, null=True)
     horizon_limit = models.FloatField(blank=True, null=True)
     testing = models.BooleanField(default=False, null=True)
