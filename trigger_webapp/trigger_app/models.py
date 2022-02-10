@@ -39,16 +39,6 @@ class ProjectSettings(models.Model):
 # Create your models here.
 class TriggerEvent(models.Model):
     id = models.AutoField(primary_key=True)
-    P = 'P'
-    I = 'I'
-    E = 'E'
-    T = 'T'
-    CHOICES = (
-        (P, 'Pending'),
-        (I, 'Ignored'),
-        (E, 'Error'),
-        (T, 'Triggered'),
-    )
     trigger_id = models.IntegerField(blank=True, null=True)
     duration = models.FloatField(blank=True, null=True)
     ra = models.FloatField(blank=True, null=True)
