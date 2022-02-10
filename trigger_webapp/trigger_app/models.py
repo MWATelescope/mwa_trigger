@@ -17,7 +17,7 @@ SOURCE_CHOICES = (
 
 class ProjectSettings(models.Model):
     id = models.AutoField(primary_key=True)
-    telescope = models.CharField(max_length=64, blank=True, null=True, verbose_name="Telescope name", help_text="E.g. MWA_VCS, MWA_correlate or ATCA.")
+    telescope = models.CharField(max_length=64, blank=True, null=True, default="", verbose_name="Telescope name", help_text="E.g. MWA_VCS, MWA_correlate or ATCA.")
     project_id = models.CharField(max_length=64, blank=True, null=True, help_text="This will be used to schedule observations.")
     project_description = models.CharField(max_length=256, blank=True, null=True, help_text="A brief description of the project. Only needs to be enough to distinguish it from the other projects.")
     trig_min_duration = models.FloatField(blank=True, null=True, verbose_name="Min")
@@ -34,45 +34,26 @@ class ProjectSettings(models.Model):
     gw = models.BooleanField(default=False, verbose_name="Observe Gravitational Waves?")
     neutrino = models.BooleanField(default=False, verbose_name="Observe Neutrinos?")
 
+    # MWA settings
+    centrefreq = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency channel", help_text="The centre frequency channel of the observations. To convert frequency channels to MHz multiply them by 1.28.")
+    mwaexptime = models.IntegerField(blank=True, null=True, verbose_name="Observation time (s)", help_text="Exposure time of each observation scheduled, in seconds (must be modulo-8 seconds).")
+    mwacalibrator = models.BooleanField(default=True, verbose_name="Calibrator?", help_text="True to have a calibrator observation chosen for you or False for no calibrator observation.")
+    mwacalexptime = models.FloatField(blank=True, null=True, verbose_name="Calibrator Observation time (s)", help_text="Exposure time of the trailing calibrator observation, if applicable, in seconds.")
+    freqres = models.FloatField(blank=True, null=True, verbose_name="Frequency Resolution (kHz)", help_text="Correlator frequency resolution for observations. None to use whatever the current mode is, for lower latency. Eg 40.")
+    inttime = models.FloatField(blank=True, null=True, verbose_name="Intergration Time (s)", help_text="Correlator integration time for observations in seconds. None to use whatever the current mode is, for lower latency. Eg 0.5.")
+    avoidsun = models.BooleanField(default=True, verbose_name="Avoid Sun?", help_text="If True, the coordinates of the target and calibrator are shifted slightly to put the Sun in a null.")
+    buffered = models.BooleanField(default=False, verbose_name="Use ring buffer?", help_text="If True and vcsmode, trigger a Voltage capture using the ring buffer.")
+
+    # ATCA setting
+    freq1 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 1 (MHz)", help_text="The centre of the first frequency channel in MHz.")
+    freq2 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 2 (MHz)", help_text="The centre of the second frequency channel in MHz.")
+    nobs = models.IntegerField(blank=True, null=True, verbose_name="Number of Observations", help_text="The number of observations to schedule.")
+    atcaexptime = models.IntegerField(blank=True, null=True, verbose_name="Exposure Time (mins)", help_text="Exposure time per observation in minutes.")
+    atcacalexptime = models.IntegerField(blank=True, null=True, verbose_name="Calibrator Exposure Time (mins)", help_text="Exposure time per (phase) calibration in minutes")
+
+
     def __str__(self):
         return f"{self.id}_{self.telescope}_{self.project_id}"
-
-class ProjectSettingsAdmin(admin.ModelAdmin):
-    model = ProjectSettings
-    fieldsets = (
-        ("Telescope Settings", {
-            'fields':(
-                'telescope',
-                'project_id',
-                'project_description',
-                'repointing_limit',
-                'horizon_limit',
-                'testing',
-            ),
-        }),
-        ("Trigger Duration Range (s)", {
-            'fields':(
-                ('trig_min_duration', 'trig_max_duration'),
-            ),
-            'description': "The inclusive duration range of an event that will automatically trigger an observation.",
-        }),
-        ("Pending Duration Range (s)", {
-            'fields':(
-                ('pending_min_duration', 'pending_max_duration'),
-            ),
-            'description': "The inclusive duration range of an event that will notify users and let them decided if an observations should be triggered.",
-        }),
-        ('Source Settings', {
-            'fields': (
-                'fermi_prob',
-                'swift_rate_signf',
-                'grb',
-                'flare_star',
-                'gw',
-                'neutrino',
-            ),
-        }),
-    )
 
 
 class TriggerEvent(models.Model):
