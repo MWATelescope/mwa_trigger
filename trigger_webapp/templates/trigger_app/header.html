@@ -43,6 +43,16 @@
               <li><a class="dropdown-item" href="/admin/trigger_app/adminalerts/">Admin Alert Control</a></li>
             </ul>
           </li>
+
+          <li class="nav-item dropdown">
+            <a class="nav-link active dropdown-toggle" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Project Settings
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item" href="/project_settings/">View Project Setting Details</a></li>
+              <li><a class="dropdown-item" href="/admin/trigger_app/projectsettings/">Edit Project Settings</a></li>
+            </ul>
+          </li>
         </ul>
           {% if user.is_authenticated %}
             <span class="navbar-text active">

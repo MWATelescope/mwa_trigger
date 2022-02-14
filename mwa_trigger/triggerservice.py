@@ -9,6 +9,7 @@ import traceback
 from time import gmtime, strftime
 from astropy.coordinates import Angle
 import astropy.units as u
+from datetime import timedelta
 
 import cabb_scheduler as cabb
 import atca_rapid_response_api as arrApi
@@ -147,7 +148,7 @@ def busy(project_id=None, obstime=None, logger=DEFAULTLOGGER):
     Call with a project_id and a desired observing time. This function will return False if the given project_id
     is allowed to override current observations from now for the given length of time, or True if not.
 
-    Note that a False result doesn't guarantee a later call to trigger() will succeed, as new observations may have been
+    Note that a False result doesn't guarantee a later call to trigger_mwa() will succeed, as new observations may have been
     added to the schedule in the meantime.
 
     Parameters
@@ -168,7 +169,7 @@ def busy(project_id=None, obstime=None, logger=DEFAULTLOGGER):
     if project_id is not None:
         urldict["project_id"] = project_id
     else:
-        logger.error("triggering.trigger() must be passed a valid project_id")
+        logger.error("triggering.trigger_mwa() must be passed a valid project_id")
         return None
 
     if obstime is not None:
@@ -183,7 +184,7 @@ def vcsfree(logger=DEFAULTLOGGER):
     This function will return the maximum number of seconds that a VCS trigger will be allowed to request,
     given the current free space, and upcoming VCS observations in the schedule.
 
-    Note that this doesn't guarantee a later call to trigger() will succeed, as new VCS observations may have been
+    Note that this doesn't guarantee a later call to trigger_mwa() will succeed, as new VCS observations may have been
     added to the schedule in the meantime.
 
     Parameters
@@ -228,7 +229,7 @@ def obslist(obstime=None, logger=DEFAULTLOGGER):
     return result
 
 
-def trigger(
+def trigger_mwa(
     project_id=None,
     secure_key=None,
     group_id=None,
@@ -369,13 +370,13 @@ def trigger(
     if project_id is not None:
         urldict["project_id"] = project_id
     else:
-        logger.error("triggering.trigger() must be passed a valid project_id")
+        logger.error("triggering.trigger_mwa() must be passed a valid project_id")
         return None
 
     if secure_key is not None:
         postdict["secure_key"] = secure_key
     else:
-        logger.error("triggering.trigger() must be passed a valid secure_key")
+        logger.error("triggering.trigger_mwa() must be passed a valid secure_key")
         return None
 
     if group_id is not None:
@@ -412,7 +413,7 @@ def trigger(
     else:
         if (freqres is None) != (inttime is None):
             logger.error(
-                "triggering.trigger() must be passed BOTH inttime AND freqres, or neither of them."
+                "triggering.trigger_mwa() must be passed BOTH inttime AND freqres, or neither of them."
             )
             return None
     if calibrator is not None:
@@ -505,13 +506,13 @@ def triggerbuffer(
     if project_id is not None:
         urldict["project_id"] = project_id
     else:
-        logger.error("triggering.trigger() must be passed a valid project_id")
+        logger.error("triggering.trigger_mwa() must be passed a valid project_id")
         return None
 
     if secure_key is not None:
         postdict["secure_key"] = secure_key
     else:
-        logger.error("triggering.trigger() must be passed a valid secure_key")
+        logger.error("triggering.trigger_mwa() must be passed a valid secure_key")
         return None
 
     if pretend is not None:
@@ -524,11 +525,6 @@ def triggerbuffer(
         url=BASEURL + "triggerbuffer", urldict=urldict, postdict=postdict, logger=logger
     )
     return result
-
-
-# Wrapper for naming consitency
-def trigger_mwa(args, **kwargs):
-    return trigger(args, **kwargs)
 
 
 def trigger_atca(
@@ -584,7 +580,7 @@ def trigger_atca(
             "freq1": freqspecs[0],
             "freq2": freqspecs[1],
             "project": project_id,
-            "scanLength": "00:20:00",  # TODO: convert exptime to hh:mm:ss
+            "scanLength": str(timedelta(seconds=exptime)), # convert exptime to hh:mm:ss
             "scanType": "Dwell",
         }
     )
@@ -598,7 +594,7 @@ def trigger_atca(
     calScan = schedule.addCalibrator(
         bestCal["calibrator"],
         scan1,
-        {"scanLength": "00:02:00"},  # TODO: convert calexptime to hh:mm:ss
+        {"scanLength": str(timedelta(seconds=calexptime))},  # convert calexptime to hh:mm:ss
     )
 
     for _ in range(nobs - 1):
