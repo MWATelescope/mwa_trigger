@@ -34,6 +34,10 @@ def group_trigger(sender, instance, **kwargs):
     # instance is the new VOEvent
     if not instance.ignored:
         vo = parsed_VOEvent(None, packet=str(instance.xml_packet))
+        # covert ra and dec to HH:MM:SS.SS format
+        c = SkyCoord( instance.ra, instance.dec, frame='icrs', unit=(u.deg,u.deg))
+        raj = c.ra.to_string(unit=u.hour, sep=':')
+        decj = c.dec.to_string(unit=u.degree, sep=':')
 
         if TriggerEvent.objects.filter(trigger_id=instance.trigger_id).exists():
             # Trigger event already exists so link the new VOEvent
@@ -47,6 +51,12 @@ def group_trigger(sender, instance, **kwargs):
             for proj_dec in project_decisions:
                 if proj_dec.decision == "I":
                     # Previous events were ignored, check if this new one is up to our standards
+                    # Update pos
+                    proj_dec.ra = instance.ra
+                    proj_dec.dec = instance.dec
+                    proj_dec.pos_error = instance.pos_error
+                    proj_dec.raj = raj
+                    proj_dec.decj = decj
                     project_worth_observing(proj_dec, vo, instance)
                 #elif proj_dec.decision == "T":
                     # TODO put decide when to repoint logic here
@@ -63,11 +73,6 @@ def group_trigger(sender, instance, **kwargs):
             # Link the VOEvent
             instance.trigger_group_id = new_trig
             instance.save()
-
-            # covert ra and dec to HH:MM:SS.SS format
-            c = SkyCoord( instance.ra, instance.dec, frame='icrs', unit=(u.deg,u.deg))
-            raj = c.ra.to_string(unit=u.hour, sep=':')
-            decj = c.dec.to_string(unit=u.degree, sep=':')
 
             # Loop over settings
             project_settings = ProjectSettings.objects.all()
@@ -119,8 +124,6 @@ def project_worth_observing(proj_dec, vo, voevent,
         decision, trigger_message = trigger_observation(
             proj_dec,
             trigger_message,
-            horizion_limit=proj_dec.project.horizon_limit,
-            pretend=proj_dec.project.testing,
             reason="First Observation",
         )
     elif pending_bool:
