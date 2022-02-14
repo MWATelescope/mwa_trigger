@@ -11,8 +11,6 @@ logger = logging.getLogger(__name__)
 
 def trigger_observation(project_decision_model,
                         trigger_message,
-                        horizion_limit=30,
-                        pretend=True,
                         reason="First Observation"):
     """Wrap the differente observation functions
     """
@@ -24,8 +22,6 @@ def trigger_observation(project_decision_model,
         decision, trigger_message, obsids = trigger_mwa_observation(
             project_decision_model,
             trigger_message,
-            horizion_limit=horizion_limit,
-            pretend=pretend,
             vcsmode=vcsmode,
         )
         if decision == 'E':
@@ -63,8 +59,8 @@ def trigger_mwa_observation(project_decision_model,
     alt = obs_source_altaz.alt.deg
     logger.debug("Triggered observation at an elevation of {0}".format(alt))
 
-    if alt < horizion_limit:
-        horizon_message = f"Not triggering due to horizon limit: alt {alt} < {horizion_limit}. "
+    if alt < project_decision_model.project.horizon_limit:
+        horizon_message = f"Not triggering due to horizon limit: alt {alt} < {project_decision_model.project.horizon_limit}. "
         logger.debug(horizon_message)
         return 'I', trigger_message + horizon_message, []
 
@@ -78,24 +74,24 @@ def trigger_mwa_observation(project_decision_model,
 
     # Not below horizon limit so observer
     logger.info(f"Triggering at gps time {t.gps} ...")
-    result = trigger(project_id='C002',
-                        secure_key=os.environ['MWA_SECURE_KEY'],
-                        group_id=project_decision_model.trigger_group_id.trigger_id,
-                        pretend=pretend,
-                        ra=project_decision_model.ra, dec=project_decision_model.dec,
-                        creator='VOEvent_Auto_Trigger', #TODO grab version
-                        obsname=f'{telescopes}_{project_decision_model.trigger_group_id.trigger_id}',
-                        nobs=1, # Changes if not in VCS
-                        freqspecs='145,24',
-                        avoidsun=True,
-                        inttime=0.5,
-                        freqres=10,
-                        exptime=15, # TODO (Default VCS time) change this for non vcs observing
-                        calibrator=True,
-                        calexptime=120,
-                        vcsmode=vcsmode,
-                        buffered=False,
-                    )
+    result = trigger_mwa(project_id='C002',
+        secure_key=os.environ['MWA_SECURE_KEY'],
+        group_id=project_decision_model.trigger_group_id.trigger_id,
+        pretend=project_decision_model.project.testing,
+        ra=project_decision_model.ra, dec=project_decision_model.dec,
+        creator='VOEvent_Auto_Trigger', #TODO grab version
+        obsname=f'{telescopes}_{project_decision_model.trigger_group_id.trigger_id}',
+        nobs=1, # Changes if not in VCS
+        freqspecs='145,24',
+        avoidsun=True,
+        inttime=0.5,
+        freqres=10,
+        exptime=15, # TODO (Default VCS time) change this for non vcs observing
+        calibrator=True,
+        calexptime=120,
+        vcsmode=vcsmode,
+        buffered=False,
+    )
     # Check if succesful
     if not result['success']:
         # Observation not succesful so record why

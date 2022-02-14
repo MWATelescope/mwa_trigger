@@ -147,7 +147,7 @@ def busy(project_id=None, obstime=None, logger=DEFAULTLOGGER):
     Call with a project_id and a desired observing time. This function will return False if the given project_id
     is allowed to override current observations from now for the given length of time, or True if not.
 
-    Note that a False result doesn't guarantee a later call to trigger() will succeed, as new observations may have been
+    Note that a False result doesn't guarantee a later call to trigger_mwa() will succeed, as new observations may have been
     added to the schedule in the meantime.
 
     Parameters
@@ -168,7 +168,7 @@ def busy(project_id=None, obstime=None, logger=DEFAULTLOGGER):
     if project_id is not None:
         urldict["project_id"] = project_id
     else:
-        logger.error("triggering.trigger() must be passed a valid project_id")
+        logger.error("triggering.trigger_mwa() must be passed a valid project_id")
         return None
 
     if obstime is not None:
@@ -183,7 +183,7 @@ def vcsfree(logger=DEFAULTLOGGER):
     This function will return the maximum number of seconds that a VCS trigger will be allowed to request,
     given the current free space, and upcoming VCS observations in the schedule.
 
-    Note that this doesn't guarantee a later call to trigger() will succeed, as new VCS observations may have been
+    Note that this doesn't guarantee a later call to trigger_mwa() will succeed, as new VCS observations may have been
     added to the schedule in the meantime.
 
     Parameters
@@ -228,7 +228,7 @@ def obslist(obstime=None, logger=DEFAULTLOGGER):
     return result
 
 
-def trigger(
+def trigger_mwa(
     project_id=None,
     secure_key=None,
     group_id=None,
@@ -369,13 +369,13 @@ def trigger(
     if project_id is not None:
         urldict["project_id"] = project_id
     else:
-        logger.error("triggering.trigger() must be passed a valid project_id")
+        logger.error("triggering.trigger_mwa() must be passed a valid project_id")
         return None
 
     if secure_key is not None:
         postdict["secure_key"] = secure_key
     else:
-        logger.error("triggering.trigger() must be passed a valid secure_key")
+        logger.error("triggering.trigger_mwa() must be passed a valid secure_key")
         return None
 
     if group_id is not None:
@@ -412,7 +412,7 @@ def trigger(
     else:
         if (freqres is None) != (inttime is None):
             logger.error(
-                "triggering.trigger() must be passed BOTH inttime AND freqres, or neither of them."
+                "triggering.trigger_mwa() must be passed BOTH inttime AND freqres, or neither of them."
             )
             return None
     if calibrator is not None:
@@ -505,13 +505,13 @@ def triggerbuffer(
     if project_id is not None:
         urldict["project_id"] = project_id
     else:
-        logger.error("triggering.trigger() must be passed a valid project_id")
+        logger.error("triggering.trigger_mwa() must be passed a valid project_id")
         return None
 
     if secure_key is not None:
         postdict["secure_key"] = secure_key
     else:
-        logger.error("triggering.trigger() must be passed a valid secure_key")
+        logger.error("triggering.trigger_mwa() must be passed a valid secure_key")
         return None
 
     if pretend is not None:
@@ -524,11 +524,6 @@ def triggerbuffer(
         url=BASEURL + "triggerbuffer", urldict=urldict, postdict=postdict, logger=logger
     )
     return result
-
-
-# Wrapper for naming consitency
-def trigger_mwa(args, **kwargs):
-    return trigger(args, **kwargs)
 
 
 def trigger_atca(
