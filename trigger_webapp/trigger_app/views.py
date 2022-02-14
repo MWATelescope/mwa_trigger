@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 import mimetypes
 
-from . import models, serializers, forms
+from . import models, serializers, forms, signals
 from .telescope_observe import trigger_observation
 
 import os
@@ -103,8 +103,20 @@ def ProjectDecision_result(request, id, decision):
             pretend=proj_dec.project.testing,
             reason="First Observation",
         )
+        if obs_decision == 'E':
+            # Error observing so send off debug
+            trigger_bool = False
+            debug_bool = True
+        else:
+            # Succesfully observed
+            trigger_bool = True
+            debug_bool = False
+
         proj_dec.decision_reason = trigger_message
         proj_dec.decision = obs_decision
+
+        # send off alert messages to users and admins
+        signals.send_all_alerts(trigger_bool, debug_bool, False, proj_dec)
     else:
         # False (0) so just update decision
         proj_dec.decision_reason += "User decided not to trigger. "
