@@ -1,5 +1,5 @@
 from django.contrib import admin
-from trigger_app.models import VOEvent, TriggerEvent, AdminAlerts, ProjectSettings, ProjectDecision
+from trigger_app.models import VOEvent, TriggerEvent, AdminAlerts, ProjectSettings, ProjectDecision, Telescope
 
 
 class ProjectSettingsAdmin(admin.ModelAdmin):
@@ -67,3 +67,4 @@ admin.site.register(TriggerEvent)
 admin.site.register(AdminAlerts)
 admin.site.register(ProjectDecision)
 admin.site.register(ProjectSettings, ProjectSettingsAdmin)
+admin.site.register(Telescope)

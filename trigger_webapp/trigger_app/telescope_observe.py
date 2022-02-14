@@ -15,12 +15,12 @@ def trigger_observation(project_decision_model,
     """Wrap the differente observation functions
     """
     # Check if source is above the horizon
-    # Create Earth location for MWA
-    # TODO ADD ONE FOR ATCA
+    # Create Earth location for the telescope
+    telescope = project_decision_model.project.telescope
     location = EarthLocation(
-        lon=116.671*u.deg,
-        lat=-26.7033*u.deg,
-        height=377.827*u.m
+        lon=telescope.lon*u.deg,
+        lat=telescope.lat*u.deg,
+        height=telescope.height*u.m
     )
     print(location)
     obs_source = SkyCoord(
@@ -40,9 +40,9 @@ def trigger_observation(project_decision_model,
         return 'I', trigger_message + horizon_message
 
     # above the horizon so send off telescope specific set ups
-    if project_decision_model.project.telescope.startswith("MWA"):
+    if project_decision_model.project.telescope.name.startswith("MWA"):
         # If telescope ends in VCS then this project is for observing in VCS mode
-        vcsmode = project_decision_model.project.telescope.endswith("VCS")
+        vcsmode = project_decision_model.project.telescope.name.endswith("VCS")
 
         # Check if you can observe and if so send off mwa observation
         decision, trigger_message, obsids = trigger_mwa_observation(

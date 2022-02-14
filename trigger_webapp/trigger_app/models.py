@@ -15,9 +15,18 @@ SOURCE_CHOICES = (
     (GW, 'Gravitational wave'),
 )
 
+class Telescope(models.Model):
+    name = models.CharField(max_length=64, verbose_name="Telescope name", help_text="E.g. MWA_VCS, MWA_correlate or ATCA.", unique=True)
+    lon = models.FloatField(verbose_name="Telescope longitude in degrees")
+    lat = models.FloatField(verbose_name="Telescope latitude in degrees")
+    height = models.FloatField(verbose_name="Telescope height above sea level in meters")
+    def __str__(self):
+        return f"{self.name}"
+
 class ProjectSettings(models.Model):
     id = models.AutoField(primary_key=True)
-    telescope = models.CharField(max_length=64, blank=True, null=True, default="", verbose_name="Telescope name", help_text="E.g. MWA_VCS, MWA_correlate or ATCA.")
+    #telescope = models.CharField(max_length=64, blank=True, null=True, verbose_name="Telescope name", help_text="E.g. MWA_VCS, MWA_correlate or ATCA. If the telescope you want is not here add it on the admin page.")
+    telescope = models.ForeignKey(Telescope, to_field="name", verbose_name="Telescope name", help_text="Telescope this project will observer with. If the telescope you want is not here add it on the admin page.", on_delete=models.CASCADE)
     project_id = models.CharField(max_length=64, blank=True, null=True, help_text="This will be used to schedule observations.")
     project_description = models.CharField(max_length=256, blank=True, null=True, help_text="A brief description of the project. Only needs to be enough to distinguish it from the other projects.")
     trig_min_duration = models.FloatField(blank=True, null=True, verbose_name="Min")
