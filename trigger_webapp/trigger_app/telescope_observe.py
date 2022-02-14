@@ -108,6 +108,9 @@ def trigger_mwa_observation(project_decision_model,
         buffered=proj_settings.mwa_buffered,
     )
     # Check if succesful
+    if result is None:
+        trigger_message += f"Web API error, possible server error.\n "
+        return 'E', trigger_message, []
     if not result['success']:
         # Observation not succesful so record why
         for err_id in result['error']:
