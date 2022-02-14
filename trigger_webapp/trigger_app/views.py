@@ -15,10 +15,16 @@ from . import models, serializers, forms
 from .telescope_observe import trigger_observation
 
 import os
+import io
 import sys
+import urllib
+import base64
 import voeventparse as vp
 from astropy.coordinates import SkyCoord
 from astropy import units as u
+import networkx as nx
+import matplotlib.pyplot as plt
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -112,6 +118,28 @@ def ProjectDecision_result(request, id, decision):
     proj_dec.save()
 
     return HttpResponseRedirect(f'/project_decision_details/{id}/')
+
+
+def project_decision_path(request, id):
+    proj_dec = models.ProjectSettings.objects.get(id=id)
+
+    # Create decision tree flow diagram
+    G = nx.DiGraph()
+    G.add_node(1)
+    G.add_node(2)
+
+    # Turn it into a matplolib object
+    nx.draw(G)
+    plt.draw()
+    fig = plt.gcf()
+
+    #convert graph into dtring buffer and then we convert 64 bit code into image
+    buf = io.BytesIO()
+    fig.savefig(buf,format='png')
+    buf.seek(0)
+    string = base64.b64encode(buf.read())
+    uri =  urllib.parse.quote(string)
+    return render(request, 'trigger_app/project_decision_path.html', {'data':uri})
 
 
 @login_required
