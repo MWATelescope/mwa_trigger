@@ -9,6 +9,7 @@ import traceback
 from time import gmtime, strftime
 from astropy.coordinates import Angle
 import astropy.units as u
+from datetime import timedelta
 
 import cabb_scheduler as cabb
 import atca_rapid_response_api as arrApi
@@ -579,7 +580,7 @@ def trigger_atca(
             "freq1": freqspecs[0],
             "freq2": freqspecs[1],
             "project": project_id,
-            "scanLength": "00:20:00",  # TODO: convert exptime to hh:mm:ss
+            "scanLength": str(timedelta(seconds=exptime)), # convert exptime to hh:mm:ss
             "scanType": "Dwell",
         }
     )
@@ -593,7 +594,7 @@ def trigger_atca(
     calScan = schedule.addCalibrator(
         bestCal["calibrator"],
         scan1,
-        {"scanLength": "00:02:00"},  # TODO: convert calexptime to hh:mm:ss
+        {"scanLength": str(timedelta(seconds=calexptime))},  # convert calexptime to hh:mm:ss
     )
 
     for _ in range(nobs - 1):
