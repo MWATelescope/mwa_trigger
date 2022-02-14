@@ -126,6 +126,9 @@ def project_worth_observing(proj_dec, vo, voevent,
             trigger_message,
             reason="First Observation",
         )
+        if decision == 'E':
+            # Error observing so send off debug
+            debug_bool = True
     elif pending_bool:
         # Send off a pending decision
         decision = 'P'
