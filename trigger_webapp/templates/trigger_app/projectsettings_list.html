@@ -10,6 +10,7 @@
       <th>Telescope</th>
       <th>Project ID</th>
       <th>Project Description</th>
+      <th>Project Flow Diagram</th>
       <th>Trigger Duration range (s)</th>
       <th>Pending Duration range (s)</th>
       <th>Minimum Fermi Probability</th>
@@ -38,6 +39,7 @@
       <td>{{ object.telescope }}</td>
       <td>{{ object.project_id }}</td>
       <td>{{ object.project_description }}</td>
+      <td><a href='/project_decision_path/{{ object.id }}/' style="text-decoration:None">View Flow Diagram</a></td>
       <td>{{ object.trig_min_duration }} - {{ object.trig_max_duration }}</td>
       <td>{{ object.pending_min_duration }} - {{ object.pending_max_duration }}</td>
       <td>{{ object.fermi_prob }}</td>
@@ -71,6 +73,7 @@
       <th>Telescope</th>
       <th>Project ID</th>
       <th>Project Description</th>
+      <th>Project Flow Diagram</th>
       <th>Trigger Duration range (s)</th>
       <th>Pending Duration range (s)</th>
       <th>Minimum Fermi Probability</th>
@@ -96,6 +99,7 @@
       <td>{{ object.telescope }}</td>
       <td>{{ object.project_id }}</td>
       <td>{{ object.project_description }}</td>
+      <td><a href='/project_decision_path/{{ object.id }}/' style="text-decoration:None">View Flow Diagram</a></td>
       <td>{{ object.trig_min_duration }} - {{ object.trig_max_duration }}</td>
       <td>{{ object.pending_min_duration }} - {{ object.pending_max_duration }}</td>
       <td>{{ object.fermi_prob }}</td>

@@ -15,15 +15,13 @@ from . import models, serializers, forms, signals
 from .telescope_observe import trigger_observation
 
 import os
-import io
 import sys
-import urllib
-import base64
 import voeventparse as vp
 from astropy.coordinates import SkyCoord
 from astropy import units as u
-import networkx as nx
-import matplotlib.pyplot as plt
+import requests
+import subprocess
+import shutil
 
 import logging
 logger = logging.getLogger(__name__)
@@ -133,25 +131,93 @@ def ProjectDecision_result(request, id, decision):
 
 
 def project_decision_path(request, id):
-    proj_dec = models.ProjectSettings.objects.get(id=id)
+    proj_set = models.ProjectSettings.objects.get(id=id)
 
     # Create decision tree flow diagram
-    G = nx.DiGraph()
-    G.add_node(1)
-    G.add_node(2)
+    telescope = "TODO"
+    with open(f"project_decision_path_{id}.txt", "w") as platuml_file:
+        platuml_file.write('''@startuml
+<style>
+activityDiagram {
+    BorderColor #000000
+    BackgroundColor #ffffff
+    LineColor #000000
+}
+</style>
+''')
+        platuml_file.write(f'''
+#Blue:VOEvent;
 
-    # Turn it into a matplolib object
-    nx.draw(G)
-    plt.draw()
-    fig = plt.gcf()
+if (Is Event from {telescope}?) then (Yes)
+    if (Have we observed\\nthis event before?) then (Yes)
+        :Has the position improved\\nenough to reobserve?;
+    else (No)
+        switch (Source type?)
+        case (GRB)
+            group GRB''')
+        if proj_set.grb:
+            platuml_file.write(f'''
+                if ("Fermi GRB probability > {proj_set.fermi_prob}\\nor\\nSWIFT Rate_signif > {proj_set.swift_rate_signf} sigma ") then (Yes)
+                    if (Trigger duration between {proj_set.trig_min_duration} and {proj_set.trig_max_duration} s) then (Yes)
+                        #Green:Trigger observation;
+                        kill
+                    else (No)
+                        if (Trigger duration between {proj_set.pending_min_duration} and {proj_set.pending_max_duration} s) then (Yes)
+                            #Orange:Pending a human's decision;
+                            kill
+                        else (No)
+                        endif
+                    endif
+                else (No)
+                endif''')
 
-    #convert graph into dtring buffer and then we convert 64 bit code into image
-    buf = io.BytesIO()
-    fig.savefig(buf,format='png')
-    buf.seek(0)
-    string = base64.b64encode(buf.read())
-    uri =  urllib.parse.quote(string)
-    return render(request, 'trigger_app/project_decision_path.html', {'data':uri})
+        platuml_file.write(f'''
+                #Red:Ignore;
+                kill
+            end group
+
+        case (Flare Star)
+            group Flare Star
+                #Red:Ignore;
+                kill
+            end group
+        case (GW)
+            group GW
+                #Red:Ignore;
+                kill
+            end group
+        case (Neutrino)
+            group Neutrino
+                #Red:Ignore;
+                kill
+            end group
+        endswitch
+
+    endif
+else (No)
+endif
+#Red:Ignore;
+kill
+@enduml
+''')
+
+    # If plantuml.jar not available download it
+    if not os.path.isfile("plantuml.jar"):
+        r = requests.get("https://github.com/plantuml/plantuml/releases/download/v1.2022.1/plantuml-1.2022.1.jar", allow_redirects=True)
+        open('plantuml.jar', 'wb').write(r.content)
+
+    # Run the generated code through plantuml and put the plot into static/images
+    sp = subprocess.Popen(f"java -jar plantuml.jar project_decision_path_{id}.txt", shell=True)
+    rc = sp.wait()
+    if os.path.isfile(f"static/images/project_decision_path_{id}.png"):
+        os.remove(f"static/images/project_decision_path_{id}.png")
+    shutil.move(f"project_decision_path_{id}.png", "static/images/")
+
+    # Delete text file
+    os.remove(f"project_decision_path_{id}.txt")
+
+    return render(request, 'trigger_app/project_decision_path.html', {'image_loc':f'images/project_decision_path_{id}.png',
+                                                                      'project':proj_set})
 
 
 @login_required

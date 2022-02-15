@@ -1,0 +1,15 @@
+{% extends 'trigger_app/header.html' %}
+
+{% load static %}
+
+{% block content %}
+<title>Project Decision Path</title>
+
+<div class="container-slide">
+  <h1>Project {{ project.telescope.name }} {{ project.project_id }} Decision Flow Chart</h1>
+  <p>Project Description: {{ project.project_description }}</p>
+  <p><a href="/admin/trigger_app/projectsettings/" style="text-decoration:None">Edit Project Settings</a></p>
+
+  <img alt="{% static image_loc %}" src="{% static image_loc %}"/>
+</div>
+{% endblock %}

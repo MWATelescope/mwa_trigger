@@ -20,6 +20,7 @@
       <th>Telescope</th>
       <th>Project ID</th>
       <th>Project Description</th>
+      <th>Project Flow Diagram</th>
       <th>GRB?</th>
       <th>Flare Stars?</th>
       <th>GW?</th>
@@ -33,6 +34,7 @@
       <td>{{ setting.telescope }}</td>
       <td>{{ setting.project_id }}</td>
       <td>{{ setting.project_description }}</td>
+      <td><a href='/project_decision_path/{{ setting.id }}/' style="text-decoration:None">View Flow Diagram</a></td>
       <td>{% if setting.grb        %} &#10004; {% endif %}</td>
       <td>{% if setting.flare_star %} &#10004; {% endif %}</td>
       <td>{% if setting.gw         %} &#10004; {% endif %}</td>
