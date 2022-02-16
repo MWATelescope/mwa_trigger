@@ -2,6 +2,7 @@ from os import sched_get_priority_max
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib import admin
+from .validators import mwa_freqspecs
 
 
 GRB = 'GRB'
@@ -44,7 +45,7 @@ class ProposalSettings(models.Model):
     neutrino = models.BooleanField(default=False, verbose_name="Observe Neutrinos?")
 
     # MWA settings
-    mwa_freqspecs = models.CharField(max_length=256, blank=True, null=True, verbose_name="Frequency channel Specifications", help_text="For an explanation of the MWA frequency specifications please see https://mwa_trigger.readthedocs.io/en/latest/mwa_frequency_specifications.html")
+    mwa_freqspecs = models.CharField(max_length=256, blank=True, null=True, verbose_name="Frequency channel Specifications", validators=[mwa_freqspecs], help_text="For an explanation of the MWA frequency specifications please see https://mwa_trigger.readthedocs.io/en/latest/mwa_frequency_specifications.html")
     mwa_nobs = models.IntegerField(blank=True, null=True, verbose_name="Number of Observations", help_text="The number of observations to schedule.")
     mwa_exptime = models.IntegerField(blank=True, null=True, verbose_name="Observation time (s)", help_text="Exposure time of each observation scheduled, in seconds (must be modulo-8 seconds).")
     mwa_calibrator = models.BooleanField(default=True, verbose_name="Calibrator?", help_text="True to have a calibrator observation chosen for you or False for no calibrator observation.")
