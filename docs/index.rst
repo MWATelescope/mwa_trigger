@@ -6,6 +6,13 @@
 Welcome to mwa_trigger's documentation!
 =======================================
 
+For an explanation of the MWA frequency specifications please see :ref:`freq_spec<MWA Frequency Specifications>`.
+
+.. toctree::
+   :hidden:
+
+   mwa_frequency_specifications
+
 .. toctree::
    :maxdepth: 4
    :caption: mwa_trigger Package:
