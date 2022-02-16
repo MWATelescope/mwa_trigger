@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import ProjectDecision, UserAlerts, VOEvent, TriggerEvent, CometLog, Status, AdminAlerts, ProjectSettings, ProjectDecision, Observations
+from .models import ProposalDecision, UserAlerts, VOEvent, TriggerEvent, CometLog, Status, AdminAlerts, ProposalSettings, ProposalDecision, Observations
 from .telescope_observe import trigger_observation
 
 from mwa_trigger.parse_xml import parsed_VOEvent
@@ -46,19 +46,19 @@ def group_trigger(sender, instance, **kwargs):
             voevent = VOEvent.objects.filter(trigger_id=instance.trigger_id)
             voevent.update(trigger_group_id=prev_trig)
 
-            # Loop over all projects settings and see if it's worth reobserving
-            project_decisions = ProjectDecision.objects.filter(trigger_group_id=prev_trig)
-            for proj_dec in project_decisions:
-                if proj_dec.decision == "I":
+            # Loop over all proposals settings and see if it's worth reobserving
+            proposal_decisions = ProposalDecision.objects.filter(trigger_group_id=prev_trig)
+            for prop_dec in proposal_decisions:
+                if prop_dec.decision == "I":
                     # Previous events were ignored, check if this new one is up to our standards
                     # Update pos
-                    proj_dec.ra = instance.ra
-                    proj_dec.dec = instance.dec
-                    proj_dec.pos_error = instance.pos_error
-                    proj_dec.raj = raj
-                    proj_dec.decj = decj
-                    project_worth_observing(proj_dec, vo, instance)
-                #elif proj_dec.decision == "T":
+                    prop_dec.ra = instance.ra
+                    prop_dec.dec = instance.dec
+                    prop_dec.pos_error = instance.pos_error
+                    prop_dec.raj = raj
+                    prop_dec.decj = decj
+                    proposal_worth_observing(prop_dec, vo, instance)
+                #elif prop_dec.decision == "T":
                     # TODO put decide when to repoint logic here
 
         else:
@@ -75,13 +75,13 @@ def group_trigger(sender, instance, **kwargs):
             instance.save()
 
             # Loop over settings
-            project_settings = ProjectSettings.objects.all()
-            for proj_set in project_settings:
-                # Create a ProjectDecision object to record what each project does
-                proj_dec = ProjectDecision.objects.create(
+            proposal_settings = ProposalSettings.objects.all()
+            for prop_set in proposal_settings:
+                # Create a ProposalDecision object to record what each proposal does
+                prop_dec = ProposalDecision.objects.create(
                     #decision=decision,
                     #decision_reason=trigger_message,
-                    project=proj_set,
+                    proposal=prop_set,
                     trigger_group_id=new_trig,
                     duration=instance.duration,
                     ra=instance.ra,
@@ -91,38 +91,38 @@ def group_trigger(sender, instance, **kwargs):
                     pos_error=instance.pos_error,
                 )
                 # Check if it's worth triggering an obs
-                project_worth_observing(proj_dec, vo, instance)
+                proposal_worth_observing(prop_dec, vo, instance)
 
 
-def project_worth_observing(proj_dec, vo, voevent,
+def proposal_worth_observing(prop_dec, vo, voevent,
                             trigger_message=""):
     # Defaults if not worth observing
     trigger_bool = debug_bool = pending_bool = False
     proj_source_bool = False
 
-    # Check if this project thinks this event is worth observing
-    if proj_dec.project.grb and voevent.source_type == "GRB":
-        # This project wants to observe GRBs so check if it is worth observing
+    # Check if this proposal thinks this event is worth observing
+    if prop_dec.proposal.grb and voevent.source_type == "GRB":
+        # This proposal wants to observe GRBs so check if it is worth observing
         trigger_bool, debug_bool, pending_bool, trigger_message = worth_observing_grb(
             vo,
-            trig_min_duration=proj_dec.project.trig_min_duration,
-            trig_max_duration=proj_dec.project.trig_max_duration,
-            pending_min_duration=proj_dec.project.pending_min_duration,
-            pending_max_duration=proj_dec.project.pending_max_duration,
-            fermi_prob=proj_dec.project.fermi_prob,
-            rate_signif=proj_dec.project.swift_rate_signf,
+            trig_min_duration=prop_dec.proposal.trig_min_duration,
+            trig_max_duration=prop_dec.proposal.trig_max_duration,
+            pending_min_duration=prop_dec.proposal.pending_min_duration,
+            pending_max_duration=prop_dec.proposal.pending_max_duration,
+            fermi_prob=prop_dec.proposal.fermi_prob,
+            rate_signif=prop_dec.proposal.swift_rate_signf,
         )
         proj_source_bool = True
     # TODO set up other source types here
 
     if not proj_source_bool:
-        # Project does not observe this type of source so update message
-        trigger_message += f"This project does not observe {voevent.get_source_type_display()}s.\n "
+        # Proposal does not observe this type of source so update message
+        trigger_message += f"This proposal does not observe {voevent.get_source_type_display()}s.\n "
 
     if trigger_bool:
         # Check if you can observe and if so send off the observation
         decision, trigger_message = trigger_observation(
-            proj_dec,
+            prop_dec,
             trigger_message,
             reason="First Observation",
         )
@@ -135,23 +135,23 @@ def project_worth_observing(proj_dec, vo, voevent,
     else:
         decision = 'I'
 
-    # Update project decision and log
-    proj_dec.decision = decision
-    proj_dec.decision_reason = trigger_message
-    proj_dec.save()
+    # Update proposal decision and log
+    prop_dec.decision = decision
+    prop_dec.decision_reason = trigger_message
+    prop_dec.save()
 
     # TODO do something smart with these results to decide which telescope to observe with
-    # but hopefully the project settings will describe if you want to observe or not.
+    # but hopefully the proposal settings will describe if you want to observe or not.
 
     # send off alert messages to users and admins
-    send_all_alerts(trigger_bool, debug_bool, pending_bool, proj_dec)
+    send_all_alerts(trigger_bool, debug_bool, pending_bool, prop_dec)
 
 
-def send_all_alerts(trigger_bool, debug_bool, pending_bool, project_decision_model):
+def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_model):
     """
     """
     # Work out all the telescopes that observed the event
-    voevents = VOEvent.objects.filter(trigger_group_id=project_decision_model.trigger_group_id)
+    voevents = VOEvent.objects.filter(trigger_group_id=proposal_decision_model.trigger_group_id)
     telescopes = []
     for voevent in voevents:
         telescopes.append(voevent.telescope)
@@ -170,27 +170,27 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, project_decision_mod
             # Check if user can recieve each type of alert
             # Trigger alert
             if aa.alert and ua.alert and trigger_bool:
-                subject = f"Trigger Web App Observation {project_decision_model.id}"
-                message_type_text = f"The trigger web service scheduled the following {project_decision_model.project.telescope} observations:\n"
+                subject = f"Trigger Web App Observation {proposal_decision_model.id}"
+                message_type_text = f"The trigger web service scheduled the following {proposal_decision_model.proposal.telescope} observations:\n"
                 # Send links for each observation
-                obs = Observations.objects.filter(project_decision_id=project_decision_model)
+                obs = Observations.objects.filter(proposal_decision_id=proposal_decision_model)
                 for ob in obs:
                     message_type_text += f"{ob.website_link}\n"
-                send_alert_type(ua.type, ua.address, subject, message_type_text, project_decision_model, telescopes)
+                send_alert_type(ua.type, ua.address, subject, message_type_text, proposal_decision_model, telescopes)
 
             # Debug Alert
             if aa.debug and ua.debug and debug_bool:
-                subject = f"Trigger Web App Debug {project_decision_model.id}"
+                subject = f"Trigger Web App Debug {proposal_decision_model.id}"
                 message_type_text = f"This is a debug notification from the trigger web service."
-                send_alert_type(ua.type, ua.address, subject, message_type_text, project_decision_model, telescopes)
+                send_alert_type(ua.type, ua.address, subject, message_type_text, proposal_decision_model, telescopes)
 
             # Pending Alert
             if aa.approval and ua.approval and pending_bool:
-                subject = f"PENDING Trigger Web App {project_decision_model.id}"
+                subject = f"PENDING Trigger Web App {proposal_decision_model.id}"
                 message_type_text = f"HUMAN INTERVENTION REQUIRED! The trigger web service is unsure about the following event."
-                send_alert_type(ua.type, ua.address, subject, message_type_text, project_decision_model, telescopes)
+                send_alert_type(ua.type, ua.address, subject, message_type_text, proposal_decision_model, telescopes)
 
-def send_alert_type(alert_type, address, subject, message_type_text, project_decision_model, telescopes):
+def send_alert_type(alert_type, address, subject, message_type_text, proposal_decision_model, telescopes):
     # Set up twillo client for SMS and calls
     client = Client(account_sid, auth_token)
 
@@ -198,17 +198,17 @@ def send_alert_type(alert_type, address, subject, message_type_text, project_dec
     message_text = f"""{message_type_text}
 
 Event Details are:
-Duration:    {project_decision_model.duration}
-RA:          {project_decision_model.raj} hours
-Dec:         {project_decision_model.decj} deg
-Error Rad:   {project_decision_model.pos_error} deg
+Duration:    {proposal_decision_model.duration}
+RA:          {proposal_decision_model.raj} hours
+Dec:         {proposal_decision_model.decj} deg
+Error Rad:   {proposal_decision_model.pos_error} deg
 Detected by: {telescopes}
 
 Decision log:
-{project_decision_model.decision_reason}
+{proposal_decision_model.decision_reason}
 
-Project decision can be seen here:
-http://127.0.0.1:8000/project_decision_details/{project_decision_model.id}/
+Proposal decision can be seen here:
+http://127.0.0.1:8000/proposal_decision_details/{proposal_decision_model.id}/
 """
 
     if alert_type == 0:

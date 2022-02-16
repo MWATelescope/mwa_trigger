@@ -6,4 +6,3 @@ tests/_trial_temp/
 .voevent_env/
 settings.json
 trigger_webapp/plantuml.jar
-trigger_webapp/static/images/project_decision_path*png

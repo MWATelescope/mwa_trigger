@@ -1,15 +1,15 @@
 {% extends 'trigger_app/header.html' %}
 
 {% block content %}
-<title>Project Decision Log</title>
+<title>Proposal Decision Log</title>
 
 <div class="container-fluid">
-  <h1>Project Decision Log</h1>
+  <h1>Proposal Decision Log</h1>
   <table class="fl-table">
     <thead>
     <tr>
       <th>ID</th>
-      <th>Project Telsecoe</th>
+      <th>Proposal Telsecoe</th>
       <th>Project ID</th>
       <th>Decision</th>
       <th>Decision Reason</th>
@@ -25,9 +25,9 @@
     {% else %}
       <tr>
     {% endif %}
-      <td><a href="/project_decision_details/{{ object.id }}/" style="text-decoration:None">{{ object.id }}</a></td>
-      <td>{{ object.project.telescope }}</td>
-      <td>{{ object.project.project_id }}</td>
+      <td><a href="/proposal_decision_details/{{ object.id }}/" style="text-decoration:None">{{ object.id }}</a></td>
+      <td>{{ object.proposal.telescope }}</td>
+      <td>{{ object.proposal.project_id }}</td>
       <td>{{ object.get_decision_display }}</td>
       <td>{{ object.decision_reason }}</td>
       <td>{{ object.duration }}</td>

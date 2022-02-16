@@ -23,12 +23,12 @@ class Telescope(models.Model):
     def __str__(self):
         return f"{self.name}"
 
-class ProjectSettings(models.Model):
+class ProposalSettings(models.Model):
     id = models.AutoField(primary_key=True)
     #telescope = models.CharField(max_length=64, blank=True, null=True, verbose_name="Telescope name", help_text="E.g. MWA_VCS, MWA_correlate or ATCA. If the telescope you want is not here add it on the admin page.")
-    telescope = models.ForeignKey(Telescope, to_field="name", verbose_name="Telescope name", help_text="Telescope this project will observer with. If the telescope you want is not here add it on the admin page.", on_delete=models.CASCADE)
+    telescope = models.ForeignKey(Telescope, to_field="name", verbose_name="Telescope name", help_text="Telescope this proposal will observer with. If the telescope you want is not here add it on the admin page.", on_delete=models.CASCADE)
     project_id = models.CharField(max_length=64, blank=True, null=True, help_text="This will be used to schedule observations.")
-    project_description = models.CharField(max_length=256, blank=True, null=True, help_text="A brief description of the project. Only needs to be enough to distinguish it from the other projects.")
+    proposal_description = models.CharField(max_length=256, blank=True, null=True, help_text="A brief description of the proposal. Only needs to be enough to distinguish it from the other proposals.")
     trig_min_duration = models.FloatField(blank=True, null=True, verbose_name="Min")
     trig_max_duration = models.FloatField(blank=True, null=True, verbose_name="Max")
     pending_min_duration = models.FloatField(blank=True, null=True, verbose_name="Min")
@@ -82,7 +82,7 @@ class TriggerEvent(models.Model):
         ordering = ['-id']
 
 
-class ProjectDecision(models.Model):
+class ProposalDecision(models.Model):
     id = models.AutoField(primary_key=True)
     P = 'P'
     I = 'I'
@@ -96,7 +96,7 @@ class ProjectDecision(models.Model):
     )
     decision = models.CharField(max_length=32, choices=CHOICES, default=P)
     decision_reason = models.CharField(max_length=2056, blank=True, null=True)
-    project = models.ForeignKey(ProjectSettings, on_delete=models.SET_NULL, blank=True, null=True)
+    proposal = models.ForeignKey(ProposalSettings, on_delete=models.SET_NULL, blank=True, null=True)
     trigger_group_id = models.ForeignKey(TriggerEvent, on_delete=models.SET_NULL, blank=True, null=True)
     duration = models.FloatField(blank=True, null=True)
     ra = models.FloatField(blank=True, null=True)
@@ -184,6 +184,6 @@ class UserAlerts(models.Model):
 class Observations(models.Model):
     obsid = models.IntegerField(primary_key=True)
     telescope = models.ForeignKey(Telescope, to_field="name", verbose_name="Telescope name", on_delete=models.CASCADE)
-    project_decision_id = models.ForeignKey(ProjectDecision, on_delete=models.SET_NULL, blank=True, null=True)
+    proposal_decision_id = models.ForeignKey(ProposalDecision, on_delete=models.SET_NULL, blank=True, null=True)
     website_link = models.URLField(max_length=256)
     reason = models.CharField(max_length=256, blank=True, null=True)

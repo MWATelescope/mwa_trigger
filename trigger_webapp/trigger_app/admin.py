@@ -1,15 +1,15 @@
 from django.contrib import admin
-from trigger_app.models import VOEvent, TriggerEvent, AdminAlerts, ProjectSettings, ProjectDecision, Telescope
+from trigger_app.models import VOEvent, TriggerEvent, AdminAlerts, ProposalSettings, ProposalDecision, Telescope
 
 
-class ProjectSettingsAdmin(admin.ModelAdmin):
-    model = ProjectSettings
+class ProposalSettingsAdmin(admin.ModelAdmin):
+    model = ProposalSettings
     fieldsets = (
         ("Telescope Settings", {
             'fields':(
                 'telescope',
                 'project_id',
-                'project_description',
+                'proposal_description',
                 'repointing_limit',
                 'horizon_limit',
                 'testing',
@@ -65,6 +65,6 @@ class ProjectSettingsAdmin(admin.ModelAdmin):
 admin.site.register(VOEvent)
 admin.site.register(TriggerEvent)
 admin.site.register(AdminAlerts)
-admin.site.register(ProjectDecision)
-admin.site.register(ProjectSettings, ProjectSettingsAdmin)
+admin.site.register(ProposalDecision)
+admin.site.register(ProposalSettings, ProposalSettingsAdmin)
 admin.site.register(Telescope)
