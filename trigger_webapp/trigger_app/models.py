@@ -44,7 +44,7 @@ class ProposalSettings(models.Model):
     neutrino = models.BooleanField(default=False, verbose_name="Observe Neutrinos?")
 
     # MWA settings
-    mwa_centrefreq = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency channel", help_text="The centre frequency channel of the observations. To convert frequency channels to MHz multiply them by 1.28.")
+    mwa_freqspecs = models.CharField(max_length=256, blank=True, null=True, verbose_name="Frequency channel Specifications", help_text="For an explanation of the MWA frequency specifications please see https://mwa_trigger.readthedocs.io/en/latest/mwa_frequency_specifications.html")
     mwa_nobs = models.IntegerField(blank=True, null=True, verbose_name="Number of Observations", help_text="The number of observations to schedule.")
     mwa_exptime = models.IntegerField(blank=True, null=True, verbose_name="Observation time (s)", help_text="Exposure time of each observation scheduled, in seconds (must be modulo-8 seconds).")
     mwa_calibrator = models.BooleanField(default=True, verbose_name="Calibrator?", help_text="True to have a calibrator observation chosen for you or False for no calibrator observation.")

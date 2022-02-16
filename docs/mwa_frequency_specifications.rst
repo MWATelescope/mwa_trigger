@@ -57,5 +57,7 @@ Channels 101-112 inclusive, and channels 141-152 inclusive:
 Example 4
 ---------
 You want to list of 24 channels to use:
+
 .. code-block::
+
    91;93;95;97;99;101;103;105;107;109;111;113;115;117;119;121;123;125;127;129;131;133;135;137
