@@ -32,6 +32,9 @@ def get_telescope(ivorn):
     if ivorn.startswith("ivo://gwnet/LVC#"):
         return "LVC"
 
+    if ivorn.startswith("ivo://HESS/GRB#"):
+        return "HESS"
+
     # Not found a know telescope so trying some simple logic
     return ivorn.split("//")[1].split("/")[1].split("#")[0]
 
@@ -120,6 +123,7 @@ class parsed_VOEvent:
                 "Fermi_GBM_Flt_Pos",
                 "Fermi_GBM_Gnd_Pos",
                 "Fermi_GBM_Fin_Pos",
+                "HESS_GRB_To",
             ]
         self.parse()
 
