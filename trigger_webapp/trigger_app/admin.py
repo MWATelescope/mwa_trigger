@@ -18,6 +18,7 @@ class ProposalSettingsAdmin(admin.ModelAdmin):
         ("MWA Telescope Settings (only fill out if using the MWA)", {
             'fields':(
                 'mwa_centrefreq',
+                'mwa_nobs',
                 'mwa_exptime',
                 'mwa_calibrator',
                 'mwa_calexptime',

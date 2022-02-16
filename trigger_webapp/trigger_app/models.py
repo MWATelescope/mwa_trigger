@@ -45,6 +45,7 @@ class ProposalSettings(models.Model):
 
     # MWA settings
     mwa_centrefreq = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency channel", help_text="The centre frequency channel of the observations. To convert frequency channels to MHz multiply them by 1.28.")
+    mwa_nobs = models.IntegerField(blank=True, null=True, verbose_name="Number of Observations", help_text="The number of observations to schedule.")
     mwa_exptime = models.IntegerField(blank=True, null=True, verbose_name="Observation time (s)", help_text="Exposure time of each observation scheduled, in seconds (must be modulo-8 seconds).")
     mwa_calibrator = models.BooleanField(default=True, verbose_name="Calibrator?", help_text="True to have a calibrator observation chosen for you or False for no calibrator observation.")
     mwa_calexptime = models.FloatField(blank=True, null=True, verbose_name="Calibrator Observation time (s)", help_text="Exposure time of the trailing calibrator observation, if applicable, in seconds.")
