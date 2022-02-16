@@ -17,22 +17,21 @@ Each freqspec is can be described as either:
    <center>,<width>,<increment>
    <start>:<stop>:<increment>
 
-
 where the increments default to 1.  Multiple entries can be given separated by a `;`
 
 
-Example 1
----------
+Example 1: A Contiguous Channel
+-------------------------------
 You want to observe with 24 contiguous frequency channels, centered on channel 121 (155 MHz):
 
 .. code-block::
 
    121,24
 
-Example 2
----------
-24 channels, with gaps of 2 channels in between each, centered on 121:
 
+Example 2: Picket Fence
+-----------------------
+You want to spread out the 24 channels, with gaps of 2 channels in between each, centered on 121:
 
 .. code-block::
 
@@ -40,24 +39,24 @@ Example 2
 
 which is the equivalent to:
 
-
 .. code-block::
 
    109;112;115;118;121;124;127;130;131;132;133;134;135;136;137;138;139;140;141;142;143;144;145;146
 
-Example 3
----------
 
-Channels 101-112 inclusive, and channels 141-152 inclusive:
+Example 3: Two bands
+--------------------
+You want to two wide frequency bands so you choose channels 101-112 inclusive, and channels 141-152 inclusive:
 
 .. code-block::
 
    101:112;141:152
 
-Example 4
----------
-You want to list of 24 channels to use:
+
+Example 4: 12 Pairs of Contiguous Channels
+------------------------------------------
+You want 12 frequency bands, each of which are two channels wide:
 
 .. code-block::
 
-   91;93;95;97;99;101;103;105;107;109;111;113;115;117;119;121;123;125;127;129;131;133;135;137
+   62;63;69;70;76;77;84;85;93;94;103;104;113;114;125;126;139;140;153;154;169;170;187;188
