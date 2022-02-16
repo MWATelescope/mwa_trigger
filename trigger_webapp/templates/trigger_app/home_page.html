@@ -13,14 +13,14 @@
   {{ twistd_comet_status.get_status_display }} </p>
   <p><a href="/comet_log/" style="text-decoration:None">View Comet Log</a></p>
 
-  <h3>Current Project Settings (Summarised)</h3>
+  <h3>Current Proposal Settings (Summarised)</h3>
   <table class="fl-table">
     <thead>
     <tr>
       <th>Telescope</th>
       <th>Project ID</th>
-      <th>Project Description</th>
-      <th>Project Flow Diagram</th>
+      <th>Proposal Description</th>
+      <th>Proposal Flow Diagram</th>
       <th>GRB?</th>
       <th>Flare Stars?</th>
       <th>GW?</th>
@@ -33,8 +33,8 @@
     <tr>
       <td>{{ setting.telescope }}</td>
       <td>{{ setting.project_id }}</td>
-      <td>{{ setting.project_description }}</td>
-      <td><a href='/project_decision_path/{{ setting.id }}/' style="text-decoration:None">View Flow Diagram</a></td>
+      <td>{{ setting.proposal_description }}</td>
+      <td><a href='/proposal_decision_path/{{ setting.id }}/' style="text-decoration:None">View Flow Diagram</a></td>
       <td>{% if setting.grb        %} &#10004; {% endif %}</td>
       <td>{% if setting.flare_star %} &#10004; {% endif %}</td>
       <td>{% if setting.gw         %} &#10004; {% endif %}</td>
@@ -45,8 +45,8 @@
     <li>No Settings yet.</li>
     {% endfor %}
     </table>
-    <p><a href="/admin/trigger_app/projectsettings/" style="text-decoration:None">Edit Project Settings</a></p>
-    <p><a href="/project_settings/" style="text-decoration:None">View Project Setting Details</a></p>
+    <p><a href="/admin/trigger_app/proposalsettings/" style="text-decoration:None">Edit Proposal Settings</a></p>
+    <p><a href="/proposal_settings/" style="text-decoration:None">View Proposal Setting Details</a></p>
 
   <h3>Event Logs</h3>
   <p><a href="/trigger_log/" style="text-decoration:None">View Trigger Log</a></p>

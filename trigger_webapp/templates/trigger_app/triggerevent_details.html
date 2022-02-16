@@ -30,12 +30,12 @@
 </div>
 
 <div class="container-fluid">
-  <h2>Project Decisions</h2>
+  <h2>Proposal Decisions</h2>
   <table class="fl-table">
     <thead>
       <tr>
         <th>ID</th>
-        <th>Project Telsecoe</th>
+        <th>Proposal Telsecope</th>
         <th>Project ID</th>
         <th>Decision</th>
         <th>Decision Reason</th>
@@ -45,21 +45,21 @@
         <th>Position Error (&#176;)</th>
       </tr>
     </thead>
-    {% for proj_dec in proj_decs %}
-    {% if proj_dec.decision == "I" %}
+    {% for prop_dec in prop_decs %}
+    {% if prop_dec.decision == "I" %}
       <tr class="grey-tr">
     {% else %}
       <tr>
     {% endif %}
-      <td><a href="/project_decision_details/{{ proj_dec.id }}" style="text-decoration:None">{{ proj_dec.id }}</a</td>
-      <td>{{ proj_dec.project.telescope }}</td>
-      <td>{{ proj_dec.project.project_id }}</td>
-      <td>{{ proj_dec.get_decision_display }}</td>
-      <td>{{ proj_dec.decision_reason }}</td>
-      <td>{{ proj_dec.duration }}</td>
-      <td>{{ proj_dec.ra }}</td>
-      <td>{{ proj_dec.dec }}</td>
-      <td>{{ proj_dec.pos_error }}</td>
+      <td><a href="/proposal_decision_details/{{ prop_dec.id }}" style="text-decoration:None">{{ prop_dec.id }}</a</td>
+      <td>{{ prop_dec.proposal.telescope }}</td>
+      <td>{{ prop_dec.proposal.project_id }}</td>
+      <td>{{ prop_dec.get_decision_display }}</td>
+      <td>{{ prop_dec.decision_reason }}</td>
+      <td>{{ prop_dec.duration }}</td>
+      <td>{{ prop_dec.ra }}</td>
+      <td>{{ prop_dec.dec }}</td>
+      <td>{{ prop_dec.pos_error }}</td>
     </tr>
     {% empty %}
     <li>No objects yet.</li>
@@ -75,7 +75,7 @@
         <tr>
           <th>Observation ID</th>
           <th>Telescope</th>
-          <th>Project Decision ID</th>
+          <th>Proposal Decision ID</th>
           <th>Reason</th>
         </tr>
       </thead>
@@ -89,7 +89,7 @@
           <td><a href="{{ ob.website_link }}" style="text-decoration:None">{{ ob.obsid }}</a></td>
         {% endif %}
         <td>{{ ob.telescope.name }}</td>
-        <td><a href="/project_decision_details/{{ ob.project_decision_id.id }}" style="text-decoration:None">{{ ob.project_decision_id.id }}</a</td>
+        <td><a href="/proposal_decision_details/{{ ob.proposal_decision_id.id }}" style="text-decoration:None">{{ ob.proposal_decision_id.id }}</a</td>
         <td>{{ ob.reason }}</td>
       </tr>
       <!-- If object_list is empty  -->

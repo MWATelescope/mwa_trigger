@@ -46,18 +46,18 @@ class CometLogList(ListView):
     # specify the model for list view
     model = models.CometLog
 
-class ProjectSettingsList(ListView):
+class ProposalSettingsList(ListView):
     # specify the model for list view
-    model = models.ProjectSettings
+    model = models.ProposalSettings
 
-class ProjectDecisionList(ListView):
+class ProposalDecisionList(ListView):
     # specify the model for list view
-    model = models.ProjectDecision
+    model = models.ProposalDecision
 
 
 def home_page(request):
     comet_status = models.Status.objects.get(name='twistd_comet')
-    settings = models.ProjectSettings.objects.all()
+    settings = models.ProposalSettings.objects.all()
     return render(request, 'trigger_app/home_page.html', {'twistd_comet_status': comet_status,
                                                           'settings':settings})
 
@@ -70,41 +70,41 @@ def TriggerEvent_details(request, tid):
     trigger_event.dec = c.dec.to_string(unit=u.degree, sep=':')
 
     voevents = models.VOEvent.objects.filter(trigger_group_id=trigger_event)
-    proj_decs = models.ProjectDecision.objects.filter(trigger_group_id=trigger_event)
+    prop_decs = models.ProposalDecision.objects.filter(trigger_group_id=trigger_event)
     mwa_obs = []
-    for proj_dec in proj_decs:
-        mwa_obs += models.Observations.objects.filter(project_decision_id=proj_dec)
+    for prop_dec in prop_decs:
+        mwa_obs += models.Observations.objects.filter(proposal_decision_id=prop_dec)
     return render(request, 'trigger_app/triggerevent_details.html', {'trigger_event':trigger_event,
                                                                      'voevents':voevents,
                                                                      'mwa_obs':mwa_obs,
-                                                                     'proj_decs':proj_decs})
+                                                                     'prop_decs':prop_decs})
 
 
-def ProjectDecision_details(request, id):
-    proj_dec = models.ProjectDecision.objects.get(id=id)
+def ProposalDecision_details(request, id):
+    prop_dec = models.ProposalDecision.objects.get(id=id)
 
     # Work out all the telescopes that observed the event
-    voevents = models.VOEvent.objects.filter(trigger_group_id=proj_dec.trigger_group_id)
+    voevents = models.VOEvent.objects.filter(trigger_group_id=prop_dec.trigger_group_id)
     telescopes = []
     for voevent in voevents:
         telescopes.append(voevent.telescope)
     # Make sure they are unique and put each on a new line
     telescopes = ".\n".join(list(set(telescopes)))
 
-    return render(request, 'trigger_app/project_decision_details.html', {'proj_dec':proj_dec,
+    return render(request, 'trigger_app/proposal_decision_details.html', {'prop_dec':prop_dec,
                                                                          'telescopes':telescopes})
 
 
-def ProjectDecision_result(request, id, decision):
-    proj_dec = models.ProjectDecision.objects.get(id=id)
+def ProposalDecision_result(request, id, decision):
+    prop_dec = models.ProposalDecision.objects.get(id=id)
 
     if decision:
         # Decision is True (1) so trigger an observation
         obs_decision, trigger_message = trigger_observation(
-            proj_dec,
-            f"{proj_dec.decision_reason}User decided to trigger. ",
-            horizion_limit=proj_dec.project.horizon_limit,
-            pretend=proj_dec.project.testing,
+            prop_dec,
+            f"{prop_dec.decision_reason}User decided to trigger. ",
+            horizion_limit=prop_dec.proposal.horizon_limit,
+            pretend=prop_dec.proposal.testing,
             reason="First Observation",
         )
         if obs_decision == 'E':
@@ -116,22 +116,22 @@ def ProjectDecision_result(request, id, decision):
             trigger_bool = True
             debug_bool = False
 
-        proj_dec.decision_reason = trigger_message
-        proj_dec.decision = obs_decision
+        prop_dec.decision_reason = trigger_message
+        prop_dec.decision = obs_decision
 
         # send off alert messages to users and admins
-        signals.send_all_alerts(trigger_bool, debug_bool, False, proj_dec)
+        signals.send_all_alerts(trigger_bool, debug_bool, False, prop_dec)
     else:
         # False (0) so just update decision
-        proj_dec.decision_reason += "User decided not to trigger. "
-        proj_dec.decision = "I"
-    proj_dec.save()
+        prop_dec.decision_reason += "User decided not to trigger. "
+        prop_dec.decision = "I"
+    prop_dec.save()
 
-    return HttpResponseRedirect(f'/project_decision_details/{id}/')
+    return HttpResponseRedirect(f'/proposal_decision_details/{id}/')
 
 
-def project_decision_path(request, id):
-    proj_set = models.ProjectSettings.objects.get(id=id)
+def proposal_decision_path(request, id):
+    prop_set = models.ProposalSettings.objects.get(id=id)
     telescope = "TODO"
 
     # Create decision tree flow diagram
@@ -141,18 +141,18 @@ flowchart TD
   A(VOEvent) --> B{Is Event from TODO?}
   B --> |YES| C{"Have we observed\nthis event before?"}
   B --> |NO| END(Ignore)
-  C --> |YES| D{"Has the position improved\nenough to reobserve?"}
-  D --> |YES| R(Reobserve)
+  C --> |YES| D{"Has the position improved\nenough to repoint?"}
+  D --> |YES| R(Repoint)
   C --> |NO| E{Source type?}
   D --> |NO| END
   E --> F[GRB]'''
-    if proj_set.grb:
+    if prop_set.grb:
         mermaid_script += f'''
-  F --> J{{"Fermi GRB probability > {proj_set.fermi_prob}\\nor\\nSWIFT Rate_signif > {proj_set.swift_rate_signf} sigma"}}
-  J --> |YES| K{{"Trigger duration between\n {proj_set.trig_min_duration} and {proj_set.trig_max_duration} s"}}
+  F --> J{{"Fermi GRB probability > {prop_set.fermi_prob}\\nor\\nSWIFT Rate_signif > {prop_set.swift_rate_signf} sigma"}}
+  J --> |YES| K{{"Trigger duration between\n {prop_set.trig_min_duration} and {prop_set.trig_max_duration} s"}}
   J --> |NO| END
   K --> |YES| L[Trigger Observation]
-  K --> |NO| M{{"Trigger duration between\n{proj_set.pending_min_duration} and {proj_set.pending_max_duration} s"}}
+  K --> |NO| M{{"Trigger duration between\n{prop_set.pending_min_duration} and {prop_set.pending_max_duration} s"}}
   M --> |YES| N[Pending a human's decision]
   M --> |NO| END
 subgraph GRB
@@ -174,9 +174,8 @@ end
   style A fill:blue,color:white
   style END fill:red,color:white'''
 
-    return render(request, 'trigger_app/project_decision_path.html', {'image_loc':f'images/project_decision_path_{id}.png',
-                                                                      'project':proj_set,
-                                                                      'mermaid_script':mermaid_script})
+    return render(request, 'trigger_app/proposal_decision_path.html', {'proposal':prop_set,
+                                                                       'mermaid_script':mermaid_script})
 
 
 @login_required

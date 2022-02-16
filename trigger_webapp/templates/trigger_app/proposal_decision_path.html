@@ -1,0 +1,16 @@
+{% extends 'trigger_app/header.html' %}
+
+{% load static %}
+
+{% block content %}
+<title>Proposal Decision Path</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+
+<div class="container-slide">
+  <h1>Proposal {{ proposal.telescope.name }} {{ proposal.project_id }} Decision Flow Chart</h1>
+  <p>Proposal Description: {{ proposal.proposal_description }}</p>
+  <p><a href="/admin/trigger_app/proposalsettings/" style="text-decoration:None">Edit Proposal Settings</a></p>
+
+  <div class="mermaid">{{ mermaid_script }}</div>
+</div>
+{% endblock %}
