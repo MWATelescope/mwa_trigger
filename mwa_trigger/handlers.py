@@ -61,7 +61,7 @@ MWAPOS = EarthLocation.from_geodetic(lon="116:40:14.93",
 EMAIL_FOOTER_TEMPLATE = """
 Result: %(success)s
 
-Errors: 
+Errors:
 %(errors)s
 """
 
@@ -218,7 +218,7 @@ class TriggerEvent(object):
         # trigger if we are above the horizon limit
         if alt > HORIZON_LIMIT:
             self.info("Triggering at gps time %d ..." % (t.gps,))
-            result = triggerservice.trigger(project_id=project_id, secure_key=secure_key,
+            result = triggerservice.trigger_mwa(project_id=project_id, secure_key=secure_key,
                                             group_id=group_id,
                                             pretend=pretend,
                                             ra=ra, dec=dec,
@@ -234,7 +234,7 @@ class TriggerEvent(object):
                                             logger=self)
             # self.debug("Response: {0}".format(result))
             if result is None:
-                self.error("Trigger Service Error: triggerservice.trigger() returned None")
+                self.error("Trigger Service Error: triggerservice.trigger_mwa() returned None")
                 return
             if email_tolist:
                 if result['success']:

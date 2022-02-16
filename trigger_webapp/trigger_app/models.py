@@ -1,6 +1,7 @@
 from os import sched_get_priority_max
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib import admin
 
 
 GRB = 'GRB'
@@ -14,29 +15,56 @@ SOURCE_CHOICES = (
     (GW, 'Gravitational wave'),
 )
 
+class Telescope(models.Model):
+    name = models.CharField(max_length=64, verbose_name="Telescope name", help_text="E.g. MWA_VCS, MWA_correlate or ATCA.", unique=True)
+    lon = models.FloatField(verbose_name="Telescope longitude in degrees")
+    lat = models.FloatField(verbose_name="Telescope latitude in degrees")
+    height = models.FloatField(verbose_name="Telescope height above sea level in meters")
+    def __str__(self):
+        return f"{self.name}"
+
 class ProjectSettings(models.Model):
     id = models.AutoField(primary_key=True)
-    telescope = models.CharField(max_length=64, blank=True, null=True)
-    project_id = models.CharField(max_length=64, blank=True, null=True)
-    project_description = models.CharField(max_length=256, blank=True, null=True)
-    trig_max_duration = models.FloatField(blank=True, null=True)
-    trig_min_duration = models.FloatField(blank=True, null=True)
-    pending_max_duration = models.FloatField(blank=True, null=True)
-    pending_min_duration = models.FloatField(blank=True, null=True)
-    fermi_prob = models.FloatField(blank=True, null=True)
-    swift_rate_signf = models.FloatField(blank=True, null=True)
-    repointing_limit = models.FloatField(blank=True, null=True)
-    horizon_limit = models.FloatField(blank=True, null=True)
-    testing = models.BooleanField(default=False, null=True)
-    grb = models.BooleanField(default=False)
-    flare_star = models.BooleanField(default=False)
-    gw = models.BooleanField(default=False)
-    neutrino = models.BooleanField(default=False)
+    #telescope = models.CharField(max_length=64, blank=True, null=True, verbose_name="Telescope name", help_text="E.g. MWA_VCS, MWA_correlate or ATCA. If the telescope you want is not here add it on the admin page.")
+    telescope = models.ForeignKey(Telescope, to_field="name", verbose_name="Telescope name", help_text="Telescope this project will observer with. If the telescope you want is not here add it on the admin page.", on_delete=models.CASCADE)
+    project_id = models.CharField(max_length=64, blank=True, null=True, help_text="This will be used to schedule observations.")
+    project_description = models.CharField(max_length=256, blank=True, null=True, help_text="A brief description of the project. Only needs to be enough to distinguish it from the other projects.")
+    trig_min_duration = models.FloatField(blank=True, null=True, verbose_name="Min")
+    trig_max_duration = models.FloatField(blank=True, null=True, verbose_name="Max")
+    pending_min_duration = models.FloatField(blank=True, null=True, verbose_name="Min")
+    pending_max_duration = models.FloatField(blank=True, null=True, verbose_name="Max")
+    fermi_prob = models.FloatField(blank=True, null=True, help_text="The minimum probability to observe for Fermi sources (it appears to be a percentage, e.g. 50).")
+    swift_rate_signf = models.FloatField(blank=True, null=True, help_text="The minimum \"RATE_SIGNIF\" (appears to be a signal-to-noise ratio) to observe for SWIFT sources (in sigma).")
+    repointing_limit = models.FloatField(blank=True, null=True, help_text="An updated position must be at least this far away from a current observation before repointing (in degrees).")
+    horizon_limit = models.FloatField(blank=True, null=True, help_text="The minimum elevation of the source to observe (in degrees).")
+    testing = models.BooleanField(default=False, help_text="If testing, will not schedule any observations.")
+    grb = models.BooleanField(default=False, verbose_name="Observe Gamma-ray Bursts?")
+    flare_star = models.BooleanField(default=False, verbose_name="Observe Flare Stars?")
+    gw = models.BooleanField(default=False, verbose_name="Observe Gravitational Waves?")
+    neutrino = models.BooleanField(default=False, verbose_name="Observe Neutrinos?")
+
+    # MWA settings
+    mwa_centrefreq = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency channel", help_text="The centre frequency channel of the observations. To convert frequency channels to MHz multiply them by 1.28.")
+    mwa_exptime = models.IntegerField(blank=True, null=True, verbose_name="Observation time (s)", help_text="Exposure time of each observation scheduled, in seconds (must be modulo-8 seconds).")
+    mwa_calibrator = models.BooleanField(default=True, verbose_name="Calibrator?", help_text="True to have a calibrator observation chosen for you or False for no calibrator observation.")
+    mwa_calexptime = models.FloatField(blank=True, null=True, verbose_name="Calibrator Observation time (s)", help_text="Exposure time of the trailing calibrator observation, if applicable, in seconds.")
+    mwa_freqres = models.FloatField(blank=True, null=True, verbose_name="Frequency Resolution (kHz)", help_text="Correlator frequency resolution for observations. None to use whatever the current mode is, for lower latency. Eg 40.")
+    mwa_inttime = models.FloatField(blank=True, null=True, verbose_name="Intergration Time (s)", help_text="Correlator integration time for observations in seconds. None to use whatever the current mode is, for lower latency. Eg 0.5.")
+    mwa_avoidsun = models.BooleanField(default=True, verbose_name="Avoid Sun?", help_text="If True, the coordinates of the target and calibrator are shifted slightly to put the Sun in a null.")
+    mwa_buffered = models.BooleanField(default=False, verbose_name="Use ring buffer?", help_text="If True and vcsmode, trigger a Voltage capture using the ring buffer.")
+
+    # ATCA setting
+    atca_freq1 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 1 (MHz)", help_text="The centre of the first frequency channel in MHz.")
+    atca_freq2 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 2 (MHz)", help_text="The centre of the second frequency channel in MHz.")
+    atca_nobs = models.IntegerField(blank=True, null=True, verbose_name="Number of Observations", help_text="The number of observations to schedule.")
+    atca_exptime = models.IntegerField(blank=True, null=True, verbose_name="Exposure Time (mins)", help_text="Exposure time per observation in minutes.")
+    atca_calexptime = models.IntegerField(blank=True, null=True, verbose_name="Calibrator Exposure Time (mins)", help_text="Exposure time per (phase) calibration in minutes")
+
 
     def __str__(self):
-        return f"{self.telescope}_{self.project_id}"
+        return f"{self.id}_{self.telescope}_{self.project_id}"
 
-# Create your models here.
+
 class TriggerEvent(models.Model):
     id = models.AutoField(primary_key=True)
     trigger_id = models.IntegerField(blank=True, null=True)
@@ -54,7 +82,6 @@ class TriggerEvent(models.Model):
         ordering = ['-id']
 
 
-# Create your models here.
 class ProjectDecision(models.Model):
     id = models.AutoField(primary_key=True)
     P = 'P'
@@ -156,7 +183,7 @@ class UserAlerts(models.Model):
 
 class Observations(models.Model):
     obsid = models.IntegerField(primary_key=True)
-    telescope = models.CharField(max_length=64, blank=True, null=True)
+    telescope = models.ForeignKey(Telescope, to_field="name", verbose_name="Telescope name", on_delete=models.CASCADE)
     project_decision_id = models.ForeignKey(ProjectDecision, on_delete=models.SET_NULL, blank=True, null=True)
     website_link = models.URLField(max_length=256)
     reason = models.CharField(max_length=256, blank=True, null=True)
