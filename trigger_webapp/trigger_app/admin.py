@@ -4,8 +4,9 @@ from trigger_app.models import VOEvent, TriggerEvent, AdminAlerts, ProposalSetti
 
 class ProposalSettingsAdmin(admin.ModelAdmin):
     model = ProposalSettings
+    list_display = ('id', 'telescope', 'project_id', 'proposal_description')
     fieldsets = (
-        ("Telescope Settings", {
+        ("Telescope Settings: Common", {
             'fields':(
                 'telescope',
                 'project_id',
@@ -15,9 +16,9 @@ class ProposalSettingsAdmin(admin.ModelAdmin):
                 'testing',
             ),
         }),
-        ("MWA Telescope Settings (only fill out if using the MWA)", {
+        ("Telescope Settings: MWA (only fill out if using the MWA)", {
             'fields':(
-                'mwa_centrefreq',
+                'mwa_freqspecs',
                 'mwa_nobs',
                 'mwa_exptime',
                 'mwa_calibrator',
@@ -28,7 +29,7 @@ class ProposalSettingsAdmin(admin.ModelAdmin):
                 'mwa_buffered',
             ),
         }),
-        ("ATCA Telescope Settings (only fill out if using the ATCA)", {
+        ("Telescope Settings: ATCA (only fill out if using the ATCA)", {
             'fields':(
                 'atca_freq1',
                 'atca_freq2',
@@ -37,13 +38,13 @@ class ProposalSettingsAdmin(admin.ModelAdmin):
                 'atca_calexptime',
             ),
         }),
-        ("Trigger Duration Range (s)", {
+        ("Source Settings: Trigger Duration Range (s)", {
             'fields':(
                 ('trig_min_duration', 'trig_max_duration'),
             ),
             'description': "The inclusive duration range of an event that will automatically trigger an observation.",
         }),
-        ("Pending Duration Range (s)", {
+        ("Source Settings: Pending Duration Range (s)", {
             'fields':(
                 ('pending_min_duration', 'pending_max_duration'),
             ),
