@@ -19,6 +19,10 @@ import sys
 import voeventparse as vp
 from astropy.coordinates import SkyCoord
 from astropy import units as u
+import requests
+import subprocess
+import shutil
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -124,6 +128,55 @@ def ProjectDecision_result(request, id, decision):
     proj_dec.save()
 
     return HttpResponseRedirect(f'/project_decision_details/{id}/')
+
+
+def project_decision_path(request, id):
+    proj_set = models.ProjectSettings.objects.get(id=id)
+    telescope = "TODO"
+
+    # Create decision tree flow diagram
+    # Set up mermaid javascript
+    mermaid_script = '''
+flowchart TD
+  A(VOEvent) --> B{Is Event from TODO?}
+  B --> |YES| C{"Have we observed\nthis event before?"}
+  B --> |NO| END(Ignore)
+  C --> |YES| D{"Has the position improved\nenough to reobserve?"}
+  D --> |YES| R(Reobserve)
+  C --> |NO| E{Source type?}
+  D --> |NO| END
+  E --> F[GRB]'''
+    if proj_set.grb:
+        mermaid_script += f'''
+  F --> J{{"Fermi GRB probability > {proj_set.fermi_prob}\\nor\\nSWIFT Rate_signif > {proj_set.swift_rate_signf} sigma"}}
+  J --> |YES| K{{"Trigger duration between\n {proj_set.trig_min_duration} and {proj_set.trig_max_duration} s"}}
+  J --> |NO| END
+  K --> |YES| L[Trigger Observation]
+  K --> |NO| M{{"Trigger duration between\n{proj_set.pending_min_duration} and {proj_set.pending_max_duration} s"}}
+  M --> |YES| N[Pending a human's decision]
+  M --> |NO| END
+subgraph GRB
+  J
+  K
+  L
+  M
+  N
+end
+  style L fill:green,color:white
+  style N fill:orange,color:white'''
+    else:
+        mermaid_script += '''
+  F[GRB] --> END'''
+    mermaid_script += '''
+  E --> G[Flare Star] --> END
+  E --> H[GW] --> END
+  E --> I[Neutrino] --> END
+  style A fill:blue,color:white
+  style END fill:red,color:white'''
+
+    return render(request, 'trigger_app/project_decision_path.html', {'image_loc':f'images/project_decision_path_{id}.png',
+                                                                      'project':proj_set,
+                                                                      'mermaid_script':mermaid_script})
 
 
 @login_required

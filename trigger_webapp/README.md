@@ -1,6 +1,6 @@
 # Web App Installation
 ```
-sudo apt-get install postgresql postgresql-contrib libpq-dev python3-dev
+sudo apt-get install postgresql postgresql-contrib libpq-dev python3-dev graphviz
 ```
 
 Set the envionment variables `DB_USER`, `DB_PASSWORD` and `DB_SECRET_KEY`

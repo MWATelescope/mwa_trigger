@@ -66,6 +66,40 @@
     {% endfor %}
   </table>
 
+
+  {% if mwa_obs %}
+    <h2>Observations</h2>
+
+    <table class="fl-table">
+      <thead>
+        <tr>
+          <th>Observation ID</th>
+          <th>Telescope</th>
+          <th>Project Decision ID</th>
+          <th>Reason</th>
+        </tr>
+      </thead>
+      <!-- Iterate over object_list -->
+      {% for ob in mwa_obs %}
+      <!-- Display Objects -->
+      <tr>
+        {% if ob.website_link is None %}
+          <td>{{ ob.obsid }}</td>
+        {% else %}
+          <td><a href="{{ ob.website_link }}" style="text-decoration:None">{{ ob.obsid }}</a></td>
+        {% endif %}
+        <td>{{ ob.telescope.name }}</td>
+        <td><a href="/project_decision_details/{{ ob.project_decision_id.id }}" style="text-decoration:None">{{ ob.project_decision_id.id }}</a</td>
+        <td>{{ ob.reason }}</td>
+      </tr>
+      <!-- If object_list is empty  -->
+      {% empty %}
+      <p>No observations yet.</p>
+      {% endfor %}
+    </table>
+  {% endif %}
+
+
   <h2>VOEvents</h2>
 
   <table class="fl-table">
@@ -115,26 +149,5 @@
     {% endfor %}
     </table>
 
-  <h2>MWA Observations</h2>
-
-  <table class="fl-table">
-    <thead>
-      <tr>
-        <th>Observation ID</th>
-        <th>Reason</th>
-      </tr>
-    </thead>
-    <!-- Iterate over object_list -->
-    {% for ob in mwa_obs %}
-    <!-- Display Objects -->
-    <tr>
-      <td><a href="http://ws.mwatelescope.org/observation/obs/?obsid={{ ob.obsid }}" style="text-decoration:None">{{ ob.obsid }}</a></td>
-      <td>{{ ob.reason }}</td>
-    </tr>
-    <!-- If object_list is empty  -->
-    {% empty %}
-    <p>No observations yet.</p>
-    {% endfor %}
-  </table>
 </div>
 {% endblock %}
