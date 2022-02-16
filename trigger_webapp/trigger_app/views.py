@@ -141,8 +141,8 @@ flowchart TD
   A(VOEvent) --> B{Is Event from TODO?}
   B --> |YES| C{"Have we observed\nthis event before?"}
   B --> |NO| END(Ignore)
-  C --> |YES| D{"Has the position improved\nenough to reobserve?"}
-  D --> |YES| R(Reobserve)
+  C --> |YES| D{"Has the position improved\nenough to repoint?"}
+  D --> |YES| R(Repoint)
   C --> |NO| E{Source type?}
   D --> |NO| END
   E --> F[GRB]'''
