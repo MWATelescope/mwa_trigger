@@ -30,9 +30,13 @@ class ProposalSettingsAdmin(admin.ModelAdmin):
             ),
         }),
         ("Telescope Settings: ATCA (only fill out if using the ATCA)", {
+            'description': "ATCA has five receivers, so we can cycle the observations through each of them each time they repoint. Here is the documentation (see table 1.1) https://www.narrabri.atnf.csiro.au/observing/users_guide/html/atug.html#Signal-Path. All receives can observe at two frequency ranges (2 GHz bands) except for 16cm, which only observes has a 2GHz bandwidth, so only has one choice.",
             'fields':(
-                'atca_freq1',
-                'atca_freq2',
+                ('atca_band_3mm', 'atca_band_3mm_freq1', 'atca_band_3mm_freq2'),
+                ('atca_band_7mm', 'atca_band_7mm_freq1', 'atca_band_7mm_freq2'),
+                ('atca_band_15mm', 'atca_band_15mm_freq1', 'atca_band_15mm_freq2'),
+                ('atca_band_4cm', 'atca_band_4cm_freq1', 'atca_band_4cm_freq2'),
+                'atca_band_16cm',
                 'atca_nobs',
                 'atca_exptime',
                 'atca_calexptime',
