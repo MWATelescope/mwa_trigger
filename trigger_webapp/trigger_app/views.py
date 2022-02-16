@@ -132,92 +132,51 @@ def ProjectDecision_result(request, id, decision):
 
 def project_decision_path(request, id):
     proj_set = models.ProjectSettings.objects.get(id=id)
+    telescope = "TODO"
 
     # Create decision tree flow diagram
-    telescope = "TODO"
-    with open(f"project_decision_path_{id}.txt", "w") as platuml_file:
-        platuml_file.write('''@startuml
-<style>
-activityDiagram {
-    BorderColor #000000
-    BackgroundColor #ffffff
-    LineColor #000000
-}
-</style>
-''')
-        platuml_file.write(f'''
-#Blue:VOEvent;
-
-if (Is Event from {telescope}?) then (Yes)
-    if (Have we observed\\nthis event before?) then (Yes)
-        :Has the position improved\\nenough to reobserve?;
-    else (No)
-        switch (Source type?)
-        case (GRB)
-            group GRB''')
-        if proj_set.grb:
-            platuml_file.write(f'''
-                if ("Fermi GRB probability > {proj_set.fermi_prob}\\nor\\nSWIFT Rate_signif > {proj_set.swift_rate_signf} sigma ") then (Yes)
-                    if (Trigger duration between {proj_set.trig_min_duration} and {proj_set.trig_max_duration} s) then (Yes)
-                        #Green:Trigger observation;
-                        kill
-                    else (No)
-                        if (Trigger duration between {proj_set.pending_min_duration} and {proj_set.pending_max_duration} s) then (Yes)
-                            #Orange:Pending a human's decision;
-                            kill
-                        else (No)
-                        endif
-                    endif
-                else (No)
-                endif''')
-
-        platuml_file.write(f'''
-                #Red:Ignore;
-                kill
-            end group
-
-        case (Flare Star)
-            group Flare Star
-                #Red:Ignore;
-                kill
-            end group
-        case (GW)
-            group GW
-                #Red:Ignore;
-                kill
-            end group
-        case (Neutrino)
-            group Neutrino
-                #Red:Ignore;
-                kill
-            end group
-        endswitch
-
-    endif
-else (No)
-endif
-#Red:Ignore;
-kill
-@enduml
-''')
-
-    # If plantuml.jar not available download it
-    if not os.path.isfile("plantuml.jar"):
-        r = requests.get("https://github.com/plantuml/plantuml/releases/download/v1.2022.1/plantuml-1.2022.1.jar", allow_redirects=True)
-        open('plantuml.jar', 'wb').write(r.content)
-
-    # Run the generated code through plantuml and put the plot into static/images
-    sp = subprocess.Popen(f"java -jar plantuml.jar project_decision_path_{id}.txt", shell=True)
-    rc = sp.wait()
-    if os.path.isfile(f"static/images/project_decision_path_{id}.png"):
-        os.remove(f"static/images/project_decision_path_{id}.png")
-    shutil.move(f"project_decision_path_{id}.png", "static/images/")
-
-    # Delete text file
-    os.remove(f"project_decision_path_{id}.txt")
+    # Set up mermaid javascript
+    mermaid_script = '''
+flowchart TD
+  A(VOEvent) --> B{Is Event from TODO?}
+  B --> |YES| C{"Have we observed\nthis event before?"}
+  B --> |NO| END(Ignore)
+  C --> |YES| D{"Has the position improved\nenough to reobserve?"}
+  D --> |YES| R(Reobserve)
+  C --> |NO| E{Source type?}
+  D --> |NO| END
+  E --> F[GRB]'''
+    if proj_set.grb:
+        mermaid_script += f'''
+  F --> J{{"Fermi GRB probability > {proj_set.fermi_prob}\\nor\\nSWIFT Rate_signif > {proj_set.swift_rate_signf} sigma"}}
+  J --> |YES| K{{"Trigger duration between\n {proj_set.trig_min_duration} and {proj_set.trig_max_duration} s"}}
+  J --> |NO| END
+  K --> |YES| L[Trigger Observation]
+  K --> |NO| M{{"Trigger duration between\n{proj_set.pending_min_duration} and {proj_set.pending_max_duration} s"}}
+  M --> |YES| N[Pending a human's decision]
+  M --> |NO| END
+subgraph GRB
+  J
+  K
+  L
+  M
+  N
+end
+  style L fill:green,color:white
+  style N fill:orange,color:white'''
+    else:
+        mermaid_script += '''
+  F[GRB] --> END'''
+    mermaid_script += '''
+  E --> G[Flare Star] --> END
+  E --> H[GW] --> END
+  E --> I[Neutrino] --> END
+  style A fill:blue,color:white
+  style END fill:red,color:white'''
 
     return render(request, 'trigger_app/project_decision_path.html', {'image_loc':f'images/project_decision_path_{id}.png',
-                                                                      'project':proj_set})
+                                                                      'project':proj_set,
+                                                                      'mermaid_script':mermaid_script})
 
 
 @login_required
