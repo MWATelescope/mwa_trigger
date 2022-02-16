@@ -6,7 +6,7 @@
 Welcome to mwa_trigger's documentation!
 =======================================
 
-For an explanation of the MWA frequency specifications please see :ref:`freq_spec<MWA Frequency Specifications>`.
+For an explanation of the MWA frequency specifications please see :ref:`MWA Frequency Specifications<freq_spec>`.
 
 .. toctree::
    :hidden:
