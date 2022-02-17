@@ -4,51 +4,55 @@
 <title>User Alert Status</title>
 <div class="container py-4">
   <p>N/A mean the admin has not given you permission to recieve this trigger type. Send them a message if you would like this changed.</p>
-  <table class="fl-table">
-    <thead>
-    <tr>
-        <th>Type</th>
-        <th>Address</th>
-        <th>Trigger</th>
-        <th>Debug</th>
-        <th>Pending Approval</th>
-    </tr>
-    </thead>
-    <!-- Iterate over ther alerts the user has made -->
-    {% for ua in user_alerts %}
-    <!-- Display Objects -->
-    <tr>
-        <td>{{ ua.get_type_display }}</td>
-        <td>{{ ua.address }}</td>
 
-        <!-- Check if the user recieves this type of alert -->
-        {% if admin_alerts.alert %}
-          <!-- True so show what the user has -->
-          <td>{{ ua.alert }}</td>
-        {% else %}
-          <!-- False so show N/A because the user can't get this type of alert -->
-          <td>N/A</td>
-        {% endif %}
+  {% for pa in prop_alert_list %}
+    <h2>Proposal ID {{ pa.proposal.id }} {{ pa.proposal.telescope }} {{ pa.proposal.project_id }}</h2>
+    <table class="fl-table">
+      <thead>
+      <tr>
+          <th>Type</th>
+          <th>Address</th>
+          <th>Trigger</th>
+          <th>Debug</th>
+          <th>Pending Approval</th>
+      </tr>
+      </thead>
+      <!-- Iterate over ther alerts the user has made -->
+      {% for ua in pa.user %}
+      <!-- Display Objects -->
+      <tr>
+          <td>{{ ua.get_type_display }}</td>
+          <td>{{ ua.address }}</td>
 
-        {% if admin_alerts.debug %}
-          <td>{{ ua.debug  }}</td>
-        {% else %}
-          <td>N/A</td>
-        {% endif %}
+          <!-- Check if the user recieves this type of alert -->
+          {% if pa.admin.alert %}
+            <!-- True so show what the user has -->
+            <td>{{ ua.alert }}</td>
+          {% else %}
+            <!-- False so show N/A because the user can't get this type of alert -->
+            <td>N/A</td>
+          {% endif %}
 
-        {% if admin_alerts.approval %}
-          <td>{{ ua.approval }}</td>
-        {% else %}
-          <td>N/A</td>
-        {% endif %}
+          {% if pa.admin.debug %}
+            <td>{{ ua.debug  }}</td>
+          {% else %}
+            <td>N/A</td>
+          {% endif %}
 
-        <td><a href="/user_alert_delete/{{ ua.id }}/" style="color:Red;">Delete Alert?</a></td>
-    </tr>
-    <!-- If object_list is empty  -->
-    {% empty %}
-    <p>No objects yet.</p>
+          {% if pa.admin.approval %}
+            <td>{{ ua.approval }}</td>
+          {% else %}
+            <td>N/A</td>
+          {% endif %}
+
+          <td><a href="/user_alert_delete/{{ ua.id }}/" style="color:Red;">Delete Alert?</a></td>
+      </tr>
+      <!-- If object_list is empty  -->
+      {% empty %}
+      <p>No objects yet.</p>
+      {% endfor %}
+    </table>
+    <p><a href="/user_alert_create/{{ pa.proposal.id }}/">Create a new alert?</a></p>
     {% endfor %}
-  </table>
-  <p><a href="/user_alert_create/">Create a new alert?</a></p>
 </div>
 {% endblock %}

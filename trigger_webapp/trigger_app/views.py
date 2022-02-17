@@ -180,11 +180,20 @@ end
 
 @login_required
 def user_alert_status(request):
-    u = request.user
-    admin_alerts = models.AdminAlerts.objects.get(user=u)
-    user_alerts = models.UserAlerts.objects.filter(user=u)
-    return render(request, 'trigger_app/user_alert_status.html', {'admin_alerts': admin_alerts,
-                                                                  'user_alerts' : user_alerts})
+    proposals = models.ProposalSettings.objects.all()
+    prop_alert_list = []
+    for prop in proposals:
+        # For each proposals find the user and admin alerts
+        u = request.user
+        user_alerts = models.UserAlerts.objects.filter(user=u, proposal=prop)
+        admin_alerts = models.AdminAlerts.objects.get(user=u, proposal=prop)
+        # Put them into a dict that can be looped over in the html
+        prop_alert_list.append({
+            "proposal":prop,
+            "user":user_alerts,
+            "admin":admin_alerts,
+        })
+    return render(request, 'trigger_app/user_alert_status.html', {'prop_alert_list': prop_alert_list})
 
 
 @login_required
@@ -196,11 +205,12 @@ def user_alert_delete(request, id):
 
 
 @login_required
-def user_alert_create(request):
+def user_alert_create(request, id):
     if request.POST:
-        # Create UserAlert that already includes user
+        # Create UserAlert that already includes user and proposal
         u = request.user
-        ua = models.UserAlerts(user=u)
+        prop = models.ProposalSettings.objects.get(id=id)
+        ua = models.UserAlerts(user=u, proposal=prop)
         # Let user update everything else
         form = forms.UserAlertForm(request.POST, instance=ua)
         if form.is_valid():
