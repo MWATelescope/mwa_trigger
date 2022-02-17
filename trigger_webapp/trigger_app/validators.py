@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django import forms
 import logging
 
 logger = logging.getLogger(__name__)
@@ -118,3 +119,10 @@ def mwa_freqspecs(input_spec, numchannels=24, separator=";"):
         )
 
     return freqs
+
+
+def atca_freq_bands(min_freq, max_freq, freq, field_name):
+    if freq + 1000 > max_freq:
+        raise forms.ValidationError({field_name: f"A centre frequency of {freq} MHz would have a maximum above {max_freq} MHz which is outside the bands frequency range."})
+    if freq - 1000 < min_freq:
+        raise forms.ValidationError({field_name: f"A centre frequency of {freq} MHz would have a minimum below {min_freq} MHz which is outside the bands frequency range."})

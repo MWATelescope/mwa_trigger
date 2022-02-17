@@ -1,8 +1,10 @@
 from django.contrib import admin
 from trigger_app.models import VOEvent, TriggerEvent, AdminAlerts, ProposalSettings, ProposalDecision, Telescope
+from trigger_app.forms import ProjectSettingsForm
 
 
 class ProposalSettingsAdmin(admin.ModelAdmin):
+    form = ProjectSettingsForm
     model = ProposalSettings
     list_display = ('id', 'telescope', 'project_id', 'proposal_description')
     fieldsets = (
