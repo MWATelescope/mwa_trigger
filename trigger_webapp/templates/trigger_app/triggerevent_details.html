@@ -107,16 +107,19 @@
       <tr>
         <th>ID</th>
         <th>Recieved (UTC)</th>
+        <th>Observed (UTC)</th>
         <th>Telescope</th>
         <th>Event Type</th>
         <th>Event ID</th>
         <th>Source Name</th>
         <th>Sequence number</th>
         <th>Duration (s)</th>
-        <th>Right Acension (&#176;)</th>
-        <th>Declination (&#176;)</th>
+        <th>Right Acension (HH:MM:SS)</th>
+        <th>Declination (DD:MM:SS)</th>
         <th>Position Error (&#176;)</th>
         <th>Source Type</th>
+        <th>Fermi Detection Probability (%)</th>
+        <th>SWIFT Rate Significance (sigma)</th>
         <th>XML File</th>
       </tr>
     </thead>
@@ -130,16 +133,19 @@
     {% endif %}
       <td>{{ voevent.id }}</td>
       <td>{{ voevent.recieved_data }}</td>
+      <td>{{ voevent.event_observed }}</td>
       <td>{{ voevent.telescope }}</td>
       <td>{{ voevent.event_type }}</td>
       <td>{% if voevent.trigger_id   is not None %} {{ voevent.trigger_id }}   {% endif %}</td>
       <td>{% if voevent.source_name  is not None %} {{ voevent.source_name }}  {% endif %}</td>
       <td>{% if voevent.sequence_num is not None %} {{ voevent.sequence_num }} {% endif %}</td>
       <td>{% if voevent.duration     is not None %} {{ voevent.duration }}     {% endif %}</td>
-      <td>{% if voevent.ra           is not None %} {{ voevent.ra }}           {% endif %}</td>
-      <td>{% if voevent.dec          is not None %} {{ voevent.dec }}          {% endif %}</td>
+      <td>{% if voevent.raj          is not None %} {{ voevent.raj }}          {% endif %}</td>
+      <td>{% if voevent.decj         is not None %} {{ voevent.decj }}         {% endif %}</td>
       <td>{% if voevent.pos_error    is not None %} {{ voevent.pos_error }}    {% endif %}</td>
       <td>{% if voevent.source_type  is not None %} {{ voevent.get_source_type_display }}  {% endif %}</td>
+      <td>{% if voevent.fermi_detection_prob is not None %} {{ voevent.fermi_detection_prob }}  {% endif %}</td>
+      <td>{% if voevent.swift_rate_signif    is not None %} {{ voevent.swift_rate_signif    }}  {% endif %}</td>
       <!-- <td>{{ voevent.xml }}</td> -->
       <td><a href="/voevent_view/{{ voevent.id }}" style="text-decoration:None">View xml</a></td>
     </tr>
