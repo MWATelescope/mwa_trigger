@@ -9,33 +9,55 @@ from .models import Observations, VOEvent
 import logging
 logger = logging.getLogger(__name__)
 
-def trigger_observation(proposal_decision_model,
-                        trigger_message,
-                        reason="First Observation"):
-    """Wrap the differente observation functions
+def trigger_observation(
+        proposal_decision_model,
+        trigger_message,
+        reason="First Observation",
+    ):
+    """Perform any comon observation checks, send off observations with the telescope's function then record observations in the Observations model.
+
+    Parameters
+    ----------
+    proposal_decision_model : `django.db.models.Model`
+        The Django ProposalDecision model object.
+    trigger_message : `str`
+        A log of all the decisions made so far so a user can understand why the source was(n't) observed.
+    reason : `str`, optional
+        The reason for this observation. The default is "First Observation" but other potential reasons are "Repointing".
+
+    Returns
+    -------
+    result : `str`
+        The results of the attempt to observer where 'T' means it was triggered, 'I' means it was ignored and 'E' means there was an error.
+    trigger_message : `str`
+        The updated trigger message to include an observation specific logs.
     """
     # Check if source is above the horizon
-    # Create Earth location for the telescope
-    telescope = proposal_decision_model.proposal.telescope
-    location = EarthLocation(
-        lon=telescope.lon*u.deg,
-        lat=telescope.lat*u.deg,
-        height=telescope.height*u.m
-    )
-    obs_source = SkyCoord(
-        proposal_decision_model.ra,
-        proposal_decision_model.dec,
-        #equinox='J2000',
-        unit=(u.deg, u.deg)
-    )
-    # Convert from RA/Dec to Alt/Az
-    obs_source_altaz = obs_source.transform_to(AltAz(obstime=Time.now(), location=location))
-    alt = obs_source_altaz.alt.deg
-    logger.debug("Triggered observation at an elevation of {0}".format(alt))
-    if alt < proposal_decision_model.proposal.horizon_limit:
-        horizon_message = f"Not triggering due to horizon limit: alt {alt} < {proposal_decision_model.proposal.horizon_limit}. "
-        logger.debug(horizon_message)
-        return 'I', trigger_message + horizon_message
+    if proposal_decision_model.proposal.telescope.name != "ATCA":
+        # ATCA can schedule obs once the source has risen so does
+        # not need to check if it is above the horizon
+
+        # Create Earth location for the telescope
+        telescope = proposal_decision_model.proposal.telescope
+        location = EarthLocation(
+            lon=telescope.lon*u.deg,
+            lat=telescope.lat*u.deg,
+            height=telescope.height*u.m
+        )
+        obs_source = SkyCoord(
+            proposal_decision_model.ra,
+            proposal_decision_model.dec,
+            #equinox='J2000',
+            unit=(u.deg, u.deg)
+        )
+        # Convert from RA/Dec to Alt/Az
+        obs_source_altaz = obs_source.transform_to(AltAz(obstime=Time.now(), location=location))
+        alt = obs_source_altaz.alt.deg
+        logger.debug("Triggered observation at an elevation of {0}".format(alt))
+        if alt < proposal_decision_model.proposal.horizon_limit:
+            horizon_message = f"Not triggering due to horizon limit: alt {alt} < {proposal_decision_model.proposal.horizon_limit}. "
+            logger.debug(horizon_message)
+            return 'I', trigger_message + horizon_message
 
     # above the horizon so send off telescope specific set ups
     if proposal_decision_model.proposal.telescope.name.startswith("MWA"):
@@ -88,11 +110,33 @@ def trigger_observation(proposal_decision_model,
             )
     return decision, trigger_message
 
-def trigger_mwa_observation(proposal_decision_model,
-                            trigger_message,
-                            obsname,
-                            vcsmode=False):
-    """Check if the mwa can observe then send it off the observation.
+def trigger_mwa_observation(
+        proposal_decision_model,
+        trigger_message,
+        obsname,
+        vcsmode=False,
+    ):
+    """Check if the MWA can observe then send it off the observation.
+
+    Parameters
+    ----------
+    proposal_decision_model : `django.db.models.Model`
+        The Django ProposalDecision model object.
+    trigger_message : `str`
+        A log of all the decisions made so far so a user can understand why the source was(n't) observed.
+    obsname : `str`
+        The name of the observation.
+    vcsmode : `boolean`, optional
+        True to observe in VCS mode and False to observe in correlator/imaging mode. Default: False
+
+    Returns
+    -------
+    result : `str`
+        The results of the attempt to observer where 'T' means it was triggered, 'I' means it was ignored and 'E' means there was an error.
+    trigger_message : `str`
+        The updated trigger message to include an observation specific logs.
+    observations : `list`
+        A list of observations that were scheduled by MWA.
     """
     prop_settings = proposal_decision_model.proposal
 
@@ -146,15 +190,40 @@ def trigger_mwa_observation(proposal_decision_model,
     return 'T', trigger_message, obsids
 
 
-def trigger_atca_observation(proposal_decision_model,
-                            trigger_message,
-                            obsname,
-                            vcsmode=False):
-    """Check if the atca can observe then send it off the observation.
+def trigger_atca_observation(
+        proposal_decision_model,
+        trigger_message,
+        obsname,
+    ):
+    """Check if the ATCA telescope can observe, send it off the observation and return any errors.
+
+    Parameters
+    ----------
+    proposal_decision_model : `django.db.models.Model`
+        The Django ProposalDecision model object.
+    trigger_message : `str`
+        A log of all the decisions made so far so a user can understand why the source was(n't) observed.
+    obsname : `str`
+        The name of the observation.
+
+    Returns
+    -------
+    result : `str`
+        The results of the attempt to observer where 'T' means it was triggered, 'I' means it was ignored and 'E' means there was an error.
+    trigger_message : `str`
+        The updated trigger message to include an observation specific logs.
+    observations : `list`
+        A list of observations that were scheduled by ATCA (currently there is no functionality to record this so will be empty).
     """
     prop_settings = proposal_decision_model.proposal
 
     # TODO add any schedule checks or observation parsing here
+
+    # Check if source is in dec ranges the ATCA can not observe
+    if proposal_decision_model.dec > 15.:
+        return 'I', trigger_message + "Source is above a declination of 15 degrees so ATCA can not observe it.\n ", []
+    elif -5. < proposal_decision_model.dec < 5.:
+        return 'I', trigger_message + "Source is within 5 degrees of the equator (which is riddled with satelite RFI) so ATCA will not observe.\n ", []
 
     # Not below horizon limit so observer
     logger.info(f"Triggering  ATCA at UTC time {Time.now()} ...")
