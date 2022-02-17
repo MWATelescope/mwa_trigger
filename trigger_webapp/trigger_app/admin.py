@@ -50,11 +50,17 @@ class ProposalSettingsAdmin(admin.ModelAdmin):
             ),
             'description': "The inclusive duration range of an event that will automatically trigger an observation.",
         }),
-        ("Source Settings: Pending Duration Range (s)", {
+        ("Source Settings: Pending Duration Range 1 (s)", {
             'fields':(
-                ('pending_min_duration', 'pending_max_duration'),
+                ('pending_min_duration_1', 'pending_max_duration_1'),
             ),
             'description': "The inclusive duration range of an event that will notify users and let them decided if an observations should be triggered.",
+        }),
+        ("Source Settings: Pending Duration Range 2 (s)", {
+            'fields':(
+                ('pending_min_duration_2', 'pending_max_duration_2'),
+            ),
+            'description': "A second inclusive duration range of an event that will notify users and let them decided if an observations should be triggered.",
         }),
         ('Source Settings', {
             'fields': (

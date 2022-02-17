@@ -113,10 +113,10 @@ def proposal_worth_observing(
             # Thresholds
             trig_min_duration=prop_dec.proposal.trig_min_duration,
             trig_max_duration=prop_dec.proposal.trig_max_duration,
-            pending_min_duration_1=prop_dec.proposal.pending_min_duration,
-            pending_max_duration_1=prop_dec.proposal.pending_max_duration,
-            pending_min_duration_2=prop_dec.proposal.pending_min_duration,
-            pending_max_duration_2=prop_dec.proposal.pending_max_duration,
+            pending_min_duration_1=prop_dec.proposal.pending_min_duration_1,
+            pending_max_duration_1=prop_dec.proposal.pending_max_duration_1,
+            pending_min_duration_2=prop_dec.proposal.pending_min_duration_2,
+            pending_max_duration_2=prop_dec.proposal.pending_max_duration_2,
             fermi_min_detection_prob=prop_dec.proposal.fermi_prob,
             swift_min_rate_signif=prop_dec.proposal.swift_rate_signf,
         )
