@@ -138,12 +138,17 @@ class VOEvent(models.Model):
     duration = models.FloatField(blank=True, null=True)
     ra = models.FloatField(blank=True, null=True)
     dec = models.FloatField(blank=True, null=True)
+    raj = models.CharField(max_length=64, blank=True, null=True)
+    decj = models.CharField(max_length=64, blank=True, null=True)
     pos_error = models.FloatField(blank=True, null=True)
     recieved_data = models.DateTimeField(auto_now_add=True, blank=True)
+    event_observed = models.DateTimeField(blank=True, null=True)
     xml_packet = models.CharField(max_length=10000)
     ignored = models.BooleanField(default=True)
     source_name = models.CharField(max_length=128, blank=True, null=True)
     source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, null=True)
+    fermi_detection_prob = models.FloatField(blank=True, null=True)
+    swift_rate_signif = models.FloatField(blank=True, null=True)
 
     class Meta:
         ordering = ['-id']
