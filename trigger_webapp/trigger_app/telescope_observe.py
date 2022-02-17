@@ -96,16 +96,6 @@ def trigger_mwa_observation(proposal_decision_model,
     """
     prop_settings = proposal_decision_model.proposal
 
-    # Calculate number of obs and their duration
-    if vcsmode:
-        # VCS mode uses a single observation only
-        nobs = 1
-        exptime = prop_settings.mwa_exptime
-    else:
-        # normal observations split this time into 2 min chunks
-        nobs = int(prop_settings.mwa_exptime / 120)
-        exptime = 120
-
     # Not below horizon limit so observer
     logger.info(f"Triggering MWA at UTC time {Time.now()} ...")
     result = trigger_mwa(project_id=prop_settings.project_id,
@@ -115,12 +105,12 @@ def trigger_mwa_observation(proposal_decision_model,
         ra=proposal_decision_model.ra, dec=proposal_decision_model.dec,
         creator='VOEvent_Auto_Trigger', #TODO grab version
         obsname=obsname,
-        nobs=nobs,
-        freqspecs=f"{prop_settings.mwa_centrefreq},24", #Assume always using 24 contiguous coarse frequency channels
+        nobs=prop_settings.nobs,
+        freqspecs=prop_settings.freqspecs, #Assume always using 24 contiguous coarse frequency channels
         avoidsun=prop_settings.mwa_avoidsun,
         inttime=prop_settings.mwa_inttime,
         freqres=prop_settings.mwa_freqres,
-        exptime=exptime,
+        exptime=prop_settings.mwa_exptime,
         calibrator=prop_settings.mwa_calibrator,
         calexptime=prop_settings.mwa_calexptime,
         vcsmode=vcsmode,

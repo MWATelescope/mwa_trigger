@@ -158,12 +158,12 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
     # Make sure they are unique and put each on a new line
     telescopes = ", ".join(list(set(telescopes)))
 
-    # Get all admin alert permissions
-    admin_alerts = AdminAlerts.objects.all()
+    # Get all admin alert permissions for this project
+    admin_alerts = AdminAlerts.objects.filter(proposal=proposal_decision_model.proposal)
     for aa in admin_alerts:
         # Grab user
         user = aa.user
-        user_alerts = UserAlerts.objects.filter(user=user)
+        user_alerts = UserAlerts.objects.filter(user=user, proposal=proposal_decision_model.proposal)
 
         # Send off the alerts of types user defined
         for ua in user_alerts:
@@ -236,12 +236,24 @@ http://127.0.0.1:8000/proposal_decision_details/{proposal_decision_model.id}/
         )
 
 
-
 @receiver(post_save, sender=User)
-def create_admin_alerts(sender, instance, **kwargs):
+def create_admin_alerts_proposal(sender, instance, **kwargs):
     if kwargs.get('created'):
-        s = AdminAlerts(user=instance)
-        s.save()
+        # Create an admin alert for each proposal
+        proposal_settings = ProposalSettings.objects.all()
+        for prop_set in proposal_settings:
+            s = AdminAlerts(user=instance, proposal=prop_set)
+            s.save()
+
+
+@receiver(post_save, sender=ProposalSettings)
+def create_admin_alerts_user(sender, instance, **kwargs):
+    if kwargs.get('created'):
+        # Create an admin alert for each user
+        users = User.objects.all()
+        for user in users:
+            s = AdminAlerts(user=user, proposal=instance)
+            s.save()
 
 
 def output_popen_stdout(process):

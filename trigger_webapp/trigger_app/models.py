@@ -2,6 +2,7 @@ from os import sched_get_priority_max
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib import admin
+from .validators import mwa_freqspecs
 
 
 GRB = 'GRB'
@@ -44,7 +45,8 @@ class ProposalSettings(models.Model):
     neutrino = models.BooleanField(default=False, verbose_name="Observe Neutrinos?")
 
     # MWA settings
-    mwa_centrefreq = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency channel", help_text="The centre frequency channel of the observations. To convert frequency channels to MHz multiply them by 1.28.")
+    mwa_freqspecs = models.CharField(max_length=256, blank=True, null=True, verbose_name="Frequency channel Specifications", validators=[mwa_freqspecs], help_text="For an explanation of the MWA frequency specifications please see https://mwa_trigger.readthedocs.io/en/latest/mwa_frequency_specifications.html")
+    mwa_nobs = models.IntegerField(blank=True, null=True, verbose_name="Number of Observations", help_text="The number of observations to schedule.")
     mwa_exptime = models.IntegerField(blank=True, null=True, verbose_name="Observation time (s)", help_text="Exposure time of each observation scheduled, in seconds (must be modulo-8 seconds).")
     mwa_calibrator = models.BooleanField(default=True, verbose_name="Calibrator?", help_text="True to have a calibrator observation chosen for you or False for no calibrator observation.")
     mwa_calexptime = models.FloatField(blank=True, null=True, verbose_name="Calibrator Observation time (s)", help_text="Exposure time of the trailing calibrator observation, if applicable, in seconds.")
@@ -54,6 +56,19 @@ class ProposalSettings(models.Model):
     mwa_buffered = models.BooleanField(default=False, verbose_name="Use ring buffer?", help_text="If True and vcsmode, trigger a Voltage capture using the ring buffer.")
 
     # ATCA setting
+    atca_band_3mm = models.BooleanField(default=False, verbose_name="Use 3mm Band?")
+    atca_band_3mm_freq1 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 1 (MHz)", help_text="The centre of the first frequency channel in MHz.")
+    atca_band_3mm_freq2 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 2 (MHz)", help_text="The centre of the second frequency channel in MHz.")
+    atca_band_7mm = models.BooleanField(default=False, verbose_name="Use 7mm Band?")
+    atca_band_7mm_freq1 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 1 (MHz)", help_text="The centre of the first frequency channel in MHz.")
+    atca_band_7mm_freq2 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 2 (MHz)", help_text="The centre of the second frequency channel in MHz.")
+    atca_band_15mm = models.BooleanField(default=False, verbose_name="Use 15mm Band?")
+    atca_band_15mm_freq1 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 1 (MHz)", help_text="The centre of the first frequency channel in MHz.")
+    atca_band_15mm_freq2 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 2 (MHz)", help_text="The centre of the second frequency channel in MHz.")
+    atca_band_4cm = models.BooleanField(default=False, verbose_name="Use 4cm Band?")
+    atca_band_4cm_freq1 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 1 (MHz)", help_text="The centre of the first frequency channel in MHz.")
+    atca_band_4cm_freq2 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 2 (MHz)", help_text="The centre of the second frequency channel in MHz.")
+    atca_band_16cm = models.BooleanField(default=False, verbose_name="User 16cm Band?")
     atca_freq1 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 1 (MHz)", help_text="The centre of the first frequency channel in MHz.")
     atca_freq2 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 2 (MHz)", help_text="The centre of the second frequency channel in MHz.")
     atca_nobs = models.IntegerField(blank=True, null=True, verbose_name="Number of Observations", help_text="The number of observations to schedule.")
@@ -156,16 +171,18 @@ class Status(models.Model):
 
 class AdminAlerts(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    proposal = models.ForeignKey(ProposalSettings, on_delete=models.CASCADE)
     alert = models.BooleanField(default=True)
     debug = models.BooleanField(default=False)
     approval = models.BooleanField(default=False)
     def __str__(self):
-        return "{}_Alerts".format(self.user)
+        return f"{self.user}_{self.proposal.id}_{self.proposal.telescope}_{self.proposal.project_id}_Alerts"
 
 
 class UserAlerts(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    proposal = models.ForeignKey(ProposalSettings, on_delete=models.CASCADE)
     EMAIL = 0
     SMS = 1
     PHONE_CALL = 2
