@@ -158,12 +158,12 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
     # Make sure they are unique and put each on a new line
     telescopes = ", ".join(list(set(telescopes)))
 
-    # Get all admin alert permissions
-    admin_alerts = AdminAlerts.objects.all()
+    # Get all admin alert permissions for this project
+    admin_alerts = AdminAlerts.objects.filter(proposal=proposal_decision_model.proposal)
     for aa in admin_alerts:
         # Grab user
         user = aa.user
-        user_alerts = UserAlerts.objects.filter(user=user)
+        user_alerts = UserAlerts.objects.filter(user=user, proposal=proposal_decision_model.proposal)
 
         # Send off the alerts of types user defined
         for ua in user_alerts:
