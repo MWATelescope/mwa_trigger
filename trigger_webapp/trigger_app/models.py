@@ -147,6 +147,7 @@ class VOEvent(models.Model):
     ignored = models.BooleanField(default=True)
     source_name = models.CharField(max_length=128, blank=True, null=True)
     source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, null=True)
+    fermi_most_likely_index = models.FloatField(blank=True, null=True)
     fermi_detection_prob = models.FloatField(blank=True, null=True)
     swift_rate_signif = models.FloatField(blank=True, null=True)
 

@@ -227,17 +227,17 @@ def trigger_atca_observation(
 
     # Not below horizon limit so observer
     logger.info(f"Triggering  ATCA at UTC time {Time.now()} ...")
-    trigger_atca(
-        project_id=prop_settings.project_id,
-        secure_key=os.environ['ATCA_SECURE_KEY_FILE'],
-        ra=proposal_decision_model.ra, dec=proposal_decision_model.dec,
-        source=obsname,
-        freqspecs=[prop_settings.atca_freq1, prop_settings.atca_freq2],
-        nobs=prop_settings.atca_nobs,
-        exptime=prop_settings.atca_exptime,
-        calexptime=prop_settings.atca_calexptime,
-        pretend=prop_settings.testing,
-    )
+    # trigger_atca(
+    #     project_id=prop_settings.project_id,
+    #     secure_key=os.environ['ATCA_SECURE_KEY_FILE'],
+    #     ra=proposal_decision_model.ra, dec=proposal_decision_model.dec,
+    #     source=obsname,
+    #     freqspecs=[prop_settings.atca_freq1, prop_settings.atca_freq2],
+    #     nobs=prop_settings.atca_nobs,
+    #     exptime=prop_settings.atca_exptime,
+    #     calexptime=prop_settings.atca_calexptime,
+    #     pretend=prop_settings.testing,
+    # )
     # TODO Check if succesful
 
     # TODO Output the results
