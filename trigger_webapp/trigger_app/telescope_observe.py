@@ -15,27 +15,31 @@ def trigger_observation(proposal_decision_model,
     """Wrap the differente observation functions
     """
     # Check if source is above the horizon
-    # Create Earth location for the telescope
-    telescope = proposal_decision_model.proposal.telescope
-    location = EarthLocation(
-        lon=telescope.lon*u.deg,
-        lat=telescope.lat*u.deg,
-        height=telescope.height*u.m
-    )
-    obs_source = SkyCoord(
-        proposal_decision_model.ra,
-        proposal_decision_model.dec,
-        #equinox='J2000',
-        unit=(u.deg, u.deg)
-    )
-    # Convert from RA/Dec to Alt/Az
-    obs_source_altaz = obs_source.transform_to(AltAz(obstime=Time.now(), location=location))
-    alt = obs_source_altaz.alt.deg
-    logger.debug("Triggered observation at an elevation of {0}".format(alt))
-    if alt < proposal_decision_model.proposal.horizon_limit:
-        horizon_message = f"Not triggering due to horizon limit: alt {alt} < {proposal_decision_model.proposal.horizon_limit}. "
-        logger.debug(horizon_message)
-        return 'I', trigger_message + horizon_message
+    if proposal_decision_model.proposal.telescope.name != "ATCA":
+        # ATCA can schedule obs once the source has risen so does
+        # not need to check if it is above the horizon
+
+        # Create Earth location for the telescope
+        telescope = proposal_decision_model.proposal.telescope
+        location = EarthLocation(
+            lon=telescope.lon*u.deg,
+            lat=telescope.lat*u.deg,
+            height=telescope.height*u.m
+        )
+        obs_source = SkyCoord(
+            proposal_decision_model.ra,
+            proposal_decision_model.dec,
+            #equinox='J2000',
+            unit=(u.deg, u.deg)
+        )
+        # Convert from RA/Dec to Alt/Az
+        obs_source_altaz = obs_source.transform_to(AltAz(obstime=Time.now(), location=location))
+        alt = obs_source_altaz.alt.deg
+        logger.debug("Triggered observation at an elevation of {0}".format(alt))
+        if alt < proposal_decision_model.proposal.horizon_limit:
+            horizon_message = f"Not triggering due to horizon limit: alt {alt} < {proposal_decision_model.proposal.horizon_limit}. "
+            logger.debug(horizon_message)
+            return 'I', trigger_message + horizon_message
 
     # above the horizon so send off telescope specific set ups
     if proposal_decision_model.proposal.telescope.name.startswith("MWA"):
@@ -165,6 +169,12 @@ def trigger_atca_observation(proposal_decision_model,
     prop_settings = proposal_decision_model.proposal
 
     # TODO add any schedule checks or observation parsing here
+
+    # Check if source is in dec ranges the ATCA can not observe
+    if proposal_decision_model.dec > 15.:
+        return 'I', trigger_message + "Source is above a declination of 15 degrees so ATCA can not observe it.\n ", []
+    elif -5. < proposal_decision_model.dec < 5.:
+        return 'I', trigger_message + "Source is within 5 degrees of the equator (which is riddled with satelite RFI) so ATCA will not observe.\n ", []
 
     # Not below horizon limit so observer
     logger.info(f"Triggering  ATCA at UTC time {Time.now()} ...")
