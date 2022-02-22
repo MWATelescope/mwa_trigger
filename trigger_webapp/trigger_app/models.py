@@ -16,6 +16,7 @@ SOURCE_CHOICES = (
     (GW, 'Gravitational wave'),
 )
 
+
 class Telescope(models.Model):
     name = models.CharField(max_length=64, verbose_name="Telescope name", help_text="E.g. MWA_VCS, MWA_correlate or ATCA.", unique=True)
     lon = models.FloatField(verbose_name="Telescope longitude in degrees")
@@ -24,12 +25,20 @@ class Telescope(models.Model):
     def __str__(self):
         return f"{self.name}"
 
+
+class EventTelescope(models.Model):
+    name = models.CharField(max_length=64, verbose_name="Event Telescope name", help_text="Telescope that we receive VOEvents from (e.g. SWIFT or Fermi)", unique=True)
+    def __str__(self):
+        return f"{self.name}"
+
+
 class ProposalSettings(models.Model):
     id = models.AutoField(primary_key=True)
     #telescope = models.CharField(max_length=64, blank=True, null=True, verbose_name="Telescope name", help_text="E.g. MWA_VCS, MWA_correlate or ATCA. If the telescope you want is not here add it on the admin page.")
     telescope = models.ForeignKey(Telescope, to_field="name", verbose_name="Telescope name", help_text="Telescope this proposal will observer with. If the telescope you want is not here add it on the admin page.", on_delete=models.CASCADE)
     project_id = models.CharField(max_length=64, help_text="This will be used to schedule observations.")
     proposal_description = models.CharField(max_length=256, help_text="A brief description of the proposal. Only needs to be enough to distinguish it from the other proposals.")
+    event_telescope = models.ForeignKey(EventTelescope, to_field="name", help_text="The telescope that this proposal will accept at least one VOEvent from before observing. Leave blank if you want to accept all telescopes.", blank=True, null=True, on_delete=models.SET_NULL)
     trig_min_duration = models.FloatField(verbose_name="Min", default=0.256)
     trig_max_duration = models.FloatField(verbose_name="Max", default=1.024)
     pending_min_duration_1 = models.FloatField(verbose_name="Min", default=1.025)

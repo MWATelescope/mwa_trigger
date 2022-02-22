@@ -64,13 +64,8 @@ def group_trigger(sender, instance, **kwargs):
                 prev_trig = trig_event
 
     if trig_exists:
-        # Trigger event already exists so link the new VOEvent
-        # prev_trig = TriggerEvent.objects.get(trigger_id=instance.trigger_id)
-        # For some reason can't update with the instance
-        voevent = VOEvent.objects.filter(trigger_id=instance.trigger_id)
-        voevent.update(trigger_group_id=prev_trig)
-        # instance.trigger_group_id = prev_trig
-        # instance.save()
+        # Trigger event already exists so link the VOEvent (have to update this way to prevent save() triggering this function again)
+        VOEvent.objects.filter(id=instance.id).update(trigger_group_id=prev_trig)
 
         # Loop over all proposals settings and see if it's worth reobserving
         proposal_decisions = ProposalDecision.objects.filter(trigger_group_id=prev_trig)
@@ -102,9 +97,8 @@ def group_trigger(sender, instance, **kwargs):
             earliest_event_observed=instance.event_observed,
             latest_event_observed=instance.event_observed,
         )
-        # Link the VOEvent
-        instance.trigger_group_id = new_trig
-        instance.save()
+        # Link the VOEvent (have to update this way to prevent save() triggering this function again)
+        VOEvent.objects.filter(id=instance.id).update(trigger_group_id=new_trig)
 
         # Loop over settings
         proposal_settings = ProposalSettings.objects.all()
@@ -134,33 +128,39 @@ def proposal_worth_observing(
     ):
     # Defaults if not worth observing
     trigger_bool = debug_bool = pending_bool = False
-    proj_source_bool = False
 
-    # Check if this proposal thinks this event is worth observing
-    if prop_dec.proposal.grb and voevent.source_type == "GRB":
-        # This proposal wants to observe GRBs so check if it is worth observing
-        trigger_bool, debug_bool, pending_bool, trigger_message = worth_observing_grb(
-            # event values
-            trig_duration=voevent.duration,
-            fermi_most_likely_index=voevent.fermi_most_likely_index,
-            fermi_detection_prob=voevent.fermi_detection_prob,
-            swift_rate_signif=voevent.swift_rate_signif,
-            # Thresholds
-            trig_min_duration=prop_dec.proposal.trig_min_duration,
-            trig_max_duration=prop_dec.proposal.trig_max_duration,
-            pending_min_duration_1=prop_dec.proposal.pending_min_duration_1,
-            pending_max_duration_1=prop_dec.proposal.pending_max_duration_1,
-            pending_min_duration_2=prop_dec.proposal.pending_min_duration_2,
-            pending_max_duration_2=prop_dec.proposal.pending_max_duration_2,
-            fermi_min_detection_prob=prop_dec.proposal.fermi_prob,
-            swift_min_rate_signif=prop_dec.proposal.swift_rate_signf,
-        )
-        proj_source_bool = True
-    # TODO set up other source types here
+    if prop_dec.proposal.event_telescope is None or prop_dec.proposal.event_telescope == voevent.telescope:
+        # This project observes events from this telescope
 
-    if not proj_source_bool:
-        # Proposal does not observe this type of source so update message
-        trigger_message += f"This proposal does not observe {voevent.get_source_type_display()}s.\n "
+        # Check if this proposal thinks this event is worth observing
+        proj_source_bool = False
+        if prop_dec.proposal.grb and voevent.source_type == "GRB":
+            # This proposal wants to observe GRBs so check if it is worth observing
+            trigger_bool, debug_bool, pending_bool, trigger_message = worth_observing_grb(
+                # event values
+                trig_duration=voevent.duration,
+                fermi_most_likely_index=voevent.fermi_most_likely_index,
+                fermi_detection_prob=voevent.fermi_detection_prob,
+                swift_rate_signif=voevent.swift_rate_signif,
+                # Thresholds
+                trig_min_duration=prop_dec.proposal.trig_min_duration,
+                trig_max_duration=prop_dec.proposal.trig_max_duration,
+                pending_min_duration_1=prop_dec.proposal.pending_min_duration_1,
+                pending_max_duration_1=prop_dec.proposal.pending_max_duration_1,
+                pending_min_duration_2=prop_dec.proposal.pending_min_duration_2,
+                pending_max_duration_2=prop_dec.proposal.pending_max_duration_2,
+                fermi_min_detection_prob=prop_dec.proposal.fermi_prob,
+                swift_min_rate_signif=prop_dec.proposal.swift_rate_signf,
+            )
+            proj_source_bool = True
+        # TODO set up other source types here
+
+        if not proj_source_bool:
+            # Proposal does not observe this type of source so update message
+            trigger_message += f"This proposal does not observe {voevent.get_source_type_display()}s.\n "
+    else:
+        # Proposal does not observe event from this telescope so update message
+        trigger_message += f"This proposal does not trigger on events from {voevent.telescope}.\n "
 
     if trigger_bool:
         # Check if you can observe and if so send off the observation

@@ -13,6 +13,7 @@ class ProposalSettingsAdmin(admin.ModelAdmin):
                 'telescope',
                 'project_id',
                 'proposal_description',
+                'event_telescope',
                 'repointing_limit',
                 'horizon_limit',
                 'testing',
