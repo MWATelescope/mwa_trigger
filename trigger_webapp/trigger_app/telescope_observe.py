@@ -72,7 +72,7 @@ def trigger_observation(
             telescopes.append(voevent.telescope)
         # Make sure they are unique and seperate with a _
         telescopes = "_".join(list(set(telescopes)))
-        obsname=f'{telescopes}_{proposal_decision_model.trigger_group_id.trigger_id}'
+        obsname=f'{telescopes}_{proposal_decision_model.trigger_id}'
 
         # Check if you can observe and if so send off ATCA observation
         decision, trigger_message, obsids = trigger_mwa_observation(
@@ -92,7 +92,7 @@ def trigger_observation(
             )
     elif proposal_decision_model.proposal.telescope.name == "ATCA":
         # Check if you can observe and if so send off mwa observation
-        obsname=f'{proposal_decision_model.trigger_group_id.trigger_id}'
+        obsname=f'{proposal_decision_model.trigger_id}'
         decision, trigger_message, obsids = trigger_atca_observation(
             proposal_decision_model,
             trigger_message,

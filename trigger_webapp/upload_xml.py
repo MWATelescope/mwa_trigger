@@ -24,6 +24,12 @@ import astropy.units as u
 def write_and_upload(xml_string):
     # Parse
     trig = parsed_VOEvent(None, packet=xml_string)
+    if trig.ra is None or trig.dec is None:
+        raj = None
+        decj = None
+    else:
+        raj = Angle(trig.ra, unit=u.deg).to_string(unit=u.hour, sep=':')
+        decj = Angle(trig.dec, unit=u.deg).to_string(unit=u.deg, sep=':')
 
     # Upload
     session = requests.session()
@@ -38,8 +44,8 @@ def write_and_upload(xml_string):
         'event_type' : trig.event_type,
         'ra' : trig.ra,
         'dec' : trig.dec,
-        'raj' : Angle(trig.ra, unit=u.deg).to_string(unit=u.hour, sep=':'),
-        'decj': Angle(trig.dec, unit=u.deg).to_string(unit=u.deg, sep=':'),
+        'raj' : raj,
+        'decj': decj,
         'pos_error' : trig.err,
         'ignored' : trig.ignore,
         'source_name' : trig.source_name,

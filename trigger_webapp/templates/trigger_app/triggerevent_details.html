@@ -7,12 +7,16 @@
   <h2>Trigger Event ID {{ trigger_event.id }}</h2>
   <table class="table-thin">
     <tr>
-      <td>First Trigger ID</td>
-      <td>{{ trigger_event.trigger_id }}</td>
+      <td>Recieved (UTC)</td>
+      <td>{{ trigger_event.recieved_data }}</td>
     </tr>
     <tr>
-      <td>First Duration (s)</td>
-      <td>{{ trigger_event.duration }}</td>
+      <td>Earliest Event Observed (UTC)</td>
+      <td>{{ trigger_event.earliest_event_observed }}</td>
+    </tr>
+    <tr>
+      <td>Latest Event Observed (UTC)</td>
+      <td>{{ trigger_event.latest_event_observed }}</td>
     </tr>
     <tr>
       <td>Best Right Acension</td>

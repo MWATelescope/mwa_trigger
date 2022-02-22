@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import ProposalDecision, UserAlerts, VOEvent, TriggerEvent, CometLog, Status, AdminAlerts, ProposalSettings, ProposalDecision, Observations
+from .models import UserAlerts, AdminAlerts, VOEvent, TriggerEvent, CometLog, Status, ProposalSettings, ProposalDecision, Observations
 from .telescope_observe import trigger_observation
 
 from mwa_trigger.parse_xml import parsed_VOEvent
@@ -17,6 +17,11 @@ import time
 from schedule import Scheduler
 from subprocess import PIPE, Popen
 from twilio.rest import Client
+import datetime
+from astropy import units as u
+from astropy.coordinates import SkyCoord
+import numpy as np
+from scipy.stats import norm
 
 import logging
 logger = logging.getLogger(__name__)
@@ -34,15 +39,38 @@ def group_trigger(sender, instance, **kwargs):
         # VOEvent ignored so do nothing
         return
 
-    vo = parsed_VOEvent(None, packet=str(instance.xml_packet))
-    # covert ra and dec to HH:MM:SS.SS format
+    # Time range to considered the same event (in seconds)
+    dt = 100
+    early_dt = instance.event_observed - datetime.timedelta(seconds=dt)
+    late_dt = instance.event_observed + datetime.timedelta(seconds=dt)
 
-    if TriggerEvent.objects.filter(trigger_id=instance.trigger_id).exists():
+    # Check if the VOEvent was observed after the earliest event observed - 100s
+    #                               and before the latest event observed + 100s
+    trig_exists = False
+    if TriggerEvent.objects.filter(earliest_event_observed__lt=late_dt,
+                                   latest_event_observed__gt=early_dt).exists():
+        for trig_event in TriggerEvent.objects.filter(earliest_event_observed__lt=late_dt,
+                                                      latest_event_observed__gt=early_dt):
+            # Calculate 95% confidence interval seperation
+            combined_err = np.sqrt(instance.pos_error**2 + trig_event.pos_error**2)
+            c95_sep = norm.interval(0.95, scale=combined_err)[1]
+
+            # Now make sure they're spacially similar
+            event_coord = SkyCoord(ra=instance.ra*u.degree, dec=instance.dec*u.degree)
+            trigger_coord = SkyCoord(ra=trig_event.ra*u.degree, dec=trig_event.dec*u.degree)
+            if event_coord.separation(trigger_coord).deg < c95_sep:
+                # Event is within the 95% confidence interval so consider them the same source/event
+                trig_exists = True
+                prev_trig = trig_event
+
+    if trig_exists:
         # Trigger event already exists so link the new VOEvent
-        prev_trig = TriggerEvent.objects.get(trigger_id=instance.trigger_id)
+        # prev_trig = TriggerEvent.objects.get(trigger_id=instance.trigger_id)
         # For some reason can't update with the instance
         voevent = VOEvent.objects.filter(trigger_id=instance.trigger_id)
         voevent.update(trigger_group_id=prev_trig)
+        # instance.trigger_group_id = prev_trig
+        # instance.save()
 
         # Loop over all proposals settings and see if it's worth reobserving
         proposal_decisions = ProposalDecision.objects.filter(trigger_group_id=prev_trig)
@@ -59,14 +87,20 @@ def group_trigger(sender, instance, **kwargs):
             #elif prop_dec.decision == "T":
                 # TODO put decide when to repoint logic here
 
+        # TODO update the TriggerEvent ra and dec if the position is better.
+        # TODO update latest_event_observed
+
     else:
         # Make a new trigger event
-        new_trig = TriggerEvent.objects.create(trigger_id=instance.trigger_id,
-            duration=instance.duration,
+        new_trig = TriggerEvent.objects.create(
             ra=instance.ra,
             dec=instance.dec,
+            raj=instance.raj,
+            decj=instance.decj,
             pos_error=instance.pos_error,
             source_type=instance.source_type,
+            earliest_event_observed=instance.event_observed,
+            latest_event_observed=instance.event_observed,
         )
         # Link the VOEvent
         instance.trigger_group_id = new_trig
@@ -81,6 +115,7 @@ def group_trigger(sender, instance, **kwargs):
                 #decision_reason=trigger_message,
                 proposal=prop_set,
                 trigger_group_id=new_trig,
+                trigger_id=instance.trigger_id,
                 duration=instance.duration,
                 ra=instance.ra,
                 dec=instance.dec,

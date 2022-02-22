@@ -152,7 +152,7 @@ flowchart TD
   J --> |YES| K{{"Trigger duration between\n {prop_set.trig_min_duration} and {prop_set.trig_max_duration} s"}}
   J --> |NO| END
   K --> |YES| L[Trigger Observation]
-  K --> |NO| M{{"Trigger duration between\n{prop_set.pending_min_duration} and {prop_set.pending_max_duration} s"}}
+  K --> |NO| M{{"Trigger duration between\n{prop_set.pending_min_duration_1} and {prop_set.pending_max_duration_1} s\nor\n{prop_set.pending_min_duration_2} and {prop_set.pending_max_duration_2} s"}}
   M --> |YES| N[Pending a human's decision]
   M --> |NO| END
 subgraph GRB
