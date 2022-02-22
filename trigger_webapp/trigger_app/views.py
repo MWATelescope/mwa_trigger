@@ -132,15 +132,20 @@ def ProposalDecision_result(request, id, decision):
 
 def proposal_decision_path(request, id):
     prop_set = models.ProposalSettings.objects.get(id=id)
-    telescope = "TODO"
+    telescope = prop_set.event_telescope
 
     # Create decision tree flow diagram
     # Set up mermaid javascript
-    mermaid_script = '''
-flowchart TD
-  A(VOEvent) --> B{Is Event from TODO?}
-  B --> |YES| C{"Have we observed\nthis event before?"}
-  B --> |NO| END(Ignore)
+    mermaid_script = "flowchart TD\n"
+    if telescope is None:
+        mermaid_script += '''
+  A(VOEvent) --> C{"Have we observed\nthis event before?"}'''
+    else:
+        mermaid_script += f'''
+  A(VOEvent) --> B{{Is Event from {telescope}?}}
+  B --> |YES| C{{"Have we observed\nthis event before?"}}
+  B --> |NO| END(Ignore)'''
+    mermaid_script += '''
   C --> |YES| D{"Has the position improved\nenough to repoint?"}
   D --> |YES| R(Repoint)
   C --> |NO| E{Source type?}

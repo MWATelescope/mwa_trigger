@@ -20,6 +20,7 @@
       <th>Telescope</th>
       <th>Project ID</th>
       <th>Proposal Description</th>
+      <th>Event Telescope(s)</th>
       <th>Proposal Flow Diagram</th>
       <th>GRB?</th>
       <th>Flare Stars?</th>
@@ -34,6 +35,7 @@
       <td>{{ setting.telescope }}</td>
       <td>{{ setting.project_id }}</td>
       <td>{{ setting.proposal_description }}</td>
+      <td>{% if setting.event_telescope is None %} All {% else %} {{ setting.event_telescope }} {% endif %}</td>
       <td><a href='/proposal_decision_path/{{ setting.id }}/' style="text-decoration:None">View Flow Diagram</a></td>
       <td>{% if setting.grb        %} &#10004; {% endif %}</td>
       <td>{% if setting.flare_star %} &#10004; {% endif %}</td>
