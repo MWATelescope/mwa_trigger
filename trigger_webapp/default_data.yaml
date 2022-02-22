@@ -1,0 +1,33 @@
+- model: trigger_app.Telescope
+  pk: 1
+  fields:
+    name: MWA_VCS
+    lon: 116.671
+    lat: -26.7033
+    height: 377.827
+- model: trigger_app.Telescope
+  pk: 2
+  fields:
+    name: MWA_correlate
+    lon: 116.671
+    lat: -26.7033
+    height: 377.827
+- model: trigger_app.Telescope
+  pk: 3
+  fields:
+    name: ATCA
+    lon: 149.550278
+    lat: -30.312778
+    height: 237.0
+- model: trigger_app.EventTelescope
+  pk: 1
+  fields:
+    name: SWIFT
+- model: trigger_app.EventTelescope
+  pk: 2
+  fields:
+    name: Fermi
+- model: trigger_app.EventTelescope
+  pk: 3
+  fields:
+    name: HESS
