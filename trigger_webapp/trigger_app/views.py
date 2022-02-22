@@ -136,20 +136,20 @@ def proposal_decision_path(request, id):
 
     # Create decision tree flow diagram
     # Set up mermaid javascript
-    mermaid_script = "flowchart TD\n"
+    mermaid_script = '''flowchart TD
+  A(VOEvent) --> B{"Have we observed\nthis event before?"}
+  B --> |YES| D{"Has the position improved\nenough to repoint?"}
+  D --> |YES| R(Repoint)
+  D --> |NO| END(Ignore)'''
     if telescope is None:
         mermaid_script += '''
-  A(VOEvent) --> C{"Have we observed\nthis event before?"}'''
+  B --> |NO| E{Source type?}'''
     else:
         mermaid_script += f'''
-  A(VOEvent) --> B{{Is Event from {telescope}?}}
-  B --> |YES| C{{"Have we observed\nthis event before?"}}
-  B --> |NO| END(Ignore)'''
+  B --> |NO| C{{Is Event from {telescope}?}}
+  C --> |NO| END
+  C --> |YES| E{{Source type?}}'''
     mermaid_script += '''
-  C --> |YES| D{"Has the position improved\nenough to repoint?"}
-  D --> |YES| R(Repoint)
-  C --> |NO| E{Source type?}
-  D --> |NO| END
   E --> F[GRB]'''
     if prop_set.grb:
         mermaid_script += f'''
