@@ -91,11 +91,7 @@ def processevent(event='', pretend=True):
     :return: Boolean, True if this handler processed this event, False to pass it to another handler function.
     """
 
-    if sys.version_info.major == 2:
-        # event arrives as a unicode string but loads requires a non-unicode string.
-        v = voeventparse.loads(str(event))
-    else:
-        v = voeventparse.loads(event.encode())
+    v = voeventparse.loads(event.encode())
     log.info("Working on: %s" % v.attrib['ivorn'])
     isgrb = is_grb(v)
     log.debug("GRB? {0}".format(isgrb))
