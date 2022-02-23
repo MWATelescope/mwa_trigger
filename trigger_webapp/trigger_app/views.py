@@ -134,9 +134,9 @@ def proposal_decision_path(request, id):
 
     # Create decision tree flow diagram
     # Set up mermaid javascript
-    mermaid_script = '''flowchart TD
-  A(VOEvent) --> B{"Have we observed\nthis event before?"}
-  B --> |YES| D{"Has the position improved\nenough to repoint?"}
+    mermaid_script = f'''flowchart TD
+  A(VOEvent) --> B{{"Have we observed\nthis event before?"}}
+  B --> |YES| D{{"Is the new event further away than\nthe repointing limit ({prop_set.repointing_limit} degrees)?"}}
   D --> |YES| R(Repoint)
   D --> |NO| END(Ignore)'''
     if telescope is None:
@@ -166,7 +166,8 @@ subgraph GRB
   N
 end
   style L fill:green,color:white
-  style N fill:orange,color:white'''
+  style N fill:orange,color:white
+  style R fill:#21B6A8,color:white'''
     else:
         mermaid_script += '''
   F[GRB] --> END'''
