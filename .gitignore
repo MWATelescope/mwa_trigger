@@ -6,3 +6,5 @@ tests/_trial_temp/
 .voevent_env/
 settings.json
 trigger_webapp/plantuml.jar
+docs/_*
+trigger_webapp/twistd.pid

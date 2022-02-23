@@ -17,7 +17,6 @@ For an explanation of the MWA frequency specifications please see :ref:`MWA Freq
    :maxdepth: 4
    :caption: mwa_trigger Package:
 
-   handlers_module
    parse_xml_module
    trigger_logic_module
    triggerservice_module
