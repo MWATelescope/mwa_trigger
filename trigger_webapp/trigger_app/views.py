@@ -103,8 +103,6 @@ def ProposalDecision_result(request, id, decision):
         obs_decision, trigger_message = trigger_observation(
             prop_dec,
             f"{prop_dec.decision_reason}User decided to trigger. ",
-            horizion_limit=prop_dec.proposal.horizon_limit,
-            pretend=prop_dec.proposal.testing,
             reason="First Observation",
         )
         if obs_decision == 'E':

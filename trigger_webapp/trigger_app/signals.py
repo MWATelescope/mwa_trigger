@@ -49,6 +49,7 @@ def group_trigger(sender, instance, **kwargs):
     trig_exists = False
     if TriggerEvent.objects.filter(earliest_event_observed__lt=late_dt,
                                    latest_event_observed__gt=early_dt).exists():
+        event_coord = SkyCoord(ra=instance.ra*u.degree, dec=instance.dec*u.degree)
         for trig_event in TriggerEvent.objects.filter(earliest_event_observed__lt=late_dt,
                                                       latest_event_observed__gt=early_dt):
             # Calculate 95% confidence interval seperation
@@ -56,7 +57,6 @@ def group_trigger(sender, instance, **kwargs):
             c95_sep = norm.interval(0.95, scale=combined_err)[1]
 
             # Now make sure they're spacially similar
-            event_coord = SkyCoord(ra=instance.ra*u.degree, dec=instance.dec*u.degree)
             trigger_coord = SkyCoord(ra=trig_event.ra*u.degree, dec=trig_event.dec*u.degree)
             if event_coord.separation(trigger_coord).deg < c95_sep:
                 # Event is within the 95% confidence interval so consider them the same source/event
@@ -75,12 +75,34 @@ def group_trigger(sender, instance, **kwargs):
                 # Update pos
                 prop_dec.ra = instance.ra
                 prop_dec.dec = instance.dec
-                prop_dec.pos_error = instance.pos_error
                 prop_dec.raj = instance.raj
                 prop_dec.decj = instance.decj
-                proposal_worth_observing(prop_dec, instance)
-            #elif prop_dec.decision == "T":
-                # TODO put decide when to repoint logic here
+                prop_dec.pos_error = instance.pos_error
+                proposal_worth_observing(
+                    prop_dec,
+                    instance,
+                    trigger_message=f"{prop_dec.decision_reason}Checking new VOEvent.\n ",
+                )
+            elif prop_dec.decision == "T":
+                # Check new event position is further away than the repointing limit
+                old_event_coord = SkyCoord(ra=prop_dec.ra*u.degree, dec=prop_dec.dec*u.degree)
+                event_sep = event_coord.separation(old_event_coord ).deg
+                if event_sep > prop_dec.proposal.repointing_limit:
+                    # worth repointing
+                    # Update pos
+                    prop_dec.ra = instance.ra
+                    prop_dec.dec = instance.dec
+                    prop_dec.raj = instance.raj
+                    prop_dec.decj = instance.decj
+                    prop_dec.pos_error = instance.pos_error
+                    repoint_message = f"Repointing because seperation ({event_sep} deg) is about the repointing limit ({prop_dec.proposal.repointing_limit} deg)."
+                    proposal_worth_observing(
+                        prop_dec,
+                        instance,
+                        observation_reason=repoint_message,
+                        trigger_message=f"{prop_dec.decision_reason}{repoint_message}\n "
+                    )
+
 
         # TODO update the TriggerEvent ra and dec if the position is better.
         # TODO update latest_event_observed
@@ -124,7 +146,8 @@ def group_trigger(sender, instance, **kwargs):
 def proposal_worth_observing(
         prop_dec,
         voevent,
-        trigger_message=""
+        trigger_message="",
+        observation_reason="First observation."
     ):
     # Defaults if not worth observing
     trigger_bool = debug_bool = pending_bool = False
@@ -151,6 +174,8 @@ def proposal_worth_observing(
                 pending_max_duration_2=prop_dec.proposal.pending_max_duration_2,
                 fermi_min_detection_prob=prop_dec.proposal.fermi_prob,
                 swift_min_rate_signif=prop_dec.proposal.swift_rate_signf,
+                # Other
+                trigger_message=trigger_message,
             )
             proj_source_bool = True
         # TODO set up other source types here
@@ -167,7 +192,7 @@ def proposal_worth_observing(
         decision, trigger_message = trigger_observation(
             prop_dec,
             trigger_message,
-            reason="First Observation",
+            reason=observation_reason,
         )
         if decision == 'E':
             # Error observing so send off debug

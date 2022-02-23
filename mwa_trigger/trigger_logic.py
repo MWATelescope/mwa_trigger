@@ -18,6 +18,8 @@ def worth_observing_grb(
         pending_max_duration_2=2.048,
         fermi_min_detection_prob=50,
         swift_min_rate_signif=0.,
+        # Other
+        trigger_message="",
     ):
     """Decide if a GRB VOEvent is worth observing.
 
@@ -41,6 +43,8 @@ def worth_observing_grb(
         The minimum fermi_detection_prob to trigger or create a pending observation. Default: 50.
     swift_min_rate_signif : `float`, optional
         The minimum swift_rate_signif to trigger or create a pending observation. Default: 0.0.
+    trigger_message : `str`
+        A log of all the decisions made so far so a user can understand why the source was(n't) observed. Default: "".
 
     Returns
     -------
@@ -57,7 +61,6 @@ def worth_observing_grb(
     trigger_bool = False
     debug_bool = False
     pending_bool = False
-    trigger_message = ""
 
     # Check the events likelyhood data
     likely_bool = False

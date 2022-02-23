@@ -149,8 +149,8 @@ def trigger_mwa_observation(
         ra=proposal_decision_model.ra, dec=proposal_decision_model.dec,
         creator='VOEvent_Auto_Trigger', #TODO grab version
         obsname=obsname,
-        nobs=prop_settings.nobs,
-        freqspecs=prop_settings.freqspecs, #Assume always using 24 contiguous coarse frequency channels
+        nobs=prop_settings.mwa_nobs,
+        freqspecs=prop_settings.mwa_freqspecs, #Assume always using 24 contiguous coarse frequency channels
         avoidsun=prop_settings.mwa_avoidsun,
         inttime=prop_settings.mwa_inttime,
         freqres=prop_settings.mwa_freqres,
