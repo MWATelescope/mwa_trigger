@@ -9,6 +9,7 @@
       <tr>
         <th>ID</th>
         <th>Recieved (UTC)</th>
+        <th>Observed (UTC)</th>
         <th>Ignored</th>
         <th>Trigger Group ID</th>
         <th>Telescope</th>
@@ -17,10 +18,12 @@
         <th>Source Name</th>
         <th>Sequence number</th>
         <th>Duration (s)</th>
-        <th>Right Acension (&#176;)</th>
-        <th>Declination (&#176;)</th>
+        <th>Right Acension (HH:MM:SS)</th>
+        <th>Declination (DD:MM:SS)</th>
         <th>Position Error (&#176;)</th>
         <th>Source Type</th>
+        <th>Fermi Detection Probability (%)</th>
+        <th>SWIFT Rate Significance (sigma)</th>
         <th>XML File</th>
       </tr>
     </thead>
@@ -34,6 +37,7 @@
     {% endif %}
       <td>{{ object.id }}</td>
       <td>{{ object.recieved_data }}</td>
+      <td>{{ object.event_observed }}</td>
       <td>{{ object.ignored }}</td>
       {% if object.trigger_group_id is None %}
         <!-- Don't make a link because there is no trigger event -->
@@ -47,10 +51,12 @@
       <td>{% if object.source_name  is not None %} {{ object.source_name }}  {% endif %}</td>
       <td>{% if object.sequence_num is not None %} {{ object.sequence_num }} {% endif %}</td>
       <td>{% if object.duration     is not None %} {{ object.duration }}     {% endif %}</td>
-      <td>{% if object.ra           is not None %} {{ object.ra }}           {% endif %}</td>
-      <td>{% if object.dec          is not None %} {{ object.dec }}          {% endif %}</td>
+      <td>{% if object.ra_hms          is not None %} {{ object.ra_hms }}          {% endif %}</td>
+      <td>{% if object.dec_dms         is not None %} {{ object.dec_dms }}         {% endif %}</td>
       <td>{% if object.pos_error    is not None %} {{ object.pos_error }}    {% endif %}</td>
       <td>{% if object.source_type  is not None %} {{ object.get_source_type_display }}  {% endif %}</td>
+      <td>{% if object.fermi_detection_prob is not None %} {{ object.fermi_detection_prob }}  {% endif %}</td>
+      <td>{% if object.swift_rate_signif    is not None %} {{ object.swift_rate_signif    }}  {% endif %}</td>
       <!-- <td>{{ object.xml }}</td> -->
       <td><a href="/voevent_view/{{ object.id }}" style="text-decoration:None">View xml</a></td>
     </tr>

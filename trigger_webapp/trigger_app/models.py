@@ -16,6 +16,7 @@ SOURCE_CHOICES = (
     (GW, 'Gravitational wave'),
 )
 
+
 class Telescope(models.Model):
     name = models.CharField(max_length=64, verbose_name="Telescope name", help_text="E.g. MWA_VCS, MWA_correlate or ATCA.", unique=True)
     lon = models.FloatField(verbose_name="Telescope longitude in degrees")
@@ -24,20 +25,30 @@ class Telescope(models.Model):
     def __str__(self):
         return f"{self.name}"
 
+
+class EventTelescope(models.Model):
+    name = models.CharField(max_length=64, verbose_name="Event Telescope name", help_text="Telescope that we receive VOEvents from (e.g. SWIFT or Fermi)", unique=True)
+    def __str__(self):
+        return f"{self.name}"
+
+
 class ProposalSettings(models.Model):
     id = models.AutoField(primary_key=True)
     #telescope = models.CharField(max_length=64, blank=True, null=True, verbose_name="Telescope name", help_text="E.g. MWA_VCS, MWA_correlate or ATCA. If the telescope you want is not here add it on the admin page.")
     telescope = models.ForeignKey(Telescope, to_field="name", verbose_name="Telescope name", help_text="Telescope this proposal will observer with. If the telescope you want is not here add it on the admin page.", on_delete=models.CASCADE)
-    project_id = models.CharField(max_length=64, blank=True, null=True, help_text="This will be used to schedule observations.")
-    proposal_description = models.CharField(max_length=256, blank=True, null=True, help_text="A brief description of the proposal. Only needs to be enough to distinguish it from the other proposals.")
-    trig_min_duration = models.FloatField(blank=True, null=True, verbose_name="Min")
-    trig_max_duration = models.FloatField(blank=True, null=True, verbose_name="Max")
-    pending_min_duration = models.FloatField(blank=True, null=True, verbose_name="Min")
-    pending_max_duration = models.FloatField(blank=True, null=True, verbose_name="Max")
-    fermi_prob = models.FloatField(blank=True, null=True, help_text="The minimum probability to observe for Fermi sources (it appears to be a percentage, e.g. 50).")
-    swift_rate_signf = models.FloatField(blank=True, null=True, help_text="The minimum \"RATE_SIGNIF\" (appears to be a signal-to-noise ratio) to observe for SWIFT sources (in sigma).")
-    repointing_limit = models.FloatField(blank=True, null=True, help_text="An updated position must be at least this far away from a current observation before repointing (in degrees).")
-    horizon_limit = models.FloatField(blank=True, null=True, help_text="The minimum elevation of the source to observe (in degrees).")
+    project_id = models.CharField(max_length=64, help_text="This will be used to schedule observations.")
+    proposal_description = models.CharField(max_length=256, help_text="A brief description of the proposal. Only needs to be enough to distinguish it from the other proposals.")
+    event_telescope = models.ForeignKey(EventTelescope, to_field="name", help_text="The telescope that this proposal will accept at least one VOEvent from before observing. Leave blank if you want to accept all telescopes.", blank=True, null=True, on_delete=models.SET_NULL)
+    trig_min_duration = models.FloatField(verbose_name="Min", default=0.256)
+    trig_max_duration = models.FloatField(verbose_name="Max", default=1.024)
+    pending_min_duration_1 = models.FloatField(verbose_name="Min", default=1.025)
+    pending_max_duration_1 = models.FloatField(verbose_name="Max", default=2.056)
+    pending_min_duration_2 = models.FloatField(verbose_name="Min", default=0.128)
+    pending_max_duration_2 = models.FloatField(verbose_name="Max", default=0.255)
+    fermi_prob = models.FloatField(help_text="The minimum probability to observe for Fermi sources (it appears to be a percentage, e.g. 50).", default=50)
+    swift_rate_signf = models.FloatField(help_text="The minimum \"RATE_SIGNIF\" (appears to be a signal-to-noise ratio) to observe for SWIFT sources (in sigma).", default=0.)
+    repointing_limit = models.FloatField(help_text="An updated position must be at least this far away from a current observation before repointing (in degrees).", default=10.)
+    horizon_limit = models.FloatField(help_text="The minimum elevation of the source to observe (in degrees).", default=10.)
     testing = models.BooleanField(default=False, help_text="If testing, will not schedule any observations.")
     grb = models.BooleanField(default=False, verbose_name="Observe Gamma-ray Bursts?")
     flare_star = models.BooleanField(default=False, verbose_name="Observe Flare Stars?")
@@ -82,10 +93,12 @@ class ProposalSettings(models.Model):
 
 class TriggerEvent(models.Model):
     id = models.AutoField(primary_key=True)
-    trigger_id = models.IntegerField(blank=True, null=True)
-    duration = models.FloatField(blank=True, null=True)
+    earliest_event_observed = models.DateTimeField(blank=True, null=True)
+    latest_event_observed = models.DateTimeField(blank=True, null=True)
     ra = models.FloatField(blank=True, null=True)
     dec = models.FloatField(blank=True, null=True)
+    ra_hms = models.CharField(max_length=64, blank=True, null=True)
+    dec_dms = models.CharField(max_length=64, blank=True, null=True)
     pos_error = models.FloatField(blank=True, null=True)
     recieved_data = models.DateTimeField(auto_now_add=True, blank=True)
     source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, null=True)
@@ -113,11 +126,12 @@ class ProposalDecision(models.Model):
     decision_reason = models.CharField(max_length=2056, blank=True, null=True)
     proposal = models.ForeignKey(ProposalSettings, on_delete=models.SET_NULL, blank=True, null=True)
     trigger_group_id = models.ForeignKey(TriggerEvent, on_delete=models.SET_NULL, blank=True, null=True)
+    trigger_id = models.IntegerField(blank=True, null=True)
     duration = models.FloatField(blank=True, null=True)
     ra = models.FloatField(blank=True, null=True)
     dec = models.FloatField(blank=True, null=True)
-    raj = models.CharField(max_length=32, blank=True, null=True)
-    decj = models.CharField(max_length=32, blank=True, null=True)
+    ra_hms = models.CharField(max_length=32, blank=True, null=True)
+    dec_dms = models.CharField(max_length=32, blank=True, null=True)
     pos_error = models.FloatField(blank=True, null=True)
     recieved_data = models.DateTimeField(auto_now_add=True, blank=True)
 
@@ -138,12 +152,18 @@ class VOEvent(models.Model):
     duration = models.FloatField(blank=True, null=True)
     ra = models.FloatField(blank=True, null=True)
     dec = models.FloatField(blank=True, null=True)
+    ra_hms = models.CharField(max_length=64, blank=True, null=True)
+    dec_dms = models.CharField(max_length=64, blank=True, null=True)
     pos_error = models.FloatField(blank=True, null=True)
     recieved_data = models.DateTimeField(auto_now_add=True, blank=True)
+    event_observed = models.DateTimeField(blank=True, null=True)
     xml_packet = models.CharField(max_length=10000)
     ignored = models.BooleanField(default=True)
     source_name = models.CharField(max_length=128, blank=True, null=True)
     source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, null=True)
+    fermi_most_likely_index = models.FloatField(blank=True, null=True)
+    fermi_detection_prob = models.FloatField(blank=True, null=True)
+    swift_rate_signif = models.FloatField(blank=True, null=True)
 
     class Meta:
         ordering = ['-id']

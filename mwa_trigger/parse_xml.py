@@ -108,13 +108,14 @@ class parsed_VOEvent:
         self.ra = None
         self.dec = None
         self.err = None
-        self.most_likely_index = None
-        self.detect_prob = None
-        self.rate_signif = None
+        self.fermi_most_likely_index = None
+        self.fermi_detection_prob = None
+        self.swift_rate_signif = None
         self.grb_ident = None
         self.telescope = None
         self.source_name = None
         self.source_type = None
+        self.event_observed = None
         if self.trig_pairs is None:
             # use defaults
             self.trig_pairs = [
@@ -172,10 +173,10 @@ class parsed_VOEvent:
                 v.find(".//Param[@name='Sequence_Num']").attrib["value"]
             )
             # Fermi triggers have likely hood statistics
-            self.most_likely_index = int(
+            self.fermi_most_likely_index = int(
                 v.find(".//Param[@name='Most_Likely_Index']").attrib["value"]
             )
-            self.detect_prob = int(
+            self.fermi_detection_prob = int(
                 v.find(".//Param[@name='Most_Likely_Prob']").attrib["value"]
             )
         elif self.telescope == "SWIFT":
@@ -200,7 +201,7 @@ class parsed_VOEvent:
                     v.find(".//Param[@name='Integ_Time']").attrib["value"]
                 )
                 self.sequence_num = None
-                self.rate_signif = float(
+                self.swift_rate_signif = float(
                     v.find(".//Param[@name='Rate_Signif']").attrib["value"]
                 )
                 self.grb_ident = v.find(".//Param[@name='GRB_Identified']").attrib["value"]
@@ -209,6 +210,7 @@ class parsed_VOEvent:
             self.trig_duration = None
             self.sequence_num = None
 
+        self.event_observed = v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Time.TimeInstant.ISOTime
         # print(voeventparse.prettystr(v.What))
         self.trig_id = int(v.find(".//Param[@name='TrigID']").attrib["value"])
         logger.debug("Trig details:")

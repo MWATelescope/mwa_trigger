@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import ProposalDecision, UserAlerts, VOEvent, TriggerEvent, CometLog, Status, AdminAlerts, ProposalSettings, ProposalDecision, Observations
+from .models import UserAlerts, AdminAlerts, VOEvent, TriggerEvent, CometLog, Status, ProposalSettings, ProposalDecision, Observations
 from .telescope_observe import trigger_observation
 
 from mwa_trigger.parse_xml import parsed_VOEvent
@@ -17,8 +17,11 @@ import time
 from schedule import Scheduler
 from subprocess import PIPE, Popen
 from twilio.rest import Client
-from astropy.coordinates import SkyCoord
+import datetime
 from astropy import units as u
+from astropy.coordinates import SkyCoord
+import numpy as np
+from scipy.stats import norm
 
 import logging
 logger = logging.getLogger(__name__)
@@ -32,99 +35,178 @@ def group_trigger(sender, instance, **kwargs):
     """Check if the latest VOEvent has already been observered or if it is new and update the models accordingly
     """
     # instance is the new VOEvent
-    if not instance.ignored:
-        vo = parsed_VOEvent(None, packet=str(instance.xml_packet))
-        # covert ra and dec to HH:MM:SS.SS format
-        c = SkyCoord( instance.ra, instance.dec, frame='icrs', unit=(u.deg,u.deg))
-        raj = c.ra.to_string(unit=u.hour, sep=':')
-        decj = c.dec.to_string(unit=u.degree, sep=':')
+    if instance.ignored:
+        # VOEvent ignored so do nothing
+        return
 
-        if TriggerEvent.objects.filter(trigger_id=instance.trigger_id).exists():
-            # Trigger event already exists so link the new VOEvent
-            prev_trig = TriggerEvent.objects.get(trigger_id=instance.trigger_id)
-            # For some reason can't update with the instance
-            voevent = VOEvent.objects.filter(trigger_id=instance.trigger_id)
-            voevent.update(trigger_group_id=prev_trig)
+    # Time range to considered the same event (in seconds)
+    dt = 100
+    early_dt = instance.event_observed - datetime.timedelta(seconds=dt)
+    late_dt = instance.event_observed + datetime.timedelta(seconds=dt)
 
-            # Loop over all proposals settings and see if it's worth reobserving
-            proposal_decisions = ProposalDecision.objects.filter(trigger_group_id=prev_trig)
-            for prop_dec in proposal_decisions:
-                if prop_dec.decision == "I":
-                    # Previous events were ignored, check if this new one is up to our standards
+    # Check if the VOEvent was observed after the earliest event observed - 100s
+    #                               and before the latest event observed + 100s
+    trig_exists = False
+    if TriggerEvent.objects.filter(earliest_event_observed__lt=late_dt,
+                                   latest_event_observed__gt=early_dt).exists():
+        event_coord = SkyCoord(ra=instance.ra*u.degree, dec=instance.dec*u.degree)
+        for trig_event in TriggerEvent.objects.filter(earliest_event_observed__lt=late_dt,
+                                                      latest_event_observed__gt=early_dt):
+            # Calculate 95% confidence interval seperation
+            combined_err = np.sqrt(instance.pos_error**2 + trig_event.pos_error**2)
+            c95_sep = norm.interval(0.95, scale=combined_err)[1]
+
+            # Now make sure they're spacially similar
+            trigger_coord = SkyCoord(ra=trig_event.ra*u.degree, dec=trig_event.dec*u.degree)
+            if event_coord.separation(trigger_coord).deg < c95_sep:
+                # Event is within the 95% confidence interval so consider them the same source/event
+                trig_exists = True
+                prev_trig = trig_event
+
+    if trig_exists:
+        # Trigger event already exists so link the VOEvent (have to update this way to prevent save() triggering this function again)
+        VOEvent.objects.filter(id=instance.id).update(trigger_group_id=prev_trig)
+
+        # Loop over all proposals settings and see if it's worth reobserving
+        proposal_decisions = ProposalDecision.objects.filter(trigger_group_id=prev_trig)
+        for prop_dec in proposal_decisions:
+            if prop_dec.decision == "I":
+                # Previous events were ignored, check if this new one is up to our standards
+                # Update pos
+                prop_dec.ra = instance.ra
+                prop_dec.dec = instance.dec
+                prop_dec.ra_hms = instance.ra_hms
+                prop_dec.dec_dms = instance.dec_dms
+                prop_dec.pos_error = instance.pos_error
+                proposal_worth_observing(
+                    prop_dec,
+                    instance,
+                    trigger_message=f"{prop_dec.decision_reason}Checking new VOEvent.\n ",
+                )
+            elif prop_dec.decision == "T":
+                # Check new event position is further away than the repointing limit
+                old_event_coord = SkyCoord(ra=prop_dec.ra*u.degree, dec=prop_dec.dec*u.degree)
+                event_sep = event_coord.separation(old_event_coord ).deg
+                if event_sep > prop_dec.proposal.repointing_limit:
+                    # worth repointing
                     # Update pos
                     prop_dec.ra = instance.ra
                     prop_dec.dec = instance.dec
+                    prop_dec.ra_hms = instance.ra_hms
+                    prop_dec.dec_dms = instance.dec_dms
                     prop_dec.pos_error = instance.pos_error
-                    prop_dec.raj = raj
-                    prop_dec.decj = decj
-                    proposal_worth_observing(prop_dec, vo, instance)
-                #elif prop_dec.decision == "T":
-                    # TODO put decide when to repoint logic here
+                    repoint_message = f"Repointing because seperation ({event_sep} deg) is greater than the repointing limit ({prop_dec.proposal.repointing_limit} deg)."
+                    proposal_worth_observing(
+                        prop_dec,
+                        instance,
+                        observation_reason=repoint_message,
+                        trigger_message=f"{prop_dec.decision_reason}{repoint_message}\n "
+                    )
 
-        else:
-            # Make a new trigger event
-            new_trig = TriggerEvent.objects.create(trigger_id=instance.trigger_id,
+
+        # TODO update the TriggerEvent ra and dec if the position is better.
+        # TODO update latest_event_observed
+
+    else:
+        # Make a new trigger event
+        new_trig = TriggerEvent.objects.create(
+            ra=instance.ra,
+            dec=instance.dec,
+            ra_hms=instance.ra_hms,
+            dec_dms=instance.dec_dms,
+            pos_error=instance.pos_error,
+            source_type=instance.source_type,
+            earliest_event_observed=instance.event_observed,
+            latest_event_observed=instance.event_observed,
+        )
+        # Link the VOEvent (have to update this way to prevent save() triggering this function again)
+        VOEvent.objects.filter(id=instance.id).update(trigger_group_id=new_trig)
+
+        # Loop over settings
+        proposal_settings = ProposalSettings.objects.all()
+        for prop_set in proposal_settings:
+            # Create a ProposalDecision object to record what each proposal does
+            prop_dec = ProposalDecision.objects.create(
+                #decision=decision,
+                #decision_reason=trigger_message,
+                proposal=prop_set,
+                trigger_group_id=new_trig,
+                trigger_id=instance.trigger_id,
                 duration=instance.duration,
                 ra=instance.ra,
                 dec=instance.dec,
+                ra_hms=instance.ra_hms,
+                dec_dms=instance.dec_dms,
                 pos_error=instance.pos_error,
-                source_type=instance.source_type,
             )
-            # Link the VOEvent
-            instance.trigger_group_id = new_trig
-            instance.save()
-
-            # Loop over settings
-            proposal_settings = ProposalSettings.objects.all()
-            for prop_set in proposal_settings:
-                # Create a ProposalDecision object to record what each proposal does
-                prop_dec = ProposalDecision.objects.create(
-                    #decision=decision,
-                    #decision_reason=trigger_message,
-                    proposal=prop_set,
-                    trigger_group_id=new_trig,
-                    duration=instance.duration,
-                    ra=instance.ra,
-                    dec=instance.dec,
-                    raj=raj,
-                    decj=decj,
-                    pos_error=instance.pos_error,
-                )
-                # Check if it's worth triggering an obs
-                proposal_worth_observing(prop_dec, vo, instance)
+            # Check if it's worth triggering an obs
+            proposal_worth_observing(prop_dec, instance)
 
 
-def proposal_worth_observing(prop_dec, vo, voevent,
-                            trigger_message=""):
+def proposal_worth_observing(
+        prop_dec,
+        voevent,
+        trigger_message="",
+        observation_reason="First observation."
+    ):
+    """For a proposal sees is this voevent is worth observing. If it is will trigger an observation and send off the relevant alerts.
+
+    Parameters
+    ----------
+    prop_dec : `django.db.models.Model`
+        The Django ProposalDecision model object.
+    voevent : `django.db.models.Model`
+        The Django VOEvent model object.
+    trigger_message : `str`, optional
+        A log of all the decisions made so far so a user can understand why the source was(n't) observed. Default: "".
+    observation_reason : `str`, optional
+        The reason for this observation. The default is "First Observation" but other potential reasons are "Repointing".
+    """
+
     # Defaults if not worth observing
     trigger_bool = debug_bool = pending_bool = False
-    proj_source_bool = False
 
-    # Check if this proposal thinks this event is worth observing
-    if prop_dec.proposal.grb and voevent.source_type == "GRB":
-        # This proposal wants to observe GRBs so check if it is worth observing
-        trigger_bool, debug_bool, pending_bool, trigger_message = worth_observing_grb(
-            vo,
-            trig_min_duration=prop_dec.proposal.trig_min_duration,
-            trig_max_duration=prop_dec.proposal.trig_max_duration,
-            pending_min_duration=prop_dec.proposal.pending_min_duration,
-            pending_max_duration=prop_dec.proposal.pending_max_duration,
-            fermi_prob=prop_dec.proposal.fermi_prob,
-            rate_signif=prop_dec.proposal.swift_rate_signf,
-        )
-        proj_source_bool = True
-    # TODO set up other source types here
+    if prop_dec.proposal.event_telescope is None or prop_dec.proposal.event_telescope == voevent.telescope:
+        # This project observes events from this telescope
 
-    if not proj_source_bool:
-        # Proposal does not observe this type of source so update message
-        trigger_message += f"This proposal does not observe {voevent.get_source_type_display()}s.\n "
+        # Check if this proposal thinks this event is worth observing
+        proj_source_bool = False
+        if prop_dec.proposal.grb and voevent.source_type == "GRB":
+            # This proposal wants to observe GRBs so check if it is worth observing
+            trigger_bool, debug_bool, pending_bool, trigger_message = worth_observing_grb(
+                # event values
+                trig_duration=voevent.duration,
+                fermi_most_likely_index=voevent.fermi_most_likely_index,
+                fermi_detection_prob=voevent.fermi_detection_prob,
+                swift_rate_signif=voevent.swift_rate_signif,
+                # Thresholds
+                trig_min_duration=prop_dec.proposal.trig_min_duration,
+                trig_max_duration=prop_dec.proposal.trig_max_duration,
+                pending_min_duration_1=prop_dec.proposal.pending_min_duration_1,
+                pending_max_duration_1=prop_dec.proposal.pending_max_duration_1,
+                pending_min_duration_2=prop_dec.proposal.pending_min_duration_2,
+                pending_max_duration_2=prop_dec.proposal.pending_max_duration_2,
+                fermi_min_detection_prob=prop_dec.proposal.fermi_prob,
+                swift_min_rate_signif=prop_dec.proposal.swift_rate_signf,
+                # Other
+                trigger_message=trigger_message,
+            )
+            proj_source_bool = True
+        # TODO set up other source types here
+
+        if not proj_source_bool:
+            # Proposal does not observe this type of source so update message
+            trigger_message += f"This proposal does not observe {voevent.get_source_type_display()}s.\n "
+    else:
+        # Proposal does not observe event from this telescope so update message
+        trigger_message += f"This proposal does not trigger on events from {voevent.telescope}.\n "
 
     if trigger_bool:
         # Check if you can observe and if so send off the observation
         decision, trigger_message = trigger_observation(
             prop_dec,
             trigger_message,
-            reason="First Observation",
+            reason=observation_reason,
         )
         if decision == 'E':
             # Error observing so send off debug
@@ -199,8 +281,8 @@ def send_alert_type(alert_type, address, subject, message_type_text, proposal_de
 
 Event Details are:
 Duration:    {proposal_decision_model.duration}
-RA:          {proposal_decision_model.raj} hours
-Dec:         {proposal_decision_model.decj} deg
+RA:          {proposal_decision_model.ra_hms} hours
+Dec:         {proposal_decision_model.dec_dms} deg
 Error Rad:   {proposal_decision_model.pos_error} deg
 Detected by: {telescopes}
 

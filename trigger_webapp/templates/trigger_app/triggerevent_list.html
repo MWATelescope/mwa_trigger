@@ -9,8 +9,8 @@
     <tr>
       <th>ID</th>
       <th>Recieved (UTC)</th>
-      <th>Trigger ID</th>
-      <th>Duration (s)</th>
+      <th>Earliest Event Observed (UTC)</th>
+      <th>Latest Event Observed (UTC)</th>
       <th>Right Acension (&#176;)</th>
       <th>Declination (&#176;)</th>
       <th>Position Error (&#176;)</th>
@@ -22,8 +22,8 @@
     <tr>
       <td><a href="/triggerevent_details/{{ object.id }}/" style="text-decoration:None">{{ object.id }}</a></td>
       <td>{{ object.recieved_data }}</td>
-      <td>{{ object.trigger_id }}</td>
-      <td>{{ object.duration }}</td>
+      <td>{{ object.earliest_event_observed }}</td>
+      <td>{{ object.latest_event_observed }}</td>
       <td>{{ object.ra }}</td>
       <td>{{ object.dec }}</td>
       <td>{{ object.pos_error }}</td>
