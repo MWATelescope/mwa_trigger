@@ -21,7 +21,4 @@ python:
     - requirements: docs/requirements.txt
     - method: pip
       path: .
-    - method: pip
-      path: git+https://github.com/ste616/cabb-schedule-api.git#subdirectory=python
-    - method: pip
-      path: git+https://github.com/ste616/atca-rapid-response-api.git#subdirectory=python
+    - requirements: requirements.txt
