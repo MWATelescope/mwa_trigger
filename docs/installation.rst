@@ -1,4 +1,3 @@
-.. _freq_spec:
 Installation
 ============
 
@@ -30,6 +29,9 @@ To run the web application, you will need to set the following environment varia
    "MWA_SECURE_KEY", "This a project dependent secure key to schedule MWA observations. Contact the MWA operations team to receive one."
    "ATCA_SECURE_KEY_FILE", "This a project dependent secure key file to schedule ATCA observations. Contact the ATCA operations team to receive one."
 
+
+.. _create_database:
+
 Start the Postgres Database
 ---------------------------
 
@@ -57,3 +59,19 @@ These commands will set up a superuser account.
    python manage.py makemigrations
    python manage.py migrate --run-syncdb
    python manage.py createsuperuser
+
+
+Delete Postgres Database
+------------------------
+
+Only do this is you want to restart the database!
+
+To delete the database use the following commands
+
+.. code-block::
+
+   sudo -u Postgres psql
+
+   DROP DATABASE trigger_db;
+
+You will then have to recreate the database using the commands in :ref:`create_database`
