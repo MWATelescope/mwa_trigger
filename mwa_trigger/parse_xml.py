@@ -133,6 +133,7 @@ class parsed_VOEvent:
         if self.packet is None:
             with open(self.xml, "rb") as f:
                 v = voeventparse.load(f)
+            self.packet = voeventparse.prettystr(v)
         else:
             v = voeventparse.loads(self.packet.encode())
 
