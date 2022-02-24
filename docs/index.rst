@@ -27,6 +27,14 @@ with the MWA and ATCA.
 
 .. toctree::
    :maxdepth: 4
+   :caption: Trigger Logic:
+
+   grb
+   event_telescopes
+
+
+.. toctree::
+   :maxdepth: 4
    :caption: mwa_trigger Package:
 
    parse_xml_module

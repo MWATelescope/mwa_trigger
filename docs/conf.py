@@ -39,6 +39,7 @@ extensions = [
     'sphinx.ext.githubpages',
     'numpydoc',
     'sphinx_automodapi.automodapi',
+    'sphinxcontrib.mermaid',
 ]
 numpydoc_show_class_members = False
 
