@@ -1,3 +1,5 @@
+.. _proposals:
+
 Creating a New Proposal
 =======================
 

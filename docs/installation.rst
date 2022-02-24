@@ -13,7 +13,7 @@ Then install the python requirements (recommended in its own virtual environment
    pip install -r trigger_webapp/requirements.txt
 
 Environment Variables
---------------------
+---------------------
 
 To run the web application, you will need to set the following environment variables:
 
