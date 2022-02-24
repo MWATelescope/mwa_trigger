@@ -39,10 +39,10 @@ The following commands will set up the Postgres database for the web app. Replac
 
 .. code-block::
 
-   sudo -u Postgres psql
+   sudo -u postgres psql
 
    CREATE DATABASE trigger_db;
-   CREATE USER $DB_USER WITH ENCRYPTED PASSWORD "$DB_PASSWORD";
+   CREATE USER $DB_USER WITH ENCRYPTED PASSWORD '$DB_PASSWORD';
 
    ALTER ROLE $DB_USER SET client_encoding TO 'utf8';
    ALTER ROLE $DB_USER SET default_transaction_isolation TO 'read committed';
@@ -70,7 +70,7 @@ To delete the database use the following commands
 
 .. code-block::
 
-   sudo -u Postgres psql
+   sudo -u postgres psql
 
    DROP DATABASE trigger_db;
 
