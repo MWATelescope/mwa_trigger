@@ -95,7 +95,7 @@ def group_trigger(sender, instance, **kwargs):
                     prop_dec.ra_hms = instance.ra_hms
                     prop_dec.dec_dms = instance.dec_dms
                     prop_dec.pos_error = instance.pos_error
-                    repoint_message = f"Repointing because seperation ({event_sep} deg) is about the repointing limit ({prop_dec.proposal.repointing_limit} deg)."
+                    repoint_message = f"Repointing because seperation ({event_sep} deg) is greater than the repointing limit ({prop_dec.proposal.repointing_limit} deg)."
                     proposal_worth_observing(
                         prop_dec,
                         instance,
