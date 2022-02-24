@@ -72,7 +72,7 @@ def trigger_observation(
             telescopes.append(voevent.telescope)
         # Make sure they are unique and seperate with a _
         telescopes = "_".join(list(set(telescopes)))
-        obsname=f'{telescopes}_{proposal_decision_model.trigger_group_id.trigger_id}'
+        obsname=f'{telescopes}_{proposal_decision_model.trigger_id}'
 
         # Check if you can observe and if so send off ATCA observation
         decision, trigger_message, obsids = trigger_mwa_observation(
@@ -92,7 +92,7 @@ def trigger_observation(
             )
     elif proposal_decision_model.proposal.telescope.name == "ATCA":
         # Check if you can observe and if so send off mwa observation
-        obsname=f'{proposal_decision_model.trigger_group_id.trigger_id}'
+        obsname=f'{proposal_decision_model.trigger_id}'
         decision, trigger_message, obsids = trigger_atca_observation(
             proposal_decision_model,
             trigger_message,
@@ -149,8 +149,8 @@ def trigger_mwa_observation(
         ra=proposal_decision_model.ra, dec=proposal_decision_model.dec,
         creator='VOEvent_Auto_Trigger', #TODO grab version
         obsname=obsname,
-        nobs=prop_settings.nobs,
-        freqspecs=prop_settings.freqspecs, #Assume always using 24 contiguous coarse frequency channels
+        nobs=prop_settings.mwa_nobs,
+        freqspecs=prop_settings.mwa_freqspecs, #Assume always using 24 contiguous coarse frequency channels
         avoidsun=prop_settings.mwa_avoidsun,
         inttime=prop_settings.mwa_inttime,
         freqres=prop_settings.mwa_freqres,
@@ -227,17 +227,17 @@ def trigger_atca_observation(
 
     # Not below horizon limit so observer
     logger.info(f"Triggering  ATCA at UTC time {Time.now()} ...")
-    trigger_atca(
-        project_id=prop_settings.project_id,
-        secure_key=os.environ['ATCA_SECURE_KEY_FILE'],
-        ra=proposal_decision_model.ra, dec=proposal_decision_model.dec,
-        source=obsname,
-        freqspecs=[prop_settings.atca_freq1, prop_settings.atca_freq2],
-        nobs=prop_settings.atca_nobs,
-        exptime=prop_settings.atca_exptime,
-        calexptime=prop_settings.atca_calexptime,
-        pretend=prop_settings.testing,
-    )
+    # trigger_atca(
+    #     project_id=prop_settings.project_id,
+    #     secure_key=os.environ['ATCA_SECURE_KEY_FILE'],
+    #     ra=proposal_decision_model.ra, dec=proposal_decision_model.dec,
+    #     source=obsname,
+    #     freqspecs=[prop_settings.atca_freq1, prop_settings.atca_freq2],
+    #     nobs=prop_settings.atca_nobs,
+    #     exptime=prop_settings.atca_exptime,
+    #     calexptime=prop_settings.atca_calexptime,
+    #     pretend=prop_settings.testing,
+    # )
     # TODO Check if succesful
 
     # TODO Output the results

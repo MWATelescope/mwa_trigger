@@ -103,8 +103,6 @@ def ProposalDecision_result(request, id, decision):
         obs_decision, trigger_message = trigger_observation(
             prop_dec,
             f"{prop_dec.decision_reason}User decided to trigger. ",
-            horizion_limit=prop_dec.proposal.horizon_limit,
-            pretend=prop_dec.proposal.testing,
             reason="First Observation",
         )
         if obs_decision == 'E':
@@ -132,19 +130,24 @@ def ProposalDecision_result(request, id, decision):
 
 def proposal_decision_path(request, id):
     prop_set = models.ProposalSettings.objects.get(id=id)
-    telescope = "TODO"
+    telescope = prop_set.event_telescope
 
     # Create decision tree flow diagram
     # Set up mermaid javascript
-    mermaid_script = '''
-flowchart TD
-  A(VOEvent) --> B{Is Event from TODO?}
-  B --> |YES| C{"Have we observed\nthis event before?"}
-  B --> |NO| END(Ignore)
-  C --> |YES| D{"Has the position improved\nenough to repoint?"}
+    mermaid_script = f'''flowchart TD
+  A(VOEvent) --> B{{"Have we observed\nthis event before?"}}
+  B --> |YES| D{{"Is the new event further away than\nthe repointing limit ({prop_set.repointing_limit} degrees)?"}}
   D --> |YES| R(Repoint)
-  C --> |NO| E{Source type?}
-  D --> |NO| END
+  D --> |NO| END(Ignore)'''
+    if telescope is None:
+        mermaid_script += '''
+  B --> |NO| E{Source type?}'''
+    else:
+        mermaid_script += f'''
+  B --> |NO| C{{Is Event from {telescope}?}}
+  C --> |NO| END
+  C --> |YES| E{{Source type?}}'''
+    mermaid_script += '''
   E --> F[GRB]'''
     if prop_set.grb:
         mermaid_script += f'''
@@ -152,7 +155,7 @@ flowchart TD
   J --> |YES| K{{"Trigger duration between\n {prop_set.trig_min_duration} and {prop_set.trig_max_duration} s"}}
   J --> |NO| END
   K --> |YES| L[Trigger Observation]
-  K --> |NO| M{{"Trigger duration between\n{prop_set.pending_min_duration} and {prop_set.pending_max_duration} s"}}
+  K --> |NO| M{{"Trigger duration between\n{prop_set.pending_min_duration_1} and {prop_set.pending_max_duration_1} s\nor\n{prop_set.pending_min_duration_2} and {prop_set.pending_max_duration_2} s"}}
   M --> |YES| N[Pending a human's decision]
   M --> |NO| END
 subgraph GRB
@@ -163,7 +166,8 @@ subgraph GRB
   N
 end
   style L fill:green,color:white
-  style N fill:orange,color:white'''
+  style N fill:orange,color:white
+  style R fill:#21B6A8,color:white'''
     else:
         mermaid_script += '''
   F[GRB] --> END'''
