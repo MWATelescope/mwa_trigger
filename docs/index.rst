@@ -29,6 +29,7 @@ with the MWA and ATCA.
    :maxdepth: 4
    :caption: Trigger Logic:
 
+   voevent_handling
    grb
    event_telescopes
 
