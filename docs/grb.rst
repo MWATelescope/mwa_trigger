@@ -1,3 +1,5 @@
+.. _grb-logic:
+
 Gamma-ray Burst Triggering Logic
 ================================
 
