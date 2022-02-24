@@ -25,11 +25,11 @@ def write_and_upload(xml_string):
     # Parse
     trig = parsed_VOEvent(None, packet=xml_string)
     if trig.ra is None or trig.dec is None:
-        raj = None
-        decj = None
+        ra_hms = None
+        dec_dms = None
     else:
-        raj = Angle(trig.ra, unit=u.deg).to_string(unit=u.hour, sep=':')
-        decj = Angle(trig.dec, unit=u.deg).to_string(unit=u.deg, sep=':')
+        ra_hms = Angle(trig.ra, unit=u.deg).to_string(unit=u.hour, sep=':')
+        dec_dms = Angle(trig.dec, unit=u.deg).to_string(unit=u.deg, sep=':')
 
     # Upload
     session = requests.session()
@@ -44,8 +44,8 @@ def write_and_upload(xml_string):
         'event_type' : trig.event_type,
         'ra' : trig.ra,
         'dec' : trig.dec,
-        'raj' : raj,
-        'decj': decj,
+        'ra_hms' : ra_hms,
+        'dec_dms': dec_dms,
         'pos_error' : trig.err,
         'ignored' : trig.ignore,
         'source_name' : trig.source_name,

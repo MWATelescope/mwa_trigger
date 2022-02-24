@@ -75,8 +75,8 @@ def group_trigger(sender, instance, **kwargs):
                 # Update pos
                 prop_dec.ra = instance.ra
                 prop_dec.dec = instance.dec
-                prop_dec.raj = instance.raj
-                prop_dec.decj = instance.decj
+                prop_dec.ra_hms = instance.ra_hms
+                prop_dec.dec_dms = instance.dec_dms
                 prop_dec.pos_error = instance.pos_error
                 proposal_worth_observing(
                     prop_dec,
@@ -92,8 +92,8 @@ def group_trigger(sender, instance, **kwargs):
                     # Update pos
                     prop_dec.ra = instance.ra
                     prop_dec.dec = instance.dec
-                    prop_dec.raj = instance.raj
-                    prop_dec.decj = instance.decj
+                    prop_dec.ra_hms = instance.ra_hms
+                    prop_dec.dec_dms = instance.dec_dms
                     prop_dec.pos_error = instance.pos_error
                     repoint_message = f"Repointing because seperation ({event_sep} deg) is about the repointing limit ({prop_dec.proposal.repointing_limit} deg)."
                     proposal_worth_observing(
@@ -112,8 +112,8 @@ def group_trigger(sender, instance, **kwargs):
         new_trig = TriggerEvent.objects.create(
             ra=instance.ra,
             dec=instance.dec,
-            raj=instance.raj,
-            decj=instance.decj,
+            ra_hms=instance.ra_hms,
+            dec_dms=instance.dec_dms,
             pos_error=instance.pos_error,
             source_type=instance.source_type,
             earliest_event_observed=instance.event_observed,
@@ -135,8 +135,8 @@ def group_trigger(sender, instance, **kwargs):
                 duration=instance.duration,
                 ra=instance.ra,
                 dec=instance.dec,
-                raj=instance.raj,
-                decj=instance.decj,
+                ra_hms=instance.ra_hms,
+                dec_dms=instance.dec_dms,
                 pos_error=instance.pos_error,
             )
             # Check if it's worth triggering an obs
@@ -267,8 +267,8 @@ def send_alert_type(alert_type, address, subject, message_type_text, proposal_de
 
 Event Details are:
 Duration:    {proposal_decision_model.duration}
-RA:          {proposal_decision_model.raj} hours
-Dec:         {proposal_decision_model.decj} deg
+RA:          {proposal_decision_model.ra_hms} hours
+Dec:         {proposal_decision_model.dec_dms} deg
 Error Rad:   {proposal_decision_model.pos_error} deg
 Detected by: {telescopes}
 

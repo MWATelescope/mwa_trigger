@@ -144,8 +144,8 @@
       <td>{% if voevent.source_name  is not None %} {{ voevent.source_name }}  {% endif %}</td>
       <td>{% if voevent.sequence_num is not None %} {{ voevent.sequence_num }} {% endif %}</td>
       <td>{% if voevent.duration     is not None %} {{ voevent.duration }}     {% endif %}</td>
-      <td>{% if voevent.raj          is not None %} {{ voevent.raj }}          {% endif %}</td>
-      <td>{% if voevent.decj         is not None %} {{ voevent.decj }}         {% endif %}</td>
+      <td>{% if voevent.ra_hms          is not None %} {{ voevent.ra_hms }}          {% endif %}</td>
+      <td>{% if voevent.dec_dms         is not None %} {{ voevent.dec_dms }}         {% endif %}</td>
       <td>{% if voevent.pos_error    is not None %} {{ voevent.pos_error }}    {% endif %}</td>
       <td>{% if voevent.source_type  is not None %} {{ voevent.get_source_type_display }}  {% endif %}</td>
       <td>{% if voevent.fermi_detection_prob is not None %} {{ voevent.fermi_detection_prob }}  {% endif %}</td>

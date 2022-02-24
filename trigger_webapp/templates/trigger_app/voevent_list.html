@@ -51,8 +51,8 @@
       <td>{% if object.source_name  is not None %} {{ object.source_name }}  {% endif %}</td>
       <td>{% if object.sequence_num is not None %} {{ object.sequence_num }} {% endif %}</td>
       <td>{% if object.duration     is not None %} {{ object.duration }}     {% endif %}</td>
-      <td>{% if object.raj          is not None %} {{ object.raj }}          {% endif %}</td>
-      <td>{% if object.decj         is not None %} {{ object.decj }}         {% endif %}</td>
+      <td>{% if object.ra_hms          is not None %} {{ object.ra_hms }}          {% endif %}</td>
+      <td>{% if object.dec_dms         is not None %} {{ object.dec_dms }}         {% endif %}</td>
       <td>{% if object.pos_error    is not None %} {{ object.pos_error }}    {% endif %}</td>
       <td>{% if object.source_type  is not None %} {{ object.get_source_type_display }}  {% endif %}</td>
       <td>{% if object.fermi_detection_prob is not None %} {{ object.fermi_detection_prob }}  {% endif %}</td>
