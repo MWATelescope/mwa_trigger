@@ -20,7 +20,6 @@ python:
    install:
     - requirements: docs/requirements.txt
     - method: pip
-      path: git+https://github.com/MWATelescope/mwa_pb.git
       path: .
       extra_requirements:
         - docs
