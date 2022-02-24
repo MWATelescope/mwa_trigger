@@ -149,6 +149,20 @@ def proposal_worth_observing(
         trigger_message="",
         observation_reason="First observation."
     ):
+    """For a proposal sees is this voevent is worth observing. If it is will trigger an observation and send off the relevant alerts.
+
+    Parameters
+    ----------
+    prop_dec : `django.db.models.Model`
+        The Django ProposalDecision model object.
+    voevent : `django.db.models.Model`
+        The Django VOEvent model object.
+    trigger_message : `str`, optional
+        A log of all the decisions made so far so a user can understand why the source was(n't) observed. Default: "".
+    observation_reason : `str`, optional
+        The reason for this observation. The default is "First Observation" but other potential reasons are "Repointing".
+    """
+
     # Defaults if not worth observing
     trigger_bool = debug_bool = pending_bool = False
 
