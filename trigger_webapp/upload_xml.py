@@ -1,24 +1,12 @@
 #!/usr/bin/env python
 
 import os
-# Configure settings for project
-# Need to run this before calling models from application!
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'trigger_webapp.settings')
-
-import django
-# Import settings
-django.setup()
-
-from trigger_app.models import VOEvent
-
 import sys
-import voeventparse
 import requests
-
-#from django.test import Client
-from mwa_trigger.parse_xml import parsed_VOEvent
 from astropy.coordinates import Angle
 import astropy.units as u
+
+from mwa_trigger.parse_xml import parsed_VOEvent
 
 
 def write_and_upload(xml_string):
@@ -33,7 +21,7 @@ def write_and_upload(xml_string):
 
     # Upload
     session = requests.session()
-    session.auth = ("nick", "test123")
+    session.auth = (os.environ['UPLOAD_USER'], os.environ['UPLOAD_PASSWORD'])
     url = 'http://127.0.0.1:8000/voevent_create/'
     data = {
         'telescope' : trig.telescope,
