@@ -471,11 +471,7 @@ def processevent(event='', pretend=True):
 
     """
 
-    if sys.version_info.major == 2:
-        # event arrives as a unicode string but loads requires a non-unicode string.
-        v = voeventparse.loads(str(event))
-    else:
-        v = voeventparse.loads(event.encode())
+    v = voeventparse.loads(event.encode())
     log.info("Working on: %s" % v.attrib['ivorn'])
     isgw = is_gw(v)
     log.debug("GW? {0}".format(isgw))
@@ -712,11 +708,7 @@ def test_event(filepath='../test_events/MS190410a-1-Preliminary.xml', test_time=
     log.info('Mock time: %s' % (test_time))
 
     payload = astropy.utils.data.get_file_contents(filepath)
-    if sys.version_info.major == 2:
-        # event arrives as a unicode string but loads requires a non-unicode string.
-        v = voeventparse.loads(str(payload))
-    else:
-        v = voeventparse.loads(payload.encode())
+    v = voeventparse.loads(payload.encode())
 
     params = {elem.attrib['name']:elem.attrib['value'] for elem in v.iterfind('.//Param')}
 

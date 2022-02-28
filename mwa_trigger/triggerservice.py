@@ -18,13 +18,9 @@ import logging
 
 logging.basicConfig()
 
-if sys.version_info.major == 3:  # Python3
-    from urllib.parse import urlencode
-    from urllib.request import Request, urlopen
-    from urllib.error import HTTPError, URLError
-else:  # Python2
-    from urllib import urlencode
-    from urllib2 import urlopen, HTTPError, URLError, Request
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
+from urllib.error import HTTPError, URLError
 
 
 DEFAULTLOGGER = logging.getLogger()
@@ -76,9 +72,7 @@ def web_api(
     url += urldata
 
     if postdict is not None:
-        postdata = urlencode(postdict)
-        if sys.version_info.major > 2:
-            postdata = postdata.encode()
+        postdata = urlencode(postdict).encode()
     else:
         postdata = None
 
@@ -96,13 +90,10 @@ def web_api(
     }
     if (username is not None) and (password is not None):
         # Add authenticatin
-        if sys.version_info.major > 2:
-            base64string = base64.b64encode(
-                ("%s:%s" % (username, password)).encode()
-            )
-            base64string = base64string.decode()
-        else:
-            base64string = base64.b64encode("%s:%s" % (username, password))
+        base64string = base64.b64encode(
+            ("%s:%s" % (username, password)).encode()
+        )
+        base64string = base64string.decode()
         header["Authorization"] = "Basic %s" % base64string
     try:
         req = Request(url, postdata, header)
@@ -111,11 +102,10 @@ def web_api(
             data = resobj.read()
             logger.debug(data.decode())
             logger.debug(resobj.headers.get_content_charset())
-            if sys.version_info.major > 2:
-                if resobj.headers.get_content_charset() is None:
-                    data = data.decode()
-                else:
-                    data = data.decode(resobj.headers.get_content_charset())
+            if resobj.headers.get_content_charset() is None:
+                data = data.decode()
+            else:
+                data = data.decode(resobj.headers.get_content_charset())
         except (ValueError, URLError):
             logger.error(
                 "urlopen failed, or there was an error reading from the opened request object"

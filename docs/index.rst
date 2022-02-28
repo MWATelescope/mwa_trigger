@@ -6,18 +6,38 @@
 Welcome to mwa_trigger's documentation!
 =======================================
 
-For an explanation of the MWA frequency specifications please see :ref:`MWA Frequency Specifications<freq_spec>`.
+This documentation is split into three sections.
+The Web Application documentation explains how to use the trigger web application.
+The Trigger Logic documentation explains the logic we use to decide if we should
+observe different sources and explain some of the telescope's VOEvent information.
+The mwa_trigger documentation describes the python package and its functions that can be
+used to parse XML files, decide if sources are worth observing and trigger observations
+with the MWA and ATCA.
 
 .. toctree::
-   :hidden:
+   :maxdepth: 4
+   :caption: Web Application:
 
+   installation
+   new_proposal
+   new_user
+   using_the_database
    mwa_frequency_specifications
+
+
+.. toctree::
+   :maxdepth: 4
+   :caption: Trigger Logic:
+
+   voevent_handling
+   grb
+   event_telescopes
+
 
 .. toctree::
    :maxdepth: 4
    :caption: mwa_trigger Package:
 
-   handlers_module
    parse_xml_module
    trigger_logic_module
    triggerservice_module

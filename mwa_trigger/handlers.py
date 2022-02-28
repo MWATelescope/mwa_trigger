@@ -12,10 +12,7 @@ __author__ = ["Paul Hancock", "Andrew Williams", "Gemma Anderson"]
 import os
 import sys
 
-if sys.version_info.major == 2:
-    from ConfigParser import SafeConfigParser as conparser
-else:
-    from configparser import ConfigParser as conparser
+from configparser import ConfigParser as conparser
 
 import smtplib
 
@@ -23,10 +20,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email.utils import formatdate
-if sys.version_info.major == 2:
-    from email.Encoders import encode_base64
-else:
-    from email.encoders import encode_base64
+from email.encoders import encode_base64
 
 import logging
 
