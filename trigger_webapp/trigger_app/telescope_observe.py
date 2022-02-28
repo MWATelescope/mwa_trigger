@@ -160,14 +160,15 @@ def trigger_mwa_observation(
         vcsmode=vcsmode,
         buffered=prop_settings.mwa_buffered,
     )
+    logger.debug(f"result: {result}")
     # Check if succesful
     if result is None:
         trigger_message += f"Web API error, possible server error.\n "
         return 'E', trigger_message, []
     if not result['success']:
         # Observation not succesful so record why
-        for err_id in result['error']:
-            trigger_message += f"{result['error'][err_id]}.\n "
+        for err_id in result['errors']:
+            trigger_message += f"{result['errors'][err_id]}.\n "
         # Return an error as the trigger status
         return 'E', trigger_message, []
 
