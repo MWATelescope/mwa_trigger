@@ -34,6 +34,10 @@ jobs:
         run: pip install .
       - name: Install web app dependencies
         run: pip install -r trigger_webapp/requirements.txt
+      - name: Run migrations
+        run: python trigger_webapp/manage.py migrate
+        env:
+          SYSTEM_ENV: GITHUB_WORKFLOW
       - name: Run tests
         run: python trigger_webapp/manage.py test trigger_webapp/
         env:
