@@ -49,4 +49,4 @@ jobs:
           python manage.py test
         env:
           SYSTEM_ENV: GITHUB_WORKFLOW
-          MWA_SECURE_KEY: testing_fake
+          MWA_SECURE_KEY: TestingOnly
