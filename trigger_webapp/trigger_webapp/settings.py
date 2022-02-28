@@ -95,7 +95,7 @@ elif SYSTEM_ENV == 'GITHUB_WORKFLOW':
     SECRET_KEY = 'TESTING_KEY'
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql',
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'github_actions',
             'USER': 'postgres',
             'PASSWORD': 'postgres',

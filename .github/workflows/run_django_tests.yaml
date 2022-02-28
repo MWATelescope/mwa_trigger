@@ -35,10 +35,18 @@ jobs:
       - name: Install web app dependencies
         run: pip install -r trigger_webapp/requirements.txt
       - name: Run migrations
-        run: python trigger_webapp/manage.py migrate
+        run: |
+          cd trigger_webapp
+          python manage.py makemigrations trigger_app
+          python manage.py migrate trigger_app
+          python manage.py migrate
+          python manage.py migrate --run-syncdb
         env:
           SYSTEM_ENV: GITHUB_WORKFLOW
       - name: Run tests
-        run: python trigger_webapp/manage.py test trigger_webapp/
+        run: |
+          cd trigger_webapp
+          python manage.py test
         env:
           SYSTEM_ENV: GITHUB_WORKFLOW
+          MWA_SECURE_KEY: testing_fake

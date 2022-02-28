@@ -22,8 +22,6 @@ class test_group_01(TestCase):
         MWA = EarthLocation(lat='-26:42:11.95', lon='116:40:14.93', height=377.8 * u.m)
         mwa_coord = coord = SkyCoord(az=0., alt=90., unit=(u.deg, u.deg), frame='altaz', obstime=Time.now(), location=MWA)
         ra_dec = mwa_coord.icrs
-        ra_deg = ra_dec.ra.deg
-        dec_deg = ra_dec.dec.deg
 
         # Parse and upload the xml file group
         for xml in xml_paths:
