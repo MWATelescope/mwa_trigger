@@ -46,7 +46,6 @@ The following commands will set up the Postgres database for the web app. Replac
    sudo -u postgres psql
 
    CREATE DATABASE trigger_db;
-
    CREATE USER $DB_USER WITH ENCRYPTED PASSWORD '$DB_PASSWORD';
 
    ALTER ROLE $DB_USER SET client_encoding TO 'utf8';
