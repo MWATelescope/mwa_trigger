@@ -26,8 +26,8 @@ from scipy.stats import norm
 import logging
 logger = logging.getLogger(__name__)
 
-account_sid = os.environ['TWILIO_ACCOUNT_SID']
-auth_token = os.environ['TWILIO_AUTH_TOKEN']
+account_sid = os.environ.get('TWILIO_ACCOUNT_SID', None)
+auth_token = os.environ.get('TWILIO_AUTH_TOKEN', None)
 
 
 @receiver(post_save, sender=VOEvent)

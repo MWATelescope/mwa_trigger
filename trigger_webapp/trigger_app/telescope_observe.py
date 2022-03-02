@@ -143,7 +143,7 @@ def trigger_mwa_observation(
     # Not below horizon limit so observer
     logger.info(f"Triggering MWA at UTC time {Time.now()} ...")
     result = trigger_mwa(project_id=prop_settings.project_id,
-        secure_key=os.environ['MWA_SECURE_KEY'],
+        secure_key=os.environ.get('MWA_SECURE_KEY', None),
         #group_id=proposal_decision_model.trigger_group_id.trigger_id, # only need this for follow up obs
         pretend=prop_settings.testing,
         ra=proposal_decision_model.ra, dec=proposal_decision_model.dec,
@@ -160,14 +160,15 @@ def trigger_mwa_observation(
         vcsmode=vcsmode,
         buffered=prop_settings.mwa_buffered,
     )
+    logger.debug(f"result: {result}")
     # Check if succesful
     if result is None:
         trigger_message += f"Web API error, possible server error.\n "
         return 'E', trigger_message, []
     if not result['success']:
         # Observation not succesful so record why
-        for err_id in result['error']:
-            trigger_message += f"{result['error'][err_id]}.\n "
+        for err_id in result['errors']:
+            trigger_message += f"{result['errors'][err_id]}.\n "
         # Return an error as the trigger status
         return 'E', trigger_message, []
 
@@ -229,7 +230,7 @@ def trigger_atca_observation(
     logger.info(f"Triggering  ATCA at UTC time {Time.now()} ...")
     # trigger_atca(
     #     project_id=prop_settings.project_id,
-    #     secure_key=os.environ['ATCA_SECURE_KEY_FILE'],
+    #     secure_key=os.environ.get('ATCA_SECURE_KEY_FILE', None),
     #     ra=proposal_decision_model.ra, dec=proposal_decision_model.dec,
     #     source=obsname,
     #     freqspecs=[prop_settings.atca_freq1, prop_settings.atca_freq2],

@@ -1,0 +1,52 @@
+name: run_django_tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+
+jobs:
+  run_tests:
+    name: Run Django Tests
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:12.3-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: github_actions
+        ports:
+          - 5432:5432
+        options: --mount type=tmpfs,destination=/var/lib/postgresql/data --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install mwa_trigger dependencies
+        run: pip install -r requirements.txt
+      - name: Install mwa_trigger
+        run: pip install .
+      - name: Install web app dependencies
+        run: pip install -r trigger_webapp/requirements.txt
+      - name: Run migrations
+        run: |
+          cd trigger_webapp
+          python manage.py makemigrations trigger_app
+          python manage.py migrate trigger_app
+          python manage.py migrate
+          python manage.py migrate --run-syncdb
+        env:
+          SYSTEM_ENV: GITHUB_WORKFLOW
+      - name: Run tests
+        run: |
+          cd trigger_webapp
+          python manage.py test
+        env:
+          SYSTEM_ENV: GITHUB_WORKFLOW
+          MWA_SECURE_KEY: TestingOnly

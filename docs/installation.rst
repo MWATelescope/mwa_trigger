@@ -4,12 +4,15 @@ Installation
 For Ubuntu or Debian Linux:
 .. code-block::
 
-   sudo apt-get install postgresql postgresql-contrib libpq-dev python3-dev graphviz
+   sudo apt-get update
+   sudo apt-get install postgresql postgresql-contrib libpq-dev python3-dev graphviz python3-pip
 
 Then install the python requirements (recommended in its own virtual environment) using:
 
 .. code-block::
 
+   pip install -r requirements.txt
+   pip install .
    pip install -r trigger_webapp/requirements.txt
 
 Environment Variables
@@ -28,9 +31,10 @@ To run the web application, you will need to set the following environment varia
    "GMAIL_APP_PASSWORD", "The app password for the mwa.trigger@gmail.com email. This can be supplied by Nick Swainston."
    "MWA_SECURE_KEY", "This a project dependent secure key to schedule MWA observations. Contact the MWA operations team to receive one."
    "ATCA_SECURE_KEY_FILE", "This a project dependent secure key file to schedule ATCA observations. Contact the ATCA operations team to receive one."
+   "SYSTEM_ENV", " Set this either to 'PRODUCTION' to turn off debug and enable CSRF_COOKIE_SECURE, or 'DEVELOPMENT' to turn on debug"
+   "UPLOAD_USER", "A username of an account that will be used by upload_xml.py to upload VOEvents"
+   "UPLOAD_PASSWORD", "The password of the upload user"
 
-
-.. _create_database:
 
 Start the Postgres Database
 ---------------------------
@@ -49,6 +53,22 @@ The following commands will set up the Postgres database for the web app. Replac
    ALTER ROLE $DB_USER SET timezone TO 'UTC';
 
 
+.. _create_database:
+
+Setup database for the first time
+---------------------------------
+
+Run the following commands from the trigger_webapp subdirectory so Django can setup up the database stucture and upload defaults
+
+.. code-block::
+
+   python manage.py makemigrations trigger_app
+   python manage.py migrate trigger_app
+   python manage.py migrate
+   python manage.py migrate --run-syncdb
+   python manage.py loaddata deafult_data.yaml
+
+
 Create a superuser
 -------------------
 
@@ -56,8 +76,6 @@ These commands will set up a superuser account.
 
 .. code-block::
 
-   python manage.py makemigrations
-   python manage.py migrate --run-syncdb
    python manage.py createsuperuser
 
 
@@ -73,5 +91,6 @@ To delete the database use the following commands
    sudo -u postgres psql
 
    DROP DATABASE trigger_db;
+   CREATE DATABASE trigger_db;
 
 You will then have to recreate the database using the commands in :ref:`create_database`

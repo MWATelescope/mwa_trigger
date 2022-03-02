@@ -17,9 +17,5 @@ def main():
         ) from exc
     execute_from_command_line(sys.argv)
 
-    # Loading default data when migrating
-    if 'migrate' in sys.argv:
-        execute_from_command_line(['manage.py', 'loaddata', 'default_data.yaml'])
-
 if __name__ == '__main__':
     main()
