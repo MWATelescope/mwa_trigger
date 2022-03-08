@@ -84,12 +84,21 @@ DATABASES = {
     }
 }
 
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/3.2/howto/static-files/
+
+STATIC_URL = '/static/'
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, "static/"),
+)
+
 # Based on the SYSTEM_ENV decide if DEBUG should be on or off
 # and override secret key and databases for github actions testing
 SYSTEM_ENV = os.environ.get('SYSTEM_ENV', None)
 if SYSTEM_ENV == 'PRODUCTION' or SYSTEM_ENV == 'STAGING':
     DEBUG = False
     CSRF_COOKIE_SECURE = True
+    STATIC_ROOT = os.path.join(BASE_DIR, "static_host/")
 elif SYSTEM_ENV == 'GITHUB_WORKFLOW':
     DEBUG = True
     SECRET_KEY = 'TESTING_KEY'
@@ -139,16 +148,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.2/howto/static-files/
-
-STATIC_URL = '/static/'
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, "static/"),
-)
-STATIC_ROOT = os.path.join(BASE_DIR, "static_host/")
 
 # Base url to serve media files
 MEDIA_URL = '/media/'
