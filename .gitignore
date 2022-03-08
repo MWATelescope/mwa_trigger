@@ -9,3 +9,5 @@ trigger_webapp/plantuml.jar
 docs/_*
 trigger_webapp/twistd.pid
 trigger_webapp/static_host/
+trigger_webapp/uwsgi-emperor.log
+trigger_webapp/trigger_webapp.sock
