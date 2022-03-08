@@ -14,3 +14,9 @@ from django.core.wsgi import get_wsgi_application
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'trigger_webapp.settings')
 
 application = get_wsgi_application()
+
+# Create a startup signal
+from trigger_app.signals import startup_signal
+
+# Send off start up signal because server is launching in production
+startup_signal.send(sender=startup_signal)

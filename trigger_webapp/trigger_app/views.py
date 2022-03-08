@@ -29,10 +29,9 @@ logger = logging.getLogger(__name__)
 # Create a startup signal
 from trigger_app.signals import startup_signal
 
-if len(sys.argv) >= 2:
-    if sys.argv[1] == 'runserver':
-        # Send off start up signal because server is launching
-        startup_signal.send(sender=startup_signal)
+if 'runserver' in sys.argv:
+    # Send off start up signal because server is launching in development
+    startup_signal.send(sender=startup_signal)
 
 class VOEventList(ListView):
     # specify the model for list view
