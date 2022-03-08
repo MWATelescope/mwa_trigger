@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'www.mwa-trigger.duckdns.org', 'mwa-trigger.duckdns.org']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'www.mwa-trigger.duckdns.org', 'mwa-trigger.duckdns.org', '146.118.70.58']
 
 
 # Application definition
