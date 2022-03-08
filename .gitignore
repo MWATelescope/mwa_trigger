@@ -8,3 +8,4 @@ settings.json
 trigger_webapp/plantuml.jar
 docs/_*
 trigger_webapp/twistd.pid
+trigger_webapp/static_host/
