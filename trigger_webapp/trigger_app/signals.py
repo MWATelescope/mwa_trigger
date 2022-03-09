@@ -15,7 +15,7 @@ import os
 import threading
 import time
 from schedule import Scheduler
-from subprocess import PIPE, Popen
+from subprocess import PIPE, Popen, run
 from twilio.rest import Client
 import datetime
 from astropy import units as u
@@ -395,11 +395,13 @@ startup_signal = Signal()
 
 def on_startup(sender, **kwargs):
     print("Starting twistd")
-    process = Popen("twistd -n comet --local-ivo=ivo://hotwired.org/test --remote=voevent.4pisky.org --cmd=/home/nick/code/mwa_trigger/trigger_webapp/upload_xml.py", shell=True, stdout=PIPE)
+    process = Popen("twistd -n comet --local-ivo=ivo://hotwired.org/test --remote=voevent.4pisky.org --cmd=upload_xml.py", shell=True, stdout=PIPE)
     scheduler = Scheduler()
     scheduler.every(1).minutes.do(output_popen_stdout, process=process)
     scheduler.run_continuously()
     # Create status model if not already made
     Status.objects.get_or_create(name='twistd_comet', status=0)
+    # Do it once for safety
+    output_popen_stdout(process)
 
 startup_signal.connect(on_startup, dispatch_uid='models-startup')
