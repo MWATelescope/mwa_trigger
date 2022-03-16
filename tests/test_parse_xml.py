@@ -2,10 +2,11 @@
 """Tests the parse_xml.py script
 """
 import os
-from numpy.testing import assert_almost_equal, assert_string_equal, assert_equal
+from yaml import load, dump, Loader
+from numpy.testing import assert_equal
 
 from mwa_trigger.parse_xml import parsed_VOEvent
-from mwa_trigger.trigger_logic import worth_observing
+from mwa_trigger.trigger_logic import worth_observing_grb
 import voeventparse
 
 import logging
@@ -14,56 +15,62 @@ logger = logging.getLogger(__name__)
 def test_trigger_event():
     xml_tests = [
                  # A short GRB we would want to trigger on
-                 ('Fermi_GRB.xml', None, [True, False, True, "Trigger time less than 2.05 s. Fermi GRB probability greater than 50. "], {'trig_duration': 0.512, 'event_type': 'GBM_Flt_Pos', 'sequence_num': 46, 'trig_id': 533367528, 'ra': 241.6167, 'dec': 48.4167, 'err': 4.7333, 'most_likely_index': 4, 'detect_prob': 94, 'telescope': 'Fermi', 'ignore': False}),
+                 ('Fermi_GRB.xml', None, [True, False, False, 'Fermi GRB probability greater than 50.\n Trigger duration between 0.256 and 1.023 s so triggering.\n ']),
                  # Same as the above but a xml packet to test if it works
-                 (None, """<?xml version='1.0' encoding='UTF-8'?>
-<voe:VOEvent xmlns:voe="http://www.ivoa.net/xml/VOEvent/v2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ivorn="ivo://nasa.gsfc.gcn/Fermi#GBM_Flt_Pos_2017-11-26T05:38:43.71_533367528_46-276" role="observation" version="2.0" xsi:schemaLocation="http://www.ivoa.net/xml/VOEvent/v2.0  http://www.ivoa.net/xml/VOEvent/VOEvent-v2.0.xsd"><Who><AuthorIVORN>ivo://nasa.gsfc.tan/gcn</AuthorIVORN><Author><shortName>Fermi (via VO-GCN)</shortName><contactName>Julie McEnery</contactName><contactPhone>+1-301-286-1632</contactPhone><contactEmail>Julie.E.McEnery@nasa.gov</contactEmail></Author><Date>2017-11-26T05:39:07</Date><Description>This VOEvent message was created with GCN VOE version: 1.25 23jul17</Description></Who><What><Param name="Packet_Type" value="111"/><Param name="Pkt_Ser_Num" value="2"/><Param name="TrigID" value="533367528" ucd="meta.id"/><Param name="Sequence_Num" value="46" ucd="meta.id.part"/><Param name="Burst_TJD" value="18083" unit="days" ucd="time"/><Param name="Burst_SOD" value="20323.71" unit="sec" ucd="time"/><Param name="Burst_Inten" value="1349" unit="cts" ucd="phot.count"/><Param name="Trig_Timescale" value="0.512" unit="sec" ucd="time.interval"/><Param name="Data_Timescale" value="0.512" unit="sec" ucd="time.interval"/><Param name="Data_Signif" value="48.60" unit="sigma" ucd="stat.snr"/><Param name="Phi" value="33.00" unit="deg" ucd="pos.az.azi"/><Param name="Theta" value="50.00" unit="deg" ucd="pos.az.zd"/><Param name="SC_Long" value="193.50" unit="deg" ucd="pos.earth.lon"/><Param name="SC_Lat" value="0.00" unit="deg" ucd="pos.earth.lat"/><Param name="Algorithm" value="3" unit="dn"/><Param name="Most_Likely_Index" value="4" unit="dn"/><Param name="Most_Likely_Prob" value="94"/><Param name="Sec_Most_Likely_Index" value="7" unit="dn"/><Param name="Sec_Most_Likely_Prob" value="4"/><Param name="Hardness_Ratio" value="1.16" ucd="arith.ratio"/><Param name="Trigger_ID" value="0x0"/><Param name="Misc_flags" value="0x1000000"/><Group name="Trigger_ID"><Param name="Def_NOT_a_GRB" value="false"/><Param name="Target_in_Blk_Catalog" value="false"/><Param name="Spatial_Prox_Match" value="false"/><Param name="Temporal_Prox_Match" value="false"/><Param name="Test_Submission" value="false"/></Group><Group name="Misc_Flags"><Param name="Values_Out_of_Range" value="false"/><Param name="Delayed_Transmission" value="true"/><Param name="Flt_Generated" value="true"/><Param name="Gnd_Generated" value="false"/></Group><Param name="LightCurve_URL" value="http://heasarc.gsfc.nasa.gov/FTP/fermi/data/gbm/triggers/2017/bn171126235/quicklook/glg_lc_medres34_bn171126235.gif" ucd="meta.ref.url"/><Param name="Coords_Type" value="1" unit="dn"/><Param name="Coords_String" value="source_object"/><Group name="Obs_Support_Info"><Description>The Sun and Moon values are valid at the time the VOEvent XML message was created.</Description><Param name="Sun_RA" value="242.17" unit="deg" ucd="pos.eq.ra"/><Param name="Sun_Dec" value="-20.97" unit="deg" ucd="pos.eq.dec"/><Param name="Sun_Distance" value="69.34" unit="deg" ucd="pos.angDistance"/><Param name="Sun_Hr_Angle" value="0.03" unit="hr"/><Param name="Moon_RA" value="331.26" unit="deg" ucd="pos.eq.ra"/><Param name="Moon_Dec" value="-12.87" unit="deg" ucd="pos.eq.dec"/><Param name="MOON_Distance" value="99.27" unit="deg" ucd="pos.angDistance"/><Param name="Moon_Illum" value="45.41" unit="%" ucd="arith.ratio"/><Param name="Galactic_Long" value="75.98" unit="deg" ucd="pos.galactic.lon"/><Param name="Galactic_Lat" value="46.93" unit="deg" ucd="pos.galactic.lat"/><Param name="Ecliptic_Long" value="217.05" unit="deg" ucd="pos.ecliptic.lon"/><Param name="Ecliptic_Lat" value="66.71" unit="deg" ucd="pos.ecliptic.lat"/></Group><Description>The Fermi-GBM location of a transient.</Description></What><WhereWhen><ObsDataLocation><ObservatoryLocation id="GEOLUN"/><ObservationLocation><AstroCoordSystem id="UTC-FK5-GEO"/><AstroCoords coord_system_id="UTC-FK5-GEO"><Time unit="s"><TimeInstant><ISOTime>2017-11-26T05:38:43.71</ISOTime></TimeInstant></Time><Position2D unit="deg"><Name1>RA</Name1><Name2>Dec</Name2><Value2><C1>241.6167</C1><C2>48.4167</C2></Value2><Error2Radius>4.7333</Error2Radius></Position2D></AstroCoords></ObservationLocation></ObsDataLocation><Description>The RA,Dec coordinates are of the type: source_object.</Description></WhereWhen><How><Description>Fermi Satellite, GBM Instrument</Description><Reference uri="http://gcn.gsfc.nasa.gov/fermi.html" type="url"/></How><Why importance="0.5"><Inference probability="0.5"><Concept>process.variation.burst;em.gamma</Concept></Inference></Why><Citations><EventIVORN cite="followup">ivo://nasa.gsfc.gcn/Fermi#GBM_Alert_2017-11-26T05:38:43.71_533367528_1-272</EventIVORN><Description>This is an updated position to the original trigger.</Description></Citations><Description>
-  </Description></voe:VOEvent>""", [True, False, True, "Trigger time less than 2.05 s. Fermi GRB probability greater than 50. "], {'trig_duration': 0.512, 'event_type': 'GBM_Flt_Pos', 'sequence_num': 46, 'trig_id': 533367528, 'ra': 241.6167, 'dec': 48.4167, 'err': 4.7333, 'most_likely_index': 4, 'detect_prob': 94, 'telescope': 'Fermi', 'ignore': False}),
+                 (None, '<VOEvent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ivorn="ivo://nasa.gsfc.gcn/Fermi#GBM_Flt_Pos_2017-11-26T05:38:43.71_533367528_46-276" role="observation" version="2.0" xsi:schemaLocation="http://www.ivoa.net/xml/VOEvent/v2.0  http://www.ivoa.net/xml/VOEvent/VOEvent-v2.0.xsd">\n  <Who>\n    <AuthorIVORN>ivo://nasa.gsfc.tan/gcn</AuthorIVORN>\n    <Author>\n      <shortName>Fermi (via VO-GCN)</shortName>\n      <contactName>Julie McEnery</contactName>\n      <contactPhone>+1-301-286-1632</contactPhone>\n      <contactEmail>Julie.E.McEnery@nasa.gov</contactEmail>\n    </Author>\n    <Date>2017-11-26T05:39:07</Date>\n    <Description>This VOEvent message was created with GCN VOE version: 1.25 23jul17</Description>\n  </Who>\n  <What>\n    <Param name="Packet_Type" value="111"/>\n    <Param name="Pkt_Ser_Num" value="2"/>\n    <Param name="TrigID" value="533367528" ucd="meta.id"/>\n    <Param name="Sequence_Num" value="46" ucd="meta.id.part"/>\n    <Param name="Burst_TJD" value="18083" unit="days" ucd="time"/>\n    <Param name="Burst_SOD" value="20323.71" unit="sec" ucd="time"/>\n    <Param name="Burst_Inten" value="1349" unit="cts" ucd="phot.count"/>\n    <Param name="Trig_Timescale" value="0.512" unit="sec" ucd="time.interval"/>\n    <Param name="Data_Timescale" value="0.512" unit="sec" ucd="time.interval"/>\n    <Param name="Data_Signif" value="48.60" unit="sigma" ucd="stat.snr"/>\n    <Param name="Phi" value="33.00" unit="deg" ucd="pos.az.azi"/>\n    <Param name="Theta" value="50.00" unit="deg" ucd="pos.az.zd"/>\n    <Param name="SC_Long" value="193.50" unit="deg" ucd="pos.earth.lon"/>\n    <Param name="SC_Lat" value="0.00" unit="deg" ucd="pos.earth.lat"/>\n    <Param name="Algorithm" value="3" unit="dn"/>\n    <Param name="Most_Likely_Index" value="4" unit="dn"/>\n    <Param name="Most_Likely_Prob" value="94"/>\n    <Param name="Sec_Most_Likely_Index" value="7" unit="dn"/>\n    <Param name="Sec_Most_Likely_Prob" value="4"/>\n    <Param name="Hardness_Ratio" value="1.16" ucd="arith.ratio"/>\n    <Param name="Trigger_ID" value="0x0"/>\n    <Param name="Misc_flags" value="0x1000000"/>\n    <Group name="Trigger_ID">\n      <Param name="Def_NOT_a_GRB" value="false"/>\n      <Param name="Target_in_Blk_Catalog" value="false"/>\n      <Param name="Spatial_Prox_Match" value="false"/>\n      <Param name="Temporal_Prox_Match" value="false"/>\n      <Param name="Test_Submission" value="false"/>\n    </Group>\n    <Group name="Misc_Flags">\n      <Param name="Values_Out_of_Range" value="false"/>\n      <Param name="Delayed_Transmission" value="true"/>\n      <Param name="Flt_Generated" value="true"/>\n      <Param name="Gnd_Generated" value="false"/>\n    </Group>\n    <Param name="LightCurve_URL" value="http://heasarc.gsfc.nasa.gov/FTP/fermi/data/gbm/triggers/2017/bn171126235/quicklook/glg_lc_medres34_bn171126235.gif" ucd="meta.ref.url"/>\n    <Param name="Coords_Type" value="1" unit="dn"/>\n    <Param name="Coords_String" value="source_object"/>\n    <Group name="Obs_Support_Info">\n      <Description>The Sun and Moon values are valid at the time the VOEvent XML message was created.</Description>\n      <Param name="Sun_RA" value="242.17" unit="deg" ucd="pos.eq.ra"/>\n      <Param name="Sun_Dec" value="-20.97" unit="deg" ucd="pos.eq.dec"/>\n      <Param name="Sun_Distance" value="69.34" unit="deg" ucd="pos.angDistance"/>\n      <Param name="Sun_Hr_Angle" value="0.03" unit="hr"/>\n      <Param name="Moon_RA" value="331.26" unit="deg" ucd="pos.eq.ra"/>\n      <Param name="Moon_Dec" value="-12.87" unit="deg" ucd="pos.eq.dec"/>\n      <Param name="MOON_Distance" value="99.27" unit="deg" ucd="pos.angDistance"/>\n      <Param name="Moon_Illum" value="45.41" unit="%" ucd="arith.ratio"/>\n      <Param name="Galactic_Long" value="75.98" unit="deg" ucd="pos.galactic.lon"/>\n      <Param name="Galactic_Lat" value="46.93" unit="deg" ucd="pos.galactic.lat"/>\n      <Param name="Ecliptic_Long" value="217.05" unit="deg" ucd="pos.ecliptic.lon"/>\n      <Param name="Ecliptic_Lat" value="66.71" unit="deg" ucd="pos.ecliptic.lat"/>\n    </Group>\n    <Description>The Fermi-GBM location of a transient.</Description>\n  </What>\n  <WhereWhen>\n    <ObsDataLocation>\n      <ObservatoryLocation id="GEOLUN"/>\n      <ObservationLocation>\n        <AstroCoordSystem id="UTC-FK5-GEO"/>\n        <AstroCoords coord_system_id="UTC-FK5-GEO">\n          <Time unit="s">\n            <TimeInstant>\n              <ISOTime>2017-11-26T05:38:43.71</ISOTime>\n            </TimeInstant>\n          </Time>\n          <Position2D unit="deg">\n            <Name1>RA</Name1>\n            <Name2>Dec</Name2>\n            <Value2>\n              <C1>241.6167</C1>\n              <C2>48.4167</C2>\n            </Value2>\n            <Error2Radius>4.7333</Error2Radius>\n          </Position2D>\n        </AstroCoords>\n      </ObservationLocation>\n    </ObsDataLocation>\n    <Description>The RA,Dec coordinates are of the type: source_object.</Description>\n  </WhereWhen>\n  <How>\n    <Description>Fermi Satellite, GBM Instrument</Description>\n    <Reference uri="http://gcn.gsfc.nasa.gov/fermi.html" type="url"/>\n  </How>\n  <Why importance="0.5">\n    <Inference probability="0.5">\n      <Concept>process.variation.burst;em.gamma</Concept>\n    </Inference>\n  </Why>\n  <Citations>\n    <EventIVORN cite="followup">ivo://nasa.gsfc.gcn/Fermi#GBM_Alert_2017-11-26T05:38:43.71_533367528_1-272</EventIVORN>\n    <Description>This is an updated position to the original trigger.</Description>\n  </Citations>\n  <Description>\n    </Description>\n  <original_prefix>voe</original_prefix>\n</VOEvent>\n', [True, False, False, 'Fermi GRB probability greater than 50.\n Trigger duration between 0.256 and 1.023 s so triggering.\n ']),
                  # A SWIFT trigger that is too long to trigger on
-                 ('SWIFT00.xml', None, [False, True, False, "Trigger time greater than 2.05 s. "], {'trig_duration': 4.096, 'event_type': 'BAT_GRB_Pos', 'sequence_num': None, 'trig_id': 772006, 'ra': 45.0, 'dec': -80.0, 'err': 0.05, 'most_likely_index': None, 'detect_prob': None, 'telescope': 'SWIFT', 'ignore': False}),
+                 ('SWIFT00.xml', None, [False, True, False, 'SWIFT rate significance > 0.000 sigma.\n Trigger duration outside of all time ranges so not triggering.\n ']),
                  # A trigger type that we choose to ignore
-                 ('Antares_1438351269.xml', None, [False, False, False, ""], {'trig_duration': None, 'event_type': '143835126', 'sequence_num': None, 'trig_id': None, 'ra': None, 'dec': None, 'err': None, 'most_likely_index': None, 'detect_prob': None, 'telescope': 'Antares', 'ignore': True}),
+                 ('Antares_1438351269.xml', None, [False, False, False, 'No probability metric given so assume it is a GRB.\n ']),
                 ]
 
-    for xml_file, xml_packet, exp_worth_obs, exp_parse in xml_tests:
+    for xml_file, xml_packet, exp_worth_obs in xml_tests:
         # Parse the file
         if xml_file is None:
-            print(f'\n{xml_packet[:10]}')
             xml_loc = None
+            yaml_loc = os.path.join(os.path.dirname(__file__), 'test_events/Fermi_GRB.yaml')
         else:
-            print(f'\n{xml_file}')
-            xml_loc = os.path.join(os.path.dirname(__file__), 'test_events', xml_file)
+            #xml_loc = os.path.join(os.path.dirname(__file__), 'test_events', xml_file)
+            xml_loc = os.path.join('tests/test_events', xml_file)
+            yaml_loc = xml_loc[:-4] + ".yaml"
+
         trig = parsed_VOEvent(xml_loc, packet=xml_packet)
-        print("Trig details:")
-        print(trig.__dict__)
-        # print(f"Dur:  {trig.trig_duration} s")
-        # print(f"ID:   {trig.trig_id}")
-        # print(f"Type: {trig.event_type}")
-        # print(f"Trig position: {trig.ra} {trig.dec} {trig.err}")
+
+        # read in yaml of expected parsed_VOEvent dict
+        # dump file for future tests
+        #if xml_file is not None:
+        #    with open(yaml_loc, 'w') as stream:
+        #        dump(dict(trig.__dict__), stream)
+
+        # Convert 'event_observed' to string as it's easier to compare than datetime
+        trig.__dict__['event_observed'] = str(trig.__dict__['event_observed'])
+        # Set xml to None to prevent path errors when testing in different locations
+        trig.__dict__['xml'] = None
+        # Read in expected class and do the same
+        with open(yaml_loc, 'r') as stream:
+            expected_trig = load(stream, Loader=Loader)
+            expected_trig['event_observed'] = str(expected_trig['event_observed'])
+            expected_trig['xml'] = None
+            # Put the packet through prettystr so they match
+            expected_trig['packet'] = voeventparse.prettystr(voeventparse.loads(expected_trig['packet'].encode()))
 
         # Compare to expected
-        assert_equal(trig.trig_duration, exp_parse['trig_duration'])
-        assert_equal(trig.event_type, exp_parse['event_type'])
-        assert_equal(trig.sequence_num, exp_parse['sequence_num'])
-        assert_equal(trig.trig_id, exp_parse['trig_id'])
-        assert_equal(trig.ra, exp_parse['ra'])
-        assert_equal(trig.dec, exp_parse['dec'])
-        assert_equal(trig.err, exp_parse['err'])
-        assert_equal(trig.most_likely_index, exp_parse['most_likely_index'])
-        assert_equal(trig.detect_prob, exp_parse['detect_prob'])
-        assert_equal(trig.telescope, exp_parse['telescope'])
-        assert_equal(trig.ignore, exp_parse['ignore'])
-
+        assert_equal(trig.__dict__, expected_trig)
 
         # Send it through trigger logic
-        trigger_bool, debug_bool, short_bool, trigger_message = worth_observing(trig)
-        print(f"{trigger_bool}, {debug_bool}, {short_bool}")
-        print(f"{trigger_message}")
+        trigger_bool, debug_bool, pending_bool, trigger_message = worth_observing_grb(
+            trig_duration=trig.trig_duration,
+            fermi_most_likely_index=trig.fermi_most_likely_index,
+            fermi_detection_prob=trig.fermi_detection_prob,
+            swift_rate_signif=trig.swift_rate_signif,
+        )
+        logger.debug(f"{trigger_bool}, {debug_bool}, {pending_bool}")
+        logger.debug(f"{trigger_message}")
 
         # Compare to expected
         assert_equal(trigger_bool, exp_worth_obs[0])
         assert_equal(debug_bool, exp_worth_obs[1])
-        assert_equal(short_bool, exp_worth_obs[2])
+        assert_equal(pending_bool, exp_worth_obs[2])
         assert_equal(trigger_message, exp_worth_obs[3])
 
 if __name__ == "__main__":

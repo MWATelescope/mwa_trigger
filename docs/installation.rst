@@ -66,7 +66,7 @@ Run the following commands from the trigger_webapp subdirectory so Django can se
    python manage.py migrate trigger_app
    python manage.py migrate
    python manage.py migrate --run-syncdb
-   python manage.py loaddata deafult_data.yaml
+   python manage.py loaddata default_data.yaml
 
 
 Create a superuser
