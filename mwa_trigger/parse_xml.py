@@ -36,7 +36,7 @@ def get_telescope(ivorn):
         return "HESS"
 
     # Not found a know telescope so trying some simple logic
-    return ivorn.split("//")[1].split("/")[1].split("#")[0]
+    return str(ivorn.split("//")[1].split("/")[1].split("#")[0])
 
 
 def get_event_type(ivorn):
@@ -45,7 +45,7 @@ def get_event_type(ivorn):
         # find first integer
         if trig_type_str[i].isdigit():
             break
-    return trig_type_str[: i - 1]
+    return str(trig_type_str[: i - 1])
 
 
 def get_source_types(telescope, event_type, source_name, v):
@@ -128,6 +128,9 @@ class parsed_VOEvent:
             ]
         self.parse()
 
+    def __iter__(self):
+        return self.__dict__.iteritems()
+
     def parse(self):
         # Read in xml
         if self.packet is None:
@@ -144,13 +147,13 @@ class parsed_VOEvent:
 
         # See if the trigger has a source name
         if self.telescope == "SWIFT" and self.event_type == "BAT_GRB_Pos":
-            self.source_name = v.Why.Inference.Name
+            self.source_name = str(v.Why.Inference.Name)
         elif self.telescope == "MAXI":
             # MAXI uses a Source_Name parameter
             src = v.find(".//Param[@name='Source_Name']")
             if src is not None:
                 # MAXI sometimes puts spaces at the start of the string!
-                self.source_name = src.attrib['value'].strip()
+                self.source_name = str(src.attrib['value'].strip())
 
         # Work out what type of source it is
         self.source_type = get_source_types(self.telescope, self.event_type, self.source_name, v)
