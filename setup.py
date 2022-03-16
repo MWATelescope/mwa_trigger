@@ -19,7 +19,7 @@ setup(name="mwa_trigger",
             'healpy',
             'mwa_pb'
       ],
-      scripts=[],
+      scripts=['trigger_webapp/upload_xml.py'],
       setup_requires=['pytest-runner'],
       tests_require=['pytest']
 )

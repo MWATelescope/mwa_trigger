@@ -21,6 +21,7 @@ cycler==0.11.0
 debugpy==1.5.1
 decorator==5.1.1
 Django==3.2.5
+django-apscheduler==0.6.2
 djangorestframework==3.13.1
 docutils==0.17.1
 dpcpp-cpp-rt==2022.0.2
@@ -105,6 +106,7 @@ twilio==7.5.1
 Twisted==21.7.0
 typing-extensions==3.10.0.2
 urllib3==1.26.7
+uWSGI==2.0.20
 voevent-parse==1.0.3
 wcwidth==0.2.5
 Werkzeug==2.0.2

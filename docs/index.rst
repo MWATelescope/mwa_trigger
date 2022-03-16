@@ -19,6 +19,7 @@ with the MWA and ATCA.
    :caption: Web Application:
 
    installation
+   running_server
    new_proposal
    new_user
    using_the_database

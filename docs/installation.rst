@@ -58,7 +58,7 @@ The following commands will set up the Postgres database for the web app. Replac
 Setup database for the first time
 ---------------------------------
 
-Run the following commands from the trigger_webapp subdirectory so Django can setup up the database stucture and upload defaults
+Run the following commands from the trigger_webapp subdirectory so Django can setup up the database structure and upload defaults
 
 .. code-block::
 

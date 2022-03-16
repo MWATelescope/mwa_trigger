@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import UserAlerts, AdminAlerts, VOEvent, TriggerEvent, CometLog, Status, ProposalSettings, ProposalDecision, Observations
+from .models import UserAlerts, AdminAlerts, VOEvent, TriggerEvent, Status, ProposalSettings, ProposalDecision, Observations
 from .telescope_observe import trigger_observation
 
 from mwa_trigger.parse_xml import parsed_VOEvent
@@ -14,8 +14,6 @@ import voeventparse
 import os
 import threading
 import time
-from schedule import Scheduler
-from subprocess import PIPE, Popen
 from twilio.rest import Client
 import datetime
 from astropy import units as u
@@ -338,68 +336,15 @@ def create_admin_alerts_user(sender, instance, **kwargs):
             s.save()
 
 
-def output_popen_stdout(process):
-    output = process.stdout.readline()
-    if output:
-        # New output so send it to the log
-        CometLog.objects.create(log=output.strip().decode())
-    comet_status = Status.objects.get(name='twistd_comet')
-    poll = process.poll()
-    if poll is None:
-        # Process is still running
-        comet_status.status = 0
-    elif poll == 0:
-        # Finished for some reason
-        comet_status.status = 2
+def on_startup(sender, **kwargs):
+    # Create a twistd comet status object and set it to stopped until the twistd_comet_wrapper.py is called
+    if Status.objects.filter(name='twistd_comet').exists():
+        Status.objects.filter(name='twistd_comet').update(status=2)
     else:
-        # Broken
-        comet_status.status = 1
-
-
-
-def run_continuously(self, interval=10):
-    """Got from
-    https://stackoverflow.com/questions/44896618/django-run-a-function-every-x-seconds
-
-    Continuously run, while executing pending jobs at each elapsed
-    time interval.
-    @return cease_continuous_run: threading.Event which can be set to
-    cease continuous run.
-    Please note that it is *intended behavior that run_continuously()
-    does not run missed jobs*. For example, if you've registered a job
-    that should run every minute and you set a continuous run interval
-    of one hour then your job won't be run 60 times at each interval but
-    only once.
-    """
-
-    cease_continuous_run = threading.Event()
-
-    class ScheduleThread(threading.Thread):
-
-        @classmethod
-        def run(cls):
-            while not cease_continuous_run.is_set():
-                self.run_pending()
-                time.sleep(interval)
-
-    continuous_thread = ScheduleThread()
-    continuous_thread.setDaemon(True)
-    continuous_thread.start()
-    return cease_continuous_run
-
-Scheduler.run_continuously = run_continuously
+        Status.objects.create(name='twistd_comet', status=2)
 
 
 # Getting a signal from views.py which indicates that the server has started
 startup_signal = Signal()
-
-def on_startup(sender, **kwargs):
-    print("Starting twistd")
-    process = Popen("twistd -n comet --local-ivo=ivo://hotwired.org/test --remote=voevent.4pisky.org --cmd=/home/nick/code/mwa_trigger/trigger_webapp/upload_xml.py", shell=True, stdout=PIPE)
-    scheduler = Scheduler()
-    scheduler.every(1).minutes.do(output_popen_stdout, process=process)
-    scheduler.run_continuously()
-    # Create status model if not already made
-    Status.objects.get_or_create(name='twistd_comet', status=0)
-
+# Run twistd startup function
 startup_signal.connect(on_startup, dispatch_uid='models-startup')

@@ -185,7 +185,7 @@ class Status(models.Model):
         (BROKEN, 'Broken'),
         (STOPPED, 'Stopped')
     )
-    name = models.CharField(max_length=64, blank=True, null=True)
+    name = models.CharField(max_length=64, blank=True, null=True, unique=True)
     status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES)
 
 
