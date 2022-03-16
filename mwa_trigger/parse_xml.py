@@ -153,7 +153,7 @@ class parsed_VOEvent:
             src = v.find(".//Param[@name='Source_Name']")
             if src is not None:
                 # MAXI sometimes puts spaces at the start of the string!
-                self.source_name = str(src.attrib['value'].strip())
+                self.source_name = str(src.attrib['value']).strip()
 
         # Work out what type of source it is
         self.source_type = get_source_types(self.telescope, self.event_type, self.source_name, v)
