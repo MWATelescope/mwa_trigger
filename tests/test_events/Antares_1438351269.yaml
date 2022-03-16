@@ -1,0 +1,61 @@
+dec: null
+err: null
+event_observed: null
+event_type: '143835126'
+fermi_detection_prob: null
+fermi_most_likely_index: null
+grb_ident: null
+ignore: true
+packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=\"\
+  ivo://nasa.gsfc.gcn/Antares_Alert#1438351269\" role=\"observation\" version=\"2.0\"\
+  \ xsi:schemaLocation=\"http://www.ivoa.net/xml/VOEvent/v1.1 http://www.ivoa.net/xml/VOEvent/VOEvent-v1.1.xsd\"\
+  >\n  <Who>\n    <AuthorIVORN>ivo://nasa.gsfc.tan/gcn</AuthorIVORN>\n    <Author>\n\
+  \      <shortName>Antares (via VO-GCN)</shortName>\n      <contactName>Damien Dornic</contactName>\n\
+  \      <contactPhone>+1-33620882320</contactPhone>\n      <contactEmail>dornic@cppm.in2p3.fr</contactEmail>\n\
+  \    </Author>\n    <Date>2019-11-26T21:55:48.081</Date>\n    <Description>This\
+  \ VOEvent message was created with GCN VOE version: 1.22 11nov15</Description>\n\
+  \  </Who>\n  <What>\n    <Param name=\"TrigID\" dataType=\"int\" value=\"1438351269\"\
+  \ ucd=\"meta.number\"/>\n    <Param name=\"N_Hits\" dataType=\"int\" value=\"110\"\
+  \ unit=\"cts\"/>\n    <Param name=\"Diff_AA_BB\" dataType=\"float\" value=\"0.9171\"\
+  \ unit=\"deg\"/>\n    <Param name=\"isRealAlert\" dataType=\"bool\" value=\"true\"\
+  \ unit=\"\"/>\n    <Param name=\"pvalue\" dataType=\"float\" value=\"0.008109260\"\
+  \ unit=\"\"/>\n    <Param name=\"ranking\" dataType=\"int\" value=\"1\" unit=\"\"\
+  />\n    <Description>Location of an HE neutrino.</Description>\n  </What>\n  <WhereWhen>\n\
+  \    <ObsDataLocation>\n      <ObservatoryLocation>\n        <AstroCoordSystem id=\"\
+  UTC-GEOD-TOPO\"/>\n        <AstroCoords coord_system_id=\"UTC-GEOD-TOPO\">\n   \
+  \       <Position3D unit=\"deg-deg-m\">\n            <Name1>longitude</Name1>\n\
+  \            <Name2>latitude</Name2>\n            <Name3>elevation</Name3>\n   \
+  \         <Value3>\n              <C1>0.0</C1>\n              <C2>0.0</C2>\n   \
+  \           <C3>0.0</C3>\n            </Value3>\n          </Position3D>\n     \
+  \   </AstroCoords>\n      </ObservatoryLocation>\n      <ObservationLocation>\n\
+  \        <AstroCoordSystem id=\"UTC-FK5-GEO\"/>\n        <AstroCoords coord_system_id=\"\
+  UTC-FK5-GEO\">\n          <Time unit=\"s\">\n            <TimeInstant>\n       \
+  \       <ISOTime>2019-11-26T21:55:34.000</ISOTime>\n            </TimeInstant>\n\
+  \          </Time>\n          <Position2D unit=\"deg\">\n            <Name1>RA</Name1>\n\
+  \            <Name2>Dec</Name2>\n            <Value2>\n              <C1>156.9570</C1>\n\
+  \              <C2>-21.2740</C2>\n            </Value2>\n            <Error2Radius>0.3250</Error2Radius>\n\
+  \          </Position2D>\n        </AstroCoords>\n      </ObservationLocation>\n\
+  \    </ObsDataLocation>\n    <Description>The RA,Dec coordinates are of the neutrino.</Description>\n\
+  \  </WhereWhen>\n  <How>\n    <Description>Antares neutrino telescope</Description>\n\
+  \    <Reference uri=\"http://antares.in2p3.fr\" type=\"url\"/>\n  </How>\n  <Why\
+  \ importance=\"0.5\">\n    <Inference probability=\"0.5\">\n      <Concept>process.variation.burst;em.gamma</Concept>\n\
+  \    </Inference>\n  </Why>\n  <Citations>\n    <EventIVORN cite=\"followup\"/>\n\
+  \    <Description>This is the position of the neutrino.</Description>\n  </Citations>\n\
+  \  <Description>\n    </Description>\n  <original_prefix>voe</original_prefix>\n\
+  </VOEvent>\n"
+ra: null
+sequence_num: null
+source_name: null
+source_type: NU
+swift_rate_signif: null
+telescope: Antares
+trig_duration: null
+trig_id: null
+trig_pairs:
+- SWIFT_BAT_GRB_Pos
+- SWIFT_XRT_Pos
+- Fermi_GBM_Flt_Pos
+- Fermi_GBM_Gnd_Pos
+- Fermi_GBM_Fin_Pos
+- HESS_GRB_To
+xml: tests/test_events/Antares_1438351269.xml
