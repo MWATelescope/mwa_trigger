@@ -82,7 +82,7 @@ EVENTHANDLERS = [
                  GRB_fermi_swift.processevent,
 #                 FlareStar_swift_maxi.processevent,
 #                 GW_LIGO.processevent,
-#                 Neutrino.processevent,
+                 Neutrino.processevent,
                  ]
 
 Pyro4.config.COMMTIMEOUT = 10.0
