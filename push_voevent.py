@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#!/usr/bin/python
 
 """Takes the XML for a VO event on standard input, and passes it on to the running
    voevent_handler process, where it will be queued and processed.
