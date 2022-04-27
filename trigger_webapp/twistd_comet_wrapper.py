@@ -7,8 +7,9 @@ import django
 django.setup()
 from django.conf import settings
 
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, call
 import time
+import glob
 
 from trigger_app.models import CometLog, Status
 
@@ -45,23 +46,31 @@ if __name__ == '__main__':
     # kill unterminated twistd jobs
     if os.path.exists("/tmp/twistd_comet.pid"):
         call("kill `cat /tmp/twistd_comet.pid`", shell=True)
+
+    # Collect all the remote servers
+    remote_command = ""
+    for tc_id, remote in enumerate(settings.VOEVENT_REMOTES):
+        remote_command += f"--remote={remote} "
+
     logger.info("Starting twistd")
-    process = Popen("twistd --pidfile /tmp/twistd_comet.pid -n comet --local-ivo=ivo://hotwired.org/test --remote=voevent.4pisky.org --cmd=upload_xml.py", shell=True, stdout=PIPE)
+    process = Popen(f"twistd --pidfile /tmp/twistd_comet.pid -n comet --local-ivo=ivo://hotwired.org/test {remote_command} --cmd=upload_xml.py", shell=True, stdout=PIPE)
     # get initial output right away
     output_popen_stdout(process)
+
     # Add the schedule job
     scheduler = BackgroundScheduler(timezone=settings.TIME_ZONE)
-    #scheduler.add_jobstore(DjangoJobStore(), "default")
-
     scheduler.add_job(
         output_popen_stdout,
         trigger=CronTrigger(second="*/59"),  # Every 60 seconds
         id="output_popen_stdout",
         max_instances=1,
         replace_existing=True,
-        kwargs={'process':process},
+        kwargs={
+            'process':process,
+        },
     )
     logger.info("Added job 'output_popen_stdout'.")
+
     logger.info("Starting scheduler...")
     scheduler.start()
     logger.info("I moved on")
