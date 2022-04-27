@@ -47,6 +47,23 @@ h3{
     border-top: 1px solid #eceeef;
 }
 
+
+/* Simple thin table */
+.table-thin-left {
+    float: left;
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 1rem;
+    vertical-align: top;
+    margin-left: auto;
+    margin-right: 100%;
+}
+.table-thin-left td {
+    padding: 0.75rem;
+    vertical-align: top;
+    border-top: 1px solid #eceeef;
+}
+
 /* Fancy table I got from the internet */
 .fl-table {
     border-radius: 5px;
