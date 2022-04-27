@@ -6,14 +6,24 @@
   <h1>MWA Trigger Home Page</h1>
   <h3><a href="https://mwa-trigger.readthedocs.io/en/latest/" style="text-decoration:None">MWA Trigger Documentation</a></h3>
   <h3>VOEvent Receiving Status (twistd comet)</h3>
-  {% if twistd_comet_status.status > 0 %}
-    <p class="NegativeTransaction">
-  {% else %}
-    <p class="PositiveTransaction">
-  {% endif %}
-  {{ twistd_comet_status.get_status_display }} </p>
+  <table class="table-thin-left">
+    <thead>
+    <tr>
+      <th>Status</th>
+      <th>Remotes</th>
+    </tr>
+    </thead>
+    <tr>
+      {% if twistd_comet_status.status > 0 %}
+        <td class="NegativeTransaction">
+      {% else %}
+        <td class="PositiveTransaction">
+      {% endif %}
+      {{ twistd_comet_status.get_status_display }} </td>
+      <td> {{ remotes }} </td>
+    </tr>
+  </table>
   <p><a href="/comet_log/" style="text-decoration:None">View Comet Log</a></p>
-
   <h3>Current Proposal Settings (Summarised)</h3>
   <table class="fl-table">
     <thead>
@@ -45,7 +55,7 @@
     </tr>
     <!-- If object_list is empty  -->
     {% empty %}
-    <li>No Settings yet.</li>
+    <tr><td>No Settings yet.</td></tr>
     {% endfor %}
     </table>
     <p><a href="/admin/trigger_app/proposalsettings/" style="text-decoration:None">Edit Proposal Settings</a></p>

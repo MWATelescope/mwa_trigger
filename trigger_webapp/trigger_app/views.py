@@ -56,9 +56,10 @@ class ProposalDecisionList(ListView):
 
 def home_page(request):
     comet_status = models.Status.objects.get(name='twistd_comet')
-    settings = models.ProposalSettings.objects.all()
+    prop_settings = models.ProposalSettings.objects.all()
     return render(request, 'trigger_app/home_page.html', {'twistd_comet_status': comet_status,
-                                                          'settings':settings})
+                                                          'settings':prop_settings,
+                                                          'remotes':", ".join(settings.VOEVENT_REMOTES)})
 
 
 def TriggerEvent_details(request, tid):
