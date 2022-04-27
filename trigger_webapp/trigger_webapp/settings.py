@@ -23,6 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'www.mwa-trigger.duckdns.org', 'mwa-trigger.duckdns.org', '146.118.70.58']
 
+# Remote hosts we monitor for VOEvents
+VOEVENT_REMOTES = ["voevent.4pisky.org", "196.44.140.214"]
+
 
 # Application definition
 
