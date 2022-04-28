@@ -22,7 +22,11 @@ def write_and_upload(xml_string):
     # Upload
     session = requests.session()
     session.auth = (os.environ['UPLOAD_USER'], os.environ['UPLOAD_PASSWORD'])
-    url = 'https://mwa-trigger.duckdns.org/voevent_create/'
+    SYSTEM_ENV = os.environ.get('SYSTEM_ENV', None)
+    if SYSTEM_ENV == 'PRODUCTION' or SYSTEM_ENV == 'STAGING':
+        url = 'https://mwa-trigger.duckdns.org/voevent_create/'
+    else:
+        url = 'http://127.0.0.1:8000/voevent_create/'
     data = {
         'telescope' : trig.telescope,
         'xml_packet' : xml_string,

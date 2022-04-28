@@ -5,6 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.db import transaction
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -36,14 +37,17 @@ if 'runserver' in sys.argv:
 class VOEventList(ListView):
     # specify the model for list view
     model = models.VOEvent
+    paginate_by = 100
 
 class TriggerEventList(ListView):
     # specify the model for list view
     model = models.TriggerEvent
+    paginate_by = 100
 
 class CometLogList(ListView):
     # specify the model for list view
     model = models.CometLog
+    paginate_by = 100
 
 class ProposalSettingsList(ListView):
     # specify the model for list view
@@ -52,13 +56,15 @@ class ProposalSettingsList(ListView):
 class ProposalDecisionList(ListView):
     # specify the model for list view
     model = models.ProposalDecision
+    paginate_by = 100
 
 
 def home_page(request):
     comet_status = models.Status.objects.get(name='twistd_comet')
-    settings = models.ProposalSettings.objects.all()
+    prop_settings = models.ProposalSettings.objects.all()
     return render(request, 'trigger_app/home_page.html', {'twistd_comet_status': comet_status,
-                                                          'settings':settings})
+                                                          'settings':prop_settings,
+                                                          'remotes':", ".join(settings.VOEVENT_REMOTES)})
 
 
 def TriggerEvent_details(request, tid):
