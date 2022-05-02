@@ -70,20 +70,20 @@ class VOEventList(ListView):
 def VOEventList(request):
     # Apply filters
     f = VOEventFilter(request.GET, queryset=models.VOEvent.objects.all())
-    # voevents = f.qs
-    # print(voevents)
+    voevents = f.qs
+    print(voevents)
 
-    # # Paginate
-    # page = request.GET.get('page', 1)
-    # paginator = Paginator(voevents, 100)
-    # try:
-    #     voevents = paginator.page(page)
-    # except InvalidPage:
-    #     # if the page contains no results (EmptyPage exception) or
-    #     # the page number is not an integer (PageNotAnInteger exception)
-    #     # return the first page
-    #     voevents = paginator.page(1)
-    return render(request, 'trigger_app/voevent_list.html', {'filter': f})
+    # Paginate
+    page = request.GET.get('page', 1)
+    paginator = Paginator(voevents, 100)
+    try:
+        voevents = paginator.page(page)
+    except InvalidPage:
+        # if the page contains no results (EmptyPage exception) or
+        # the page number is not an integer (PageNotAnInteger exception)
+        # return the first page
+        voevents = paginator.page(1)
+    return render(request, 'trigger_app/voevent_list.html', {'filter': f, "page_obj":voevents})
 
 class TriggerEventList(ListView):
     # specify the model for list view

@@ -98,7 +98,7 @@
       </tr>
     </thead>
     <!-- Iterate over object_list -->
-    {% for object in filter.qs %}
+    {% for object in page_obj %}
     <!-- Display Objects -->
     {% if object.ignored %}
       <tr class="grey-tr">
