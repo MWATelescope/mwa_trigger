@@ -3,9 +3,13 @@ from django.views.generic.list import ListView
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db import transaction
+from django.db.models import Count, Q, F, Value, Subquery, OuterRef, CharField
+from django.db.models.functions import Concat
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.contrib.postgres.aggregates import StringAgg
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger, InvalidPage
+from sqlalchemy import subquery
 import django_filters
 
 from rest_framework import status
@@ -61,11 +65,6 @@ class VOEventFilter(django_filters.FilterSet):
         model = models.VOEvent
         fields = '__all__'
 
-class VOEventList(ListView):
-    # specify the model for list view
-    model = models.VOEvent
-    paginate_by = 100
-    filterset_class = VOEventFilter
 
 def VOEventList(request):
     # Apply filters
@@ -85,22 +84,38 @@ def VOEventList(request):
         voevents = paginator.page(1)
     return render(request, 'trigger_app/voevent_list.html', {'filter': f, "page_obj":voevents})
 
-class TriggerEventList(ListView):
-    # specify the model for list view
-    model = models.TriggerEvent
-    paginate_by = 100
+def TriggerEventList(request):
+    # Find all telescopes for each trigger event
+    voevents = models.VOEvent.objects.filter(ignored=False)
+    trigger_event = models.TriggerEvent.objects.all()
+
+    # Loop over the trigger events and grab all the telescopes of the VOEvents
+    tevent_telescope_list = []
+    for tevent in trigger_event:
+        tevent_telescope_list.append(
+            ' '.join(
+                set(voevents.filter(trigger_group_id=tevent).values_list('telescope', flat=True))
+            )
+        )
+
+    # Paginate
+    page = request.GET.get('page', 1)
+    # zip the trigger event and the tevent_telescope_list together so I can loop over both in the html
+    paginator = Paginator(list(zip(trigger_event, tevent_telescope_list)), 100)
+    try:
+        object_list = paginator.page(page)
+    except InvalidPage:
+        object_list = paginator.page(1)
+    return render(request, 'trigger_app/triggerevent_list.html', {'object_list':object_list})
 
 class CometLogList(ListView):
-    # specify the model for list view
     model = models.CometLog
     paginate_by = 100
 
 class ProposalSettingsList(ListView):
-    # specify the model for list view
     model = models.ProposalSettings
 
 class ProposalDecisionList(ListView):
-    # specify the model for list view
     model = models.ProposalDecision
     paginate_by = 100
 

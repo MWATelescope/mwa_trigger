@@ -26,7 +26,7 @@ urlpatterns = [
     path('user_alert_status/', views.user_alert_status),
     path('user_alert_delete/<int:id>/', views.user_alert_delete),
     path('user_alert_create/<int:id>/', views.user_alert_create),
-    path('trigger_log/', views.TriggerEventList.as_view()),
+    path('trigger_log/', views.TriggerEventList),
     path('triggerevent_details/<int:tid>/', views.TriggerEvent_details),
     path('voevent_log/', views.VOEventList),
     path('comet_log/', views.CometLogList.as_view()),
