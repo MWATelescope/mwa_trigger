@@ -5,7 +5,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.db import transaction
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger, InvalidPage
+import django_filters
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -34,10 +35,55 @@ if 'runserver' in sys.argv:
     # Send off start up signal because server is launching in development
     startup_signal.send(sender=startup_signal)
 
+class VOEventFilter(django_filters.FilterSet):
+    recieved_data = django_filters.DateTimeFromToRangeFilter()
+    event_observed = django_filters.DateTimeFromToRangeFilter()
+
+    duration__lte = django_filters.NumberFilter(field_name='duration', lookup_expr='lte')
+    duration__gte = django_filters.NumberFilter(field_name='duration', lookup_expr='gte')
+
+    ra__lte = django_filters.NumberFilter(field_name='ra', lookup_expr='lte')
+    ra__gte = django_filters.NumberFilter(field_name='ra', lookup_expr='gte')
+
+    dec__lte = django_filters.NumberFilter(field_name='dec', lookup_expr='lte')
+    dec__gte = django_filters.NumberFilter(field_name='dec', lookup_expr='gte')
+
+    pos_error__lte = django_filters.NumberFilter(field_name='pos_error', lookup_expr='lte')
+    pos_error__gte = django_filters.NumberFilter(field_name='pos_error', lookup_expr='gte')
+
+    fermi_detection_prob__lte = django_filters.NumberFilter(field_name='fermi_detection_prob', lookup_expr='lte')
+    fermi_detection_prob__gte = django_filters.NumberFilter(field_name='fermi_detection_prob', lookup_expr='gte')
+
+    swift_rate_signif__lte = django_filters.NumberFilter(field_name='swift_rate_signif', lookup_expr='lte')
+    swift_rate_signif__gte = django_filters.NumberFilter(field_name='swift_rate_signif', lookup_expr='gte')
+
+    class Meta:
+        model = models.VOEvent
+        fields = '__all__'
+
 class VOEventList(ListView):
     # specify the model for list view
     model = models.VOEvent
     paginate_by = 100
+    filterset_class = VOEventFilter
+
+def VOEventList(request):
+    # Apply filters
+    f = VOEventFilter(request.GET, queryset=models.VOEvent.objects.all())
+    # voevents = f.qs
+    # print(voevents)
+
+    # # Paginate
+    # page = request.GET.get('page', 1)
+    # paginator = Paginator(voevents, 100)
+    # try:
+    #     voevents = paginator.page(page)
+    # except InvalidPage:
+    #     # if the page contains no results (EmptyPage exception) or
+    #     # the page number is not an integer (PageNotAnInteger exception)
+    #     # return the first page
+    #     voevents = paginator.page(1)
+    return render(request, 'trigger_app/voevent_list.html', {'filter': f})
 
 class TriggerEventList(ListView):
     # specify the model for list view

@@ -28,7 +28,7 @@ urlpatterns = [
     path('user_alert_create/<int:id>/', views.user_alert_create),
     path('trigger_log/', views.TriggerEventList.as_view()),
     path('triggerevent_details/<int:tid>/', views.TriggerEvent_details),
-    path('voevent_log/', views.VOEventList.as_view()),
+    path('voevent_log/', views.VOEventList),
     path('comet_log/', views.CometLogList.as_view()),
     path('proposal_settings/', views.ProposalSettingsList.as_view()),
     path('proposal_decision_details/<int:id>/', views.ProposalDecision_details),

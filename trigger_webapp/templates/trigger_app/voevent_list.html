@@ -5,6 +5,77 @@
 <title>VOEvent Log</title>
 <div class="container-fluid">
   <h1>VOEvent Log</h1>
+  <h3>Filter VOEvents:</h3>
+  <div style="background-color:#f8f8f8; width:90%; margin: 0 auto; padding-bottom: 20px;">
+  <form action="" method="get">
+    <table>
+      <tr>
+        <td width="15%">{{ filter.form.ignored.label_tag }}</td>
+        <td width="15%">{{ filter.form.ignored }}</td>
+        <td width="15%">Trigger group ID:</td>
+        <td width="15%">{{ filter.form.trigger_group_id }}</td>
+        <td width="15%"></td>
+        <td width="7.5%">Min (inclusive)</td>
+        <td width="7.5%">Max (inclusive)</td>
+      </tr>
+      <tr>
+        <td>{{ filter.form.source_type.label_tag }}</td>
+        <td>{{ filter.form.source_type }}</td>
+        <td>Event ID:</td>
+        <td>{{ filter.form.trigger_id }}</td>
+        <td>Duration (s):</td>
+        <td>{{ filter.form.duration__gte }}</td>
+        <td>{{ filter.form.duration__lte }}</td>
+      </tr>
+      <tr>
+        <td>{{ filter.form.telescope.label_tag }}</td>
+        <td>{{ filter.form.telescope }}</td>
+        <td>{{ filter.form.source_name.label_tag }}</td>
+        <td>{{ filter.form.source_name }}</td>
+        <td>RA (deg):</td>
+        <td>{{ filter.form.ra__gte }}</td>
+        <td>{{ filter.form.ra__lte }}</td>
+      </tr>
+      <tr>
+        <td>{{ filter.form.event_type.label_tag }}</td>
+        <td>{{ filter.form.event_type }}</td>
+        <td>{{ filter.form.sequence_num.label_tag }}</td>
+        <td>{{ filter.form.sequence_num }}</td>
+        <td>Dec (deg):</td>
+        <td>{{ filter.form.dec__gte }}</td>
+        <td>{{ filter.form.dec__lte }}</td>
+      </tr>
+      <tr>
+        <td>Recieved date (start)</td>
+        <td><input type="datetime-local" name="recieved_data_after" value="{{filter.form.recieved_data_after}}"></td>
+        <td>Recieved date (end)</td>
+        <td><input type="datetime-local" name="recieved_data_before" value="{{filter.form.recieved_data_before}}"></td>
+        <td>Position error (deg):</td>
+        <td>{{ filter.form.pos_error__gte }}</td>
+        <td>{{ filter.form.pos_error__lte }}</td>
+      </tr>
+      <tr>
+        <td>Observed date (start)</td>
+        <td><input type="datetime-local" name="event_observed_after" value="{{filter.form.event_observed_after}}"></td>
+        <td>Observed date (end)</td>
+        <td><input type="datetime-local" name="event_observed_before" value="{{filter.form.event_observed_before}}"></td>
+        <td>Fermi Detection Probability (%):</td>
+        <td>{{ filter.form.fermi_detection_prob__gte }}</td>
+        <td>{{ filter.form.fermi_detection_prob__lte }}</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>SWIFT Rate Significance (sigma):</td>
+        <td>{{ filter.form.swift_rate_signif__gte }}</td>
+        <td>{{ filter.form.swift_rate_signif__lte }}</td>
+      </tr>
+    </table>
+    <input class="btn btn-primary" type="submit" />
+  </form>
+  </div>
   <table class="fl-table">
     <thead>
       <tr>
@@ -27,7 +98,7 @@
       </tr>
     </thead>
     <!-- Iterate over object_list -->
-    {% for object in object_list %}
+    {% for object in filter.qs %}
     <!-- Display Objects -->
     {% if object.ignored %}
       <tr class="grey-tr">
