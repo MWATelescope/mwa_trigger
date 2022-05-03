@@ -130,20 +130,37 @@ def home_page(request):
 
 def TriggerEvent_details(request, tid):
     trigger_event = models.TriggerEvent.objects.get(id=tid)
+
     # covert ra and dec to HH:MM:SS.SS format
     c = SkyCoord( trigger_event.ra, trigger_event.dec, frame='icrs', unit=(u.deg,u.deg))
     trigger_event.ra = c.ra.to_string(unit=u.hour, sep=':')
     trigger_event.dec = c.dec.to_string(unit=u.degree, sep=':')
 
+    # grab telescope names
     voevents = models.VOEvent.objects.filter(trigger_group_id=trigger_event)
+    telescopes = ' '.join(set(voevents.values_list('telescope', flat=True)))
+
+    # grab event ID
+    event_id = list(dict.fromkeys(voevents.values_list('trigger_id')))[0][0]
+
+    # list all voevents with the same id
+    event_id_voevents = models.VOEvent.objects.filter(trigger_id=event_id)
+
+    # list all prop decisions
     prop_decs = models.ProposalDecision.objects.filter(trigger_group_id=trigger_event)
+
+    # Grab MWA obs if the exist
     mwa_obs = []
     for prop_dec in prop_decs:
         mwa_obs += models.Observations.objects.filter(proposal_decision_id=prop_dec)
+
     return render(request, 'trigger_app/triggerevent_details.html', {'trigger_event':trigger_event,
                                                                      'voevents':voevents,
                                                                      'mwa_obs':mwa_obs,
-                                                                     'prop_decs':prop_decs})
+                                                                     'prop_decs':prop_decs,
+                                                                     'telescopes':telescopes,
+                                                                     'event_id':event_id,
+                                                                     'event_id_voevents':event_id_voevents,})
 
 
 def ProposalDecision_details(request, id):

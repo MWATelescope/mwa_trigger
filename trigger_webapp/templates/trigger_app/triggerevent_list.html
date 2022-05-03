@@ -13,8 +13,8 @@
       <th>Recieved (UTC)</th>
       <th>Earliest Event Observed (UTC)</th>
       <th>Latest Event Observed (UTC)</th>
-      <th>Right Acension (&#176;)</th>
-      <th>Declination (&#176;)</th>
+      <th>RA (&#176;)</th>
+      <th>Dec (&#176;)</th>
       <th>Position Error (&#176;)</th>
     </tr>
     </thead>
@@ -25,9 +25,9 @@
       <td><a href="/triggerevent_details/{{ object.id }}/" style="text-decoration:None">{{ object.id }}</a></td>
       <td>{% if object.source_type  is not None %} {{ object.get_source_type_display }}  {% endif %}</td>
       <td>{{ tele_str }}</td>
-      <td>{{ object.recieved_data }}</td>
-      <td>{{ object.earliest_event_observed }}</td>
-      <td>{{ object.latest_event_observed }}</td>
+      <td>{{ object.recieved_data|date:"Y-m-d H:i:s" }}</td>
+      <td>{{ object.earliest_event_observed|date:"Y-m-d H:i:s" }}</td>
+      <td>{{ object.latest_event_observed|date:"Y-m-d H:i:s" }}</td>
       <td>{{ object.ra }}</td>
       <td>{{ object.dec }}</td>
       <td>{{ object.pos_error }}</td>

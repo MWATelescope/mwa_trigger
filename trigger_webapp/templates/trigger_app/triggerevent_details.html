@@ -4,19 +4,27 @@
 <title>Trigger Event Details</title>
 
 <div class="container-sm">
-  <h2>Trigger Event ID {{ trigger_event.id }}</h2>
+  <h2>{% if trigger_event.source_type  is not None %} {{ trigger_event.get_source_type_display }} {% endif %} Trigger Event ID {{ trigger_event.id }}</h2>
   <table class="table-thin">
     <tr>
+      <td>Telescope(s)</td>
+      <td>{{ telescopes }}</td>
+    </tr>
+    <tr>
+      <td>Event ID</td>
+      <td>{{ event_id }}</td>
+    </tr>
+    <tr>
       <td>Recieved (UTC)</td>
-      <td>{{ trigger_event.recieved_data }}</td>
+      <td>{{ trigger_event.recieved_data|date:"Y-m-d H:i:s" }}</td>
     </tr>
     <tr>
       <td>Earliest Event Observed (UTC)</td>
-      <td>{{ trigger_event.earliest_event_observed }}</td>
+      <td>{{ trigger_event.earliest_event_observed|date:"Y-m-d H:i:s" }}</td>
     </tr>
     <tr>
       <td>Latest Event Observed (UTC)</td>
-      <td>{{ trigger_event.latest_event_observed }}</td>
+      <td>{{ trigger_event.latest_event_observed|date:"Y-m-d H:i:s" }}</td>
     </tr>
     <tr>
       <td>Best Right Acension</td>
@@ -104,27 +112,26 @@
   {% endif %}
 
 
-  <h2>VOEvents</h2>
+  <h2>Trigger Event's VOEvents</h2>
 
   <table class="fl-table">
     <thead>
       <tr>
         <th>ID</th>
-        <th>Recieved (UTC)</th>
-        <th>Observed (UTC)</th>
+        <th>Source Type</th>
         <th>Telescope</th>
         <th>Event Type</th>
+        <th>Recieved (UTC)</th>
+        <th>Observed (UTC)</th>
         <th>Event ID</th>
         <th>Source Name</th>
         <th>Sequence number</th>
         <th>Duration (s)</th>
-        <th>Right Acension (HH:MM:SS)</th>
-        <th>Declination (DD:MM:SS)</th>
+        <th>RA (HH:MM:SS)</th>
+        <th>Dec (DD:MM:SS)</th>
         <th>Position Error (&#176;)</th>
-        <th>Source Type</th>
         <th>Fermi Detection Probability (%)</th>
         <th>SWIFT Rate Significance (sigma)</th>
-        <th>XML File</th>
       </tr>
     </thead>
     <!-- Iterate over object_list -->
@@ -135,11 +142,12 @@
     {% else %}
       <tr>
     {% endif %}
-      <td>{{ voevent.id }}</td>
-      <td>{{ voevent.recieved_data }}</td>
-      <td>{{ voevent.event_observed }}</td>
+      <td><a href="/voevent_view/{{ voevent.id }}" style="text-decoration:None">{{ voevent.id }}</a></td>
+      <td>{% if voevent.source_type  is not None %} {{ voevent.get_source_type_display }}  {% endif %}</td>
       <td>{{ voevent.telescope }}</td>
       <td>{{ voevent.event_type }}</td>
+      <td>{{ voevent.recieved_data|date:"Y-m-d H:i:s" }}</td>
+      <td>{{ voevent.event_observed|date:"Y-m-d H:i:s" }}</td>
       <td>{% if voevent.trigger_id   is not None %} {{ voevent.trigger_id }}   {% endif %}</td>
       <td>{% if voevent.source_name  is not None %} {{ voevent.source_name }}  {% endif %}</td>
       <td>{% if voevent.sequence_num is not None %} {{ voevent.sequence_num }} {% endif %}</td>
@@ -147,17 +155,66 @@
       <td>{% if voevent.ra_hms          is not None %} {{ voevent.ra_hms }}          {% endif %}</td>
       <td>{% if voevent.dec_dms         is not None %} {{ voevent.dec_dms }}         {% endif %}</td>
       <td>{% if voevent.pos_error    is not None %} {{ voevent.pos_error }}    {% endif %}</td>
-      <td>{% if voevent.source_type  is not None %} {{ voevent.get_source_type_display }}  {% endif %}</td>
       <td>{% if voevent.fermi_detection_prob is not None %} {{ voevent.fermi_detection_prob }}  {% endif %}</td>
       <td>{% if voevent.swift_rate_signif    is not None %} {{ voevent.swift_rate_signif    }}  {% endif %}</td>
-      <!-- <td>{{ voevent.xml }}</td> -->
-      <td><a href="/voevent_view/{{ voevent.id }}" style="text-decoration:None">View xml</a></td>
     </tr>
     <!-- If object_list is empty  -->
     {% empty %}
     <li>No objects yet.</li>
     {% endfor %}
     </table>
+
+    <h2> Event ID VOEvents</h2>
+
+    <table class="fl-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Source Type</th>
+          <th>Telescope</th>
+          <th>Event Type</th>
+          <th>Recieved (UTC)</th>
+          <th>Observed (UTC)</th>
+          <th>Event ID</th>
+          <th>Source Name</th>
+          <th>Sequence number</th>
+          <th>Duration (s)</th>
+          <th>RA (HH:MM:SS)</th>
+          <th>Dec (DD:MM:SS)</th>
+          <th>Position Error (&#176;)</th>
+          <th>Fermi Detection Probability (%)</th>
+          <th>SWIFT Rate Significance (sigma)</th>
+        </tr>
+      </thead>
+      <!-- Iterate over object_list -->
+      {% for voevent in event_id_voevents %}
+      <!-- Display Objects -->
+      {% if voevent.ignored %}
+        <tr class="grey-tr">
+      {% else %}
+        <tr>
+      {% endif %}
+        <td><a href="/voevent_view/{{ voevent.id }}" style="text-decoration:None">{{ voevent.id }}</a></td>
+        <td>{% if voevent.source_type  is not None %} {{ voevent.get_source_type_display }}  {% endif %}</td>
+        <td>{{ voevent.telescope }}</td>
+        <td>{{ voevent.event_type }}</td>
+        <td>{{ voevent.recieved_data|date:"Y-m-d H:i:s" }}</td>
+        <td>{{ voevent.event_observed|date:"Y-m-d H:i:s" }}</td>
+        <td>{% if voevent.trigger_id   is not None %} {{ voevent.trigger_id }}   {% endif %}</td>
+        <td>{% if voevent.source_name  is not None %} {{ voevent.source_name }}  {% endif %}</td>
+        <td>{% if voevent.sequence_num is not None %} {{ voevent.sequence_num }} {% endif %}</td>
+        <td>{% if voevent.duration     is not None %} {{ voevent.duration }}     {% endif %}</td>
+        <td>{% if voevent.ra_hms          is not None %} {{ voevent.ra_hms }}          {% endif %}</td>
+        <td>{% if voevent.dec_dms         is not None %} {{ voevent.dec_dms }}         {% endif %}</td>
+        <td>{% if voevent.pos_error    is not None %} {{ voevent.pos_error }}    {% endif %}</td>
+        <td>{% if voevent.fermi_detection_prob is not None %} {{ voevent.fermi_detection_prob }}  {% endif %}</td>
+        <td>{% if voevent.swift_rate_signif    is not None %} {{ voevent.swift_rate_signif    }}  {% endif %}</td>
+      </tr>
+      <!-- If object_list is empty  -->
+      {% empty %}
+      <li>No objects yet.</li>
+      {% endfor %}
+      </table>
 
 </div>
 {% endblock %}
