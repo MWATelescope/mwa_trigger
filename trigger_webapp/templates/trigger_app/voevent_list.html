@@ -106,7 +106,7 @@
       <tr>
     {% endif %}
       <td><a href="/voevent_view/{{ object.id }}" style="text-decoration:None">{{ object.id }}</a></td>
-      <td>{% if object.source_type  is not None %} {{ object.get_source_type_display }}  {% endif %}</td>
+      <td>{% if object.source_type is not None %} {{ object.get_source_type_display }}  {% endif %}</td>
       <td>{{ object.telescope }}</td>
       <td>{{ object.event_type }}</td>
       <td>{{ object.recieved_data|date:"Y-m-d H:i:s" }}</td>
@@ -117,7 +117,14 @@
       {% else %}
         <td><a href="/triggerevent_details/{{ object.trigger_group_id }}/" style="text-decoration:None">{{ object.trigger_group_id }}</a></td>
       {% endif %}
-      <td>{% if object.trigger_id   is not None %} {{ object.trigger_id }}   {% endif %}</td>
+      <td>{% if object.trigger_id is not None %}
+            {% if object.telescope == "SWIFT" and not object.ignored %}
+              <!-- Link to SWIFT telescope page -->
+              <a href="https://gcn.gsfc.nasa.gov/other/{{ object.trigger_id }}.swift" style="text-decoration:None">{{ object.trigger_id }}</a>
+            {% else %}
+              {{ object.trigger_id }}
+            {% endif %}
+          {% endif %}</td>
       <td>{% if object.source_name  is not None %} {{ object.source_name }}  {% endif %}</td>
       <td>{% if object.sequence_num is not None %} {{ object.sequence_num }} {% endif %}</td>
       <td>{% if object.duration     is not None %} {{ object.duration }}     {% endif %}</td>

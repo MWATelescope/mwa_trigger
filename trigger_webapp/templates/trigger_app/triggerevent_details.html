@@ -12,7 +12,14 @@
     </tr>
     <tr>
       <td>Event ID</td>
-      <td>{{ event_id }}</td>
+      <td>{% if event_id is not None %}
+            {% if 'SWIFT' in telescopes  %}
+              <!-- Link to SWIFT telescope page -->
+              <a href="https://gcn.gsfc.nasa.gov/other/{{ event_id }}.swift" style="text-decoration:None">{{ event_id }}</a>
+            {% else %}
+              {{ event_id }}
+            {% endif %}
+          {% endif %}</td>
     </tr>
     <tr>
       <td>Recieved (UTC)</td>

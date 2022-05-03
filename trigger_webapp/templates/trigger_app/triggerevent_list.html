@@ -23,7 +23,7 @@
     <!-- Display Objects -->
     <tr>
       <td><a href="/triggerevent_details/{{ object.id }}/" style="text-decoration:None">{{ object.id }}</a></td>
-      <td>{% if object.source_type  is not None %} {{ object.get_source_type_display }}  {% endif %}</td>
+      <td>{% if object.source_type is not None %} {{ object.get_source_type_display }}  {% endif %}</td>
       <td>{{ tele_str }}</td>
       <td>{{ object.recieved_data|date:"Y-m-d H:i:s" }}</td>
       <td>{{ object.earliest_event_observed|date:"Y-m-d H:i:s" }}</td>
