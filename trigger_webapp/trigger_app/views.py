@@ -70,7 +70,6 @@ def VOEventList(request):
     # Apply filters
     f = VOEventFilter(request.GET, queryset=models.VOEvent.objects.all())
     voevents = f.qs
-    print(voevents)
 
     # Paginate
     page = request.GET.get('page', 1)
