@@ -11,6 +11,7 @@
     <tr>
       <th>Status</th>
       <th>Remotes</th>
+      <th>TCPs</th>
     </tr>
     </thead>
     <tr>
@@ -21,6 +22,7 @@
       {% endif %}
       {{ twistd_comet_status.get_status_display }} </td>
       <td> {{ remotes }} </td>
+      <td> {{ tcps }} </td>
     </tr>
   </table>
   <p><a href="/comet_log/" style="text-decoration:None">View Comet Log</a></p>

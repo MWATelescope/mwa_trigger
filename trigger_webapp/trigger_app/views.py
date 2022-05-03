@@ -125,7 +125,8 @@ def home_page(request):
     prop_settings = models.ProposalSettings.objects.all()
     return render(request, 'trigger_app/home_page.html', {'twistd_comet_status': comet_status,
                                                           'settings':prop_settings,
-                                                          'remotes':", ".join(settings.VOEVENT_REMOTES)})
+                                                          'remotes':", ".join(settings.VOEVENT_REMOTES),
+                                                          'tcps':", ".join(settings.VOEVENT_TCP)})
 
 
 def TriggerEvent_details(request, tid):
