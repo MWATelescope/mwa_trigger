@@ -226,7 +226,7 @@ def ProposalDecision_details(request, id):
     prop_dec = models.ProposalDecision.objects.get(id=id)
 
     # Work out all the telescopes that observed the event
-    voevents = models.VOEvent.objects.filter(associated_event_id=prop_dec.associated_event_id)
+    voevents = models.VOEvent.objects.filter(trigger_group_id=prop_dec.trigger_group_id)
     telescopes = []
     for voevent in voevents:
         telescopes.append(voevent.telescope)
