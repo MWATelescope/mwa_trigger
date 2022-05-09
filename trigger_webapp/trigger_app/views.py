@@ -71,6 +71,9 @@ def VOEventList(request):
     f = VOEventFilter(request.GET, queryset=models.VOEvent.objects.all())
     voevents = f.qs
 
+    # Get position error units
+    poserr_unit = request.GET.get('poserr_unit', 'deg')
+
     # Paginate
     page = request.GET.get('page', 1)
     paginator = Paginator(voevents, 100)
@@ -81,7 +84,7 @@ def VOEventList(request):
         # the page number is not an integer (PageNotAnInteger exception)
         # return the first page
         voevents = paginator.page(1)
-    return render(request, 'trigger_app/voevent_list.html', {'filter': f, "page_obj":voevents})
+    return render(request, 'trigger_app/voevent_list.html', {'filter': f, "page_obj":voevents, "poserr_unit":poserr_unit})
 
 def TriggerEventList(request):
     # Find all telescopes for each trigger event
@@ -154,13 +157,17 @@ def TriggerEvent_details(request, tid):
     for prop_dec in prop_decs:
         mwa_obs += models.Observations.objects.filter(proposal_decision_id=prop_dec)
 
+    # Get position error units
+    poserr_unit = request.GET.get('poserr_unit', 'deg')
+
     return render(request, 'trigger_app/triggerevent_details.html', {'trigger_event':trigger_event,
                                                                      'voevents':voevents,
                                                                      'mwa_obs':mwa_obs,
                                                                      'prop_decs':prop_decs,
                                                                      'telescopes':telescopes,
                                                                      'event_id':event_id,
-                                                                     'event_id_voevents':event_id_voevents,})
+                                                                     'event_id_voevents':event_id_voevents,
+                                                                     'poserr_unit':poserr_unit,})
 
 
 def ProposalDecision_details(request, id):

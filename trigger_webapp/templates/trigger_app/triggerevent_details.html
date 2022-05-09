@@ -1,5 +1,7 @@
 {% extends 'trigger_app/header.html' %}
 
+{% load utils %}
+
 {% block content %}
 <title>Trigger Event Details</title>
 
@@ -42,8 +44,13 @@
       <td>{{ trigger_event.dec }}</td>
     </tr>
     <tr>
-      <td>Best Position Error (&#176;)</td>
-      <td>{{ trigger_event.pos_error }}</td>
+      {% if poserr_unit == "deg" %}
+        <td>Best Position Error (&#176;)</td>
+        <td>{{ trigger_event.pos_error }}</td>
+      {% else %}
+        <td>Best Position Error (arcmin)</td>
+        <td>{% multiply trigger_event.pos_error 60 2 %}</td>
+      {% endif %}
     </tr>
   </table>
 </div>
@@ -61,7 +68,11 @@
         <th>Duration (s)</th>
         <th>Right Acension (&#176;)</th>
         <th>Declination (&#176;)</th>
-        <th>Position Error (&#176;)</th>
+        {% if poserr_unit == "deg" %}
+          <th><a href="?{% url_switch request 'poserr_unit' %}">Position Error (&#176;)</a></th>
+        {% else %}
+          <th><a href="?{% url_switch request 'poserr_unit' %}">Position Error (arcmin)</a></th>
+        {% endif %}
       </tr>
     </thead>
     {% for prop_dec in prop_decs %}
@@ -78,7 +89,15 @@
       <td>{{ prop_dec.duration }}</td>
       <td>{{ prop_dec.ra }}</td>
       <td>{{ prop_dec.dec }}</td>
-      <td>{{ prop_dec.pos_error }}</td>
+      <td>
+      {% if prop_dec.pos_error    is not None %}
+        {% if poserr_unit == "deg" %}
+          {{ prop_dec.pos_error }}
+        {% else %}
+          {% multiply prop_dec.pos_error 60 2 %}
+        {% endif %}
+      {% endif %}
+      </td>
     </tr>
     {% empty %}
     <li>No objects yet.</li>
@@ -136,7 +155,11 @@
         <th>Duration (s)</th>
         <th>RA (HH:MM:SS)</th>
         <th>Dec (DD:MM:SS)</th>
-        <th>Position Error (&#176;)</th>
+        {% if poserr_unit == "deg" %}
+          <th><a href="?{% url_switch request 'poserr_unit' %}">Position Error (&#176;)</a></th>
+        {% else %}
+          <th><a href="?{% url_switch request 'poserr_unit' %}">Position Error (arcmin)</a></th>
+        {% endif %}
         <th>Fermi Detection Probability (%)</th>
         <th>SWIFT Rate Significance (sigma)</th>
       </tr>
@@ -161,7 +184,15 @@
       <td>{% if voevent.duration     is not None %} {{ voevent.duration }}     {% endif %}</td>
       <td>{% if voevent.ra_hms          is not None %} {{ voevent.ra_hms }}          {% endif %}</td>
       <td>{% if voevent.dec_dms         is not None %} {{ voevent.dec_dms }}         {% endif %}</td>
-      <td>{% if voevent.pos_error    is not None %} {{ voevent.pos_error }}    {% endif %}</td>
+      <td>
+      {% if voevent.pos_error    is not None %}
+        {% if poserr_unit == "deg" %}
+          {{ voevent.pos_error }}
+        {% else %}
+          {% multiply voevent.pos_error 60 2 %}
+        {% endif %}
+      {% endif %}
+      </td>
       <td>{% if voevent.fermi_detection_prob is not None %} {{ voevent.fermi_detection_prob }}  {% endif %}</td>
       <td>{% if voevent.swift_rate_signif    is not None %} {{ voevent.swift_rate_signif    }}  {% endif %}</td>
     </tr>
@@ -188,7 +219,11 @@
           <th>Duration (s)</th>
           <th>RA (HH:MM:SS)</th>
           <th>Dec (DD:MM:SS)</th>
-          <th>Position Error (&#176;)</th>
+          {% if poserr_unit == "deg" %}
+            <th><a href="?{% url_switch request 'poserr_unit' %}">Position Error (&#176;)</a></th>
+          {% else %}
+            <th><a href="?{% url_switch request 'poserr_unit' %}">Position Error (arcmin)</a></th>
+          {% endif %}
           <th>Fermi Detection Probability (%)</th>
           <th>SWIFT Rate Significance (sigma)</th>
         </tr>
@@ -213,7 +248,15 @@
         <td>{% if voevent.duration     is not None %} {{ voevent.duration }}     {% endif %}</td>
         <td>{% if voevent.ra_hms          is not None %} {{ voevent.ra_hms }}          {% endif %}</td>
         <td>{% if voevent.dec_dms         is not None %} {{ voevent.dec_dms }}         {% endif %}</td>
-        <td>{% if voevent.pos_error    is not None %} {{ voevent.pos_error }}    {% endif %}</td>
+        <td>
+        {% if voevent.pos_error    is not None %}
+          {% if poserr_unit == "deg" %}
+            {{ voevent.pos_error }}
+          {% else %}
+            {% multiply voevent.pos_error 60 2 %}
+          {% endif %}
+        {% endif %}
+        </td>
         <td>{% if voevent.fermi_detection_prob is not None %} {{ voevent.fermi_detection_prob }}  {% endif %}</td>
         <td>{% if voevent.swift_rate_signif    is not None %} {{ voevent.swift_rate_signif    }}  {% endif %}</td>
       </tr>

@@ -1,5 +1,7 @@
 {% extends 'trigger_app/header.html' %}
 
+{% load utils %}
+
 {% block content %}
 
 <title>VOEvent Log</title>
@@ -92,7 +94,11 @@
         <th>Duration (s)</th>
         <th>RA (HH:MM:SS)</th>
         <th>Dec (DD:MM:SS)</th>
-        <th>Position Error (&#176;)</th>
+        {% if poserr_unit == "deg" %}
+          <th><a href="?{% url_switch request 'poserr_unit' %}">Position Error (&#176;)</a></th>
+        {% else %}
+          <th><a href="?{% url_switch request 'poserr_unit' %}">Position Error (arcmin)</a></th>
+        {% endif %}
         <th>Fermi Detection Probability (%)</th>
         <th>SWIFT Rate Significance (sigma)</th>
       </tr>
@@ -130,6 +136,15 @@
       <td>{% if object.duration     is not None %} {{ object.duration }}     {% endif %}</td>
       <td>{% if object.ra_hms          is not None %} {{ object.ra_hms }}          {% endif %}</td>
       <td>{% if object.dec_dms         is not None %} {{ object.dec_dms }}         {% endif %}</td>
+      <td>
+      {% if object.pos_error    is not None %}
+        {% if poserr_unit == "deg" %}
+          {{ object.pos_error }}
+        {% else %}
+          {% multiply object.pos_error 60 2 %}
+        {% endif %}
+      {% endif %}
+      </td>
       <td>{% if object.pos_error    is not None %} {{ object.pos_error }}    {% endif %}</td>
       <td>{% if object.fermi_detection_prob is not None %} {{ object.fermi_detection_prob }}  {% endif %}</td>
       <td>{% if object.swift_rate_signif    is not None %} {{ object.swift_rate_signif    }}  {% endif %}</td>
