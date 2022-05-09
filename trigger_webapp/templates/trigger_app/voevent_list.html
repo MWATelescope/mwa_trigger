@@ -106,7 +106,7 @@
       <tr>
     {% endif %}
       <td><a href="/voevent_view/{{ object.id }}" style="text-decoration:None">{{ object.id }}</a></td>
-      <td>{% if object.source_type is not None %} {{ object.get_source_type_display }}  {% endif %}</td>
+      <td>{% if object.source_type is not None %} {{ object.source_type }}  {% endif %}</td>
       <td>{{ object.telescope }}</td>
       <td>{{ object.event_type }}</td>
       <td>{{ object.event_observed|date:"Y-m-d H:i:s" }}</td>
