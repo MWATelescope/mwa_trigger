@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import UserAlerts, AdminAlerts, VOEvent, PossibleEventAssociation, Status, ProposalSettings, ProposalDecision, Observations
+from .models import UserAlerts, AdminAlerts, VOEvent, PossibleEventAssociation, Status, ProposalSettings, ProposalDecision, Observations, TriggerID
 from .telescope_observe import trigger_observation
 
 from mwa_trigger.parse_xml import parsed_VOEvent
@@ -37,36 +37,16 @@ def group_trigger(sender, instance, **kwargs):
         # VOEvent ignored so do nothing
         return
 
-    # Time range to considered the same event (in seconds)
-    dt = 100
-    early_dt = instance.event_observed - datetime.timedelta(seconds=dt)
-    late_dt = instance.event_observed + datetime.timedelta(seconds=dt)
-
-    # Check if the VOEvent was observed after the earliest event observed - 100s
-    #                               and before the latest event observed + 100s
-    trig_exists = False
-    if PossibleEventAssociation.objects.filter(earliest_event_observed__lt=late_dt,
-                                   latest_event_observed__gt=early_dt).exists():
-        event_coord = SkyCoord(ra=instance.ra*u.degree, dec=instance.dec*u.degree)
-        for trig_event in PossibleEventAssociation.objects.filter(earliest_event_observed__lt=late_dt,
-                                                      latest_event_observed__gt=early_dt):
-            # Calculate 95% confidence interval seperation
-            combined_err = np.sqrt(instance.pos_error**2 + trig_event.pos_error**2)
-            c95_sep = norm.interval(0.95, scale=combined_err)[1]
-
-            # Now make sure they're spacially similar
-            trigger_coord = SkyCoord(ra=trig_event.ra*u.degree, dec=trig_event.dec*u.degree)
-            if event_coord.separation(trigger_coord).deg < c95_sep:
-                # Event is within the 95% confidence interval so consider them the same source/event
-                trig_exists = True
-                prev_trig = trig_event
-
-    if trig_exists:
+    # ------------------------------------------------------------------------------
+    # Look for other events with the same Trigger ID
+    # ------------------------------------------------------------------------------
+    trigger_id = TriggerID.objects.filter(id=instance.id)
+    if trigger_id.exists():
         # Trigger event already exists so link the VOEvent (have to update this way to prevent save() triggering this function again)
-        VOEvent.objects.filter(id=instance.id).update(associated_event_id=prev_trig)
+        VOEvent.objects.filter(id=instance.id).update(trigger_group_id=trigger_id)
 
         # Loop over all proposals settings and see if it's worth reobserving
-        proposal_decisions = ProposalDecision.objects.filter(associated_event_id=prev_trig)
+        proposal_decisions = ProposalDecision.objects.filter(trigger_group_id=trigger_id)
         for prop_dec in proposal_decisions:
             if prop_dec.decision == "I":
                 # Previous events were ignored, check if this new one is up to our standards
@@ -101,6 +81,68 @@ def group_trigger(sender, instance, **kwargs):
                         trigger_message=f"{prop_dec.decision_reason}{repoint_message}\n "
                     )
 
+        # TODO update the PossibleEventAssociation ra and dec if the position is better.
+        # TODO update latest_event_observed
+
+    else:
+        # Make a new trigger group ID
+        new_trig = TriggerID.objects.create(
+            id=instance.id,
+        )
+        # Link the VOEvent (have to update this way to prevent save() triggering this function again)
+        VOEvent.objects.filter(id=instance.id).update(associated_event_id=new_trig)
+
+        # Loop over settings
+        proposal_settings = ProposalSettings.objects.all()
+        for prop_set in proposal_settings:
+            # Create a ProposalDecision object to record what each proposal does
+            prop_dec = ProposalDecision.objects.create(
+                #decision=decision,
+                #decision_reason=trigger_message,
+                proposal=prop_set,
+                trigger_group_id=new_trig,
+                trigger_id=instance.trigger_id,
+                duration=instance.duration,
+                ra=instance.ra,
+                dec=instance.dec,
+                ra_hms=instance.ra_hms,
+                dec_dms=instance.dec_dms,
+                pos_error=instance.pos_error,
+            )
+            # Check if it's worth triggering an obs
+            proposal_worth_observing(prop_dec, instance)
+
+    # ------------------------------------------------------------------------------
+    # Look for associated events (in time and space) which includes other telescopes
+    # ------------------------------------------------------------------------------
+
+    # Time range to considered the same event (in seconds)
+    dt = 100
+    early_dt = instance.event_observed - datetime.timedelta(seconds=dt)
+    late_dt = instance.event_observed + datetime.timedelta(seconds=dt)
+
+    # Check if the VOEvent was observed after the earliest event observed - 100s
+    #                               and before the latest  event observed + 100s
+    association_exists = False
+    if PossibleEventAssociation.objects.filter(earliest_event_observed__lt=late_dt,
+                                               latest_event_observed__gt=early_dt).exists():
+        event_coord = SkyCoord(ra=instance.ra*u.degree, dec=instance.dec*u.degree)
+        for trig_event in PossibleEventAssociation.objects.filter(earliest_event_observed__lt=late_dt,
+                                                      latest_event_observed__gt=early_dt):
+            # Calculate 95% confidence interval seperation
+            combined_err = np.sqrt(instance.pos_error**2 + trig_event.pos_error**2)
+            c95_sep = norm.interval(0.95, scale=combined_err)[1]
+
+            # Now make sure they're spacially similar
+            trigger_coord = SkyCoord(ra=trig_event.ra*u.degree, dec=trig_event.dec*u.degree)
+            if event_coord.separation(trigger_coord).deg < c95_sep:
+                # Event is within the 95% confidence interval so consider them the same source/event
+                association_exists = True
+                prev_trig = trig_event
+
+    if association_exists:
+        # Trigger event already exists so link the VOEvent (have to update this way to prevent save() triggering this function again)
+        VOEvent.objects.filter(id=instance.id).update(associated_event_id=prev_trig)
 
         # TODO update the PossibleEventAssociation ra and dec if the position is better.
         # TODO update latest_event_observed
@@ -119,26 +161,6 @@ def group_trigger(sender, instance, **kwargs):
         )
         # Link the VOEvent (have to update this way to prevent save() triggering this function again)
         VOEvent.objects.filter(id=instance.id).update(associated_event_id=new_trig)
-
-        # Loop over settings
-        proposal_settings = ProposalSettings.objects.all()
-        for prop_set in proposal_settings:
-            # Create a ProposalDecision object to record what each proposal does
-            prop_dec = ProposalDecision.objects.create(
-                #decision=decision,
-                #decision_reason=trigger_message,
-                proposal=prop_set,
-                associated_event_id=new_trig,
-                trigger_id=instance.trigger_id,
-                duration=instance.duration,
-                ra=instance.ra,
-                dec=instance.dec,
-                ra_hms=instance.ra_hms,
-                dec_dms=instance.dec_dms,
-                pos_error=instance.pos_error,
-            )
-            # Check if it's worth triggering an obs
-            proposal_worth_observing(prop_dec, instance)
 
 
 def proposal_worth_observing(
@@ -231,7 +253,7 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
     """
     """
     # Work out all the telescopes that observed the event
-    voevents = VOEvent.objects.filter(associated_event_id=proposal_decision_model.associated_event_id)
+    voevents = VOEvent.objects.filter(trigger_group_id=proposal_decision_model.trigger_group_id)
     telescopes = []
     for voevent in voevents:
         telescopes.append(voevent.telescope)

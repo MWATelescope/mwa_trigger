@@ -144,7 +144,6 @@ def PossibleEventAssociation_details(request, tid):
     telescopes = ' '.join(set(voevents.values_list('telescope', flat=True)))
 
     # grab event ID
-    print(voevents.values_list('trigger_id'))
     event_id = list(dict.fromkeys(voevents.values_list('trigger_id')))[0][0]
 
     # list all voevents with the same id
