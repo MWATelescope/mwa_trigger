@@ -128,8 +128,8 @@
         <th>Source Type</th>
         <th>Telescope</th>
         <th>Event Type</th>
+        <th>Alert Time (UTC)</th>
         <th>Recieved (UTC)</th>
-        <th>Observed (UTC)</th>
         <th>Event ID</th>
         <th>Source Name</th>
         <th>Sequence number</th>
@@ -153,8 +153,8 @@
       <td>{% if voevent.source_type  is not None %} {{ voevent.get_source_type_display }}  {% endif %}</td>
       <td>{{ voevent.telescope }}</td>
       <td>{{ voevent.event_type }}</td>
-      <td>{{ voevent.recieved_data|date:"Y-m-d H:i:s" }}</td>
       <td>{{ voevent.event_observed|date:"Y-m-d H:i:s" }}</td>
+      <td>{{ voevent.recieved_data|date:"Y-m-d H:i:s" }}</td>
       <td>{% if voevent.trigger_id   is not None %} {{ voevent.trigger_id }}   {% endif %}</td>
       <td>{% if voevent.source_name  is not None %} {{ voevent.source_name }}  {% endif %}</td>
       <td>{% if voevent.sequence_num is not None %} {{ voevent.sequence_num }} {% endif %}</td>
@@ -180,8 +180,8 @@
           <th>Source Type</th>
           <th>Telescope</th>
           <th>Event Type</th>
+          <th>Alert Time (UTC)</th>
           <th>Recieved (UTC)</th>
-          <th>Observed (UTC)</th>
           <th>Event ID</th>
           <th>Source Name</th>
           <th>Sequence number</th>
@@ -205,8 +205,8 @@
         <td>{% if voevent.source_type  is not None %} {{ voevent.get_source_type_display }}  {% endif %}</td>
         <td>{{ voevent.telescope }}</td>
         <td>{{ voevent.event_type }}</td>
-        <td>{{ voevent.recieved_data|date:"Y-m-d H:i:s" }}</td>
         <td>{{ voevent.event_observed|date:"Y-m-d H:i:s" }}</td>
+        <td>{{ voevent.recieved_data|date:"Y-m-d H:i:s" }}</td>
         <td>{% if voevent.trigger_id   is not None %} {{ voevent.trigger_id }}   {% endif %}</td>
         <td>{% if voevent.source_name  is not None %} {{ voevent.source_name }}  {% endif %}</td>
         <td>{% if voevent.sequence_num is not None %} {{ voevent.sequence_num }} {% endif %}</td>

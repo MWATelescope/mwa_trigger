@@ -83,8 +83,8 @@
         <th>Source Type</th>
         <th>Telescope</th>
         <th>Event Type</th>
+        <th>Alert Time (UTC)</th>
         <th>Recieved (UTC)</th>
-        <th>Observed (UTC)</th>
         <th>Trigger Group ID</th>
         <th>Event ID</th>
         <th>Source Name</th>
@@ -109,8 +109,8 @@
       <td>{% if object.source_type is not None %} {{ object.get_source_type_display }}  {% endif %}</td>
       <td>{{ object.telescope }}</td>
       <td>{{ object.event_type }}</td>
-      <td>{{ object.recieved_data|date:"Y-m-d H:i:s" }}</td>
       <td>{{ object.event_observed|date:"Y-m-d H:i:s" }}</td>
+      <td>{{ object.recieved_data|date:"Y-m-d H:i:s" }}</td>
       {% if object.trigger_group_id is None %}
         <!-- Don't make a link because there is no trigger event -->
         <td></td>
