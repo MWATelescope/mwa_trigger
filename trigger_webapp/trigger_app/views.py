@@ -196,6 +196,32 @@ def PossibleEventAssociation_details(request, tid):
                                                                      'poserr_unit':poserr_unit,})
 
 
+def TriggerID_details(request, tid):
+    trigger_event = models.TriggerID.objects.get(id=tid)
+
+    # grab telescope names
+    voevents = models.VOEvent.objects.filter(trigger_group_id=trigger_event)
+    telescopes = ' '.join(set(voevents.values_list('telescope', flat=True)))
+
+    # list all prop decisions
+    prop_decs = models.ProposalDecision.objects.filter(trigger_group_id=trigger_event)
+
+    # Grab MWA obs if the exist
+    mwa_obs = []
+    for prop_dec in prop_decs:
+        mwa_obs += models.Observations.objects.filter(proposal_decision_id=prop_dec)
+
+    # Get position error units
+    poserr_unit = request.GET.get('poserr_unit', 'deg')
+
+    return render(request, 'trigger_app/trigger_group_id_details.html', {'trigger_event':trigger_event,
+                                                                     'voevents':voevents,
+                                                                     'mwa_obs':mwa_obs,
+                                                                     'prop_decs':prop_decs,
+                                                                     'telescopes':telescopes,
+                                                                     'poserr_unit':poserr_unit,})
+
+
 def ProposalDecision_details(request, id):
     prop_dec = models.ProposalDecision.objects.get(id=id)
 

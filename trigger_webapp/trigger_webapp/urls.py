@@ -29,7 +29,7 @@ urlpatterns = [
     path('possible_event_association_log/', views.PossibleEventAssociationList),
     path('possible_event_association_details/<int:tid>/', views.PossibleEventAssociation_details),
     path('trigger_id_log/', views.TriggerIDList),
-    #path('trigger_id_details/<int:tid>/', views.TriggerID_details),
+    path('trigger_id_details/<int:tid>/', views.TriggerID_details),
     path('voevent_log/', views.VOEventList),
     path('comet_log/', views.CometLogList.as_view()),
     path('proposal_settings/', views.ProposalSettingsList.as_view()),
