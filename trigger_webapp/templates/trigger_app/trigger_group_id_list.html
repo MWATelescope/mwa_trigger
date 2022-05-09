@@ -17,7 +17,7 @@
     {% for object, tele_str, source_str in object_list %}
     <!-- Display Objects -->
     <tr>
-      <td><a href="/possible_event_association_details/{{ object.id }}/" style="text-decoration:None">{{ object.id }}</a></td>
+      <td><a href="/trigger_id_details/{{ object.id }}/" style="text-decoration:None">{{ object.id }}</a></td>
       {% if tele_str == "SWIFT" %}
         <!-- Link to SWIFT telescope page -->
         <td><a href="https://gcn.gsfc.nasa.gov/other/{{ object.trigger_id }}.swift" style="text-decoration:None">{{ object.trigger_id }}</a></td>

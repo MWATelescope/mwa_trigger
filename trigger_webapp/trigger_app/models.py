@@ -113,6 +113,15 @@ class PossibleEventAssociation(models.Model):
 class TriggerID(models.Model):
     id = models.AutoField(primary_key=True)
     trigger_id = models.IntegerField(unique=True)
+    earliest_event_observed = models.DateTimeField(blank=True, null=True)
+    latest_event_observed = models.DateTimeField(blank=True, null=True)
+    ra = models.FloatField(blank=True, null=True)
+    dec = models.FloatField(blank=True, null=True)
+    ra_hms = models.CharField(max_length=64, blank=True, null=True)
+    dec_dms = models.CharField(max_length=64, blank=True, null=True)
+    pos_error = models.FloatField(blank=True, null=True)
+    recieved_data = models.DateTimeField(auto_now_add=True, blank=True)
+    source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, null=True)
 
     def __str__(self):
         return str(self.id)
