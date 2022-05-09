@@ -1,9 +1,9 @@
 {% extends 'trigger_app/header.html' %}
 
 {% block content %}
-<title>Trigger Event Log</title>
+<title>Possible Event Association Log</title>
 <div class="container-fluid">
-  <h1>Trigger Event Log</h1>
+  <h1>Possible Event Association Log</h1>
   <table class="fl-table">
     <thead>
     <tr>
@@ -22,7 +22,7 @@
     {% for object, tele_str in object_list %}
     <!-- Display Objects -->
     <tr>
-      <td><a href="/triggerevent_details/{{ object.id }}/" style="text-decoration:None">{{ object.id }}</a></td>
+      <td><a href="/possible_event_association_details/{{ object.id }}/" style="text-decoration:None">{{ object.id }}</a></td>
       <td>{% if object.source_type is not None %} {{ object.source_type }}  {% endif %}</td>
       <td>{{ tele_str }}</td>
       <td>{{ object.recieved_data|date:"Y-m-d H:i:s" }}</td>

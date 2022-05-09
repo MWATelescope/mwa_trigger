@@ -91,7 +91,7 @@ class ProposalSettings(models.Model):
         return f"{self.id}_{self.telescope}_{self.project_id}"
 
 
-class TriggerEvent(models.Model):
+class PossibleEventAssociation(models.Model):
     id = models.AutoField(primary_key=True)
     earliest_event_observed = models.DateTimeField(blank=True, null=True)
     latest_event_observed = models.DateTimeField(blank=True, null=True)
@@ -125,7 +125,7 @@ class ProposalDecision(models.Model):
     decision = models.CharField(max_length=32, choices=CHOICES, default=P)
     decision_reason = models.CharField(max_length=2056, blank=True, null=True)
     proposal = models.ForeignKey(ProposalSettings, on_delete=models.SET_NULL, blank=True, null=True)
-    trigger_group_id = models.ForeignKey(TriggerEvent, on_delete=models.SET_NULL, blank=True, null=True)
+    associated_event_id = models.ForeignKey(PossibleEventAssociation, on_delete=models.SET_NULL, blank=True, null=True)
     trigger_id = models.IntegerField(blank=True, null=True)
     duration = models.FloatField(blank=True, null=True)
     ra = models.FloatField(blank=True, null=True)
@@ -144,8 +144,8 @@ class ProposalDecision(models.Model):
 
 class VOEvent(models.Model):
     id = models.AutoField(primary_key=True)
-    trigger_group_id = models.ForeignKey(
-        TriggerEvent,
+    associated_event_id = models.ForeignKey(
+        PossibleEventAssociation,
         on_delete=models.SET_NULL,
         related_name="voevent",
         blank=True,

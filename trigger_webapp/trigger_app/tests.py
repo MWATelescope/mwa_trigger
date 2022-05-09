@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from .models import VOEvent, TriggerEvent, ProposalDecision
+from .models import VOEvent, PossibleEventAssociation, ProposalDecision
 
 from mwa_trigger.parse_xml import parsed_VOEvent
 import astropy.units as u
@@ -51,9 +51,9 @@ class test_group_01(TestCase):
 
 
     def test_trigger_groups(self):
-        # Check there are three VOEvents that were grouped as one TriggerEvent
+        # Check there are three VOEvents that were grouped as one PossibleEventAssociation
         self.assertEqual(len(VOEvent.objects.all()), 3)
-        self.assertEqual(len(TriggerEvent.objects.all()), 1)
+        self.assertEqual(len(PossibleEventAssociation.objects.all()), 1)
 
     def test_proposal_decision(self):
         print(f"\n\n!!!!!!!!!!!!!!\n{ProposalDecision.objects.get(id=1).decision_reason}\n!!!!!!!!!!!!!!!\n\n")

@@ -3,10 +3,10 @@
 {% load utils %}
 
 {% block content %}
-<title>Trigger Event Details</title>
+<title>Possible Event Association Details</title>
 
 <div class="container-sm">
-  <h2>{% if trigger_event.source_type  is not None %} {{ trigger_event.get_source_type_display }} {% endif %} Trigger Event ID {{ trigger_event.id }}</h2>
+  <h2>{% if trigger_event.source_type  is not None %} {{ trigger_event.get_source_type_display }} {% endif %} Possible Event Association ID {{ trigger_event.id }}</h2>
   <table class="table-thin">
     <tr>
       <td>Telescope(s)</td>
@@ -138,7 +138,7 @@
   {% endif %}
 
 
-  <h2>Trigger Event's VOEvents</h2>
+  <h2>Possibily Associated VOEvents</h2>
 
   <table class="fl-table">
     <thead>

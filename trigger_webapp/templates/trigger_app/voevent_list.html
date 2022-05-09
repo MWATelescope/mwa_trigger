@@ -14,8 +14,8 @@
       <tr>
         <td width="15%">{{ filter.form.ignored.label_tag }}</td>
         <td width="15%">{{ filter.form.ignored }}</td>
-        <td width="15%">Trigger group ID:</td>
-        <td width="15%">{{ filter.form.trigger_group_id }}</td>
+        <td width="15%">Possibily Associated Events ID:</td>
+        <td width="15%">{{ filter.form.associated_event_id }}</td>
         <td width="15%"></td>
         <td width="7.5%">Min (inclusive)</td>
         <td width="7.5%">Max (inclusive)</td>
@@ -87,7 +87,7 @@
         <th>Event Type</th>
         <th>Alert Time (UTC)</th>
         <th>Recieved (UTC)</th>
-        <th>Trigger Group ID</th>
+        <th>Associated Event ID</th>
         <th>Event ID</th>
         <th>Source Name</th>
         <th>Sequence number</th>
@@ -117,11 +117,11 @@
       <td>{{ object.event_type }}</td>
       <td>{{ object.event_observed|date:"Y-m-d H:i:s" }}</td>
       <td>{{ object.recieved_data|date:"Y-m-d H:i:s" }}</td>
-      {% if object.trigger_group_id is None %}
+      {% if object.associated_event_id is None %}
         <!-- Don't make a link because there is no trigger event -->
         <td></td>
       {% else %}
-        <td><a href="/triggerevent_details/{{ object.trigger_group_id }}/" style="text-decoration:None">{{ object.trigger_group_id }}</a></td>
+        <td><a href="/possible_event_association_details/{{ object.associated_event_id }}/" style="text-decoration:None">{{ object.associated_event_id }}</a></td>
       {% endif %}
       <td>{% if object.trigger_id is not None %}
             {% if object.telescope == "SWIFT" and not object.ignored %}

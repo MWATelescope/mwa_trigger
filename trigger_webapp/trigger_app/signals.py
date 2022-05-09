@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import UserAlerts, AdminAlerts, VOEvent, TriggerEvent, Status, ProposalSettings, ProposalDecision, Observations
+from .models import UserAlerts, AdminAlerts, VOEvent, PossibleEventAssociation, Status, ProposalSettings, ProposalDecision, Observations
 from .telescope_observe import trigger_observation
 
 from mwa_trigger.parse_xml import parsed_VOEvent
@@ -45,10 +45,10 @@ def group_trigger(sender, instance, **kwargs):
     # Check if the VOEvent was observed after the earliest event observed - 100s
     #                               and before the latest event observed + 100s
     trig_exists = False
-    if TriggerEvent.objects.filter(earliest_event_observed__lt=late_dt,
+    if PossibleEventAssociation.objects.filter(earliest_event_observed__lt=late_dt,
                                    latest_event_observed__gt=early_dt).exists():
         event_coord = SkyCoord(ra=instance.ra*u.degree, dec=instance.dec*u.degree)
-        for trig_event in TriggerEvent.objects.filter(earliest_event_observed__lt=late_dt,
+        for trig_event in PossibleEventAssociation.objects.filter(earliest_event_observed__lt=late_dt,
                                                       latest_event_observed__gt=early_dt):
             # Calculate 95% confidence interval seperation
             combined_err = np.sqrt(instance.pos_error**2 + trig_event.pos_error**2)
@@ -63,10 +63,10 @@ def group_trigger(sender, instance, **kwargs):
 
     if trig_exists:
         # Trigger event already exists so link the VOEvent (have to update this way to prevent save() triggering this function again)
-        VOEvent.objects.filter(id=instance.id).update(trigger_group_id=prev_trig)
+        VOEvent.objects.filter(id=instance.id).update(associated_event_id=prev_trig)
 
         # Loop over all proposals settings and see if it's worth reobserving
-        proposal_decisions = ProposalDecision.objects.filter(trigger_group_id=prev_trig)
+        proposal_decisions = ProposalDecision.objects.filter(associated_event_id=prev_trig)
         for prop_dec in proposal_decisions:
             if prop_dec.decision == "I":
                 # Previous events were ignored, check if this new one is up to our standards
@@ -102,12 +102,12 @@ def group_trigger(sender, instance, **kwargs):
                     )
 
 
-        # TODO update the TriggerEvent ra and dec if the position is better.
+        # TODO update the PossibleEventAssociation ra and dec if the position is better.
         # TODO update latest_event_observed
 
     else:
         # Make a new trigger event
-        new_trig = TriggerEvent.objects.create(
+        new_trig = PossibleEventAssociation.objects.create(
             ra=instance.ra,
             dec=instance.dec,
             ra_hms=instance.ra_hms,
@@ -118,7 +118,7 @@ def group_trigger(sender, instance, **kwargs):
             latest_event_observed=instance.event_observed,
         )
         # Link the VOEvent (have to update this way to prevent save() triggering this function again)
-        VOEvent.objects.filter(id=instance.id).update(trigger_group_id=new_trig)
+        VOEvent.objects.filter(id=instance.id).update(associated_event_id=new_trig)
 
         # Loop over settings
         proposal_settings = ProposalSettings.objects.all()
@@ -128,7 +128,7 @@ def group_trigger(sender, instance, **kwargs):
                 #decision=decision,
                 #decision_reason=trigger_message,
                 proposal=prop_set,
-                trigger_group_id=new_trig,
+                associated_event_id=new_trig,
                 trigger_id=instance.trigger_id,
                 duration=instance.duration,
                 ra=instance.ra,
@@ -231,7 +231,7 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
     """
     """
     # Work out all the telescopes that observed the event
-    voevents = VOEvent.objects.filter(trigger_group_id=proposal_decision_model.trigger_group_id)
+    voevents = VOEvent.objects.filter(associated_event_id=proposal_decision_model.associated_event_id)
     telescopes = []
     for voevent in voevents:
         telescopes.append(voevent.telescope)

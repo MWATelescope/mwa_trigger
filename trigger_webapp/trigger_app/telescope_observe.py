@@ -66,7 +66,7 @@ def trigger_observation(
 
         # Create an observation name
         # Collect event telescopes
-        voevents = VOEvent.objects.filter(trigger_group_id=proposal_decision_model.trigger_group_id)
+        voevents = VOEvent.objects.filter(associated_event_id=proposal_decision_model.associated_event_id)
         telescopes = []
         for voevent in voevents:
             telescopes.append(voevent.telescope)
@@ -144,7 +144,6 @@ def trigger_mwa_observation(
     logger.info(f"Triggering MWA at UTC time {Time.now()} ...")
     result = trigger_mwa(project_id=prop_settings.project_id,
         secure_key=os.environ.get('MWA_SECURE_KEY', None),
-        #group_id=proposal_decision_model.trigger_group_id.trigger_id, # only need this for follow up obs
         pretend=prop_settings.testing,
         ra=proposal_decision_model.ra, dec=proposal_decision_model.dec,
         creator='VOEvent_Auto_Trigger', #TODO grab version
