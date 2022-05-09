@@ -180,23 +180,16 @@ def PossibleEventAssociation_details(request, tid):
     event_id = list(dict.fromkeys(voevents.values_list('trigger_id')))[0][0]
 
     # list all voevents with the same id
-    event_id_voevents = models.VOEvent.objects.filter(trigger_id=event_id)
-
-    # list all prop decisions
-    prop_decs = models.ProposalDecision.objects.filter(associated_event_id=trigger_event)
-
-    # Grab MWA obs if the exist
-    mwa_obs = []
-    for prop_dec in prop_decs:
-        mwa_obs += models.Observations.objects.filter(proposal_decision_id=prop_dec)
+    if event_id:
+        event_id_voevents = models.VOEvent.objects.filter(trigger_id=event_id)
+    else:
+        event_id_voevents = []
 
     # Get position error units
     poserr_unit = request.GET.get('poserr_unit', 'deg')
 
     return render(request, 'trigger_app/possible_event_association_details.html', {'trigger_event':trigger_event,
                                                                      'voevents':voevents,
-                                                                     'mwa_obs':mwa_obs,
-                                                                     'prop_decs':prop_decs,
                                                                      'telescopes':telescopes,
                                                                      'event_id':event_id,
                                                                      'event_id_voevents':event_id_voevents,
