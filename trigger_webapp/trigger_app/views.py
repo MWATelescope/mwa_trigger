@@ -110,6 +110,39 @@ def PossibleEventAssociationList(request):
         object_list = paginator.page(1)
     return render(request, 'trigger_app/possible_event_association_list.html', {'object_list':object_list})
 
+
+def TriggerIDList(request):
+    # Find all telescopes for each trigger event
+    trigger_group_ids = models.TriggerID.objects.all()
+    voevents = models.VOEvent.objects.all()
+
+    # Loop over the trigger events and grab all the telescopes and soruces of the VOEvents
+    telescope_list = []
+    source_list = []
+    for tevent in trigger_group_ids:
+        telescope_list.append(
+            ' '.join(set(voevents.filter(trigger_group_id=tevent).values_list('telescope', flat=True)))
+        )
+        sources = voevents.filter(trigger_group_id=tevent).values_list('source_type', flat=True)
+        # remove Nones
+        sources =  [ i for i in sources if i ]
+        if len(sources) > 0:
+            source_list.append(' '.join(set(sources)))
+        else:
+            source_list.append(' ')
+
+
+    # Paginate
+    page = request.GET.get('page', 1)
+    # zip the trigger event and the tevent_telescope_list together so I can loop over both in the html
+    paginator = Paginator(list(zip(trigger_group_ids, telescope_list, source_list)), 100)
+    try:
+        object_list = paginator.page(page)
+    except InvalidPage:
+        object_list = paginator.page(1)
+    return render(request, 'trigger_app/trigger_group_id_list.html', {'object_list':object_list})
+
+
 class CometLogList(ListView):
     model = models.CometLog
     paginate_by = 100
