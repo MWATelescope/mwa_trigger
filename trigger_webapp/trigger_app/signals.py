@@ -40,13 +40,13 @@ def group_trigger(sender, instance, **kwargs):
     # ------------------------------------------------------------------------------
     # Look for other events with the same Trigger ID
     # ------------------------------------------------------------------------------
-    trigger_id = TriggerID.objects.filter(id=instance.id)
+    trigger_id = TriggerID.objects.filter(trigger_id=instance.trigger_id)
     if trigger_id.exists():
         # Trigger event already exists so link the VOEvent (have to update this way to prevent save() triggering this function again)
-        VOEvent.objects.filter(id=instance.id).update(trigger_group_id=trigger_id)
+        VOEvent.objects.filter(id=instance.id).update(trigger_group_id=trigger_id[0])
 
         # Loop over all proposals settings and see if it's worth reobserving
-        proposal_decisions = ProposalDecision.objects.filter(trigger_group_id=trigger_id)
+        proposal_decisions = ProposalDecision.objects.filter(trigger_group_id=trigger_id[0])
         for prop_dec in proposal_decisions:
             if prop_dec.decision == "I":
                 # Previous events were ignored, check if this new one is up to our standards
@@ -87,10 +87,10 @@ def group_trigger(sender, instance, **kwargs):
     else:
         # Make a new trigger group ID
         new_trig = TriggerID.objects.create(
-            id=instance.id,
+            trigger_id=instance.trigger_id,
         )
         # Link the VOEvent (have to update this way to prevent save() triggering this function again)
-        VOEvent.objects.filter(id=instance.id).update(associated_event_id=new_trig)
+        VOEvent.objects.filter(id=instance.id).update(trigger_group_id=new_trig)
 
         # Loop over settings
         proposal_settings = ProposalSettings.objects.all()

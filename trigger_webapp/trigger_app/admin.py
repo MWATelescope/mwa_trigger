@@ -1,5 +1,5 @@
 from django.contrib import admin
-from trigger_app.models import VOEvent, PossibleEventAssociation, AdminAlerts, ProposalSettings, ProposalDecision, Telescope, Status
+from trigger_app.models import VOEvent, PossibleEventAssociation, AdminAlerts, ProposalSettings, ProposalDecision, Telescope, Status, TriggerID
 from trigger_app.forms import ProjectSettingsForm
 
 
@@ -78,6 +78,7 @@ class ProposalSettingsAdmin(admin.ModelAdmin):
 
 # Register your models here.
 admin.site.register(VOEvent)
+admin.site.register(TriggerID)
 admin.site.register(PossibleEventAssociation)
 admin.site.register(AdminAlerts)
 admin.site.register(ProposalDecision)
