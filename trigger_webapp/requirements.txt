@@ -28,7 +28,6 @@ kiwisolver==1.4.2
 lxml==4.8.0
 matplotlib==3.5.2
 mwa-pb==1.4
-mwa-trigger @ file:///home/nick/code/mwa_trigger
 numpy==1.22.3
 orderedmultidict==1.0.1
 packaging==21.3
