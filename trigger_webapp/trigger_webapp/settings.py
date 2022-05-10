@@ -121,16 +121,6 @@ elif SYSTEM_ENV == 'GITHUB_WORKFLOW':
     }
 elif SYSTEM_ENV == 'DEVELOPMENT':
     DEBUG = True
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'test_user',
-            'USER': 'postgres',
-            'PASSWORD': 'postgres',
-            'HOST': '127.0.0.1',
-            'PORT': '5432',
-        }
-    }
 
 
 # Password validation
