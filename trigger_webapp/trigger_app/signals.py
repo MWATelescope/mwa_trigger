@@ -200,7 +200,7 @@ def proposal_worth_observing(
     # Defaults if not worth observing
     trigger_bool = debug_bool = pending_bool = False
 
-    if prop_dec.proposal.event_telescope is None or prop_dec.proposal.event_telescope == voevent.telescope:
+    if prop_dec.proposal.event_telescope is None or str(prop_dec.proposal.event_telescope).strip() == voevent.telescope.strip():
         # This project observes events from this telescope
 
         # Check if this proposal thinks this event is worth observing

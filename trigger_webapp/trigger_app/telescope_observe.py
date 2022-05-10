@@ -66,7 +66,7 @@ def trigger_observation(
 
         # Create an observation name
         # Collect event telescopes
-        voevents = VOEvent.objects.filter(associated_event_id=proposal_decision_model.associated_event_id)
+        voevents = VOEvent.objects.filter(trigger_group_id=proposal_decision_model.trigger_group_id)
         telescopes = []
         for voevent in voevents:
             telescopes.append(voevent.telescope)
