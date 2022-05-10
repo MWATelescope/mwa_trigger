@@ -3,13 +3,9 @@ from django.views.generic.list import ListView
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db import transaction
-from django.db.models import Count, Q, F, Value, Subquery, OuterRef, CharField
-from django.db.models.functions import Concat
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.contrib.postgres.aggregates import StringAgg
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger, InvalidPage
-from sqlalchemy import subquery
 import django_filters
 
 from rest_framework import status
@@ -20,14 +16,10 @@ import mimetypes
 from . import models, serializers, forms, signals
 from .telescope_observe import trigger_observation
 
-import os
 import sys
 import voeventparse as vp
 from astropy.coordinates import SkyCoord
 from astropy import units as u
-import requests
-import subprocess
-import shutil
 
 import logging
 logger = logging.getLogger(__name__)

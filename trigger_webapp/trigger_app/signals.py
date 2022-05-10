@@ -7,13 +7,9 @@ from django.conf import settings
 from .models import UserAlerts, AdminAlerts, VOEvent, PossibleEventAssociation, Status, ProposalSettings, ProposalDecision, Observations, TriggerID
 from .telescope_observe import trigger_observation
 
-from mwa_trigger.parse_xml import parsed_VOEvent
 from mwa_trigger.trigger_logic import worth_observing_grb
-import voeventparse
 
 import os
-import threading
-import time
 from twilio.rest import Client
 import datetime
 from astropy import units as u
