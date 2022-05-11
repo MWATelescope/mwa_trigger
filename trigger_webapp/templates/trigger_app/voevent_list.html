@@ -89,7 +89,6 @@
         <th>Recieved (UTC)</th>
         <th>Trigger ID</th>
         <th>Group ID</th>
-        <th>Associated ID</th>
         <th>Source Name</th>
         <th>Sequence number</th>
         <th>Duration (s)</th>
@@ -134,17 +133,11 @@
       {% else %}
         <td><a href="/trigger_id_details/{{ object.trigger_group_id }}/" style="text-decoration:None">{{ object.trigger_group_id}}</a></td>
       {% endif %}
-      {% if object.associated_event_id is None %}
-        <!-- Don't make a link because there is no associated event -->
-        <td></td>
-      {% else %}
-        <td><a href="/possible_event_association_details/{{ object.associated_event_id }}/" style="text-decoration:None">{{ object.associated_event_id }}</a></td>
-      {% endif %}
       <td>{% if object.source_name  is not None %} {{ object.source_name }}  {% endif %}</td>
       <td>{% if object.sequence_num is not None %} {{ object.sequence_num }} {% endif %}</td>
       <td>{% if object.duration     is not None %} {{ object.duration }}     {% endif %}</td>
-      <td>{% if object.ra_hms          is not None %} {{ object.ra_hms }}          {% endif %}</td>
-      <td>{% if object.dec_dms         is not None %} {{ object.dec_dms }}         {% endif %}</td>
+      <td>{% if object.ra_hms       is not None %} {{ object.ra_hms }}       {% endif %}</td>
+      <td>{% if object.dec_dms      is not None %} {{ object.dec_dms }}      {% endif %}</td>
       <td>
       {% if object.pos_error    is not None %}
         {% if poserr_unit == "deg" %}
