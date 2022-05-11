@@ -47,13 +47,21 @@ if __name__ == '__main__':
     if os.path.exists("/tmp/twistd_comet.pid"):
         call("kill `cat /tmp/twistd_comet.pid`", shell=True)
 
-    # Collect all the remote servers
+    # Collect all the remote broadcast servers
     remote_command = ""
     for tc_id, remote in enumerate(settings.VOEVENT_REMOTES):
         remote_command += f"--remote={remote} "
+    # Collect all the TCP connections
+    if len(settings.VOEVENT_TCP) > 0:
+        remote_command += f"--receive "
+    for tc_id, remote in enumerate(settings.VOEVENT_TCP):
+        remote_command += f"--author-whitelist={remote} "
 
-    logger.info("Starting twistd")
-    process = Popen(f"twistd --pidfile /tmp/twistd_comet.pid -n comet --local-ivo=ivo://hotwired.org/test {remote_command} --cmd=upload_xml.py", shell=True, stdout=PIPE)
+
+    logger.info("Starting twistd command:")
+    twistd_commad = f"twistd --pidfile /tmp/twistd_comet.pid -n comet --local-ivo=ivo://hotwired.org/test {remote_command} --cmd=upload_xml.py"
+    logger.info(twistd_commad)
+    process = Popen(twistd_commad, shell=True, stdout=PIPE)
     # get initial output right away
     output_popen_stdout(process)
 

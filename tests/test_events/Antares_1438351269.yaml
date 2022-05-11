@@ -50,10 +50,11 @@ source_type: NU
 swift_rate_signif: null
 telescope: Antares
 trig_duration: null
-trig_id: null
+trig_id: 1438351269
 trig_pairs:
 - SWIFT_BAT_GRB_Pos
 - SWIFT_XRT_Pos
+- SWIFT_UVOT_Pos
 - Fermi_GBM_Flt_Pos
 - Fermi_GBM_Gnd_Pos
 - Fermi_GBM_Fin_Pos

@@ -3,9 +3,14 @@ from django.views.generic.list import ListView
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db import transaction
+from django.db.models import Count, Q, F, Value, Subquery, OuterRef, CharField
+from django.db.models.functions import Concat
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.contrib.postgres.aggregates import StringAgg
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger, InvalidPage
+from sqlalchemy import subquery
+import django_filters
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -34,27 +39,85 @@ if 'runserver' in sys.argv:
     # Send off start up signal because server is launching in development
     startup_signal.send(sender=startup_signal)
 
-class VOEventList(ListView):
-    # specify the model for list view
-    model = models.VOEvent
-    paginate_by = 100
+class VOEventFilter(django_filters.FilterSet):
+    recieved_data = django_filters.DateTimeFromToRangeFilter()
+    event_observed = django_filters.DateTimeFromToRangeFilter()
 
-class TriggerEventList(ListView):
-    # specify the model for list view
-    model = models.TriggerEvent
-    paginate_by = 100
+    duration__lte = django_filters.NumberFilter(field_name='duration', lookup_expr='lte')
+    duration__gte = django_filters.NumberFilter(field_name='duration', lookup_expr='gte')
+
+    ra__lte = django_filters.NumberFilter(field_name='ra', lookup_expr='lte')
+    ra__gte = django_filters.NumberFilter(field_name='ra', lookup_expr='gte')
+
+    dec__lte = django_filters.NumberFilter(field_name='dec', lookup_expr='lte')
+    dec__gte = django_filters.NumberFilter(field_name='dec', lookup_expr='gte')
+
+    pos_error__lte = django_filters.NumberFilter(field_name='pos_error', lookup_expr='lte')
+    pos_error__gte = django_filters.NumberFilter(field_name='pos_error', lookup_expr='gte')
+
+    fermi_detection_prob__lte = django_filters.NumberFilter(field_name='fermi_detection_prob', lookup_expr='lte')
+    fermi_detection_prob__gte = django_filters.NumberFilter(field_name='fermi_detection_prob', lookup_expr='gte')
+
+    swift_rate_signif__lte = django_filters.NumberFilter(field_name='swift_rate_signif', lookup_expr='lte')
+    swift_rate_signif__gte = django_filters.NumberFilter(field_name='swift_rate_signif', lookup_expr='gte')
+
+    class Meta:
+        model = models.VOEvent
+        fields = '__all__'
+
+
+def VOEventList(request):
+    # Apply filters
+    f = VOEventFilter(request.GET, queryset=models.VOEvent.objects.all())
+    voevents = f.qs
+
+    # Get position error units
+    poserr_unit = request.GET.get('poserr_unit', 'deg')
+
+    # Paginate
+    page = request.GET.get('page', 1)
+    paginator = Paginator(voevents, 100)
+    try:
+        voevents = paginator.page(page)
+    except InvalidPage:
+        # if the page contains no results (EmptyPage exception) or
+        # the page number is not an integer (PageNotAnInteger exception)
+        # return the first page
+        voevents = paginator.page(1)
+    return render(request, 'trigger_app/voevent_list.html', {'filter': f, "page_obj":voevents, "poserr_unit":poserr_unit})
+
+def TriggerEventList(request):
+    # Find all telescopes for each trigger event
+    voevents = models.VOEvent.objects.filter(ignored=False)
+    trigger_event = models.TriggerEvent.objects.all()
+
+    # Loop over the trigger events and grab all the telescopes of the VOEvents
+    tevent_telescope_list = []
+    for tevent in trigger_event:
+        tevent_telescope_list.append(
+            ' '.join(
+                set(voevents.filter(trigger_group_id=tevent).values_list('telescope', flat=True))
+            )
+        )
+
+    # Paginate
+    page = request.GET.get('page', 1)
+    # zip the trigger event and the tevent_telescope_list together so I can loop over both in the html
+    paginator = Paginator(list(zip(trigger_event, tevent_telescope_list)), 100)
+    try:
+        object_list = paginator.page(page)
+    except InvalidPage:
+        object_list = paginator.page(1)
+    return render(request, 'trigger_app/triggerevent_list.html', {'object_list':object_list})
 
 class CometLogList(ListView):
-    # specify the model for list view
     model = models.CometLog
     paginate_by = 100
 
 class ProposalSettingsList(ListView):
-    # specify the model for list view
     model = models.ProposalSettings
 
 class ProposalDecisionList(ListView):
-    # specify the model for list view
     model = models.ProposalDecision
     paginate_by = 100
 
@@ -64,25 +127,47 @@ def home_page(request):
     prop_settings = models.ProposalSettings.objects.all()
     return render(request, 'trigger_app/home_page.html', {'twistd_comet_status': comet_status,
                                                           'settings':prop_settings,
-                                                          'remotes':", ".join(settings.VOEVENT_REMOTES)})
+                                                          'remotes':", ".join(settings.VOEVENT_REMOTES),
+                                                          'tcps':", ".join(settings.VOEVENT_TCP)})
 
 
 def TriggerEvent_details(request, tid):
     trigger_event = models.TriggerEvent.objects.get(id=tid)
+
     # covert ra and dec to HH:MM:SS.SS format
     c = SkyCoord( trigger_event.ra, trigger_event.dec, frame='icrs', unit=(u.deg,u.deg))
     trigger_event.ra = c.ra.to_string(unit=u.hour, sep=':')
     trigger_event.dec = c.dec.to_string(unit=u.degree, sep=':')
 
+    # grab telescope names
     voevents = models.VOEvent.objects.filter(trigger_group_id=trigger_event)
+    telescopes = ' '.join(set(voevents.values_list('telescope', flat=True)))
+
+    # grab event ID
+    event_id = list(dict.fromkeys(voevents.values_list('trigger_id')))[0][0]
+
+    # list all voevents with the same id
+    event_id_voevents = models.VOEvent.objects.filter(trigger_id=event_id)
+
+    # list all prop decisions
     prop_decs = models.ProposalDecision.objects.filter(trigger_group_id=trigger_event)
+
+    # Grab MWA obs if the exist
     mwa_obs = []
     for prop_dec in prop_decs:
         mwa_obs += models.Observations.objects.filter(proposal_decision_id=prop_dec)
+
+    # Get position error units
+    poserr_unit = request.GET.get('poserr_unit', 'deg')
+
     return render(request, 'trigger_app/triggerevent_details.html', {'trigger_event':trigger_event,
                                                                      'voevents':voevents,
                                                                      'mwa_obs':mwa_obs,
-                                                                     'prop_decs':prop_decs})
+                                                                     'prop_decs':prop_decs,
+                                                                     'telescopes':telescopes,
+                                                                     'event_id':event_id,
+                                                                     'event_id_voevents':event_id_voevents,
+                                                                     'poserr_unit':poserr_unit,})
 
 
 def ProposalDecision_details(request, id):

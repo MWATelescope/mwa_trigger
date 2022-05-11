@@ -121,6 +121,7 @@ class parsed_VOEvent:
             self.trig_pairs = [
                 "SWIFT_BAT_GRB_Pos",
                 "SWIFT_XRT_Pos",
+                "SWIFT_UVOT_Pos",
                 "Fermi_GBM_Flt_Pos",
                 "Fermi_GBM_Gnd_Pos",
                 "Fermi_GBM_Fin_Pos",
@@ -158,6 +159,10 @@ class parsed_VOEvent:
         # Work out what type of source it is
         self.source_type = get_source_types(self.telescope, self.event_type, self.source_name, v)
         logger.debug(f"source types: {self.source_type}")
+
+        # Attempt to get a Trigger ID (for Fermi and SWIFT)
+        if v.find(".//Param[@name='TrigID']") is not None:
+            self.trig_id = int(v.find(".//Param[@name='TrigID']").attrib["value"])
 
         # Check if this is the type of trigger we're looking for
         this_pair = f"{self.telescope}_{self.event_type}"
@@ -215,8 +220,6 @@ class parsed_VOEvent:
             self.sequence_num = None
 
         self.event_observed = v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Time.TimeInstant.ISOTime
-        # print(voeventparse.prettystr(v.What))
-        self.trig_id = int(v.find(".//Param[@name='TrigID']").attrib["value"])
         logger.debug("Trig details:")
         logger.debug(f"Dur:  {self.trig_duration} s")
         logger.debug(f"ID:   {self.trig_id}")

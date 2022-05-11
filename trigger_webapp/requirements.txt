@@ -22,6 +22,7 @@ debugpy==1.5.1
 decorator==5.1.1
 Django==3.2.5
 django-apscheduler==0.6.2
+django-filter==21.1
 djangorestframework==3.13.1
 docutils==0.17.1
 dpcpp-cpp-rt==2022.0.2
