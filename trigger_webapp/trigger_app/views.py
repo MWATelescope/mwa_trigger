@@ -111,23 +111,26 @@ def TriggerIDList(request):
     # Loop over the trigger events and grab all the telescopes and soruces of the VOEvents
     telescope_list = []
     source_list = []
+    source_name_list = []
     for tevent in trigger_group_ids:
+        trigger_group_voevents = voevents.filter(trigger_group_id=tevent)
         telescope_list.append(
-            ' '.join(set(voevents.filter(trigger_group_id=tevent).values_list('telescope', flat=True)))
+            ' '.join(set(trigger_group_voevents.values_list('telescope', flat=True)))
         )
-        sources = voevents.filter(trigger_group_id=tevent).values_list('source_type', flat=True)
+        sources = trigger_group_voevents.values_list('source_type', flat=True)
         # remove Nones
         sources =  [ i for i in sources if i ]
         if len(sources) > 0:
             source_list.append(' '.join(set(sources)))
         else:
             source_list.append(' ')
+        source_name_list.append(trigger_group_voevents.first().source_name)
 
 
     # Paginate
     page = request.GET.get('page', 1)
     # zip the trigger event and the tevent_telescope_list together so I can loop over both in the html
-    paginator = Paginator(list(zip(trigger_group_ids, telescope_list, source_list)), 100)
+    paginator = Paginator(list(zip(trigger_group_ids, telescope_list, source_list, source_name_list)), 100)
     try:
         object_list = paginator.page(page)
     except InvalidPage:

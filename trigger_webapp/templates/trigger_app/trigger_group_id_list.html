@@ -9,12 +9,14 @@
     <tr>
       <th>ID</th>
       <th>Trigger ID</th>
+      <th>Source Name</th>
       <th>Source Type</th>
       <th>Telescope(s)</th>
+      <th>Earliest Alert (UTC)</th>
     </tr>
     </thead>
     <!-- Iterate over object_list -->
-    {% for object, tele_str, source_str in object_list %}
+    {% for object, tele_str, source_str, source_name in object_list %}
     <!-- Display Objects -->
     <tr>
       <td><a href="/trigger_id_details/{{ object.id }}/" style="text-decoration:None">{{ object.id }}</a></td>
@@ -24,8 +26,14 @@
       {% else %}
         <td>{{ object.trigger_id }}</td>
       {% endif %}
+      {% if source_str == "FS" %}
+        <td>{{ source_name }}</td>
+      {% else %}
+        <td>{{ source_str }}{{ object.earliest_event_observed|date:"ymd" }}</td>
+      {% endif %}
       <td>{{ source_str }}</td>
       <td>{{ tele_str }}</td>
+      <td>{{ object.earliest_event_observed|date:"Y-m-d H:i:s" }}</td>
     </tr>
     <!-- If object_list is empty  -->
     {% empty %}
