@@ -3,13 +3,9 @@ from django.views.generic.list import ListView
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db import transaction
-from django.db.models import Count, Q, F, Value, Subquery, OuterRef, CharField
-from django.db.models.functions import Concat
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.contrib.postgres.aggregates import StringAgg
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger, InvalidPage
-from sqlalchemy import subquery
 import django_filters
 
 from rest_framework import status
@@ -20,14 +16,10 @@ import mimetypes
 from . import models, serializers, forms, signals
 from .telescope_observe import trigger_observation
 
-import os
 import sys
 import voeventparse as vp
 from astropy.coordinates import SkyCoord
 from astropy import units as u
-import requests
-import subprocess
-import shutil
 
 import logging
 logger = logging.getLogger(__name__)
@@ -86,17 +78,17 @@ def VOEventList(request):
         voevents = paginator.page(1)
     return render(request, 'trigger_app/voevent_list.html', {'filter': f, "page_obj":voevents, "poserr_unit":poserr_unit})
 
-def TriggerEventList(request):
+def PossibleEventAssociationList(request):
     # Find all telescopes for each trigger event
     voevents = models.VOEvent.objects.filter(ignored=False)
-    trigger_event = models.TriggerEvent.objects.all()
+    trigger_event = models.PossibleEventAssociation.objects.all()
 
     # Loop over the trigger events and grab all the telescopes of the VOEvents
     tevent_telescope_list = []
     for tevent in trigger_event:
         tevent_telescope_list.append(
             ' '.join(
-                set(voevents.filter(trigger_group_id=tevent).values_list('telescope', flat=True))
+                set(voevents.filter(associated_event_id=tevent).values_list('telescope', flat=True))
             )
         )
 
@@ -108,7 +100,40 @@ def TriggerEventList(request):
         object_list = paginator.page(page)
     except InvalidPage:
         object_list = paginator.page(1)
-    return render(request, 'trigger_app/triggerevent_list.html', {'object_list':object_list})
+    return render(request, 'trigger_app/possible_event_association_list.html', {'object_list':object_list})
+
+
+def TriggerIDList(request):
+    # Find all telescopes for each trigger event
+    trigger_group_ids = models.TriggerID.objects.all()
+    voevents = models.VOEvent.objects.all()
+
+    # Loop over the trigger events and grab all the telescopes and soruces of the VOEvents
+    telescope_list = []
+    source_list = []
+    for tevent in trigger_group_ids:
+        telescope_list.append(
+            ' '.join(set(voevents.filter(trigger_group_id=tevent).values_list('telescope', flat=True)))
+        )
+        sources = voevents.filter(trigger_group_id=tevent).values_list('source_type', flat=True)
+        # remove Nones
+        sources =  [ i for i in sources if i ]
+        if len(sources) > 0:
+            source_list.append(' '.join(set(sources)))
+        else:
+            source_list.append(' ')
+
+
+    # Paginate
+    page = request.GET.get('page', 1)
+    # zip the trigger event and the tevent_telescope_list together so I can loop over both in the html
+    paginator = Paginator(list(zip(trigger_group_ids, telescope_list, source_list)), 100)
+    try:
+        object_list = paginator.page(page)
+    except InvalidPage:
+        object_list = paginator.page(1)
+    return render(request, 'trigger_app/trigger_group_id_list.html', {'object_list':object_list})
+
 
 class CometLogList(ListView):
     model = models.CometLog
@@ -131,8 +156,8 @@ def home_page(request):
                                                           'tcps':", ".join(settings.VOEVENT_TCP)})
 
 
-def TriggerEvent_details(request, tid):
-    trigger_event = models.TriggerEvent.objects.get(id=tid)
+def PossibleEventAssociation_details(request, tid):
+    trigger_event = models.PossibleEventAssociation.objects.get(id=tid)
 
     # covert ra and dec to HH:MM:SS.SS format
     c = SkyCoord( trigger_event.ra, trigger_event.dec, frame='icrs', unit=(u.deg,u.deg))
@@ -140,14 +165,35 @@ def TriggerEvent_details(request, tid):
     trigger_event.dec = c.dec.to_string(unit=u.degree, sep=':')
 
     # grab telescope names
-    voevents = models.VOEvent.objects.filter(trigger_group_id=trigger_event)
+    voevents = models.VOEvent.objects.filter(associated_event_id=trigger_event)
     telescopes = ' '.join(set(voevents.values_list('telescope', flat=True)))
 
     # grab event ID
     event_id = list(dict.fromkeys(voevents.values_list('trigger_id')))[0][0]
 
     # list all voevents with the same id
-    event_id_voevents = models.VOEvent.objects.filter(trigger_id=event_id)
+    if event_id:
+        event_id_voevents = models.VOEvent.objects.filter(trigger_id=event_id)
+    else:
+        event_id_voevents = []
+
+    # Get position error units
+    poserr_unit = request.GET.get('poserr_unit', 'deg')
+
+    return render(request, 'trigger_app/possible_event_association_details.html', {'trigger_event':trigger_event,
+                                                                     'voevents':voevents,
+                                                                     'telescopes':telescopes,
+                                                                     'event_id':event_id,
+                                                                     'event_id_voevents':event_id_voevents,
+                                                                     'poserr_unit':poserr_unit,})
+
+
+def TriggerID_details(request, tid):
+    trigger_event = models.TriggerID.objects.get(id=tid)
+
+    # grab telescope names
+    voevents = models.VOEvent.objects.filter(trigger_group_id=trigger_event)
+    telescopes = ' '.join(set(voevents.values_list('telescope', flat=True)))
 
     # list all prop decisions
     prop_decs = models.ProposalDecision.objects.filter(trigger_group_id=trigger_event)
@@ -160,13 +206,11 @@ def TriggerEvent_details(request, tid):
     # Get position error units
     poserr_unit = request.GET.get('poserr_unit', 'deg')
 
-    return render(request, 'trigger_app/triggerevent_details.html', {'trigger_event':trigger_event,
+    return render(request, 'trigger_app/trigger_group_id_details.html', {'trigger_event':trigger_event,
                                                                      'voevents':voevents,
                                                                      'mwa_obs':mwa_obs,
                                                                      'prop_decs':prop_decs,
                                                                      'telescopes':telescopes,
-                                                                     'event_id':event_id,
-                                                                     'event_id_voevents':event_id_voevents,
                                                                      'poserr_unit':poserr_unit,})
 
 

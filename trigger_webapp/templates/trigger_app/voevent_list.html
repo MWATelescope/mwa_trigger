@@ -14,8 +14,8 @@
       <tr>
         <td width="15%">{{ filter.form.ignored.label_tag }}</td>
         <td width="15%">{{ filter.form.ignored }}</td>
-        <td width="15%">Trigger group ID:</td>
-        <td width="15%">{{ filter.form.trigger_group_id }}</td>
+        <td width="15%">Possibily Associated Events ID:</td>
+        <td width="15%">{{ filter.form.associated_event_id }}</td>
         <td width="15%"></td>
         <td width="7.5%">Min (inclusive)</td>
         <td width="7.5%">Max (inclusive)</td>
@@ -87,8 +87,8 @@
         <th>Event Type</th>
         <th>Alert Time (UTC)</th>
         <th>Recieved (UTC)</th>
-        <th>Trigger Group ID</th>
-        <th>Event ID</th>
+        <th>Trigger ID</th>
+        <th>Group ID</th>
         <th>Source Name</th>
         <th>Sequence number</th>
         <th>Duration (s)</th>
@@ -117,25 +117,27 @@
       <td>{{ object.event_type }}</td>
       <td>{{ object.event_observed|date:"Y-m-d H:i:s" }}</td>
       <td>{{ object.recieved_data|date:"Y-m-d H:i:s" }}</td>
+      <td>
+        {% if object.trigger_id is not None %}
+          {% if object.telescope == "SWIFT" and not object.ignored %}
+            <!-- Link to SWIFT telescope page -->
+            <a href="https://gcn.gsfc.nasa.gov/other/{{ object.trigger_id }}.swift" style="text-decoration:None">{{ object.trigger_id }}</a>
+          {% else %}
+            {{ object.trigger_id }}
+          {% endif %}
+        {% endif %}
+      </td>
       {% if object.trigger_group_id is None %}
         <!-- Don't make a link because there is no trigger event -->
         <td></td>
       {% else %}
-        <td><a href="/triggerevent_details/{{ object.trigger_group_id }}/" style="text-decoration:None">{{ object.trigger_group_id }}</a></td>
+        <td><a href="/trigger_id_details/{{ object.trigger_group_id }}/" style="text-decoration:None">{{ object.trigger_group_id}}</a></td>
       {% endif %}
-      <td>{% if object.trigger_id is not None %}
-            {% if object.telescope == "SWIFT" and not object.ignored %}
-              <!-- Link to SWIFT telescope page -->
-              <a href="https://gcn.gsfc.nasa.gov/other/{{ object.trigger_id }}.swift" style="text-decoration:None">{{ object.trigger_id }}</a>
-            {% else %}
-              {{ object.trigger_id }}
-            {% endif %}
-          {% endif %}</td>
       <td>{% if object.source_name  is not None %} {{ object.source_name }}  {% endif %}</td>
       <td>{% if object.sequence_num is not None %} {{ object.sequence_num }} {% endif %}</td>
       <td>{% if object.duration     is not None %} {{ object.duration }}     {% endif %}</td>
-      <td>{% if object.ra_hms          is not None %} {{ object.ra_hms }}          {% endif %}</td>
-      <td>{% if object.dec_dms         is not None %} {{ object.dec_dms }}         {% endif %}</td>
+      <td>{% if object.ra_hms       is not None %} {{ object.ra_hms }}       {% endif %}</td>
+      <td>{% if object.dec_dms      is not None %} {{ object.dec_dms }}      {% endif %}</td>
       <td>
       {% if object.pos_error    is not None %}
         {% if poserr_unit == "deg" %}

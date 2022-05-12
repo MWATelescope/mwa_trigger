@@ -1,0 +1,38 @@
+{% extends 'trigger_app/header.html' %}
+
+{% block content %}
+<title>Trigger ID Log</title>
+<div class="container-fluid">
+  <h1>Trigger ID Log</h1>
+  <table class="fl-table">
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Trigger ID</th>
+      <th>Source Type</th>
+      <th>Telescope(s)</th>
+    </tr>
+    </thead>
+    <!-- Iterate over object_list -->
+    {% for object, tele_str, source_str in object_list %}
+    <!-- Display Objects -->
+    <tr>
+      <td><a href="/trigger_id_details/{{ object.id }}/" style="text-decoration:None">{{ object.id }}</a></td>
+      {% if tele_str == "SWIFT" %}
+        <!-- Link to SWIFT telescope page -->
+        <td><a href="https://gcn.gsfc.nasa.gov/other/{{ object.trigger_id }}.swift" style="text-decoration:None">{{ object.trigger_id }}</a></td>
+      {% else %}
+        <td>{{ object.trigger_id }}</td>
+      {% endif %}
+      <td>{{ source_str }}</td>
+      <td>{{ tele_str }}</td>
+    </tr>
+    <!-- If object_list is empty  -->
+    {% empty %}
+    <li>No objects yet.</li>
+    {% endfor %}
+  </table>
+
+  {% include "trigger_app/pagination.html" %}
+</div>
+{% endblock %}
