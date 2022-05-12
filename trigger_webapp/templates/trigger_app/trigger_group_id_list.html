@@ -11,6 +11,7 @@
       <th>Trigger ID</th>
       <th>Source Type</th>
       <th>Telescope(s)</th>
+      <th>Earliest Alert (UTC)</th>
     </tr>
     </thead>
     <!-- Iterate over object_list -->
@@ -26,6 +27,7 @@
       {% endif %}
       <td>{{ source_str }}</td>
       <td>{{ tele_str }}</td>
+      <td>{{ object.earliest_event_observed|date:"Y-m-d H:i:s" }}</td>
     </tr>
     <!-- If object_list is empty  -->
     {% empty %}
