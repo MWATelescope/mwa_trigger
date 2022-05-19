@@ -78,6 +78,36 @@ def VOEventList(request):
         voevents = paginator.page(1)
     return render(request, 'trigger_app/voevent_list.html', {'filter': f, "page_obj":voevents, "poserr_unit":poserr_unit})
 
+
+class ProposalDecisionFilter(django_filters.FilterSet):
+    recieved_data = django_filters.DateTimeFromToRangeFilter()
+
+    class Meta:
+        model = models.ProposalDecision
+        fields = '__all__'
+
+
+def ProposalDecisionList(request):
+    # Apply filters
+    f = ProposalDecisionFilter(request.GET, queryset=models.ProposalDecision.objects.all())
+    ProposalDecision = f.qs
+
+    # Get position error units
+    poserr_unit = request.GET.get('poserr_unit', 'deg')
+
+    # Paginate
+    page = request.GET.get('page', 1)
+    paginator = Paginator(ProposalDecision, 100)
+    try:
+        ProposalDecision = paginator.page(page)
+    except InvalidPage:
+        # if the page contains no results (EmptyPage exception) or
+        # the page number is not an integer (PageNotAnInteger exception)
+        # return the first page
+        ProposalDecision = paginator.page(1)
+    return render(request, 'trigger_app/proposaldecision_list.html', {'filter': f, "page_obj":ProposalDecision, "poserr_unit":poserr_unit})
+
+
 def PossibleEventAssociationList(request):
     # Find all telescopes for each trigger event
     voevents = models.VOEvent.objects.filter(ignored=False)
@@ -144,10 +174,6 @@ class CometLogList(ListView):
 
 class ProposalSettingsList(ListView):
     model = models.ProposalSettings
-
-class ProposalDecisionList(ListView):
-    model = models.ProposalDecision
-    paginate_by = 100
 
 
 def home_page(request):
@@ -406,9 +432,6 @@ def proposal_edit_form(request, id):
             saved = form.save()
             # on success, the request is redirected as a GET
             return redirect(proposal_decision_path, id=saved.id)
-        else:
-            print("eww")
     else:
-        print("here")
         form = forms.ProjectSettingsForm()
     return render(request, 'trigger_app/proposal_form.html', {'form':form})

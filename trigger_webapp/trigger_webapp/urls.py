@@ -37,7 +37,7 @@ urlpatterns = [
     path('proposal_edit/<int:id>/', views.proposal_edit_form),
     path('proposal_decision_details/<int:id>/', views.ProposalDecision_details),
     path('proposal_decision_result/<int:id>/<int:decision>/', views.ProposalDecision_result),
-    path('proposal_decision_log/', views.ProposalDecisionList.as_view()),
+    path('proposal_decision_log/', views.ProposalDecisionList),
     path('proposal_decision_path/<int:id>/', views.proposal_decision_path),
     path('voevent_view/<int:id>/', views.voevent_view),
     path('voevent_create/', views.voevent_create),
