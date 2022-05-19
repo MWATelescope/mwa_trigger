@@ -418,11 +418,10 @@ def proposal_form(request, id=None):
     src_tele = parse_xml.SOURCE_TELESCOPES
     if id:
         proposal = models.ProposalSettings.objects.get(id=id)
+    else:
+        proposal = None
     if request.POST:
-        if id:
-            form = forms.ProjectSettingsForm(request.POST, instance=proposal)
-        else:
-            form = forms.ProjectSettingsForm(request.POST)
+        form = forms.ProjectSettingsForm(request.POST, instance=proposal)
         if form.is_valid():
             saved = form.save()
             # on success, the request is redirected as a GET

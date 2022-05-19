@@ -3,7 +3,7 @@
 # from built-in library
 from django import forms
 from .models import UserAlerts, ProposalSettings
-from .validators import atca_freq_bands
+from .validators import atca_freq_bands, mwa_proposal_id, mwa_freqspecs
 
 # creating a form
 class UserAlertForm(forms.ModelForm):
@@ -15,7 +15,7 @@ class UserAlertForm(forms.ModelForm):
 
 class ProjectSettingsForm(forms.ModelForm):
     def clean(self):
-        # Validate that the user chose Frequency values within each band
+        # Validate that the user chose ATCA Frequency values within each band
         band1 = self.cleaned_data['atca_band_3mm']
         if band1:
             # min_freq, max_freq, freq, field_name
@@ -33,6 +33,20 @@ class ProjectSettingsForm(forms.ModelForm):
         if band4:
             atca_freq_bands(3900, 11000, self.cleaned_data['atca_band_4cm_freq1'], 'atca_band_4cm_freq1')
             atca_freq_bands(3900, 11000, self.cleaned_data['atca_band_4cm_freq2'], 'atca_band_4cm_freq2')
+
+
+        # Make sure the project ID is works
+        telescope = self.cleaned_data['telescope']
+        if str(telescope).startswith("MWA"):
+            mwa_proposal_id(self.cleaned_data['project_id'])
+
+            # Check the MWA frequency channel specifications are valid
+            if self.cleaned_data['mwa_freqspecs']:
+                mwa_freqspecs(self.cleaned_data['mwa_freqspecs'])
+            else:
+                raise forms.ValidationError({'mwa_freqspecs': "No Frequency channel Specifications suppled."})
+        # TODO do same thing with ATCA
+
 
     # specify the name of model to use
     class Meta:

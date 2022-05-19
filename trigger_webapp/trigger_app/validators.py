@@ -1,6 +1,10 @@
 from django.core.exceptions import ValidationError
 from django import forms
+
+import os
 import logging
+
+from mwa_trigger.triggerservice import trigger_mwa
 
 logger = logging.getLogger(__name__)
 
@@ -126,3 +130,34 @@ def atca_freq_bands(min_freq, max_freq, freq, field_name):
         raise forms.ValidationError({field_name: f"A centre frequency of {freq} MHz would have a maximum above {max_freq} MHz which is outside the bands frequency range."})
     if freq - 1000 < min_freq:
         raise forms.ValidationError({field_name: f"A centre frequency of {freq} MHz would have a minimum below {min_freq} MHz which is outside the bands frequency range."})
+
+
+def mwa_proposal_id(project_id):
+    result = trigger_mwa(project_id=project_id,
+        secure_key=os.environ.get('MWA_SECURE_KEY', None),
+        pretend=True,
+        ra=0.,
+        dec=0.,
+        creator='VOEvent_Auto_Trigger',
+        obsname='proposal_test',
+        nobs=1,
+        freqspecs="121,24", #Assume always using 24 contiguous coarse frequency channels
+        avoidsun=True,
+        inttime=0.5,
+        freqres=10.0,
+        exptime=900,
+        calibrator=True,
+        calexptime=120,
+        vcsmode=True,
+    )
+    logger.debug(f"result: {result}")
+    # Check if succesful
+    if result is None:
+        raise forms.ValidationError({"Web API error, possible server error"})
+    if not result['success']:
+        # Observation not succesful so record why
+        error_message = ""
+        for err_id in result['errors']:
+            error_message += f"{result['errors'][err_id]}.\n "
+        # Return an error as the trigger status
+        raise forms.ValidationError({error_message})
