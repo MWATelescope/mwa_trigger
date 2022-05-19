@@ -411,27 +411,18 @@ def voevent_create(request):
 
 
 @login_required
-def proposal_create_form(request):
+def proposal_form(request, id=None):
+    if id:
+        proposal = models.ProposalSettings.objects.get(id=id)
     if request.POST:
-        form = forms.ProjectSettingsForm(request.POST)
+        if id:
+            form = forms.ProjectSettingsForm(request.POST, instance=proposal)
+        else:
+            form = forms.ProjectSettingsForm(request.POST)
         if form.is_valid():
             saved = form.save()
             # on success, the request is redirected as a GET
             return redirect(proposal_decision_path, id=saved.id)
     else:
-        form = forms.ProjectSettingsForm()
-    return render(request, 'trigger_app/proposal_form.html', {'form':form})
-
-
-@login_required
-def proposal_edit_form(request, id):
-    proposal = models.ProposalSettings.objects.get(id=id)
-    if request.POST:
-        form = forms.ProjectSettingsForm(request.POST, instance=proposal)
-        if form.is_valid():
-            saved = form.save()
-            # on success, the request is redirected as a GET
-            return redirect(proposal_decision_path, id=saved.id)
-    else:
-        form = forms.ProjectSettingsForm()
+        form = forms.ProjectSettingsForm(instance=proposal)
     return render(request, 'trigger_app/proposal_form.html', {'form':form})
