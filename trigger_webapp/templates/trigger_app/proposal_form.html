@@ -9,6 +9,20 @@
     <script> src="{% static 'js/hide_section.js' %}" </script>
     <title>New Proposal</title>
     <div class="container-md">
+        {% if form.errors %}
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <div class="alert alert-danger">
+                        <strong>{{ field.label_tag }} {{ error|escape }}</strong>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <div class="alert alert-danger">
+                    <strong>{{ error|escape }}</strong>
+                </div>
+            {% endfor %}
+        {% endif %}
     <h1>New Proposal</h1>
     <form action = "" method = "post">
         <p>{{ form.proposal_description.label_tag }}</p>
