@@ -30,6 +30,7 @@
   <table class="fl-table">
     <thead>
     <tr>
+      <th>ID</th>
       <th>Telescope</th>
       <th>Project ID</th>
       <th>Proposal Description</th>
@@ -45,6 +46,7 @@
     {% for setting in settings %}
     <!-- Display Objects -->
     <tr>
+      <td><a href='/proposal_edit/{{ setting.id }}/' style="text-decoration:None">{{ setting.id }}</a></td>
       <td>{{ setting.telescope }}</td>
       <td>{{ setting.project_id }}</td>
       <td>{{ setting.proposal_description }}</td>

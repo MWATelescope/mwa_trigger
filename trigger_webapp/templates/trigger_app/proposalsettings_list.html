@@ -7,12 +7,14 @@
   <table class="fl-table">
     <thead>
     <tr>
+      <th>ID</th>
       <th>Telescope</th>
       <th>Project ID</th>
       <th>Proposal Description</th>
       <th>Proposal Flow Diagram</th>
       <th>Trigger Duration range (s)</th>
-      <th>Pending Duration range (s)</th>
+      <th>Pending Duration range 1 (s)</th>
+      <th>Pending Duration range 2 (s)</th>
       <th>Minimum Fermi Probability</th>
       <th>Minimum SWIFT Rate Significance</th>
       <th>Repointing Limit</th>
@@ -36,12 +38,14 @@
     {% if "MWA" in object.telescope.name %}
     <!-- Display Objects -->
     <tr>
+      <td><a href='/proposal_edit/{{ object.id }}/' style="text-decoration:None">{{ object.id }}</a></td>
       <td>{{ object.telescope }}</td>
       <td>{{ object.project_id }}</td>
       <td>{{ object.proposal_description }}</td>
       <td><a href='/proposal_decision_path/{{ object.id }}/' style="text-decoration:None">View Flow Diagram</a></td>
       <td>{{ object.trig_min_duration }} - {{ object.trig_max_duration }}</td>
-      <td>{{ object.pending_min_duration }} - {{ object.pending_max_duration }}</td>
+      <td>{{ object.pending_min_duration_1 }} - {{ object.pending_max_duration_1 }}</td>
+      <td>{{ object.pending_min_duration_2 }} - {{ object.pending_max_duration_2 }}</td>
       <td>{{ object.fermi_prob }}</td>
       <td>{{ object.swift_rate_signf }}</td>
       <td>{{ object.repointing_limit }}</td>
@@ -70,12 +74,14 @@
   <table class="fl-table">
     <thead>
     <tr>
+      <th>ID</th>
       <th>Telescope</th>
       <th>Project ID</th>
       <th>Proposal Description</th>
       <th>Proposal Flow Diagram</th>
       <th>Trigger Duration range (s)</th>
-      <th>Pending Duration range (s)</th>
+      <th>Pending Duration range 1 (s)</th>
+      <th>Pending Duration range 2 (s)</th>
       <th>Minimum Fermi Probability</th>
       <th>Minimum SWIFT Rate Significance</th>
       <th>Repointing Limit</th>
@@ -96,12 +102,14 @@
     {% if "MWA" not in object.telescope.name %}
     <!-- Display Objects -->
     <tr>
+      <td><a href='/proposal_edit/{{ object.id }}/' style="text-decoration:None">{{ object.id }}</a></td>
       <td>{{ object.telescope }}</td>
       <td>{{ object.project_id }}</td>
       <td>{{ object.proposal_description }}</td>
       <td><a href='/proposal_decision_path/{{ object.id }}/' style="text-decoration:None">View Flow Diagram</a></td>
       <td>{{ object.trig_min_duration }} - {{ object.trig_max_duration }}</td>
-      <td>{{ object.pending_min_duration }} - {{ object.pending_max_duration }}</td>
+      <td>{{ object.pending_min_duration_1 }} - {{ object.pending_max_duration_1 }}</td>
+      <td>{{ object.pending_min_duration_2 }} - {{ object.pending_max_duration_2 }}</td>
       <td>{{ object.fermi_prob }}</td>
       <td>{{ object.swift_rate_signf }}</td>
       <td>{{ object.repointing_limit }}</td>
