@@ -33,7 +33,15 @@
         <h2>Event Source Settings</h2>
         <h3>Source type to observere</h3>
         <table>
-            <tr><td>{{ form.source_type.label_tag }}</td><td>{{ form.source_type }}</td></tr>
+            <tr><td>{{ form.source_type.label_tag }} {% help_wrap form.source_type.help_text %}</td><td>
+                <select name="source_type" id="source_type">
+                    <option disabled selected value> -- select an option -- </option>
+                    <option value="GRB">Gamma-ray burst</option>
+                    <option value="FS">Flare star</option>
+                    <option value="NU">Neutrino</option>
+                    <option value="GW">Gravitational wave</option>
+                </select>
+            </td></tr>
         </table>
         <h3>Source duration</h3>
         <table>
@@ -49,10 +57,53 @@
 
         <hr>
         <h2>Event Telescope Settings</h2>
-        <table>
-            <tr><td>{{ form.event_telescope.label_tag }}      {% help_wrap form.event_telescope.help_text %}</td><td>{{ form.event_telescope }}</td></tr>
-            <tr><td>TODO new repointing options</td><td></td></tr>
-        </table>
+        <div id="none">
+            <p>Select a source type before choosing an event telescope</p>
+        </div>
+        <div id="GRB">
+            <table>
+                <tr><td>{{ form.event_telescope.label_tag }}      {% help_wrap form.event_telescope.help_text %}</td><td>
+                <select name="event_telescope" id="event_telescope">
+                    <option disabled selected value> -- select an option -- </option>
+                    {% for telescope in src_tele.GRB %}
+                        <option value="{{ telescope }}">{{ telescope }}</option>
+                    {% endfor %}
+                </select></td></tr>
+            </table>
+        </div>
+        <div id="FS">
+            <table>
+                <tr><td>{{ form.event_telescope.label_tag }}      {% help_wrap form.event_telescope.help_text %}</td><td>
+                <select name="event_telescope" id="event_telescope">
+                    <option disabled selected value> -- select an option -- </option>
+                    {% for telescope in src_tele.FS %}
+                        <option value="{{ telescope }}">{{ telescope }}</option>
+                    {% endfor %}
+                </select></td></tr>
+            </table>
+        </div>
+        <div id="GW">
+            <table>
+                <tr><td>{{ form.event_telescope.label_tag }}      {% help_wrap form.event_telescope.help_text %}</td><td>
+                <select name="event_telescope" id="event_telescope">
+                    <option disabled selected value> -- select an option -- </option>
+                    {% for telescope in src_tele.GW %}
+                        <option value="{{ telescope }}">{{ telescope }}</option>
+                    {% endfor %}
+                </select></td></tr>
+            </table>
+        </div>
+        <div id="NU">
+            <table>
+                <tr><td>{{ form.event_telescope.label_tag }}      {% help_wrap form.event_telescope.help_text %}</td><td>
+                <select name="event_telescope" id="event_telescope">
+                    <option disabled selected value> -- select an option -- </option>
+                    {% for telescope in src_tele.NU %}
+                        <option value="{{ telescope }}">{{ telescope }}</option>
+                    {% endfor %}
+                </select></td></tr>
+            </table>
+        </div>
 
         <hr>
         <h2>Target Telescope Settings</h2>
@@ -127,6 +178,40 @@
                 }
             });
             $("#telescope").trigger("change")
+            $("#source_type").change(function() {
+                if ($(this).val() === "GRB") {
+                    $('#GRB').show();
+                    $('#FS').hide();
+                    $('#GW').hide();
+                    $('#NU').hide();
+                    $('#none').hide();
+                } else if ($(this).val() === "FS") {
+                    $('#GRB').hide();
+                    $('#FS').show();
+                    $('#GW').hide();
+                    $('#NU').hide();
+                    $('#none').hide();
+                } else if ($(this).val() === "GW") {
+                    $('#GRB').hide();
+                    $('#FS').hide();
+                    $('#GW').show();
+                    $('#NU').hide();
+                    $('#none').hide();
+                } else if ($(this).val() === "NU") {
+                    $('#GRB').hide();
+                    $('#FS').hide();
+                    $('#GW').hide();
+                    $('#NU').show();
+                    $('#none').hide();
+                } else {
+                    $('#GRB').hide();
+                    $('#FS').hide();
+                    $('#GW').hide();
+                    $('#NU').hide();
+                    $('#none').show();
+                }
+            });
+            $("#source_type").trigger("change")
         })
     </script>
 {% endblock %}

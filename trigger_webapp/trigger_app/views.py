@@ -21,6 +21,8 @@ import voeventparse as vp
 from astropy.coordinates import SkyCoord
 from astropy import units as u
 
+from mwa_trigger import parse_xml
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -412,6 +414,8 @@ def voevent_create(request):
 
 @login_required
 def proposal_form(request, id=None):
+    # grab source type telescope dict
+    src_tele = parse_xml.SOURCE_TELESCOPES
     if id:
         proposal = models.ProposalSettings.objects.get(id=id)
     if request.POST:
@@ -425,4 +429,4 @@ def proposal_form(request, id=None):
             return redirect(proposal_decision_path, id=saved.id)
     else:
         form = forms.ProjectSettingsForm(instance=proposal)
-    return render(request, 'trigger_app/proposal_form.html', {'form':form})
+    return render(request, 'trigger_app/proposal_form.html', {'form':form, "src_tele": src_tele})
