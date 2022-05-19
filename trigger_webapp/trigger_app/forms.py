@@ -2,7 +2,7 @@
 # import the standard Django Forms
 # from built-in library
 from django import forms
-from .models import UserAlerts
+from .models import UserAlerts, ProposalSettings
 from .validators import atca_freq_bands
 
 # creating a form
@@ -33,3 +33,8 @@ class ProjectSettingsForm(forms.ModelForm):
         if band4:
             atca_freq_bands(3900, 11000, self.cleaned_data['atca_band_4cm_freq1'], 'atca_band_4cm_freq1')
             atca_freq_bands(3900, 11000, self.cleaned_data['atca_band_4cm_freq2'], 'atca_band_4cm_freq2')
+
+    # specify the name of model to use
+    class Meta:
+        model = ProposalSettings
+        fields = '__all__'

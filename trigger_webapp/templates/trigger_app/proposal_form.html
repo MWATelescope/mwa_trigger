@@ -1,0 +1,126 @@
+{% extends 'trigger_app/header.html' %}
+
+{% load utils %}
+
+{% load static %}
+
+{% block content %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script> src="{% static 'js/hide_section.js' %}" </script>
+    <title>New Proposal</title>
+    <div class="container-md">
+    <h1>New Proposal</h1>
+    <form action = "" method = "post">
+        <p>{{ form.proposal_description.label_tag }}</p>
+        <textarea cols="100" id="proposal_description" name="proposal_description" placeholder="{{ form.proposal_description.help_text }}">{% if form.proposal_description.value != None %}{{ form.proposal_description.value }}{% endif %}</textarea>
+        {% csrf_token %}
+
+        <hr>
+        <h2>Event Source Settings</h2>
+        <h3>Source types to observere</h3>
+        <table>
+            <tr><td>{{ form.grb }}</td><td>{{ form.grb.label_tag }}</td></tr>
+            <tr><td>{{ form.flare_star }}</td><td>{{ form.flare_star.label_tag }}</td></tr>
+            <tr><td>{{ form.gw }}</td><td>{{ form.gw.label_tag }}</td></tr>
+            <tr><td>{{ form.neutrino }}</td><td>{{ form.neutrino.label_tag }}</td></tr>
+        </table>
+        <h3>Source duration</h3>
+        <table>
+            <tr><td>Trigger Duration Range (s)  {% help_wrap 'The inclusive duration range of an event that will automatically trigger an observation.' %}</td><td>{{ form.trig_min_duration }}</td><td>{{ form.trig_max_duration }}</td></tr>
+            <tr><td>Pending Duration Range 1 (s){% help_wrap 'The inclusive duration range of an event that will notify users and let them decided if an observations should be triggered.' %}</td><td>{{ form.pending_min_duration_1 }}</td><td>{{ form.pending_max_duration_1 }}</td></tr>
+            <tr><td>Pending Duration Range 2 (s){% help_wrap 'A second inclusive duration range of an event that will notify users and let them decided if an observations should be triggered.' %}</td><td>{{ form.pending_min_duration_2 }}</td><td>{{ form.pending_max_duration_2 }}</td></tr>
+        </table>
+        <h3>Source thresholds</h3>
+        <table>
+            <tr><td>{{ form.fermi_prob.label_tag }}      {% help_wrap form.fermi_prob.help_text %}</td><td>{{ form.fermi_prob }}</td></tr>
+            <tr><td>{{ form.swift_rate_signf.label_tag }}{% help_wrap form.swift_rate_signf.help_text %}</td><td>{{ form.swift_rate_signf }}</td></tr>
+        </table>
+
+        <hr>
+        <h2>Event Telescope Settings</h2>
+        <table>
+            <tr><td>{{ form.event_telescope.label_tag }}      {% help_wrap form.event_telescope.help_text %}</td><td>{{ form.event_telescope }}</td></tr>
+            <tr><td>TODO new repointing options</td><td></td></tr>
+        </table>
+
+        <hr>
+        <h2>Target Telescope Settings</h2>
+        <table>
+            <tr><td>{{ form.telescope.label_tag }} {% help_wrap form.telescope.help_text %}</td><td>
+                <select name="telescope" id="telescope">
+                    <option disabled selected value> -- select an option -- </option>
+                    <option value="MWA_VCS">MWA_VCS</option>
+                    <option value="MWA_correlate">MWA_correlate</option>
+                    <option value="ATCA">ATCA</option>
+                </select>
+            </td></tr>
+            <tr><td>{{ form.project_id.label_tag }}  {% help_wrap form.project_id.help_text %}</td>  <td>{{ form.project_id }}</td></tr>
+            <tr><td>{{ form.repointing_limit.label_tag }}  {% help_wrap form.repointing_limit.help_text %}</td>  <td>{{ form.repointing_limit }}</td></tr>
+            <tr><td>{{ form.horizon_limit.label_tag }}  {% help_wrap form.horizon_limit.help_text %}</td>  <td>{{ form.horizon_limit }}</td></tr>
+            <tr><td>{{ form.testing.label_tag }}  {% help_wrap form.testing.help_text %}</td>  <td>{{ form.testing }}</td></tr>
+        </table>
+        <div id="mwa_vcs">
+            <table>
+                <tr><td>{{ form.mwa_freqspecs.label_tag }}  {% help_wrap form.mwa_freqspecs.help_text %}</td>  <td>{{ form.mwa_freqspecs }}</td></tr>
+                <tr><td>{{ form.mwa_exptime.label_tag }}    {% help_wrap form.mwa_exptime.help_text %}</td>    <td>{{ form.mwa_exptime }}</td></tr>
+                <tr><td>{{ form.mwa_calibrator.label_tag }} {% help_wrap form.mwa_calibrator.help_text %}</td> <td>{{ form.mwa_calibrator }}</td></tr>
+                <tr><td>{{ form.mwa_calexptime.label_tag }} {% help_wrap form.mwa_calexptime.help_text %}</td> <td>{{ form.mwa_calexptime }}</td></tr>
+                <tr><td>{{ form.mwa_avoidsun.label_tag }}   {% help_wrap form.mwa_avoidsun.help_text %}</td>   <td>{{ form.mwa_avoidsun }}</td></tr>
+                <tr><td>{{ form.mwa_buffered.label_tag }}   {% help_wrap form.mwa_buffered.help_text %}</td>   <td>{{ form.mwa_buffered }}</td></tr>
+            </table>
+        </div>
+        <div id="mwa_corr">
+            <table>
+                <tr><td>{{ form.mwa_freqspecs.label_tag }}  {% help_wrap form.mwa_freqspecs.help_text %}</td>  <td>{{ form.mwa_freqspecs }}</td></tr>
+                <tr><td>{{ form.mwa_nobs.label_tag }}       {% help_wrap form.mwa_nobs.help_text %}</td>       <td>{{ form.mwa_nobs }}</td></tr>
+                <tr><td>{{ form.mwa_exptime.label_tag }}    {% help_wrap form.mwa_exptime.help_text %}</td>    <td>{{ form.mwa_exptime }}</td></tr>
+                <tr><td>{{ form.mwa_calibrator.label_tag }} {% help_wrap form.mwa_calibrator.help_text %}</td> <td>{{ form.mwa_calibrator }}</td></tr>
+                <tr><td>{{ form.mwa_calexptime.label_tag }} {% help_wrap form.mwa_calexptime.help_text %}</td> <td>{{ form.mwa_calexptime }}</td></tr>
+                <tr><td>{{ form.mwa_freqres.label_tag }}    {% help_wrap form.mwa_freqres.help_text %}</td>    <td>{{ form.mwa_freqres }}</td></tr>
+                <tr><td>{{ form.mwa_inttime.label_tag }}    {% help_wrap form.mwa_inttime.help_text %}</td>    <td>{{ form.mwa_inttime }}</td></tr>
+                <tr><td>{{ form.mwa_avoidsun.label_tag }}   {% help_wrap form.mwa_avoidsun.help_text %}</td>   <td>{{ form.mwa_avoidsun }}</td></tr>
+            </table>
+        </div>
+        <div id="atca">
+            <p>ATCA has five receivers, so we can cycle the observations through each of them each time they repoint. Here is the documentation (see table 1.1) https://www.narrabri.atnf.csiro.au/observing/users_guide/html/atug.html#Signal-Path. All receives can observe at two frequency ranges (2 GHz bands) except for 16cm, which only observes has a 2GHz bandwidth, so only has one choice.</p>
+            <table>
+                <tr><td>{{ form.atca_band_3mm }}{{ form.atca_band_3mm.label_tag }}</td><td>{{ form.atca_band_3mm_freq1.label_tag }}</td><td>{{ form.atca_band_3mm_freq1 }}</td><td>{{ form.atca_band_3mm_freq2.label_tag }}</td><td>{{ form.atca_band_3mm_freq2 }}</td></tr>
+                <tr><td>{{ form.atca_band_7mm }}{{ form.atca_band_7mm.label_tag }}</td><td>{{ form.atca_band_7mm_freq1.label_tag }}</td><td>{{ form.atca_band_7mm_freq1 }}</td><td>{{ form.atca_band_7mm_freq2.label_tag }}</td><td>{{ form.atca_band_7mm_freq2 }}</td></tr>
+                <tr><td>{{ form.atca_band_15mm }}{{ form.atca_band_15mm.label_tag }}</td><td>{{ form.atca_band_15mm_freq1.label_tag }}</td><td>{{ form.atca_band_15mm_freq1 }}</td><td>{{ form.atca_band_15mm_freq2.label_tag }}</td><td>{{ form.atca_band_15mm_freq2 }}</td></tr>
+                <tr><td>{{ form.atca_band_4cm }}{{ form.atca_band_4cm.label_tag }}</td><td>{{ form.atca_band_4cm_freq1.label_tag }}</td><td>{{ form.atca_band_4cm_freq1 }}</td><td>{{ form.atca_band_4cm_freq2.label_tag }}</td><td>{{ form.atca_band_4cm_freq2 }}</td></tr>
+                <tr><td>{{ form.atca_band_16cm }}{{ form.atca_band_16cm.label_tag }}</td></tr>
+            </table>
+            <table>
+                <tr><td>{{ form.atca_nobs.label_tag }}       {% help_wrap form.atca_nobs.help_text %}</td>      <td>{{ form.atca_nobs }}</td></tr>
+                <tr><td>{{ form.atca_exptime.label_tag }}    {% help_wrap form.atca_exptime.help_text %}</td>   <td>{{ form.atca_exptime }}</td></tr>
+                <tr><td>{{ form.atca_calexptime.label_tag }} {% help_wrap form.atca_calexptime.help_text %}</td><td>{{ form.atca_calexptime }}</td></tr>
+            </table>
+        </div>
+        <input type="submit" value=Submit>
+    </form>
+    </div>
+    <script>
+        $(document).ready(function(){
+            $("#telescope").change(function() {
+                if ($(this).val() === "MWA_VCS") {
+                    $('#mwa_vcs').show();
+                    $('#mwa_corr').hide();
+                    $('#atca').hide();
+                } else if ($(this).val() === "MWA_correlate") {
+                    $('#mwa_vcs').hide();
+                    $('#mwa_corr').show();
+                    $('#atca').hide();
+                } else if ($(this).val() === "ATCA") {
+                    $('#mwa_vcs').hide();
+                    $('#mwa_corr').hide();
+                    $('#atca').show();
+                } else {
+                    $('#mwa_vcs').hide();
+                    $('#mwa_corr').hide();
+                    $('#atca').hide();
+                }
+            });
+            $("#telescope").trigger("change")
+        })
+    </script>
+{% endblock %}

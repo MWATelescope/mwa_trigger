@@ -3,7 +3,7 @@ from django.views.generic.list import ListView
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db import transaction
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger, InvalidPage
 import django_filters
@@ -382,3 +382,17 @@ def voevent_create(request):
         return Response(voe.data, status=status.HTTP_201_CREATED)
     logger.debug(request.data)
     return Response(voe.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@login_required
+def proposal_create_form(request):
+    if request.POST:
+        form = forms.ProjectSettingsForm(request.POST)
+        if form.is_valid():
+                saved = form.save()
+                # on success, the request is redirected as a GET
+                print(saved.id)
+                return redirect(proposal_decision_path, id=saved.id)
+    else:
+        form = forms.ProjectSettingsForm()
+    return render(request, 'trigger_app/proposal_form.html', {'form':form})

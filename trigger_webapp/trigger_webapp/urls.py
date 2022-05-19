@@ -33,6 +33,7 @@ urlpatterns = [
     path('voevent_log/', views.VOEventList),
     path('comet_log/', views.CometLogList.as_view()),
     path('proposal_settings/', views.ProposalSettingsList.as_view()),
+    path('proposal_create/', views.proposal_create_form),
     path('proposal_decision_details/<int:id>/', views.ProposalDecision_details),
     path('proposal_decision_result/<int:id>/<int:decision>/', views.ProposalDecision_result),
     path('proposal_decision_log/', views.ProposalDecisionList.as_view()),
