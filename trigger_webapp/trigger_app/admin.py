@@ -64,10 +64,7 @@ class ProposalSettingsAdmin(admin.ModelAdmin):
             'fields': (
                 'fermi_prob',
                 'swift_rate_signf',
-                'grb',
-                'flare_star',
-                'gw',
-                'neutrino',
+                'source_type',
             ),
         }),
     )

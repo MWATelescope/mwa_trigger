@@ -36,10 +36,7 @@
       <th>Proposal Description</th>
       <th>Event Telescope(s)</th>
       <th>Proposal Flow Diagram</th>
-      <th>GRB?</th>
-      <th>Flare Stars?</th>
-      <th>GW?</th>
-      <th>Neutrinos?</th>
+      <th>Source Type</th>
     </tr>
     </thead>
     <!-- Iterate over object_list -->
@@ -52,10 +49,7 @@
       <td>{{ setting.proposal_description }}</td>
       <td>{% if setting.event_telescope is None %} All {% else %} {{ setting.event_telescope }} {% endif %}</td>
       <td><a href='/proposal_decision_path/{{ setting.id }}/' style="text-decoration:None">View Flow Diagram</a></td>
-      <td>{% if setting.grb        %} &#10004; {% endif %}</td>
-      <td>{% if setting.flare_star %} &#10004; {% endif %}</td>
-      <td>{% if setting.gw         %} &#10004; {% endif %}</td>
-      <td>{% if setting.neutrino   %} &#10004; {% endif %}</td>
+      <td>{{ setting.get_source_type_display }}</td>
     </tr>
     <!-- If object_list is empty  -->
     {% empty %}

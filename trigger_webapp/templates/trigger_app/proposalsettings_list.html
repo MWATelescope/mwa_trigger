@@ -19,10 +19,7 @@
       <th>Minimum SWIFT Rate Significance</th>
       <th>Repointing Limit</th>
       <th>Testing?</th>
-      <th>GRB?</th>
-      <th>Flare Stars?</th>
-      <th>GW?</th>
-      <th>Neutrinos?</th>
+      <th>Source Type</th>
       <th>Centre Frequency Channel ID</th>
       <th>Observing time (s)</th>
       <th>Calibrator?</th>
@@ -50,10 +47,7 @@
       <td>{{ object.swift_rate_signf }}</td>
       <td>{{ object.repointing_limit }}</td>
       <td>{{ object.testing }}</td>
-      <td>{% if object.grb        %} &#10004; {% endif %}</td>
-      <td>{% if object.flare_star %} &#10004; {% endif %}</td>
-      <td>{% if object.gw         %} &#10004; {% endif %}</td>
-      <td>{% if object.neutrino   %} &#10004; {% endif %}</td>
+      <td>{{ object.get_source_type_display }}</td>
       <td>{{ object.mwa_centrefreq }}</td>
       <td>{{ object.mwa_exptime }}</td>
       <td>{{ object.mwa_calexptime }}</td>
@@ -83,10 +77,7 @@
       <th>Minimum SWIFT Rate Significance</th>
       <th>Repointing Limit</th>
       <th>Testing?</th>
-      <th>GRB?</th>
-      <th>Flare Stars?</th>
-      <th>GW?</th>
-      <th>Neutrinos?</th>
+      <th>Source Type</th>
       <th>Band 1 Centre Frequency (MHz)</th>
       <th>Band 2 Centre Frequency (MHz)</th>
       <th>N Obs</th>
@@ -111,10 +102,7 @@
       <td>{{ object.swift_rate_signf }}</td>
       <td>{{ object.repointing_limit }}</td>
       <td>{{ object.testing }}</td>
-      <td>{% if object.grb        %} &#10004; {% endif %}</td>
-      <td>{% if object.flare_star %} &#10004; {% endif %}</td>
-      <td>{% if object.gw         %} &#10004; {% endif %}</td>
-      <td>{% if object.neutrino   %} &#10004; {% endif %}</td>
+      <td>{{ object.get_source_type_display }}</td>
       <td>{{ object.atca_freq1 }}</td>
       <td>{{ object.atca_freq2 }}</td>
       <td>{{ object.atca_nobs }}</td>

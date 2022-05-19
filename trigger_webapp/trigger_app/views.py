@@ -312,7 +312,7 @@ def proposal_decision_path(request, id):
   C --> |YES| E{{Source type?}}'''
     mermaid_script += '''
   E --> F[GRB]'''
-    if prop_set.grb:
+    if prop_set.source_type == "GRB":
         mermaid_script += f'''
   F --> J{{"Fermi GRB probability > {prop_set.fermi_prob}\\nor\\nSWIFT Rate_signif > {prop_set.swift_rate_signf} sigma"}}
   J --> |YES| K{{"Trigger duration between\n {prop_set.trig_min_duration} and {prop_set.trig_max_duration} s"}}

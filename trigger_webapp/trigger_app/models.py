@@ -50,10 +50,7 @@ class ProposalSettings(models.Model):
     repointing_limit = models.FloatField(help_text="An updated position must be at least this far away from a current observation before repointing (in degrees).", default=10.)
     horizon_limit = models.FloatField(help_text="The minimum elevation of the source to observe (in degrees).", default=10.)
     testing = models.BooleanField(default=False, help_text="If testing, will not schedule any observations.")
-    grb = models.BooleanField(default=False, verbose_name="Observe Gamma-ray Bursts?")
-    flare_star = models.BooleanField(default=False, verbose_name="Observe Flare Stars?")
-    gw = models.BooleanField(default=False, verbose_name="Observe Gravitational Waves?")
-    neutrino = models.BooleanField(default=False, verbose_name="Observe Neutrinos?")
+    source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, verbose_name="What type of source to will you trigger on?")
 
     # MWA settings
     mwa_freqspecs = models.CharField(max_length=256, blank=True, null=True, verbose_name="Frequency channel Specifications", validators=[mwa_freqspecs], help_text="For an explanation of the MWA frequency specifications please see https://mwa_trigger.readthedocs.io/en/latest/mwa_frequency_specifications.html")

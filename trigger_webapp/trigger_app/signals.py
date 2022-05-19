@@ -202,7 +202,7 @@ def proposal_worth_observing(
 
         # Check if this proposal thinks this event is worth observing
         proj_source_bool = False
-        if prop_dec.proposal.grb and voevent.source_type == "GRB":
+        if prop_dec.proposal.source_type == "GRB" and voevent.source_type == "GRB":
             # This proposal wants to observe GRBs so check if it is worth observing
             trigger_bool, debug_bool, pending_bool, trigger_message = worth_observing_grb(
                 # event values
