@@ -59,12 +59,9 @@ class ProposalSettings(models.Model):
     mwa_freqspecs = models.CharField(max_length=256, blank=True, null=True, verbose_name="Frequency channel Specifications", validators=[mwa_freqspecs], help_text="For an explanation of the MWA frequency specifications please see https://mwa_trigger.readthedocs.io/en/latest/mwa_frequency_specifications.html")
     mwa_nobs = models.IntegerField(blank=True, null=True, verbose_name="Number of Observations", help_text="The number of observations to schedule.")
     mwa_exptime = models.IntegerField(blank=True, null=True, verbose_name="Observation time (s)", help_text="Exposure time of each observation scheduled, in seconds (must be modulo-8 seconds).")
-    mwa_calibrator = models.BooleanField(default=True, verbose_name="Calibrator?", help_text="True to have a calibrator observation chosen for you or False for no calibrator observation.")
     mwa_calexptime = models.FloatField(blank=True, null=True, verbose_name="Calibrator Observation time (s)", help_text="Exposure time of the trailing calibrator observation, if applicable, in seconds.")
     mwa_freqres = models.FloatField(blank=True, null=True, verbose_name="Frequency Resolution (kHz)", help_text="Correlator frequency resolution for observations. None to use whatever the current mode is, for lower latency. Eg 40.")
     mwa_inttime = models.FloatField(blank=True, null=True, verbose_name="Intergration Time (s)", help_text="Correlator integration time for observations in seconds. None to use whatever the current mode is, for lower latency. Eg 0.5.")
-    mwa_avoidsun = models.BooleanField(default=True, verbose_name="Avoid Sun?", help_text="If True, the coordinates of the target and calibrator are shifted slightly to put the Sun in a null.")
-    mwa_buffered = models.BooleanField(default=False, verbose_name="Use ring buffer?", help_text="If True and vcsmode, trigger a Voltage capture using the ring buffer.")
 
     # ATCA setting
     atca_band_3mm = models.BooleanField(default=False, verbose_name="Use 3mm Band?")

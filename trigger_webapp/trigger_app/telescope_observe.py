@@ -150,14 +150,13 @@ def trigger_mwa_observation(
         obsname=obsname,
         nobs=prop_settings.mwa_nobs,
         freqspecs=prop_settings.mwa_freqspecs, #Assume always using 24 contiguous coarse frequency channels
-        avoidsun=prop_settings.mwa_avoidsun,
+        avoidsun=True,
         inttime=prop_settings.mwa_inttime,
         freqres=prop_settings.mwa_freqres,
         exptime=prop_settings.mwa_exptime,
-        calibrator=prop_settings.mwa_calibrator,
+        calibrator=True,
         calexptime=prop_settings.mwa_calexptime,
         vcsmode=vcsmode,
-        buffered=prop_settings.mwa_buffered,
     )
     logger.debug(f"result: {result}")
     # Check if succesful

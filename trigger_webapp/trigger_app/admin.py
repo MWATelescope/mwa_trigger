@@ -24,12 +24,9 @@ class ProposalSettingsAdmin(admin.ModelAdmin):
                 'mwa_freqspecs',
                 'mwa_nobs',
                 'mwa_exptime',
-                'mwa_calibrator',
                 'mwa_calexptime',
                 'mwa_freqres',
                 'mwa_inttime',
-                'mwa_avoidsun',
-                'mwa_buffered',
             ),
         }),
         ("Telescope Settings: ATCA (only fill out if using the ATCA)", {
