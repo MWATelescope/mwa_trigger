@@ -36,16 +36,22 @@ class ProjectSettingsForm(forms.ModelForm):
 
 
         # Make sure the project ID is works
-        telescope = self.cleaned_data['telescope']
-        if str(telescope).startswith("MWA"):
-            mwa_proposal_id(self.cleaned_data['project_id'])
+        if 'telescope' in self.cleaned_data.keys():
+            telescope = self.cleaned_data['telescope']
+            if str(telescope).startswith("MWA"):
+                mwa_proposal_id(self.cleaned_data['project_id'])
 
-            # Check the MWA frequency channel specifications are valid
-            if self.cleaned_data['mwa_freqspecs']:
-                mwa_freqspecs(self.cleaned_data['mwa_freqspecs'])
-            else:
-                raise forms.ValidationError({'mwa_freqspecs': "No Frequency channel Specifications suppled."})
-        # TODO do same thing with ATCA
+                # Check the MWA frequency channel specifications are valid
+                if self.cleaned_data['mwa_freqspecs']:
+                    mwa_freqspecs(self.cleaned_data['mwa_freqspecs'])
+                else:
+                    raise forms.ValidationError({'mwa_freqspecs': "No Frequency channel Specifications suppled."})
+            elif str(telescope) == "ATCA":
+                if not self.cleaned_data['atca_band_3mm'] and not self.cleaned_data['atca_band_7mm'] and \
+                   not self.cleaned_data['atca_band_15mm'] and not self.cleaned_data['atca_band_4cm'] and \
+                   not self.cleaned_data['atca_band_16cm']:
+                    raise forms.ValidationError("Please choose at least 1 ATCA frequency band.")
+                # TODO also check ATCA's project ID
 
 
     # specify the name of model to use

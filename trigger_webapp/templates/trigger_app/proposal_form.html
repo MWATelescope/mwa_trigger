@@ -25,24 +25,17 @@
         {% endif %}
     <h1>New Proposal</h1>
     <form action = "" method = "post">
+        {% csrf_token %}
+
         <p>{{ form.proposal_description.label_tag }}</p>
         <textarea cols="100" id="proposal_description" name="proposal_description" placeholder="{{ form.proposal_description.help_text }}">{% if form.proposal_description.value != None %}{{ form.proposal_description.value }}{% endif %}</textarea>
-        {% csrf_token %}
+        {% for error in form.proposal_description.errors %}<div class="alert alert-danger"><strong>{{ error|escape }}</strong></div>{% endfor %}
 
         <hr>
         <h2>Event Source Settings</h2>
         <h3>Source type to observere</h3>
-        <table>
-            <tr><td>{{ form.source_type.label_tag }} {% help_wrap form.source_type.help_text %}</td><td>
-                <select name="source_type" id="source_type">
-                    <option disabled selected value> -- select an option -- </option>
-                    <option value="GRB">Gamma-ray burst</option>
-                    <option value="FS">Flare star</option>
-                    <option value="NU">Neutrino</option>
-                    <option value="GW">Gravitational wave</option>
-                </select>
-            </td></tr>
-        </table>
+        {{ form.source_type.label_tag }} {% help_wrap form.source_type.help_text %}{{ form.source_type }}
+        {% for error in form.source_type.errors %}<div class="alert alert-danger"><strong>{{ error|escape }}</strong></div>{% endfor %}
         <h3>Source duration</h3>
         <table>
             <tr><td>Trigger Duration Range (s)  {% help_wrap 'The inclusive duration range of an event that will automatically trigger an observation.' %}</td><td>{{ form.trig_min_duration }}</td><td>{{ form.trig_max_duration }}</td></tr>
@@ -64,7 +57,7 @@
             <table>
                 <tr><td>{{ form.event_telescope.label_tag }}      {% help_wrap form.event_telescope.help_text %}</td><td>
                 <select name="event_telescope" id="event_telescope">
-                    <option disabled selected value> -- select an option -- </option>
+                    <option disabled selected value> Use any telescope </option>
                     {% for telescope in src_tele.GRB %}
                         <option value="{{ telescope }}">{{ telescope }}</option>
                     {% endfor %}
@@ -75,7 +68,7 @@
             <table>
                 <tr><td>{{ form.event_telescope.label_tag }}      {% help_wrap form.event_telescope.help_text %}</td><td>
                 <select name="event_telescope" id="event_telescope">
-                    <option disabled selected value> -- select an option -- </option>
+                    <option disabled selected value> Use any telescope </option>
                     {% for telescope in src_tele.FS %}
                         <option value="{{ telescope }}">{{ telescope }}</option>
                     {% endfor %}
@@ -86,7 +79,7 @@
             <table>
                 <tr><td>{{ form.event_telescope.label_tag }}      {% help_wrap form.event_telescope.help_text %}</td><td>
                 <select name="event_telescope" id="event_telescope">
-                    <option disabled selected value> -- select an option -- </option>
+                    <option disabled selected value> Use any telescope </option>
                     {% for telescope in src_tele.GW %}
                         <option value="{{ telescope }}">{{ telescope }}</option>
                     {% endfor %}
@@ -97,7 +90,7 @@
             <table>
                 <tr><td>{{ form.event_telescope.label_tag }}      {% help_wrap form.event_telescope.help_text %}</td><td>
                 <select name="event_telescope" id="event_telescope">
-                    <option disabled selected value> -- select an option -- </option>
+                    <option disabled selected value> Use any telescope </option>
                     {% for telescope in src_tele.NU %}
                         <option value="{{ telescope }}">{{ telescope }}</option>
                     {% endfor %}
@@ -108,20 +101,19 @@
         <hr>
         <h2>Target Telescope Settings</h2>
         <table>
-            <tr><td>{{ form.telescope.label_tag }} {% help_wrap form.telescope.help_text %}</td><td>
-                <select name="telescope" id="telescope">
-                    <option disabled selected value> -- select an option -- </option>
-                    <option value="MWA_VCS">MWA_VCS</option>
-                    <option value="MWA_correlate">MWA_correlate</option>
-                    <option value="ATCA">ATCA</option>
-                </select>
-            </td></tr>
+            <tr><td>{{ form.telescope.label_tag }} {% help_wrap form.telescope.help_text %}</td><td>{{ form.telescope }}</td></tr>
+            {% for error in form.telescope.errors %}<div class="alert alert-danger"><strong>{{ form.telescope.label_tag }}{{ error|escape }}</strong></div>{% endfor %}
             <tr><td>{{ form.project_id.label_tag }}  {% help_wrap form.project_id.help_text %}</td>  <td>{{ form.project_id }}</td></tr>
+            {% for error in form.project_id.errors %}<div class="alert alert-danger"><strong>{{ form.project_id.label_tag }}{{ error|escape }}</strong></div>{% endfor %}
             <tr><td>{{ form.repointing_limit.label_tag }}  {% help_wrap form.repointing_limit.help_text %}</td>  <td>{{ form.repointing_limit }}</td></tr>
+            {% for error in form.repointing_limit.errors %}<div class="alert alert-danger"><strong>{{ form.repointing_limit.label_tag }}{{ error|escape }}</strong></div>{% endfor %}
             <tr><td>{{ form.horizon_limit.label_tag }}  {% help_wrap form.horizon_limit.help_text %}</td>  <td>{{ form.horizon_limit }}</td></tr>
+            {% for error in form.horizon_limit.errors %}<div class="alert alert-danger"><strong>{{ form.horizon_limit.label_tag }}{{ error|escape }}</strong></div>{% endfor %}
             <tr><td>{{ form.testing.label_tag }}  {% help_wrap form.testing.help_text %}</td>  <td>{{ form.testing }}</td></tr>
+            {% for error in form.testing.errors %}<div class="alert alert-danger"><strong>{{ form.testing.label_tag }}{{ error|escape }}</strong></div>{% endfor %}
         </table>
         <div id="mwa_vcs">
+            <p>For an explanation of the MWA frequency specifications please see the <a href="https://mwa_trigger.readthedocs.io/en/latest/mwa_frequency_specifications.html">documentation</a></p>
             <table>
                 <tr><td>{{ form.mwa_freqspecs.label_tag }}  {% help_wrap form.mwa_freqspecs.help_text %}</td>  <td>{{ form.mwa_freqspecs }}</td></tr>
                 <tr><td>{{ form.mwa_exptime.label_tag }}    {% help_wrap form.mwa_exptime.help_text %}</td>    <td>{{ form.mwa_exptime }}</td></tr>
@@ -129,6 +121,7 @@
             </table>
         </div>
         <div id="mwa_corr">
+            <p>For an explanation of the MWA frequency specifications please see the <a href="https://mwa_trigger.readthedocs.io/en/latest/mwa_frequency_specifications.html">documentation</a></p>
             <table>
                 <tr><td>{{ form.mwa_freqspecs.label_tag }}  {% help_wrap form.mwa_freqspecs.help_text %}</td>  <td>{{ form.mwa_freqspecs }}</td></tr>
                 <tr><td>{{ form.mwa_nobs.label_tag }}       {% help_wrap form.mwa_nobs.help_text %}</td>       <td>{{ form.mwa_nobs }}</td></tr>
@@ -139,7 +132,7 @@
             </table>
         </div>
         <div id="atca">
-            <p>ATCA has five receivers, so we can cycle the observations through each of them each time they repoint. Here is the documentation (see table 1.1) https://www.narrabri.atnf.csiro.au/observing/users_guide/html/atug.html#Signal-Path. All receives can observe at two frequency ranges (2 GHz bands) except for 16cm, which only observes has a 2GHz bandwidth, so only has one choice.</p>
+            <p>ATCA has five receivers, so we can cycle the observations through each of them each time they repoint. Here is the <a href="https://www.narrabri.atnf.csiro.au/observing/users_guide/html/atug.html#Signal-Path">documentation</a> (see table 1.1) . All receives can observe at two frequency ranges (2 GHz bands) except for 16cm, which only observes has a 2GHz bandwidth, so only has one choice.</p>
             <table>
                 <tr><td>{{ form.atca_band_3mm }}{{ form.atca_band_3mm.label_tag }}</td><td>{{ form.atca_band_3mm_freq1.label_tag }}</td><td>{{ form.atca_band_3mm_freq1 }}</td><td>{{ form.atca_band_3mm_freq2.label_tag }}</td><td>{{ form.atca_band_3mm_freq2 }}</td></tr>
                 <tr><td>{{ form.atca_band_7mm }}{{ form.atca_band_7mm.label_tag }}</td><td>{{ form.atca_band_7mm_freq1.label_tag }}</td><td>{{ form.atca_band_7mm_freq1 }}</td><td>{{ form.atca_band_7mm_freq2.label_tag }}</td><td>{{ form.atca_band_7mm_freq2 }}</td></tr>
@@ -158,7 +151,7 @@
     </div>
     <script>
         $(document).ready(function(){
-            $("#telescope").change(function() {
+            $("#id_telescope").change(function() {
                 if ($(this).val() === "MWA_VCS") {
                     $('#mwa_vcs').show();
                     $('#mwa_corr').hide();
@@ -177,8 +170,8 @@
                     $('#atca').hide();
                 }
             });
-            $("#telescope").trigger("change")
-            $("#source_type").change(function() {
+            $("#id_telescope").trigger("change")
+            $("#id_source_type").change(function() {
                 if ($(this).val() === "GRB") {
                     $('#GRB').show();
                     $('#FS').hide();
@@ -211,7 +204,7 @@
                     $('#none').show();
                 }
             });
-            $("#source_type").trigger("change")
+            $("#id_source_type").trigger("change")
         })
     </script>
 {% endblock %}

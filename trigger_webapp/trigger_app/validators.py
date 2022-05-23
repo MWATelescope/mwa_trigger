@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django import forms
+from django.utils.translation import gettext
 
 import os
 import logging
@@ -127,9 +128,9 @@ def mwa_freqspecs(input_spec, numchannels=24, separator=";"):
 
 def atca_freq_bands(min_freq, max_freq, freq, field_name):
     if freq + 1000 > max_freq:
-        raise forms.ValidationError({field_name: f"A centre frequency of {freq} MHz would have a maximum above {max_freq} MHz which is outside the bands frequency range."})
+        raise forms.ValidationError(gettext(f"{field_name} error: A centre frequency of {freq} MHz would have a maximum above {max_freq} MHz which is outside the bands frequency range."))
     if freq - 1000 < min_freq:
-        raise forms.ValidationError({field_name: f"A centre frequency of {freq} MHz would have a minimum below {min_freq} MHz which is outside the bands frequency range."})
+        raise forms.ValidationError(gettext(f"{field_name} error: A centre frequency of {freq} MHz would have a minimum below {min_freq} MHz which is outside the bands frequency range."))
 
 
 def mwa_proposal_id(project_id):
