@@ -31,12 +31,14 @@
     <thead>
     <tr>
       <th>ID</th>
+      <th>Proposal ID</th>
       <th>Telescope</th>
-      <th>Project ID</th>
-      <th>Proposal Description</th>
-      <th>Event Telescope(s)</th>
-      <th>Proposal Flow Diagram</th>
       <th>Source Type</th>
+      <th>Event Telescope</th>
+      <th>Project ID</th>
+      <th>Testing?</th>
+      <th>Proposal Description</th>
+      <th>Proposal Flow Diagram</th>
     </tr>
     </thead>
     <!-- Iterate over object_list -->
@@ -44,12 +46,14 @@
     <!-- Display Objects -->
     <tr>
       <td><a href='/proposal_edit/{{ setting.id }}/' style="text-decoration:None">{{ setting.id }}</a></td>
+      <td>{{ setting.proposal_id }}</td>
       <td>{{ setting.telescope }}</td>
-      <td>{{ setting.project_id }}</td>
-      <td>{{ setting.proposal_description }}</td>
-      <td>{% if setting.event_telescope is None %} All {% else %} {{ setting.event_telescope }} {% endif %}</td>
-      <td><a href='/proposal_decision_path/{{ setting.id }}/' style="text-decoration:None">View Flow Diagram</a></td>
       <td>{{ setting.get_source_type_display }}</td>
+      <td>{% if setting.event_telescope is None %} All {% else %} {{ setting.event_telescope }} {% endif %}</td>
+      <td>{{ setting.project_id }}</td>
+      <td>{{ setting.testing }}</td>
+      <td>{{ setting.proposal_description }}</td>
+      <td><a href='/proposal_decision_path/{{ setting.id }}/' style="text-decoration:None">View Flow Diagram</a></td>
     </tr>
     <!-- If object_list is empty  -->
     {% empty %}
