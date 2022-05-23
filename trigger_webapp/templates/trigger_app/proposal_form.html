@@ -27,6 +27,8 @@
     <form action = "" method = "post">
         {% csrf_token %}
 
+        <p>{{ form.proposal_id.label_tag }} {% help_wrap '{{ form.proposal_id.help_text }}' %}{{ form.proposal_id }}</p>
+        {% for error in form.proposal_id.errors %}<div class="alert alert-danger"><strong>{{ error|escape }}</strong></div>{% endfor %}
         <p>{{ form.proposal_description.label_tag }}</p>
         <textarea cols="100" id="proposal_description" name="proposal_description" placeholder="{{ form.proposal_description.help_text }}">{% if form.proposal_description.value != None %}{{ form.proposal_description.value }}{% endif %}</textarea>
         {% for error in form.proposal_description.errors %}<div class="alert alert-danger"><strong>{{ error|escape }}</strong></div>{% endfor %}
@@ -112,7 +114,7 @@
             <tr><td>{{ form.testing.label_tag }}  {% help_wrap form.testing.help_text %}</td>  <td>{{ form.testing }}</td></tr>
             {% for error in form.testing.errors %}<div class="alert alert-danger"><strong>{{ form.testing.label_tag }}{{ error|escape }}</strong></div>{% endfor %}
         </table>
-        <div id="mwa_vcs">
+        <div id="mwa">
             <p>For an explanation of the MWA frequency specifications please see the <a href="https://mwa_trigger.readthedocs.io/en/latest/mwa_frequency_specifications.html">documentation</a></p>
             <table>
                 <tr><td>{{ form.mwa_freqspecs.label_tag }}  {% help_wrap form.mwa_freqspecs.help_text %}</td>  <td>{{ form.mwa_freqspecs }}</td></tr>
@@ -121,12 +123,8 @@
             </table>
         </div>
         <div id="mwa_corr">
-            <p>For an explanation of the MWA frequency specifications please see the <a href="https://mwa_trigger.readthedocs.io/en/latest/mwa_frequency_specifications.html">documentation</a></p>
             <table>
-                <tr><td>{{ form.mwa_freqspecs.label_tag }}  {% help_wrap form.mwa_freqspecs.help_text %}</td>  <td>{{ form.mwa_freqspecs }}</td></tr>
                 <tr><td>{{ form.mwa_nobs.label_tag }}       {% help_wrap form.mwa_nobs.help_text %}</td>       <td>{{ form.mwa_nobs }}</td></tr>
-                <tr><td>{{ form.mwa_exptime.label_tag }}    {% help_wrap form.mwa_exptime.help_text %}</td>    <td>{{ form.mwa_exptime }}</td></tr>
-                <tr><td>{{ form.mwa_calexptime.label_tag }} {% help_wrap form.mwa_calexptime.help_text %}</td> <td>{{ form.mwa_calexptime }}</td></tr>
                 <tr><td>{{ form.mwa_freqres.label_tag }}    {% help_wrap form.mwa_freqres.help_text %}</td>    <td>{{ form.mwa_freqres }}</td></tr>
                 <tr><td>{{ form.mwa_inttime.label_tag }}    {% help_wrap form.mwa_inttime.help_text %}</td>    <td>{{ form.mwa_inttime }}</td></tr>
             </table>
@@ -153,19 +151,19 @@
         $(document).ready(function(){
             $("#id_telescope").change(function() {
                 if ($(this).val() === "MWA_VCS") {
-                    $('#mwa_vcs').show();
+                    $('#mwa').show();
                     $('#mwa_corr').hide();
                     $('#atca').hide();
                 } else if ($(this).val() === "MWA_correlate") {
-                    $('#mwa_vcs').hide();
+                    $('#mwa').show();
                     $('#mwa_corr').show();
                     $('#atca').hide();
                 } else if ($(this).val() === "ATCA") {
-                    $('#mwa_vcs').hide();
+                    $('#mwa').hide();
                     $('#mwa_corr').hide();
                     $('#atca').show();
                 } else {
-                    $('#mwa_vcs').hide();
+                    $('#mwa').hide();
                     $('#mwa_corr').hide();
                     $('#atca').hide();
                 }
