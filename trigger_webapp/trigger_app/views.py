@@ -418,8 +418,10 @@ def proposal_form(request, id=None):
     src_tele = parse_xml.SOURCE_TELESCOPES
     if id:
         proposal = models.ProposalSettings.objects.get(id=id)
+        title = f"Editing Proposal #{id}"
     else:
         proposal = None
+        title = "New Proposal"
     if request.POST:
         form = forms.ProjectSettingsForm(request.POST, instance=proposal)
         if form.is_valid():
@@ -428,4 +430,4 @@ def proposal_form(request, id=None):
             return redirect(proposal_decision_path, id=saved.id)
     else:
         form = forms.ProjectSettingsForm(instance=proposal)
-    return render(request, 'trigger_app/proposal_form.html', {'form':form, "src_tele": src_tele})
+    return render(request, 'trigger_app/proposal_form.html', {'form':form, "src_tele": src_tele, "title":title})
