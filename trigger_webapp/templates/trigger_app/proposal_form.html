@@ -27,7 +27,7 @@
     <form action = "" method = "post">
         {% csrf_token %}
 
-        <p>{{ form.proposal_id.label_tag }} {% help_wrap '{{ form.proposal_id.help_text }}' %}{{ form.proposal_id }}</p>
+        <p>{{ form.proposal_id.label_tag }} {% help_wrap form.proposal_id.help_text %}{{ form.proposal_id }}</p>
         {% for error in form.proposal_id.errors %}<div class="alert alert-danger"><strong>{{ error|escape }}</strong></div>{% endfor %}
         <p>{{ form.proposal_description.label_tag }}</p>
         <textarea cols="100" id="proposal_description" name="proposal_description" placeholder="{{ form.proposal_description.help_text }}">{% if form.proposal_description.value != None %}{{ form.proposal_description.value }}{% endif %}</textarea>
@@ -36,7 +36,7 @@
         <hr>
         <h2>Event Source Settings</h2>
         <h3>Source type to observere</h3>
-        {{ form.source_type.label_tag }} {% help_wrap form.source_type.help_text %}{{ form.source_type }}
+        {{ form.source_type.label_tag }}{{ form.source_type }}
         {% for error in form.source_type.errors %}<div class="alert alert-danger"><strong>{{ error|escape }}</strong></div>{% endfor %}
         <h3>Source duration</h3>
         <table>
