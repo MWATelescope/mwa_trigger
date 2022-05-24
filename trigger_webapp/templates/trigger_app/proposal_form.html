@@ -130,19 +130,44 @@
             </table>
         </div>
         <div id="atca">
-            <p>ATCA has five receivers, so we can cycle the observations through each of them each time they repoint. Here is the <a href="https://www.narrabri.atnf.csiro.au/observing/users_guide/html/atug.html#Signal-Path">documentation</a> (see table 1.1) . All receives can observe at two frequency ranges (2 GHz bands) except for 16cm, which only observes has a 2GHz bandwidth, so only has one choice.</p>
+            <p>{{ form.atca_prioritise_source.label_tag }}       {% help_wrap form.atca_prioritise_source.help_text %}{{ form.atca_prioritise_source }}
+            <br>{{ form.atca_max_exptime.label_tag }}    {% help_wrap form.atca_max_exptime.help_text %}{{ form.atca_max_exptime }}</p>
+            <p>ATCA has five receivers, so we can cycle the observations through each of them each time they repoint. Here is the
+                <a href="https://www.narrabri.atnf.csiro.au/observing/users_guide/html/atug.html#Signal-Path">documentation</a> (see table 1.1) .
+                All receives can observe at two frequency ranges (2 GHz bands) except for 16cm, which only has a 2GHz bandwidth, so you can only observer at the centre frequency.</p>
+            <hr>
+            {{ form.atca_band_3mm }}{{ form.atca_band_3mm.label_tag }}<br>
             <table>
-                <tr><td>{{ form.atca_band_3mm }}{{ form.atca_band_3mm.label_tag }}</td><td>{{ form.atca_band_3mm_freq1.label_tag }}</td><td>{{ form.atca_band_3mm_freq1 }}</td><td>{{ form.atca_band_3mm_freq2.label_tag }}</td><td>{{ form.atca_band_3mm_freq2 }}</td></tr>
-                <tr><td>{{ form.atca_band_7mm }}{{ form.atca_band_7mm.label_tag }}</td><td>{{ form.atca_band_7mm_freq1.label_tag }}</td><td>{{ form.atca_band_7mm_freq1 }}</td><td>{{ form.atca_band_7mm_freq2.label_tag }}</td><td>{{ form.atca_band_7mm_freq2 }}</td></tr>
-                <tr><td>{{ form.atca_band_15mm }}{{ form.atca_band_15mm.label_tag }}</td><td>{{ form.atca_band_15mm_freq1.label_tag }}</td><td>{{ form.atca_band_15mm_freq1 }}</td><td>{{ form.atca_band_15mm_freq2.label_tag }}</td><td>{{ form.atca_band_15mm_freq2 }}</td></tr>
-                <tr><td>{{ form.atca_band_4cm }}{{ form.atca_band_4cm.label_tag }}</td><td>{{ form.atca_band_4cm_freq1.label_tag }}</td><td>{{ form.atca_band_4cm_freq1 }}</td><td>{{ form.atca_band_4cm_freq2.label_tag }}</td><td>{{ form.atca_band_4cm_freq2 }}</td></tr>
-                <tr><td>{{ form.atca_band_16cm }}{{ form.atca_band_16cm.label_tag }}</td></tr>
+                <tr><td>{{ form.atca_band_3mm_exptime.label_tag }}{% help_wrap form.atca_band_3mm_exptime.help_text %}</td><td>{{ form.atca_band_3mm_exptime }}</td></tr>
+                <tr><td>{{ form.atca_band_3mm_freq1.label_tag }}{% help_wrap form.atca_band_3mm_freq1.help_text %}</td><td>{{ form.atca_band_3mm_freq1 }}</td></tr>
+                <tr><td>{{ form.atca_band_3mm_freq2.label_tag }}{% help_wrap form.atca_band_3mm_freq2.help_text %}</td><td>{{ form.atca_band_3mm_freq2 }}</td></tr>
             </table>
+            <hr>
+            {{ form.atca_band_7mm }}{{ form.atca_band_7mm.label_tag }}<br>
             <table>
-                <tr><td>{{ form.atca_nobs.label_tag }}       {% help_wrap form.atca_nobs.help_text %}</td>      <td>{{ form.atca_nobs }}</td></tr>
-                <tr><td>{{ form.atca_exptime.label_tag }}    {% help_wrap form.atca_exptime.help_text %}</td>   <td>{{ form.atca_exptime }}</td></tr>
-                <tr><td>{{ form.atca_calexptime.label_tag }} {% help_wrap form.atca_calexptime.help_text %}</td><td>{{ form.atca_calexptime }}</td></tr>
+                <tr><td>{{ form.atca_band_7mm_exptime.label_tag }}{% help_wrap form.atca_band_7mm_exptime.help_text %}</td><td>{{ form.atca_band_7mm_exptime }}</td></tr>
+                <tr><td>{{ form.atca_band_7mm_freq1.label_tag }}{% help_wrap form.atca_band_7mm_freq1.help_text %}</td><td>{{ form.atca_band_7mm_freq1 }}</td></tr>
+                <tr><td>{{ form.atca_band_7mm_freq2.label_tag }}{% help_wrap form.atca_band_7mm_freq2.help_text %}</td><td>{{ form.atca_band_7mm_freq2 }}</td></tr>
             </table>
+            <hr>
+            {{ form.atca_band_15mm }}{{ form.atca_band_15mm.label_tag }}<br>
+            <table>
+                <tr><td>{{ form.atca_band_15mm_exptime.label_tag }}{% help_wrap form.atca_band_15mm_exptime.help_text %}</td><td>{{ form.atca_band_15mm_exptime }}</td></tr>
+                <tr><td>{{ form.atca_band_15mm_freq1.label_tag }}{% help_wrap form.atca_band_15mm_freq1.help_text %}</td><td>{{ form.atca_band_15mm_freq1 }}</td></tr>
+                <tr><td>{{ form.atca_band_15mm_freq2.label_tag }}{% help_wrap form.atca_band_15mm_freq2.help_text %}</td><td>{{ form.atca_band_15mm_freq2 }}</td></tr>
+            </table>
+            <hr>
+            {{ form.atca_band_4cm }}{{ form.atca_band_4cm.label_tag }}<br>
+            <table>
+                <tr><td>{{ form.atca_band_4cm_exptime.label_tag }}{% help_wrap form.atca_band_4cm_exptime.help_text %}</td><td>{{ form.atca_band_4cm_exptime }}</td></tr>
+                <tr><td>{{ form.atca_band_4cm_freq1.label_tag }}{% help_wrap form.atca_band_4cm_freq1.help_text %}</td><td>{{ form.atca_band_4cm_freq1 }}</td></tr>
+                <tr><td>{{ form.atca_band_4cm_freq2.label_tag }}{% help_wrap form.atca_band_4cm_freq2.help_text %}</td><td>{{ form.atca_band_4cm_freq2 }}</td></tr>
+            </table>
+            <hr>{{ form.atca_band_16cm }}{{ form.atca_band_16cm.label_tag }}<br>
+            <table>
+                <tr><td>{{ form.atca_band_16cm_exptime.label_tag }}{% help_wrap form.atca_band_16cm_exptime.help_text %}</td><td>{{ form.atca_band_16cm_exptime }}</td></tr>
+            </table>
+
         </div>
         <input type="submit" value=Submit>
     </form>

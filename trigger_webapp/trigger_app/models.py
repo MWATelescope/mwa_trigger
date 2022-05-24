@@ -60,21 +60,25 @@ class ProposalSettings(models.Model):
 
     # ATCA setting
     atca_band_3mm = models.BooleanField(default=False, verbose_name="Use 3mm Band?")
+    atca_band_3mm_exptime = models.IntegerField(default=720, verbose_name="Band Exposure Time (mins)", help_text="Total exposure time of the observation cycle at this frequency band.")
     atca_band_3mm_freq1 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 1 (MHz)", help_text="The centre of the first frequency channel in MHz.")
     atca_band_3mm_freq2 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 2 (MHz)", help_text="The centre of the second frequency channel in MHz.")
     atca_band_7mm = models.BooleanField(default=False, verbose_name="Use 7mm Band?")
+    atca_band_7mm_exptime = models.IntegerField(default=720, verbose_name="Band Exposure Time (mins)", help_text="Total exposure time of the observation cycle at this frequency band.")
     atca_band_7mm_freq1 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 1 (MHz)", help_text="The centre of the first frequency channel in MHz.")
     atca_band_7mm_freq2 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 2 (MHz)", help_text="The centre of the second frequency channel in MHz.")
     atca_band_15mm = models.BooleanField(default=False, verbose_name="Use 15mm Band?")
+    atca_band_15mm_exptime = models.IntegerField(default=720, verbose_name="Band Exposure Time (mins)", help_text="Total exposure time of the observation cycle at this frequency band.")
     atca_band_15mm_freq1 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 1 (MHz)", help_text="The centre of the first frequency channel in MHz.")
     atca_band_15mm_freq2 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 2 (MHz)", help_text="The centre of the second frequency channel in MHz.")
     atca_band_4cm = models.BooleanField(default=False, verbose_name="Use 4cm Band?")
+    atca_band_4cm_exptime = models.IntegerField(default=720, verbose_name="Band Exposure Time (mins)", help_text="Total exposure time of the observation cycle at this frequency band.")
     atca_band_4cm_freq1 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 1 (MHz)", help_text="The centre of the first frequency channel in MHz.")
     atca_band_4cm_freq2 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 2 (MHz)", help_text="The centre of the second frequency channel in MHz.")
     atca_band_16cm = models.BooleanField(default=False, verbose_name="User 16cm Band?")
-    atca_nobs = models.IntegerField(default=1, verbose_name="Number of Observations", help_text="The number of observations to schedule.")
-    atca_exptime = models.IntegerField(default=720, verbose_name="Exposure Time (mins)", help_text="Exposure time per observation in minutes.")
-    atca_calexptime = models.IntegerField(default=2, verbose_name="Calibrator Exposure Time (mins)", help_text="Exposure time per (phase) calibration in minutes")
+    atca_band_16cm_exptime = models.IntegerField(default=720, verbose_name="Band Exposure Time (mins)", help_text="Total exposure time of the observation cycle at this frequency band.")
+    atca_max_exptime = models.IntegerField(default=720, verbose_name="Maximum Exposure Time (mins)", help_text="Total exposure time of all the observations combined.")
+    atca_prioritise_source = models.BooleanField(default=False, verbose_name="Prioritise Source?", help_text="Prioritise time on source rather than time on calibrator.")
 
 
     def __str__(self):
