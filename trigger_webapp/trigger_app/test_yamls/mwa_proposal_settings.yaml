@@ -16,7 +16,7 @@
         "fermi_prob": 50.0,
         "swift_rate_signf": 0.0,
         "repointing_limit": 10.0,
-        "horizon_limit": 10.0,
+        "mwa_horizon_limit": 10.0,
         "testing": true,
         "grb": true,
         "flare_star": false,

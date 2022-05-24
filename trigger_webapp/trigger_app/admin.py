@@ -15,7 +15,6 @@ class ProposalSettingsAdmin(admin.ModelAdmin):
                 'proposal_description',
                 'event_telescope',
                 'repointing_limit',
-                'horizon_limit',
                 'testing',
             ),
         }),
@@ -27,6 +26,7 @@ class ProposalSettingsAdmin(admin.ModelAdmin):
                 'mwa_calexptime',
                 'mwa_freqres',
                 'mwa_inttime',
+                'mwa_horizon_limit',
             ),
         }),
         ("Telescope Settings: ATCA (only fill out if using the ATCA)", {

@@ -54,8 +54,8 @@ def trigger_observation(
         obs_source_altaz = obs_source.transform_to(AltAz(obstime=Time.now(), location=location))
         alt = obs_source_altaz.alt.deg
         logger.debug("Triggered observation at an elevation of {0}".format(alt))
-        if alt < proposal_decision_model.proposal.horizon_limit:
-            horizon_message = f"Not triggering due to horizon limit: alt {alt} < {proposal_decision_model.proposal.horizon_limit}. "
+        if alt < proposal_decision_model.proposal.mwa_horizon_limit:
+            horizon_message = f"Not triggering due to horizon limit: alt {alt} < {proposal_decision_model.proposal.mwa_horizon_limit}. "
             logger.debug(horizon_message)
             return 'I', trigger_message + horizon_message
 

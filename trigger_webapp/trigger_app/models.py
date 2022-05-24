@@ -46,7 +46,6 @@ class ProposalSettings(models.Model):
     fermi_prob = models.FloatField(help_text="The minimum probability to observe for Fermi sources (it appears to be a percentage, e.g. 50).", default=50)
     swift_rate_signf = models.FloatField(help_text="The minimum \"RATE_SIGNIF\" (appears to be a signal-to-noise ratio) to observe for SWIFT sources (in sigma).", default=0.)
     repointing_limit = models.FloatField(help_text="An updated position must be at least this far away from a current observation before repointing (in degrees).", default=10.)
-    horizon_limit = models.FloatField(help_text="The minimum elevation of the source to observe (in degrees).", default=10.)
     testing = models.BooleanField(default=False, help_text="If testing, will not schedule any observations.")
     source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, verbose_name="What type of source to will you trigger on?")
 
@@ -57,6 +56,7 @@ class ProposalSettings(models.Model):
     mwa_calexptime = models.FloatField(default=120., verbose_name="Calibrator Observation time (s)", help_text="Exposure time of the trailing calibrator observation, if applicable, in seconds.")
     mwa_freqres = models.FloatField(default=10., verbose_name="Frequency Resolution (kHz)", help_text="Correlator frequency resolution for observations. None to use whatever the current mode is, for lower latency. Eg 40.")
     mwa_inttime = models.FloatField(default=0.5, verbose_name="Intergration Time (s)", help_text="Correlator integration time for observations in seconds. None to use whatever the current mode is, for lower latency. Eg 0.5.")
+    mwa_horizon_limit = models.FloatField(verbose_name="Horizon limit (deg)", help_text="The minimum elevation of the source to observe (in degrees).", default=10.)
 
     # ATCA setting
     atca_band_3mm = models.BooleanField(default=False, verbose_name="Use 3mm Band?")

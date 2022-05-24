@@ -46,7 +46,7 @@
       <td>{{ object.fermi_prob }}</td>
       <td>{{ object.swift_rate_signf }}</td>
       <td>{{ object.repointing_limit }}</td>
-      <td>{{ object.horizon_limit }}</td>
+      <td>{{ object.mwa_horizon_limit }}</td>
       <td>{{ object.mwa_freqspecs }}</td>
       <td>{{ object.mwa_exptime }}</td>
       <td>{{ object.mwa_calexptime }}</td>
@@ -103,7 +103,7 @@
       <td>{{ object.fermi_prob }}</td>
       <td>{{ object.swift_rate_signf }}</td>
       <td>{{ object.repointing_limit }}</td>
-      <td>{{ object.horizon_limit }}</td>
+      <td>{{ object.mwa_horizon_limit }}</td>
       <td>{{ object.mwa_freqspecs }}</td>
       <td>{{ object.mwa_exptime }}</td>
       <td>{{ object.mwa_calexptime }}</td>
@@ -134,7 +134,7 @@
       <th>Pending Duration range 2 (s)</th>
       <th>Minimum Fermi Probability</th>
       <th>Minimum SWIFT Rate Significance</th>
-      <th>Repointing Limit</th>
+      <th>Repointing Limit</th
       <th>Horizon Limit</th>
     </tr>
     </thead>
@@ -157,7 +157,6 @@
       <td>{{ object.fermi_prob }}</td>
       <td>{{ object.swift_rate_signf }}</td>
       <td>{{ object.repointing_limit }}</td>
-      <td>{{ object.horizon_limit }}</td>
     </tr>
     {% endif %}
     <!-- If object_list is empty  -->
