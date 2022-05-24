@@ -11,9 +11,11 @@ SOURCE_TELESCOPES = {
     "GRB":[
         "SWIFT",
         "Fermi",
+        "HESS",
     ],
     "FS":[
         "SWIFT",
+        "MAXI",
     ],
     "GW":[
         "LVC",
