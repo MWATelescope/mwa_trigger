@@ -34,7 +34,7 @@ class ProposalSettings(models.Model):
     #telescope = models.CharField(max_length=64, blank=True, null=True, verbose_name="Telescope name", help_text="E.g. MWA_VCS, MWA_correlate or ATCA. If the telescope you want is not here add it on the admin page.")
     telescope = models.ForeignKey(Telescope, to_field="name", verbose_name="Telescope name", help_text="Telescope this proposal will observer with. If the telescope you want is not here add it on the admin page.", on_delete=models.CASCADE)
     project_id = models.CharField(max_length=64, help_text="This is the target telescopes's project ID that is used with a password to schedule observations.")
-    proposal_id = models.CharField(max_length=16, help_text="A short identifier of the proposal of maximum lenth 16 charcters.")
+    proposal_id = models.CharField(max_length=16, unique=True, help_text="A short identifier of the proposal of maximum lenth 16 charcters.")
     proposal_description = models.CharField(max_length=256, help_text="A brief description of the proposal. Only needs to be enough to distinguish it from the other proposals.")
     event_telescope = models.ForeignKey(EventTelescope, to_field="name", help_text="The telescope that this proposal will accept at least one VOEvent from before observing. Leave blank if you want to accept all telescopes.", blank=True, null=True, on_delete=models.SET_NULL)
     trig_min_duration = models.FloatField(verbose_name="Min", default=0.256)
@@ -117,6 +117,8 @@ class TriggerID(models.Model):
 
     def __str__(self):
         return str(self.id)
+    class Meta:
+        ordering = ['-id']
 
 
 class ProposalDecision(models.Model):

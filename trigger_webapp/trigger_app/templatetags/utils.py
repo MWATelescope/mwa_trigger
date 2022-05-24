@@ -35,3 +35,7 @@ def multiply(qty, multiply_by, decimal_places, *args, **kwargs):
 def help_wrap(title, *args, **kwargs):
     # Will wrap the input with the html to make a nice hover over help question mark
     return mark_safe(f'<span data-toggle=\'tooltip\' title=\'{title}\'><img width="25" height="25" src="{settings.STATIC_URL}trigger_app/question_mark.png" alt="?"/></span>')
+
+@register.filter
+def index(indexable, i):
+    return indexable[i]

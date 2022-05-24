@@ -181,10 +181,34 @@ class ProposalSettingsList(ListView):
 def home_page(request):
     comet_status = models.Status.objects.get(name='twistd_comet')
     prop_settings = models.ProposalSettings.objects.all()
+    recent_triggers = models.TriggerID.objects.all()[:5]
+
+    telescope_list = []
+    source_name_list = []
+    proposal_decision_list = []
+    for trig in recent_triggers:
+        trigger_group_voevents = models.VOEvent.objects.filter(trigger_group_id=trig)
+        telescope_list.append(
+            ' '.join(set(trigger_group_voevents.values_list('telescope', flat=True)))
+        )
+        source_name_list.append(trigger_group_voevents.first().source_name)
+        # grab decision for each proposal
+        decision_list = []
+        for prop in prop_settings:
+            this_decision = models.ProposalDecision.objects.filter(trigger_group_id=trig, proposal=prop)
+            if this_decision.exists():
+                decision_list.append(this_decision.first().decision)
+            else:
+                decision_list.append("")
+        proposal_decision_list.append(decision_list)
+
+    recent_triggers_info = list(zip(recent_triggers, telescope_list, source_name_list, proposal_decision_list))
+
     return render(request, 'trigger_app/home_page.html', {'twistd_comet_status': comet_status,
                                                           'settings':prop_settings,
                                                           'remotes':", ".join(settings.VOEVENT_REMOTES),
-                                                          'tcps':", ".join(settings.VOEVENT_TCP)})
+                                                          'tcps':", ".join(settings.VOEVENT_TCP),
+                                                          "recent_triggers":recent_triggers_info})
 
 
 def PossibleEventAssociation_details(request, tid):

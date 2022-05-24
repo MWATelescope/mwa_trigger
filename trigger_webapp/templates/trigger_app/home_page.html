@@ -1,5 +1,7 @@
 {% extends 'trigger_app/header.html' %}
 
+{% load utils %}
+
 {% block content %}
 <title>Home Page</title>
 <div class="container py-4">
@@ -28,6 +30,49 @@
     </tr>
   </table>
   <p><a href="/comet_log/" style="text-decoration:None">View Comet Log</a></p>
+
+  <hr>
+  <h2>Most recent Transient Events</h2>
+  <table class="fl-table">
+    <col>
+    <colgroup span="{{ settings|length }}"></colgroup>
+    <thead>
+    <tr>
+      <td> </td><td> </td><td> </td><td> </td><td> </td><td> </td>
+      <th style="text-align: center; background: #448a92" colspan="{{ settings|length }}" scope="colgroup">Proposal Decisions</th>
+    </tr>
+    <tr>
+      <th scope="row">ID</th>
+      <th scope="row">First Alert (UTC)</th>
+      <th scope="row">Trigger ID</th>
+      <th scope="row">Source Type</th>
+      <th scope="row">Telescope</th>
+      <th scope="row">Source Name</th>
+      {% for setting in settings %}
+        <th>{{ setting.proposal_id }}</th>
+      {% endfor %}
+    </tr>
+    </thead>
+    {% for trig, telescope, source_name, prop_decisions in recent_triggers %}
+    <tr>
+      <td><a href="/trigger_id_details/{{ trig.id }}/" style="text-decoration:None">{{ trig.id }}</a></td>
+      <td scope="row">{{ trig.recieved_data|date:"Y-m-d H:i:s" }}</td>
+      {% if telescope == "SWIFT" %}
+        <!-- Link to SWIFT telescope page -->
+        <td><a href="https://gcn.gsfc.nasa.gov/other/{{ object.trigger_id }}.swift" style="text-decoration:None">{{ trig.trigger_id }}</a></td>
+      {% else %}
+        <td>{{ trig.trigger_id }}</td>
+      {% endif %}
+      <td scope="row">{{ trig.trigger_id }}</td>
+      <td scope="row">{{ trig.source_type }}</td>
+      <td scope="row">{{ telescope }}</td>
+      <td scope="row">{{ source_name }}</td>
+      {% for setting in settings %}
+        <td>{{ prop_decisions|index:forloop.counter0 }}</td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </table>
 
   <hr>
   <h2>Current Proposal Settings (Summarised)</h2>
