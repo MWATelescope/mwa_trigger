@@ -197,7 +197,7 @@ def home_page(request):
         for prop in prop_settings:
             this_decision = models.ProposalDecision.objects.filter(trigger_group_id=trig, proposal=prop)
             if this_decision.exists():
-                decision_list.append(this_decision.first().decision)
+                decision_list.append(this_decision.first().get_decision_display())
             else:
                 decision_list.append("")
         proposal_decision_list.append(decision_list)

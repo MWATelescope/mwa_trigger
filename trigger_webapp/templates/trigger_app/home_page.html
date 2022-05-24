@@ -44,9 +44,9 @@
     <tr>
       <th scope="row">ID</th>
       <th scope="row">First Alert (UTC)</th>
+      <th scope="row">Event Telescope</th>
       <th scope="row">Trigger ID</th>
       <th scope="row">Source Type</th>
-      <th scope="row">Telescope</th>
       <th scope="row">Source Name</th>
       {% for setting in settings %}
         <th>{{ setting.proposal_id }}</th>
@@ -57,18 +57,24 @@
     <tr>
       <td><a href="/trigger_id_details/{{ trig.id }}/" style="text-decoration:None">{{ trig.id }}</a></td>
       <td scope="row">{{ trig.recieved_data|date:"Y-m-d H:i:s" }}</td>
+      <td scope="row">{{ telescope }}</td>
       {% if telescope == "SWIFT" %}
         <!-- Link to SWIFT telescope page -->
         <td><a href="https://gcn.gsfc.nasa.gov/other/{{ object.trigger_id }}.swift" style="text-decoration:None">{{ trig.trigger_id }}</a></td>
       {% else %}
         <td>{{ trig.trigger_id }}</td>
       {% endif %}
-      <td scope="row">{{ trig.trigger_id }}</td>
       <td scope="row">{{ trig.source_type }}</td>
-      <td scope="row">{{ telescope }}</td>
       <td scope="row">{{ source_name }}</td>
       {% for setting in settings %}
-        <td>{{ prop_decisions|index:forloop.counter0 }}</td>
+        {% if prop_decisions|index:forloop.counter0 == "Ignored" %}
+          <td class="grey-tr">
+        {% elif prop_decisions|index:forloop.counter0 == "Error" %}
+          <td class="NegativeTransaction">
+        {% else %}
+          <td>
+        {% endif %}
+        {{ prop_decisions|index:forloop.counter0 }}</td>
       {% endfor %}
     </tr>
     {% endfor %}
@@ -81,7 +87,7 @@
     <tr>
       <th>ID</th>
       <th>Proposal ID</th>
-      <th>Telescope</th>
+      <th>Target Telescope</th>
       <th>Source Type</th>
       <th>Event Telescope</th>
       <th>Project ID</th>

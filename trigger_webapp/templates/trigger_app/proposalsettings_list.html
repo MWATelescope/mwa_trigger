@@ -9,7 +9,6 @@
     <tr>
       <th>ID</th>
       <th>Proposal ID</th>
-      <th>Telescope</th>
       <th>Source Type</th>
       <th>Event Telescope</th>
       <th>Project ID</th>
@@ -35,7 +34,6 @@
     <tr>
       <td><a href='/proposal_edit/{{ object.id }}/' style="text-decoration:None">{{ object.id }}</a></td>
       <td>{{ object.proposal_id }}</td>
-      <td>{{ object.telescope }}</td>
       <td>{{ object.source_type }}</td>
       <td>{% if object.event_telescope is None %} All {% else %} {{ object.event_telescope }} {% endif %}</td>
       <td>{{ object.project_id }}</td>
@@ -66,7 +64,6 @@
     <tr>
       <th>ID</th>
       <th>Proposal ID</th>
-      <th>Telescope</th>
       <th>Source Type</th>
       <th>Event Telescope</th>
       <th>Project ID</th>
@@ -94,7 +91,6 @@
     <tr>
       <td><a href='/proposal_edit/{{ object.id }}/' style="text-decoration:None">{{ object.id }}</a></td>
       <td>{{ object.proposal_id }}</td>
-      <td>{{ object.telescope }}</td>
       <td>{{ object.source_type }}</td>
       <td>{% if object.event_telescope is None %} All {% else %} {{ object.event_telescope }} {% endif %}</td>
       <td>{{ object.project_id }}</td>
@@ -127,7 +123,6 @@
     <tr>
       <th>ID</th>
       <th>Proposal ID</th>
-      <th>Telescope</th>
       <th>Source Type</th>
       <th>Event Telescope</th>
       <th>Project ID</th>
@@ -150,7 +145,6 @@
     <tr>
       <td><a href='/proposal_edit/{{ object.id }}/' style="text-decoration:None">{{ object.id }}</a></td>
       <td>{{ object.proposal_id }}</td>
-      <td>{{ object.telescope }}</td>
       <td>{{ object.source_type }}</td>
       <td>{% if object.event_telescope is None %} All {% else %} {{ object.event_telescope }} {% endif %}</td>
       <td>{{ object.project_id }}</td>
