@@ -60,8 +60,11 @@ def get_source_types(telescope, event_type, source_name, v):
         return "NU"
 
     # Check for Flare Stars
-    data_file = data_load.FLARE_STAR_NAMES
-    flare_stars = [a.strip().lower() for a in open(data_file, 'r').readlines() if not a.startswith("#")]
+    maxi_data_file = data_load.MAXI_FLARE_STAR_NAMES
+    maxi_flare_stars = [a.strip().lower() for a in open(maxi_data_file, 'r').readlines() if not a.startswith("#")]
+    swift_data_file = data_load.SWIFT_FLARE_STAR_NAMES
+    swift_flare_stars = [a.strip().lower() for a in open(maxi_data_file, 'r').readlines() if not a.startswith("#")] # TODO CHANGE
+    flare_stars = maxi_flare_stars + swift_flare_stars
     # Check if this is a sub_sub_threshold event and ignore if it is
     if telescope == "SWIFT" and 'sub-sub-threshold' in str(v.What.Description):
         flare_star = False
