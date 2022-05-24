@@ -46,6 +46,7 @@
         </table>
         <h3>Source thresholds</h3>
         <table>
+            <tr><td>{{ form.maximum_position_uncertainty.label_tag }}      {% help_wrap form.maximum_position_uncertainty.help_text %}</td><td>{{ form.maximum_position_uncertainty }}</td></tr>
             <tr><td>{{ form.fermi_prob.label_tag }}      {% help_wrap form.fermi_prob.help_text %}</td><td>{{ form.fermi_prob }}</td></tr>
             <tr><td>{{ form.swift_rate_signf.label_tag }}{% help_wrap form.swift_rate_signf.help_text %}</td><td>{{ form.swift_rate_signf }}</td></tr>
         </table>

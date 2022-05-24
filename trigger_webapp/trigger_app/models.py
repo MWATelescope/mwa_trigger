@@ -43,6 +43,7 @@ class ProposalSettings(models.Model):
     pending_max_duration_1 = models.FloatField(verbose_name="Max", default=2.056)
     pending_min_duration_2 = models.FloatField(verbose_name="Min", default=0.128)
     pending_max_duration_2 = models.FloatField(verbose_name="Max", default=0.255)
+    maximum_position_uncertainty = models.FloatField(verbose_name="Maximum Position Uncertainty (deg)", help_text="A VOEvent must have less than or equal to this position uncertainty to be observed.", default=0.05)
     fermi_prob = models.FloatField(help_text="The minimum probability to observe for Fermi sources (it appears to be a percentage, e.g. 50).", default=50)
     swift_rate_signf = models.FloatField(help_text="The minimum \"RATE_SIGNIF\" (appears to be a signal-to-noise ratio) to observe for SWIFT sources (in sigma).", default=0.)
     repointing_limit = models.FloatField(help_text="An updated position must be at least this far away from a current observation before repointing (in degrees).", default=10.)
