@@ -51,12 +51,12 @@ class ProposalSettings(models.Model):
     source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, verbose_name="What type of source to will you trigger on?")
 
     # MWA settings
-    mwa_freqspecs = models.CharField(max_length=256, blank=True, null=True, verbose_name="MWA frequency specifications", help_text="The frequency channels IDs for the MWA to observe at.")
-    mwa_nobs = models.IntegerField(blank=True, null=True, verbose_name="Number of Observations", help_text="The number of observations to schedule.")
-    mwa_exptime = models.IntegerField(blank=True, null=True, verbose_name="Observation time (s)", help_text="Exposure time of each observation scheduled, in seconds (must be modulo-8 seconds).")
-    mwa_calexptime = models.FloatField(blank=True, null=True, verbose_name="Calibrator Observation time (s)", help_text="Exposure time of the trailing calibrator observation, if applicable, in seconds.")
-    mwa_freqres = models.FloatField(blank=True, null=True, verbose_name="Frequency Resolution (kHz)", help_text="Correlator frequency resolution for observations. None to use whatever the current mode is, for lower latency. Eg 40.")
-    mwa_inttime = models.FloatField(blank=True, null=True, verbose_name="Intergration Time (s)", help_text="Correlator integration time for observations in seconds. None to use whatever the current mode is, for lower latency. Eg 0.5.")
+    mwa_freqspecs = models.CharField(default="144,24", max_length=256, verbose_name="MWA frequency specifications", help_text="The frequency channels IDs for the MWA to observe at.")
+    mwa_nobs = models.IntegerField(default=1, verbose_name="Number of Observations", help_text="The number of observations to schedule.")
+    mwa_exptime = models.IntegerField(default=896, verbose_name="Observation time (s)", help_text="Exposure time of each observation scheduled, in seconds (must be modulo-8 seconds).")
+    mwa_calexptime = models.FloatField(default=120., verbose_name="Calibrator Observation time (s)", help_text="Exposure time of the trailing calibrator observation, if applicable, in seconds.")
+    mwa_freqres = models.FloatField(default=10., verbose_name="Frequency Resolution (kHz)", help_text="Correlator frequency resolution for observations. None to use whatever the current mode is, for lower latency. Eg 40.")
+    mwa_inttime = models.FloatField(default=0.5, verbose_name="Intergration Time (s)", help_text="Correlator integration time for observations in seconds. None to use whatever the current mode is, for lower latency. Eg 0.5.")
 
     # ATCA setting
     atca_band_3mm = models.BooleanField(default=False, verbose_name="Use 3mm Band?")
@@ -72,11 +72,9 @@ class ProposalSettings(models.Model):
     atca_band_4cm_freq1 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 1 (MHz)", help_text="The centre of the first frequency channel in MHz.")
     atca_band_4cm_freq2 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 2 (MHz)", help_text="The centre of the second frequency channel in MHz.")
     atca_band_16cm = models.BooleanField(default=False, verbose_name="User 16cm Band?")
-    atca_freq1 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 1 (MHz)", help_text="The centre of the first frequency channel in MHz.")
-    atca_freq2 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 2 (MHz)", help_text="The centre of the second frequency channel in MHz.")
-    atca_nobs = models.IntegerField(blank=True, null=True, verbose_name="Number of Observations", help_text="The number of observations to schedule.")
-    atca_exptime = models.IntegerField(blank=True, null=True, verbose_name="Exposure Time (mins)", help_text="Exposure time per observation in minutes.")
-    atca_calexptime = models.IntegerField(blank=True, null=True, verbose_name="Calibrator Exposure Time (mins)", help_text="Exposure time per (phase) calibration in minutes")
+    atca_nobs = models.IntegerField(default=1, verbose_name="Number of Observations", help_text="The number of observations to schedule.")
+    atca_exptime = models.IntegerField(default=720, verbose_name="Exposure Time (mins)", help_text="Exposure time per observation in minutes.")
+    atca_calexptime = models.IntegerField(default=2, verbose_name="Calibrator Exposure Time (mins)", help_text="Exposure time per (phase) calibration in minutes")
 
 
     def __str__(self):
