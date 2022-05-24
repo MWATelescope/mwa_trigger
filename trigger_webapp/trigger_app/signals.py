@@ -197,40 +197,47 @@ def proposal_worth_observing(
     # Defaults if not worth observing
     trigger_bool = debug_bool = pending_bool = False
 
-    if prop_dec.proposal.event_telescope is None or str(prop_dec.proposal.event_telescope).strip() == voevent.telescope.strip():
-        # This project observes events from this telescope
-
-        # Check if this proposal thinks this event is worth observing
-        proj_source_bool = False
-        if prop_dec.proposal.source_type == "GRB" and voevent.source_type == "GRB":
-            # This proposal wants to observe GRBs so check if it is worth observing
-            trigger_bool, debug_bool, pending_bool, trigger_message = worth_observing_grb(
-                # event values
-                trig_duration=voevent.duration,
-                fermi_most_likely_index=voevent.fermi_most_likely_index,
-                fermi_detection_prob=voevent.fermi_detection_prob,
-                swift_rate_signif=voevent.swift_rate_signif,
-                # Thresholds
-                trig_min_duration=prop_dec.proposal.trig_min_duration,
-                trig_max_duration=prop_dec.proposal.trig_max_duration,
-                pending_min_duration_1=prop_dec.proposal.pending_min_duration_1,
-                pending_max_duration_1=prop_dec.proposal.pending_max_duration_1,
-                pending_min_duration_2=prop_dec.proposal.pending_min_duration_2,
-                pending_max_duration_2=prop_dec.proposal.pending_max_duration_2,
-                fermi_min_detection_prob=prop_dec.proposal.fermi_prob,
-                swift_min_rate_signif=prop_dec.proposal.swift_rate_signf,
-                # Other
-                trigger_message=trigger_message,
-            )
-            proj_source_bool = True
-        # TODO set up other source types here
-
-        if not proj_source_bool:
-            # Proposal does not observe this type of source so update message
-            trigger_message += f"This proposal does not observe {voevent.get_source_type_display()}s.\n "
+    # Check if event has an accurate enough position
+    if voevent.pos_error > prop_dec.proposal.maximum_position_uncertainty:
+        # Ignore the inaccurate event
+        trigger_message += f"The VOEvents positions uncertainty ({voevent.pos_error} deg) is greater than {prop_dec.proposal.maximum_position_uncertainty} so not observing.\n "
     else:
-        # Proposal does not observe event from this telescope so update message
-        trigger_message += f"This proposal does not trigger on events from {voevent.telescope}.\n "
+        # Continue to next test
+
+        if prop_dec.proposal.event_telescope is None or str(prop_dec.proposal.event_telescope).strip() == voevent.telescope.strip():
+            # This project observes events from this telescope
+
+            # Check if this proposal thinks this event is worth observing
+            proj_source_bool = False
+            if prop_dec.proposal.source_type == "GRB" and voevent.source_type == "GRB":
+                # This proposal wants to observe GRBs so check if it is worth observing
+                trigger_bool, debug_bool, pending_bool, trigger_message = worth_observing_grb(
+                    # event values
+                    trig_duration=voevent.duration,
+                    fermi_most_likely_index=voevent.fermi_most_likely_index,
+                    fermi_detection_prob=voevent.fermi_detection_prob,
+                    swift_rate_signif=voevent.swift_rate_signif,
+                    # Thresholds
+                    trig_min_duration=prop_dec.proposal.trig_min_duration,
+                    trig_max_duration=prop_dec.proposal.trig_max_duration,
+                    pending_min_duration_1=prop_dec.proposal.pending_min_duration_1,
+                    pending_max_duration_1=prop_dec.proposal.pending_max_duration_1,
+                    pending_min_duration_2=prop_dec.proposal.pending_min_duration_2,
+                    pending_max_duration_2=prop_dec.proposal.pending_max_duration_2,
+                    fermi_min_detection_prob=prop_dec.proposal.fermi_prob,
+                    swift_min_rate_signif=prop_dec.proposal.swift_rate_signf,
+                    # Other
+                    trigger_message=trigger_message,
+                )
+                proj_source_bool = True
+            # TODO set up other source types here
+
+            if not proj_source_bool:
+                # Proposal does not observe this type of source so update message
+                trigger_message += f"This proposal does not observe {voevent.get_source_type_display()}s.\n "
+        else:
+            # Proposal does not observe event from this telescope so update message
+            trigger_message += f"This proposal does not trigger on events from {voevent.telescope}.\n "
 
     if trigger_bool:
         # Check if you can observe and if so send off the observation
