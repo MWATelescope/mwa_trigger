@@ -37,9 +37,6 @@ class ProposalSettingsAdmin(admin.ModelAdmin):
                 ('atca_band_15mm', 'atca_band_15mm_freq1', 'atca_band_15mm_freq2'),
                 ('atca_band_4cm', 'atca_band_4cm_freq1', 'atca_band_4cm_freq2'),
                 'atca_band_16cm',
-                'atca_nobs',
-                'atca_exptime',
-                'atca_calexptime',
             ),
         }),
         ("Source Settings: Trigger Duration Range (s)", {
