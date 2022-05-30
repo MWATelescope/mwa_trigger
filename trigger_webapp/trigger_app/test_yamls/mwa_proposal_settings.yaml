@@ -1,5 +1,15 @@
 [
 {
+    "model": "trigger_app.telescopeprojectid",
+    "pk": 1,
+    "fields": {
+        "id": "T001",
+        "password": "TestingOnly",
+        "description": "Testing MWA",
+        "telescope": "MWA_VCS",
+    }
+},
+{
     "model": "trigger_app.proposalsettings",
     "pk": 1,
     "fields": {
@@ -27,5 +37,5 @@
         "mwa_freqres": 40.0,
         "mwa_inttime": 0.5,
     }
-}
+},
 ]
