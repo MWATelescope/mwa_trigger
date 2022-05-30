@@ -29,11 +29,37 @@ class EventTelescope(models.Model):
         return f"{self.name}"
 
 
+class TelescopeProjectID(models.Model):
+    id = models.CharField(primary_key=True, max_length=64, verbose_name="Telescope Project ID", help_text="The project ID for the telescope used to automatically schedule observations.")
+    password = models.CharField(max_length=64, verbose_name="Telescope Project Password", help_text="The project password for the telescope used to automatically schedule observations.")
+    description = models.CharField(max_length=256, help_text="A brief description of the project.")
+    telescope = models.ForeignKey(
+        Telescope,
+        to_field="name",
+        verbose_name="Telescope name",
+        help_text="Telescope this proposal will observer with. If the telescope you want is not here add it on the admin page.",
+        on_delete=models.CASCADE,
+    )
+
+    def __str__(self):
+        return f"{self.telescope}_{self.id}"
+
 class ProposalSettings(models.Model):
     id = models.AutoField(primary_key=True)
-    #telescope = models.CharField(max_length=64, blank=True, null=True, verbose_name="Telescope name", help_text="E.g. MWA_VCS, MWA_correlate or ATCA. If the telescope you want is not here add it on the admin page.")
-    telescope = models.ForeignKey(Telescope, to_field="name", verbose_name="Telescope name", help_text="Telescope this proposal will observer with. If the telescope you want is not here add it on the admin page.", on_delete=models.CASCADE)
-    project_id = models.CharField(max_length=64, verbose_name="Project ID", help_text="This is the target telescopes's project ID that is used with a password to schedule observations.")
+    telescope = models.ForeignKey(
+        Telescope,
+        to_field="name",
+        verbose_name="Telescope name",
+        help_text="Telescope this proposal will observer with. If the telescope you want is not here add it on the admin page.",
+        on_delete=models.CASCADE,
+    )
+    project_id = models.ForeignKey(
+        TelescopeProjectID,
+        to_field="id",
+        verbose_name="Project ID",
+        help_text="This is the target telescopes's project ID that is used with a password to schedule observations.",
+        on_delete=models.CASCADE,
+    )
     proposal_id = models.CharField(max_length=16, unique=True, verbose_name="Proposal ID", help_text="A short identifier of the proposal of maximum lenth 16 charcters.")
     proposal_description = models.CharField(max_length=256, help_text="A brief description of the proposal. Only needs to be enough to distinguish it from the other proposals.")
     event_telescope = models.ForeignKey(EventTelescope, to_field="name", help_text="The telescope that this proposal will accept at least one VOEvent from before observing. Leave blank if you want to accept all telescopes.", blank=True, null=True, on_delete=models.SET_NULL)

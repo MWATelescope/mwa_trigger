@@ -1,6 +1,6 @@
 from django.contrib import admin
-from trigger_app.models import VOEvent, PossibleEventAssociation, AdminAlerts, ProposalSettings, ProposalDecision, Telescope, Status, TriggerID
-from trigger_app.forms import ProjectSettingsForm
+from trigger_app.models import VOEvent, PossibleEventAssociation, AdminAlerts, ProposalSettings, ProposalDecision, Telescope, Status, TriggerID, TelescopeProjectID
+from trigger_app.forms import ProjectSettingsForm, TelescopeProjectIDForm
 
 
 class ProposalSettingsAdmin(admin.ModelAdmin):
@@ -67,12 +67,19 @@ class ProposalSettingsAdmin(admin.ModelAdmin):
     )
 
 
+class TelescopeProjectIDAdmin(admin.ModelAdmin):
+    form = TelescopeProjectIDForm
+    model = TelescopeProjectID
+
+
 # Register your models here.
+admin.site.register(ProposalSettings, ProposalSettingsAdmin)
+admin.site.register(TelescopeProjectID, TelescopeProjectIDAdmin)
+
 admin.site.register(VOEvent)
 admin.site.register(TriggerID)
 admin.site.register(PossibleEventAssociation)
 admin.site.register(AdminAlerts)
 admin.site.register(ProposalDecision)
-admin.site.register(ProposalSettings, ProposalSettingsAdmin)
 admin.site.register(Telescope)
 admin.site.register(Status)

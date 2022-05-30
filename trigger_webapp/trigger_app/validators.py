@@ -133,9 +133,10 @@ def atca_freq_bands(min_freq, max_freq, freq, field_name):
         raise forms.ValidationError(gettext(f"{field_name} error: A centre frequency of {freq} MHz would have a minimum below {min_freq} MHz which is outside the bands frequency range."))
 
 
-def mwa_proposal_id(project_id):
-    result = trigger_mwa(project_id=project_id,
-        secure_key=os.environ.get('MWA_SECURE_KEY', None),
+def mwa_proposal_id(project_id, secure_key):
+    result = trigger_mwa(
+        project_id=project_id,
+        secure_key=secure_key,
         pretend=True,
         ra=0.,
         dec=0.,

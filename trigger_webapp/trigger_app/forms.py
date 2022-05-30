@@ -2,7 +2,7 @@
 # import the standard Django Forms
 # from built-in library
 from django import forms
-from .models import UserAlerts, ProposalSettings
+from .models import UserAlerts, ProposalSettings, TelescopeProjectID
 from .validators import atca_freq_bands, mwa_proposal_id, mwa_freqspecs
 
 # creating a form
@@ -39,7 +39,6 @@ class ProjectSettingsForm(forms.ModelForm):
         if 'telescope' in self.cleaned_data.keys():
             telescope = self.cleaned_data['telescope']
             if str(telescope).startswith("MWA"):
-                mwa_proposal_id(self.cleaned_data['project_id'])
 
                 # Check the MWA frequency channel specifications are valid
                 if self.cleaned_data['mwa_freqspecs']:
@@ -51,10 +50,25 @@ class ProjectSettingsForm(forms.ModelForm):
                    not self.cleaned_data['atca_band_15mm'] and not self.cleaned_data['atca_band_4cm'] and \
                    not self.cleaned_data['atca_band_16cm']:
                     raise forms.ValidationError("Please choose at least 1 ATCA frequency band.")
-                # TODO also check ATCA's project ID
 
 
     # specify the name of model to use
     class Meta:
         model = ProposalSettings
+        fields = '__all__'
+
+class TelescopeProjectIDForm(forms.ModelForm):
+    def clean(self):
+        # Make sure the project ID is works
+        if 'telescope' in self.cleaned_data.keys():
+            telescope = self.cleaned_data['telescope']
+            if str(telescope).startswith("MWA"):
+                mwa_proposal_id(self.cleaned_data['id'], self.cleaned_data['password'])
+
+                # TODO also check ATCA's project ID
+
+
+    # specify the name of model to use
+    class Meta:
+        model = TelescopeProjectID
         fields = '__all__'
