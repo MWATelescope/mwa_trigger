@@ -102,6 +102,7 @@
 
         <hr>
         <h2>Target Telescope Settings</h2>
+        <p>If you can not find the Telescope Project ID please use this <a href="/admin/trigger_app/telescopeprojectid/add/">link</a>  to add it.</p>
         <table>
             <tr><td>{{ form.telescope.label_tag }} {% help_wrap form.telescope.help_text %}</td><td>{{ form.telescope }}</td></tr>
             {% for error in form.telescope.errors %}<div class="alert alert-danger"><strong>{{ form.telescope.label_tag }}{{ error|escape }}</strong></div>{% endfor %}
