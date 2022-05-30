@@ -34,25 +34,7 @@
         {% for error in form.proposal_description.errors %}<div class="alert alert-danger"><strong>{{ error|escape }}</strong></div>{% endfor %}
 
         <hr>
-        <h2>Event Source Settings</h2>
-        <h3>Source type to observere</h3>
         {{ form.source_type.label_tag }}{{ form.source_type }}
-        {% for error in form.source_type.errors %}<div class="alert alert-danger"><strong>{{ error|escape }}</strong></div>{% endfor %}
-        <h3>Source duration</h3>
-        <table>
-            <tr><td>Trigger Duration Range (s)  {% help_wrap 'The inclusive duration range of an event that will automatically trigger an observation.' %}</td><td>{{ form.trig_min_duration }}</td><td>{{ form.trig_max_duration }}</td></tr>
-            <tr><td>Pending Duration Range 1 (s){% help_wrap 'The inclusive duration range of an event that will notify users and let them decided if an observations should be triggered.' %}</td><td>{{ form.pending_min_duration_1 }}</td><td>{{ form.pending_max_duration_1 }}</td></tr>
-            <tr><td>Pending Duration Range 2 (s){% help_wrap 'A second inclusive duration range of an event that will notify users and let them decided if an observations should be triggered.' %}</td><td>{{ form.pending_min_duration_2 }}</td><td>{{ form.pending_max_duration_2 }}</td></tr>
-        </table>
-        <h3>Source thresholds</h3>
-        <table>
-            <tr><td>{{ form.maximum_position_uncertainty.label_tag }}      {% help_wrap form.maximum_position_uncertainty.help_text %}</td><td>{{ form.maximum_position_uncertainty }}</td></tr>
-            <tr><td>{{ form.fermi_prob.label_tag }}      {% help_wrap form.fermi_prob.help_text %}</td><td>{{ form.fermi_prob }}</td></tr>
-            <tr><td>{{ form.swift_rate_signf.label_tag }}{% help_wrap form.swift_rate_signf.help_text %}</td><td>{{ form.swift_rate_signf }}</td></tr>
-        </table>
-
-        <hr>
-        <h2>Event Telescope Settings</h2>
         <div id="none">
             <p>Select a source type before choosing an event telescope</p>
         </div>
@@ -99,6 +81,23 @@
                     {% endfor %}
                 </select></td></tr>
             </table>
+        </div>
+        <hr>
+        <h2>Event Source Settings</h2>
+        {% for error in form.source_type.errors %}<div class="alert alert-danger"><strong>{{ error|escape }}</strong></div>{% endfor %}
+        <h3>Source duration</h3>
+        <table>
+            <tr><td>Trigger Duration Range (s)  {% help_wrap 'The inclusive duration range of an event that will automatically trigger an observation.' %}</td><td>{{ form.trig_min_duration }}</td><td>{{ form.trig_max_duration }}</td></tr>
+            <tr><td>Pending Duration Range 1 (s){% help_wrap 'The inclusive duration range of an event that will notify users and let them decided if an observations should be triggered.' %}</td><td>{{ form.pending_min_duration_1 }}</td><td>{{ form.pending_max_duration_1 }}</td></tr>
+            <tr><td>Pending Duration Range 2 (s){% help_wrap 'A second inclusive duration range of an event that will notify users and let them decided if an observations should be triggered.' %}</td><td>{{ form.pending_min_duration_2 }}</td><td>{{ form.pending_max_duration_2 }}</td></tr>
+        </table>
+        <h3>Source thresholds</h3>
+        {{ form.maximum_position_uncertainty.label_tag }}{% help_wrap form.maximum_position_uncertainty.help_text %}{{ form.maximum_position_uncertainty }}
+        <div id="fermi_thres">
+            {{ form.fermi_prob.label_tag }}{% help_wrap form.fermi_prob.help_text %}{{ form.fermi_prob }}
+        </div>
+        <div id="swift_thres">
+            {{ form.swift_rate_signf.label_tag }}{% help_wrap form.swift_rate_signf.help_text %}{{ form.swift_rate_signf }}
         </div>
 
         <hr>
@@ -229,6 +228,27 @@
                 }
             });
             $("#id_source_type").trigger("change")
+            $("#event_telescope").change(function() {
+                console.log($(this).val());
+                if ($(this).val() === "") {
+                    console.log(1);
+                    $('#fermi_thres').show();
+                    $('#swift_thres').show();
+                } else if ($(this).val() === "Fermi") {
+                    console.log(2);
+                    $('#fermi_thres').show();
+                    $('#swift_thres').hide();
+                } else if ($(this).val() === "SWIFT") {
+                    console.log(3);
+                    $('#fermi_thres').hide();
+                    $('#swift_thres').show();
+                } else {
+                    console.log(4);
+                    $('#fermi_thres').hide();
+                    $('#swift_thres').hide();
+                }
+            });
+            $("#event_telescope").trigger("change")
         })
     </script>
 {% endblock %}
