@@ -54,8 +54,8 @@ def trigger_observation(
         obs_source_altaz = obs_source.transform_to(AltAz(obstime=Time.now(), location=location))
         alt = obs_source_altaz.alt.deg
         logger.debug("Triggered observation at an elevation of {0}".format(alt))
-        if alt < proposal_decision_model.proposal.horizon_limit:
-            horizon_message = f"Not triggering due to horizon limit: alt {alt} < {proposal_decision_model.proposal.horizon_limit}. "
+        if alt < proposal_decision_model.proposal.mwa_horizon_limit:
+            horizon_message = f"Not triggering due to horizon limit: alt {alt} < {proposal_decision_model.proposal.mwa_horizon_limit}. "
             logger.debug(horizon_message)
             return 'I', trigger_message + horizon_message
 
@@ -142,22 +142,22 @@ def trigger_mwa_observation(
 
     # Not below horizon limit so observer
     logger.info(f"Triggering MWA at UTC time {Time.now()} ...")
-    result = trigger_mwa(project_id=prop_settings.project_id,
-        secure_key=os.environ.get('MWA_SECURE_KEY', None),
+    result = trigger_mwa(
+        project_id=prop_settings.project_id.id,
+        secure_key=prop_settings.project_id.password,
         pretend=prop_settings.testing,
         ra=proposal_decision_model.ra, dec=proposal_decision_model.dec,
         creator='VOEvent_Auto_Trigger', #TODO grab version
         obsname=obsname,
         nobs=prop_settings.mwa_nobs,
         freqspecs=prop_settings.mwa_freqspecs, #Assume always using 24 contiguous coarse frequency channels
-        avoidsun=prop_settings.mwa_avoidsun,
+        avoidsun=True,
         inttime=prop_settings.mwa_inttime,
         freqres=prop_settings.mwa_freqres,
         exptime=prop_settings.mwa_exptime,
-        calibrator=prop_settings.mwa_calibrator,
+        calibrator=True,
         calexptime=prop_settings.mwa_calexptime,
         vcsmode=vcsmode,
-        buffered=prop_settings.mwa_buffered,
     )
     logger.debug(f"result: {result}")
     # Check if succesful

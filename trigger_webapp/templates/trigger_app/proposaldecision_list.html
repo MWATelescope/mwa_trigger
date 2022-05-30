@@ -5,11 +5,27 @@
 
 <div class="container-fluid">
   <h1>Proposal Decision Log</h1>
+  <h3>Filter VOEvents:</h3>
+  <div style="background-color:#f8f8f8; width:90%; margin: 0 auto; padding-bottom: 20px;">
+  <form action="" method="get">
+    <table>
+      <tr>
+        <td width="15%">{{ filter.form.decision.label_tag }}</td>
+        <td width="15%">{{ filter.form.decision }}</td>
+        <td width="15%">Recieved date (start)</td>
+        <td width="15%"><input type="datetime-local" name="recieved_data_after" value="{{filter.form.recieved_data_after}}"></td>
+        <td width="15%">Recieved date (end)</td>
+        <td width="15%"><input type="datetime-local" name="recieved_data_before" value="{{filter.form.recieved_data_before}}"></td>
+      </tr>
+    </table>
+    <input class="btn btn-primary" type="submit" />
+  </form>
   <table class="fl-table">
     <thead>
     <tr>
       <th>ID</th>
-      <th>Proposal Telsecoe</th>
+      <th>Date (UTC)</th>
+      <th>Proposal Telsecope</th>
       <th>Project ID</th>
       <th>Decision</th>
       <th>Decision Reason</th>
@@ -19,13 +35,14 @@
       <th>Best Position Error (&#176;)</th>
     </tr>
   </thead>
-    {% for object in object_list %}
+    {% for object in page_obj %}
     {% if object.decision == "I" %}
       <tr class="grey-tr">
     {% else %}
       <tr>
     {% endif %}
       <td><a href="/proposal_decision_details/{{ object.id }}/" style="text-decoration:None">{{ object.id }}</a></td>
+      <td>{{ object.recieved_data|date:"Y-m-d H:i:s" }}</td>
       <td>{{ object.proposal.telescope }}</td>
       <td>{{ object.proposal.project_id }}</td>
       <td>{{ object.get_decision_display }}</td>

@@ -31,3 +31,19 @@
   pk: 3
   fields:
     name: HESS
+- model: trigger_app.EventTelescope
+  pk: 4
+  fields:
+    name: Antares
+- model: trigger_app.EventTelescope
+  pk: 5
+  fields:
+    name: AMON
+- model: trigger_app.EventTelescope
+  pk: 6
+  fields:
+    name: MAXI
+- model: trigger_app.EventTelescope
+  pk: 7
+  fields:
+    name: LVC

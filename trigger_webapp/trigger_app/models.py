@@ -1,8 +1,5 @@
-from os import sched_get_priority_max
 from django.db import models
 from django.contrib.auth.models import User
-from django.contrib import admin
-from .validators import mwa_freqspecs
 
 
 GRB = 'GRB'
@@ -32,11 +29,38 @@ class EventTelescope(models.Model):
         return f"{self.name}"
 
 
+class TelescopeProjectID(models.Model):
+    id = models.CharField(primary_key=True, max_length=64, verbose_name="Telescope Project ID", help_text="The project ID for the telescope used to automatically schedule observations.")
+    password = models.CharField(max_length=64, verbose_name="Telescope Project Password", help_text="The project password for the telescope used to automatically schedule observations.")
+    description = models.CharField(max_length=256, help_text="A brief description of the project.")
+    telescope = models.ForeignKey(
+        Telescope,
+        to_field="name",
+        verbose_name="Telescope name",
+        help_text="Telescope this proposal will observer with. If the telescope you want is not here add it on the admin page.",
+        on_delete=models.CASCADE,
+    )
+
+    def __str__(self):
+        return f"{self.telescope}_{self.id}"
+
 class ProposalSettings(models.Model):
     id = models.AutoField(primary_key=True)
-    #telescope = models.CharField(max_length=64, blank=True, null=True, verbose_name="Telescope name", help_text="E.g. MWA_VCS, MWA_correlate or ATCA. If the telescope you want is not here add it on the admin page.")
-    telescope = models.ForeignKey(Telescope, to_field="name", verbose_name="Telescope name", help_text="Telescope this proposal will observer with. If the telescope you want is not here add it on the admin page.", on_delete=models.CASCADE)
-    project_id = models.CharField(max_length=64, help_text="This will be used to schedule observations.")
+    telescope = models.ForeignKey(
+        Telescope,
+        to_field="name",
+        verbose_name="Telescope name",
+        help_text="Telescope this proposal will observer with. If the telescope you want is not here add it on the admin page.",
+        on_delete=models.CASCADE,
+    )
+    project_id = models.ForeignKey(
+        TelescopeProjectID,
+        to_field="id",
+        verbose_name="Project ID",
+        help_text="This is the target telescopes's project ID that is used with a password to schedule observations.",
+        on_delete=models.CASCADE,
+    )
+    proposal_id = models.CharField(max_length=16, unique=True, verbose_name="Proposal ID", help_text="A short identifier of the proposal of maximum lenth 16 charcters.")
     proposal_description = models.CharField(max_length=256, help_text="A brief description of the proposal. Only needs to be enough to distinguish it from the other proposals.")
     event_telescope = models.ForeignKey(EventTelescope, to_field="name", help_text="The telescope that this proposal will accept at least one VOEvent from before observing. Leave blank if you want to accept all telescopes.", blank=True, null=True, on_delete=models.SET_NULL)
     trig_min_duration = models.FloatField(verbose_name="Min", default=0.256)
@@ -45,46 +69,43 @@ class ProposalSettings(models.Model):
     pending_max_duration_1 = models.FloatField(verbose_name="Max", default=2.056)
     pending_min_duration_2 = models.FloatField(verbose_name="Min", default=0.128)
     pending_max_duration_2 = models.FloatField(verbose_name="Max", default=0.255)
+    maximum_position_uncertainty = models.FloatField(verbose_name="Maximum Position Uncertainty (deg)", help_text="A VOEvent must have less than or equal to this position uncertainty to be observed.", default=0.05)
     fermi_prob = models.FloatField(help_text="The minimum probability to observe for Fermi sources (it appears to be a percentage, e.g. 50).", default=50)
     swift_rate_signf = models.FloatField(help_text="The minimum \"RATE_SIGNIF\" (appears to be a signal-to-noise ratio) to observe for SWIFT sources (in sigma).", default=0.)
-    repointing_limit = models.FloatField(help_text="An updated position must be at least this far away from a current observation before repointing (in degrees).", default=10.)
-    horizon_limit = models.FloatField(help_text="The minimum elevation of the source to observe (in degrees).", default=10.)
+    repointing_limit = models.FloatField(verbose_name="Repointing Limit (deg)", help_text="An updated position must be at least this far away from a current observation before repointing (in degrees).", default=10.)
     testing = models.BooleanField(default=False, help_text="If testing, will not schedule any observations.")
-    grb = models.BooleanField(default=False, verbose_name="Observe Gamma-ray Bursts?")
-    flare_star = models.BooleanField(default=False, verbose_name="Observe Flare Stars?")
-    gw = models.BooleanField(default=False, verbose_name="Observe Gravitational Waves?")
-    neutrino = models.BooleanField(default=False, verbose_name="Observe Neutrinos?")
+    source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, verbose_name="What type of source to will you trigger on?")
 
     # MWA settings
-    mwa_freqspecs = models.CharField(max_length=256, blank=True, null=True, verbose_name="Frequency channel Specifications", validators=[mwa_freqspecs], help_text="For an explanation of the MWA frequency specifications please see https://mwa_trigger.readthedocs.io/en/latest/mwa_frequency_specifications.html")
-    mwa_nobs = models.IntegerField(blank=True, null=True, verbose_name="Number of Observations", help_text="The number of observations to schedule.")
-    mwa_exptime = models.IntegerField(blank=True, null=True, verbose_name="Observation time (s)", help_text="Exposure time of each observation scheduled, in seconds (must be modulo-8 seconds).")
-    mwa_calibrator = models.BooleanField(default=True, verbose_name="Calibrator?", help_text="True to have a calibrator observation chosen for you or False for no calibrator observation.")
-    mwa_calexptime = models.FloatField(blank=True, null=True, verbose_name="Calibrator Observation time (s)", help_text="Exposure time of the trailing calibrator observation, if applicable, in seconds.")
-    mwa_freqres = models.FloatField(blank=True, null=True, verbose_name="Frequency Resolution (kHz)", help_text="Correlator frequency resolution for observations. None to use whatever the current mode is, for lower latency. Eg 40.")
-    mwa_inttime = models.FloatField(blank=True, null=True, verbose_name="Intergration Time (s)", help_text="Correlator integration time for observations in seconds. None to use whatever the current mode is, for lower latency. Eg 0.5.")
-    mwa_avoidsun = models.BooleanField(default=True, verbose_name="Avoid Sun?", help_text="If True, the coordinates of the target and calibrator are shifted slightly to put the Sun in a null.")
-    mwa_buffered = models.BooleanField(default=False, verbose_name="Use ring buffer?", help_text="If True and vcsmode, trigger a Voltage capture using the ring buffer.")
+    mwa_freqspecs = models.CharField(default="144,24", max_length=256, verbose_name="MWA frequency specifications", help_text="The frequency channels IDs for the MWA to observe at.")
+    mwa_nobs = models.IntegerField(default=1, verbose_name="Number of Observations", help_text="The number of observations to schedule.")
+    mwa_exptime = models.IntegerField(default=896, verbose_name="Observation time (s)", help_text="Exposure time of each observation scheduled, in seconds (must be modulo-8 seconds).")
+    mwa_calexptime = models.FloatField(default=120., verbose_name="Calibrator Observation time (s)", help_text="Exposure time of the trailing calibrator observation, if applicable, in seconds.")
+    mwa_freqres = models.FloatField(default=10., verbose_name="Frequency Resolution (kHz)", help_text="Correlator frequency resolution for observations. None to use whatever the current mode is, for lower latency. Eg 40.")
+    mwa_inttime = models.FloatField(default=0.5, verbose_name="Intergration Time (s)", help_text="Correlator integration time for observations in seconds. None to use whatever the current mode is, for lower latency. Eg 0.5.")
+    mwa_horizon_limit = models.FloatField(verbose_name="Horizon limit (deg)", help_text="The minimum elevation of the source to observe (in degrees).", default=10.)
 
     # ATCA setting
     atca_band_3mm = models.BooleanField(default=False, verbose_name="Use 3mm Band?")
+    atca_band_3mm_exptime = models.IntegerField(default=720, verbose_name="Band Exposure Time (mins)", help_text="Total exposure time of the observation cycle at this frequency band.")
     atca_band_3mm_freq1 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 1 (MHz)", help_text="The centre of the first frequency channel in MHz.")
     atca_band_3mm_freq2 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 2 (MHz)", help_text="The centre of the second frequency channel in MHz.")
     atca_band_7mm = models.BooleanField(default=False, verbose_name="Use 7mm Band?")
+    atca_band_7mm_exptime = models.IntegerField(default=720, verbose_name="Band Exposure Time (mins)", help_text="Total exposure time of the observation cycle at this frequency band.")
     atca_band_7mm_freq1 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 1 (MHz)", help_text="The centre of the first frequency channel in MHz.")
     atca_band_7mm_freq2 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 2 (MHz)", help_text="The centre of the second frequency channel in MHz.")
     atca_band_15mm = models.BooleanField(default=False, verbose_name="Use 15mm Band?")
+    atca_band_15mm_exptime = models.IntegerField(default=720, verbose_name="Band Exposure Time (mins)", help_text="Total exposure time of the observation cycle at this frequency band.")
     atca_band_15mm_freq1 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 1 (MHz)", help_text="The centre of the first frequency channel in MHz.")
     atca_band_15mm_freq2 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 2 (MHz)", help_text="The centre of the second frequency channel in MHz.")
     atca_band_4cm = models.BooleanField(default=False, verbose_name="Use 4cm Band?")
+    atca_band_4cm_exptime = models.IntegerField(default=720, verbose_name="Band Exposure Time (mins)", help_text="Total exposure time of the observation cycle at this frequency band.")
     atca_band_4cm_freq1 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 1 (MHz)", help_text="The centre of the first frequency channel in MHz.")
     atca_band_4cm_freq2 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 2 (MHz)", help_text="The centre of the second frequency channel in MHz.")
     atca_band_16cm = models.BooleanField(default=False, verbose_name="User 16cm Band?")
-    atca_freq1 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 1 (MHz)", help_text="The centre of the first frequency channel in MHz.")
-    atca_freq2 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 2 (MHz)", help_text="The centre of the second frequency channel in MHz.")
-    atca_nobs = models.IntegerField(blank=True, null=True, verbose_name="Number of Observations", help_text="The number of observations to schedule.")
-    atca_exptime = models.IntegerField(blank=True, null=True, verbose_name="Exposure Time (mins)", help_text="Exposure time per observation in minutes.")
-    atca_calexptime = models.IntegerField(blank=True, null=True, verbose_name="Calibrator Exposure Time (mins)", help_text="Exposure time per (phase) calibration in minutes")
+    atca_band_16cm_exptime = models.IntegerField(default=720, verbose_name="Band Exposure Time (mins)", help_text="Total exposure time of the observation cycle at this frequency band.")
+    atca_max_exptime = models.IntegerField(default=720, verbose_name="Maximum Exposure Time (mins)", help_text="Total exposure time of all the observations combined.")
+    atca_prioritise_source = models.BooleanField(default=False, verbose_name="Prioritise Source?", help_text="Prioritise time on source rather than time on calibrator.")
 
 
     def __str__(self):
@@ -125,6 +146,8 @@ class TriggerID(models.Model):
 
     def __str__(self):
         return str(self.id)
+    class Meta:
+        ordering = ['-id']
 
 
 class ProposalDecision(models.Model):

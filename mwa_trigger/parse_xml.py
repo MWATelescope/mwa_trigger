@@ -6,6 +6,25 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# A dictionary of the telescopes each source type can be detected by
+SOURCE_TELESCOPES = {
+    "GRB":[
+        "SWIFT",
+        "Fermi",
+        "HESS",
+    ],
+    "FS":[
+        "SWIFT",
+        "MAXI",
+    ],
+    "GW":[
+        "LVC",
+    ],
+    "NU":[
+        "Antares",
+        "AMON",
+    ],
+}
 
 def get_telescope(ivorn):
     # Check ivorn for the telescope name
@@ -52,7 +71,7 @@ def get_source_types(telescope, event_type, source_name, v):
     """
     """
     #Check for Gravitational Waves
-    if telescope == "LVC":
+    if telescope in SOURCE_TELESCOPES["GW"]:
         return "GW"
 
     # Check for neutrinos
