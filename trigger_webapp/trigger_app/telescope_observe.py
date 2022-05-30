@@ -142,8 +142,9 @@ def trigger_mwa_observation(
 
     # Not below horizon limit so observer
     logger.info(f"Triggering MWA at UTC time {Time.now()} ...")
-    result = trigger_mwa(project_id=prop_settings.project_id,
-        secure_key=os.environ.get('MWA_SECURE_KEY', None),
+    result = trigger_mwa(
+        project_id=prop_settings.project_id.id,
+        secure_key=prop_settings.project_id.password,
         pretend=prop_settings.testing,
         ra=proposal_decision_model.ra, dec=proposal_decision_model.dec,
         creator='VOEvent_Auto_Trigger', #TODO grab version
