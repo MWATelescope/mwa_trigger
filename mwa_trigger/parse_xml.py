@@ -161,7 +161,7 @@ class parsed_VOEvent:
         self.fermi_most_likely_index = None
         self.fermi_detection_prob = None
         self.swift_rate_signif = None
-        self.antares_rating = None
+        self.antares_ranking = None
         self.grb_ident = None
         self.telescope = None
         self.source_name = None
@@ -294,7 +294,7 @@ class parsed_VOEvent:
         elif self.telescope == "Antares":
             self.trig_duration = None
             self.sequence_num = None
-            self.antares_rating = int(v.find(".//Param[@name='ranking']").attrib["value"])
+            self.antares_ranking = int(v.find(".//Param[@name='ranking']").attrib["value"])
 
         self.event_observed = v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Time.TimeInstant.ISOTime
         logger.debug("Trig details:")

@@ -72,6 +72,7 @@ class ProposalSettings(models.Model):
     maximum_position_uncertainty = models.FloatField(verbose_name="Maximum Position Uncertainty (deg)", help_text="A VOEvent must have less than or equal to this position uncertainty to be observed.", default=0.05)
     fermi_prob = models.FloatField(help_text="The minimum probability to observe for Fermi sources (it appears to be a percentage, e.g. 50).", default=50)
     swift_rate_signf = models.FloatField(help_text="The minimum \"RATE_SIGNIF\" (appears to be a signal-to-noise ratio) to observe for SWIFT sources (in sigma).", default=0.)
+    antares_min_ranking = models.IntegerField(help_text="The minimum rating (1 is best) to observe for Antares sources.", default=2)
     repointing_limit = models.FloatField(verbose_name="Repointing Limit (deg)", help_text="An updated position must be at least this far away from a current observation before repointing (in degrees).", default=10.)
     testing = models.BooleanField(default=False, help_text="If testing, will not schedule any observations.")
     source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, verbose_name="What type of source to will you trigger on?")
@@ -219,7 +220,7 @@ class VOEvent(models.Model):
     fermi_most_likely_index = models.FloatField(blank=True, null=True)
     fermi_detection_prob = models.FloatField(blank=True, null=True)
     swift_rate_signif = models.FloatField(blank=True, null=True)
-    antares_rating = models.IntegerField(blank=True, null=True)
+    antares_ranking = models.IntegerField(blank=True, null=True)
 
     class Meta:
         ordering = ['-id']

@@ -99,6 +99,9 @@
         <div id="swift_thres">
             {{ form.swift_rate_signf.label_tag }}{% help_wrap form.swift_rate_signf.help_text %}{{ form.swift_rate_signf }}
         </div>
+        <div id="antares_thres">
+            {{ form.antares_min_ranking.label_tag }}{% help_wrap form.antares_min_ranking.help_text %}{{ form.antares_min_ranking }}
+        </div>
 
         <hr>
         <h2>Target Telescope Settings</h2>
@@ -235,18 +238,27 @@
                     console.log(1);
                     $('#fermi_thres').show();
                     $('#swift_thres').show();
+                    $('#antares_thres').show();
                 } else if ($(this).val() === "Fermi") {
                     console.log(2);
                     $('#fermi_thres').show();
                     $('#swift_thres').hide();
+                    $('#antares_thres').hide();
                 } else if ($(this).val() === "SWIFT") {
                     console.log(3);
                     $('#fermi_thres').hide();
                     $('#swift_thres').show();
+                    $('#antares_thres').hide();
+                } else if ($(this).val() === "Antares") {
+                    console.log(3);
+                    $('#fermi_thres').hide();
+                    $('#swift_thres').hide();
+                    $('#antares_thres').show();
                 } else {
                     console.log(4);
                     $('#fermi_thres').hide();
                     $('#swift_thres').hide();
+                    $('#antares_thres').hide();
                 }
             });
             $("#event_telescope").trigger("change")

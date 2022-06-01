@@ -47,7 +47,7 @@ def write_and_upload(xml_string):
         'fermi_most_likely_index' : trig.fermi_most_likely_index,
         'fermi_detection_prob' : trig.fermi_detection_prob,
         'swift_rate_signf' : trig.swift_rate_signif,
-        'antares_rating' : trig.antares_rating,
+        'antares_ranking' : trig.antares_ranking,
     }
     r = session.post(url, data=data)
 
