@@ -1,5 +1,4 @@
 import voeventparse
-from . import handlers
 from . import data_load
 
 import logging
@@ -63,6 +62,9 @@ def get_event_type(ivorn):
     if "LVC" in ivorn:
         # Do LVS specific parsing
         return trig_type_str.split("-")[-1]
+    elif "Antares" in ivorn:
+        # Do Antares specific parsing
+        return ivorn.split("Antares_")[-1].split("#")[0]
     else:
         # Do default parsing
         for i in range(len(trig_type_str)):
@@ -123,6 +125,26 @@ def get_source_types(telescope, event_type, source_name, v):
     return None
 
 
+def get_position_info(v):
+    """
+    Return the ra,dec,err from a given voevent
+    These are typically in degrees, in the J2000 equinox.
+
+    :param v: A VOEvent string, in XML format
+    :return: A tuple of (ra, dec, err) where ra,dec are the coordinates in J2000 and err is the error radius in deg.
+    """
+    try:
+        ra  = float(v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Position2D.Value2.C1)
+        dec = float(v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Position2D.Value2.C2)
+        err = float(v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Position2D.Error2Radius)
+    except:
+        # Try old method if new one doesn't work
+        ra = float(v.find(".//C1"))
+        dec = float(v.find(".//C2"))
+        err = float(v.find('.//Error2Radius'))
+    return ra, dec, err
+
+
 class parsed_VOEvent:
     def __init__(self, xml, packet=None, trig_pairs=None):
         self.xml = xml
@@ -160,6 +182,7 @@ class parsed_VOEvent:
                 # "LVC_Initial",
                 "AMON_ICECUBE_BRONZE_Event",
                 "AMON_ICECUBE_GOLD_Event",
+                "Antares_Alert",
             ]
         self.parse()
 
@@ -271,5 +294,5 @@ class parsed_VOEvent:
         logger.debug(f"Type: {self.event_type}")
 
         # Get current position
-        self.ra, self.dec, self.err = handlers.get_position_info(v)
+        self.ra, self.dec, self.err = get_position_info(v)
         logger.debug(f"Trig position: {self.ra} {self.dec} {self.err}")
