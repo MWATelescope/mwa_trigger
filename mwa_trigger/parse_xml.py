@@ -60,11 +60,16 @@ def get_telescope(ivorn):
 
 def get_event_type(ivorn):
     trig_type_str = ivorn.split("#")[1]
-    for i in range(len(trig_type_str)):
-        # find first integer
-        if trig_type_str[i].isdigit():
-            break
-    return str(trig_type_str[: i - 1])
+    if "LVC" in ivorn:
+        # Do LVCS specific parsing
+        return trig_type_str.split("-")[-1]
+    else:
+        # Do default parsing
+        for i in range(len(trig_type_str)):
+            # find first integer
+            if trig_type_str[i].isdigit():
+                break
+        return str(trig_type_str[: i - 1])
 
 
 def get_source_types(telescope, event_type, source_name, v):
@@ -145,6 +150,10 @@ class parsed_VOEvent:
                 "Fermi_GBM_Gnd_Pos",
                 "Fermi_GBM_Fin_Pos",
                 "HESS_GRB_To",
+                # "LVC_Initial",
+                # "LVC_Preliminary",
+                # "LVC_Retraction",
+                # "LVC_Initial",
             ]
         self.parse()
 
