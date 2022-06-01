@@ -34,6 +34,7 @@ def write_and_upload(xml_string):
         'trigger_id' : trig.trig_id,
         'sequence_num' : trig.sequence_num,
         'event_type' : trig.event_type,
+        'role' : trig.role,
         'ra' : trig.ra,
         'dec' : trig.dec,
         'ra_hms' : ra_hms,

@@ -61,7 +61,7 @@ def get_telescope(ivorn):
 def get_event_type(ivorn):
     trig_type_str = ivorn.split("#")[1]
     if "LVC" in ivorn:
-        # Do LVCS specific parsing
+        # Do LVS specific parsing
         return trig_type_str.split("-")[-1]
     else:
         # Do default parsing
@@ -69,7 +69,11 @@ def get_event_type(ivorn):
             # find first integer
             if trig_type_str[i].isdigit():
                 break
-        return str(trig_type_str[: i - 1])
+        if trig_type_str[i-1] == "_":
+            # skip the _
+            return str(trig_type_str[: i - 1])
+        else:
+            return str(trig_type_str[:i])
 
 
 def get_source_types(telescope, event_type, source_name, v):
@@ -80,7 +84,7 @@ def get_source_types(telescope, event_type, source_name, v):
         return "GW"
 
     # Check for neutrinos
-    if telescope == "Antares" or ( telescope == "AMON" and event_type == "ICECUBE_GOLD" ):
+    if telescope == "Antares" or ( telescope == "AMON" and "ICECUBE" in event_type ):
         return "NU"
 
     # Check for Flare Stars
@@ -154,6 +158,8 @@ class parsed_VOEvent:
                 # "LVC_Preliminary",
                 # "LVC_Retraction",
                 # "LVC_Initial",
+                "AMON_ICECUBE_BRONZE_Event",
+                "AMON_ICECUBE_GOLD_Event",
             ]
         self.parse()
 
@@ -188,9 +194,19 @@ class parsed_VOEvent:
         self.source_type = get_source_types(self.telescope, self.event_type, self.source_name, v)
         logger.debug(f"source types: {self.source_type}")
 
-        # Attempt to get a Trigger ID (for Fermi and SWIFT)
+        # Attempt to get a Trigger ID (for Fermi, SWIFT and Antares)
         if v.find(".//Param[@name='TrigID']") is not None:
             self.trig_id = int(v.find(".//Param[@name='TrigID']").attrib["value"])
+        elif v.find(".//Param[@name='AMON_ID']") is not None:
+            # ICECUBE's ID
+            self.trig_id = int(v.find(".//Param[@name='AMON_ID']").attrib["value"])
+
+        # Check the voevent role (normally observation or test)
+        self.role = v.attrib["role"]
+        if self.role == "test":
+            # Just a test observation so ignore it
+            self.ignore = True
+            return
 
         # Check if this is the type of trigger we're looking for
         this_pair = f"{self.telescope}_{self.event_type}"
