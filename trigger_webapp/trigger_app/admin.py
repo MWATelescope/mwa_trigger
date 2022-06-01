@@ -1,6 +1,6 @@
 from django.contrib import admin
-from trigger_app.models import VOEvent, PossibleEventAssociation, AdminAlerts, ProposalSettings, ProposalDecision, Telescope, Status, TriggerID
-from trigger_app.forms import ProjectSettingsForm
+from trigger_app.models import VOEvent, PossibleEventAssociation, AdminAlerts, ProposalSettings, ProposalDecision, Telescope, Status, TriggerID, TelescopeProjectID
+from trigger_app.forms import ProjectSettingsForm, TelescopeProjectIDForm
 
 
 class ProposalSettingsAdmin(admin.ModelAdmin):
@@ -15,7 +15,6 @@ class ProposalSettingsAdmin(admin.ModelAdmin):
                 'proposal_description',
                 'event_telescope',
                 'repointing_limit',
-                'horizon_limit',
                 'testing',
             ),
         }),
@@ -24,12 +23,10 @@ class ProposalSettingsAdmin(admin.ModelAdmin):
                 'mwa_freqspecs',
                 'mwa_nobs',
                 'mwa_exptime',
-                'mwa_calibrator',
                 'mwa_calexptime',
                 'mwa_freqres',
                 'mwa_inttime',
-                'mwa_avoidsun',
-                'mwa_buffered',
+                'mwa_horizon_limit',
             ),
         }),
         ("Telescope Settings: ATCA (only fill out if using the ATCA)", {
@@ -40,9 +37,6 @@ class ProposalSettingsAdmin(admin.ModelAdmin):
                 ('atca_band_15mm', 'atca_band_15mm_freq1', 'atca_band_15mm_freq2'),
                 ('atca_band_4cm', 'atca_band_4cm_freq1', 'atca_band_4cm_freq2'),
                 'atca_band_16cm',
-                'atca_nobs',
-                'atca_exptime',
-                'atca_calexptime',
             ),
         }),
         ("Source Settings: Trigger Duration Range (s)", {
@@ -67,21 +61,25 @@ class ProposalSettingsAdmin(admin.ModelAdmin):
             'fields': (
                 'fermi_prob',
                 'swift_rate_signf',
-                'grb',
-                'flare_star',
-                'gw',
-                'neutrino',
+                'source_type',
             ),
         }),
     )
 
 
+class TelescopeProjectIDAdmin(admin.ModelAdmin):
+    form = TelescopeProjectIDForm
+    model = TelescopeProjectID
+
+
 # Register your models here.
+admin.site.register(ProposalSettings, ProposalSettingsAdmin)
+admin.site.register(TelescopeProjectID, TelescopeProjectIDAdmin)
+
 admin.site.register(VOEvent)
 admin.site.register(TriggerID)
 admin.site.register(PossibleEventAssociation)
 admin.site.register(AdminAlerts)
 admin.site.register(ProposalDecision)
-admin.site.register(ProposalSettings, ProposalSettingsAdmin)
 admin.site.register(Telescope)
 admin.site.register(Status)

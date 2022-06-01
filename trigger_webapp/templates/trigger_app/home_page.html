@@ -1,11 +1,15 @@
 {% extends 'trigger_app/header.html' %}
 
+{% load utils %}
+
 {% block content %}
 <title>Home Page</title>
 <div class="container py-4">
   <h1>MWA Trigger Home Page</h1>
-  <h3><a href="https://mwa-trigger.readthedocs.io/en/latest/" style="text-decoration:None">MWA Trigger Documentation</a></h3>
-  <h3>VOEvent Receiving Status (twistd comet)</h3>
+  <h3 style="text-align: center"><a href="https://mwa-trigger.readthedocs.io/en/latest/" style="text-decoration:None">MWA Trigger Documentation</a></h3>
+  <hr>
+
+  <h2>VOEvent Receiving Status (twistd comet)</h2>
   <table class="table-thin-left">
     <thead>
     <tr>
@@ -26,49 +30,102 @@
     </tr>
   </table>
   <p><a href="/comet_log/" style="text-decoration:None">View Comet Log</a></p>
-  <h3>Current Proposal Settings (Summarised)</h3>
+
+  <hr>
+  <h2>Most recent Transient Events</h2>
+  <table class="fl-table">
+    <col>
+    <colgroup span="{{ settings|length }}"></colgroup>
+    <thead>
+    <tr>
+      <td> </td><td> </td><td> </td><td> </td><td> </td><td> </td>
+      <th style="text-align: center; background: #448a92" colspan="{{ settings|length }}" scope="colgroup">Proposal Decisions</th>
+    </tr>
+    <tr>
+      <th scope="row">ID</th>
+      <th scope="row">First Alert (UTC)</th>
+      <th scope="row">Event Telescope</th>
+      <th scope="row">Trigger ID</th>
+      <th scope="row">Source Type</th>
+      <th scope="row">Source Name</th>
+      {% for setting in settings %}
+        <th>{{ setting.proposal_id }}</th>
+      {% endfor %}
+    </tr>
+    </thead>
+    {% for trig, telescope, source_name, prop_decisions in recent_triggers %}
+    <tr>
+      <td><a href="/trigger_id_details/{{ trig.id }}/" style="text-decoration:None">{{ trig.id }}</a></td>
+      <td scope="row">{{ trig.recieved_data|date:"Y-m-d H:i:s" }}</td>
+      <td scope="row">{{ telescope }}</td>
+      {% if telescope == "SWIFT" %}
+        <!-- Link to SWIFT telescope page -->
+        <td><a href="https://gcn.gsfc.nasa.gov/other/{{ object.trigger_id }}.swift" style="text-decoration:None">{{ trig.trigger_id }}</a></td>
+      {% else %}
+        <td>{{ trig.trigger_id }}</td>
+      {% endif %}
+      <td scope="row">{{ trig.source_type }}</td>
+      <td scope="row">{{ source_name }}</td>
+      {% for setting in settings %}
+        {% if prop_decisions|index:forloop.counter0 == "Ignored" %}
+          <td class="grey-tr">
+        {% elif prop_decisions|index:forloop.counter0 == "Error" %}
+          <td class="NegativeTransaction">
+        {% else %}
+          <td>
+        {% endif %}
+        {{ prop_decisions|index:forloop.counter0 }}</td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </table>
+
+  <hr>
+  <h2>Current Proposal Settings (Summarised)</h2>
   <table class="fl-table">
     <thead>
     <tr>
-      <th>Telescope</th>
+      <th>ID</th>
+      <th>Proposal ID</th>
+      <th>Target Telescope</th>
+      <th>Source Type</th>
+      <th>Event Telescope</th>
       <th>Project ID</th>
+      <th>Testing?</th>
       <th>Proposal Description</th>
-      <th>Event Telescope(s)</th>
       <th>Proposal Flow Diagram</th>
-      <th>GRB?</th>
-      <th>Flare Stars?</th>
-      <th>GW?</th>
-      <th>Neutrinos?</th>
     </tr>
     </thead>
     <!-- Iterate over object_list -->
     {% for setting in settings %}
     <!-- Display Objects -->
     <tr>
+      <td><a href='/proposal_edit/{{ setting.id }}/' style="text-decoration:None">{{ setting.id }}</a></td>
+      <td>{{ setting.proposal_id }}</td>
       <td>{{ setting.telescope }}</td>
-      <td>{{ setting.project_id }}</td>
-      <td>{{ setting.proposal_description }}</td>
+      <td>{{ setting.get_source_type_display }}</td>
       <td>{% if setting.event_telescope is None %} All {% else %} {{ setting.event_telescope }} {% endif %}</td>
+      <td>{{ setting.project_id }}</td>
+      <td>{{ setting.testing }}</td>
+      <td>{{ setting.proposal_description }}</td>
       <td><a href='/proposal_decision_path/{{ setting.id }}/' style="text-decoration:None">View Flow Diagram</a></td>
-      <td>{% if setting.grb        %} &#10004; {% endif %}</td>
-      <td>{% if setting.flare_star %} &#10004; {% endif %}</td>
-      <td>{% if setting.gw         %} &#10004; {% endif %}</td>
-      <td>{% if setting.neutrino   %} &#10004; {% endif %}</td>
     </tr>
     <!-- If object_list is empty  -->
     {% empty %}
     <tr><td>No Settings yet.</td></tr>
     {% endfor %}
     </table>
-    <p><a href="/admin/trigger_app/proposalsettings/" style="text-decoration:None">Edit Proposal Settings</a></p>
     <p><a href="/proposal_settings/" style="text-decoration:None">View Proposal Setting Details</a></p>
+    <p><a href="/proposal_create/" style="text-decoration:None">Create New a Proposal</a></p>
 
-  <h3>Event Logs</h3>
+  <hr>
+  <h2>Event Logs</h2>
   <p><a href="/voevent_log/" style="text-decoration:None">View Raw VOEvent Log</a></p>
   <p><a href="/trigger_id_log/" style="text-decoration:None">View Trigger ID Log</a></p>
-  <p><a href="/proposal_decision_log/">View Proposal Decision Log</a></p>
+  <p><a href="/proposal_decision_log/" style="text-decoration:None">View Proposal Decision Log</a></p>
 
-  <h3>Alert Control</h3>
+  <hr>
+  <h2>Alert Control</h2>
   <p><a href="/user_alert_status/" style="text-decoration:None">User Alert Control</a></p>
   <p><a href="/admin/trigger_app/adminalerts/" style="text-decoration:None">Admin Alert Control</a></p>
 </div>

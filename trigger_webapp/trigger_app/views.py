@@ -3,7 +3,7 @@ from django.views.generic.list import ListView
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db import transaction
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger, InvalidPage
 import django_filters
@@ -20,6 +20,8 @@ import sys
 import voeventparse as vp
 from astropy.coordinates import SkyCoord
 from astropy import units as u
+
+from mwa_trigger import parse_xml
 
 import logging
 logger = logging.getLogger(__name__)
@@ -77,6 +79,36 @@ def VOEventList(request):
         # return the first page
         voevents = paginator.page(1)
     return render(request, 'trigger_app/voevent_list.html', {'filter': f, "page_obj":voevents, "poserr_unit":poserr_unit})
+
+
+class ProposalDecisionFilter(django_filters.FilterSet):
+    recieved_data = django_filters.DateTimeFromToRangeFilter()
+
+    class Meta:
+        model = models.ProposalDecision
+        fields = '__all__'
+
+
+def ProposalDecisionList(request):
+    # Apply filters
+    f = ProposalDecisionFilter(request.GET, queryset=models.ProposalDecision.objects.all())
+    ProposalDecision = f.qs
+
+    # Get position error units
+    poserr_unit = request.GET.get('poserr_unit', 'deg')
+
+    # Paginate
+    page = request.GET.get('page', 1)
+    paginator = Paginator(ProposalDecision, 100)
+    try:
+        ProposalDecision = paginator.page(page)
+    except InvalidPage:
+        # if the page contains no results (EmptyPage exception) or
+        # the page number is not an integer (PageNotAnInteger exception)
+        # return the first page
+        ProposalDecision = paginator.page(1)
+    return render(request, 'trigger_app/proposaldecision_list.html', {'filter': f, "page_obj":ProposalDecision, "poserr_unit":poserr_unit})
+
 
 def PossibleEventAssociationList(request):
     # Find all telescopes for each trigger event
@@ -145,18 +177,38 @@ class CometLogList(ListView):
 class ProposalSettingsList(ListView):
     model = models.ProposalSettings
 
-class ProposalDecisionList(ListView):
-    model = models.ProposalDecision
-    paginate_by = 100
-
 
 def home_page(request):
     comet_status = models.Status.objects.get(name='twistd_comet')
     prop_settings = models.ProposalSettings.objects.all()
+    recent_triggers = models.TriggerID.objects.all()[:5]
+
+    telescope_list = []
+    source_name_list = []
+    proposal_decision_list = []
+    for trig in recent_triggers:
+        trigger_group_voevents = models.VOEvent.objects.filter(trigger_group_id=trig)
+        telescope_list.append(
+            ' '.join(set(trigger_group_voevents.values_list('telescope', flat=True)))
+        )
+        source_name_list.append(trigger_group_voevents.first().source_name)
+        # grab decision for each proposal
+        decision_list = []
+        for prop in prop_settings:
+            this_decision = models.ProposalDecision.objects.filter(trigger_group_id=trig, proposal=prop)
+            if this_decision.exists():
+                decision_list.append(this_decision.first().get_decision_display())
+            else:
+                decision_list.append("")
+        proposal_decision_list.append(decision_list)
+
+    recent_triggers_info = list(zip(recent_triggers, telescope_list, source_name_list, proposal_decision_list))
+
     return render(request, 'trigger_app/home_page.html', {'twistd_comet_status': comet_status,
                                                           'settings':prop_settings,
                                                           'remotes':", ".join(settings.VOEVENT_REMOTES),
-                                                          'tcps':", ".join(settings.VOEVENT_TCP)})
+                                                          'tcps':", ".join(settings.VOEVENT_TCP),
+                                                          "recent_triggers":recent_triggers_info})
 
 
 def PossibleEventAssociation_details(request, tid):
@@ -286,7 +338,7 @@ def proposal_decision_path(request, id):
   C --> |YES| E{{Source type?}}'''
     mermaid_script += '''
   E --> F[GRB]'''
-    if prop_set.grb:
+    if prop_set.source_type == "GRB":
         mermaid_script += f'''
   F --> J{{"Fermi GRB probability > {prop_set.fermi_prob}\\nor\\nSWIFT Rate_signif > {prop_set.swift_rate_signf} sigma"}}
   J --> |YES| K{{"Trigger duration between\n {prop_set.trig_min_duration} and {prop_set.trig_max_duration} s"}}
@@ -382,3 +434,24 @@ def voevent_create(request):
         return Response(voe.data, status=status.HTTP_201_CREATED)
     logger.debug(request.data)
     return Response(voe.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@login_required
+def proposal_form(request, id=None):
+    # grab source type telescope dict
+    src_tele = parse_xml.SOURCE_TELESCOPES
+    if id:
+        proposal = models.ProposalSettings.objects.get(id=id)
+        title = f"Editing Proposal #{id}"
+    else:
+        proposal = None
+        title = "New Proposal"
+    if request.POST:
+        form = forms.ProjectSettingsForm(request.POST, instance=proposal)
+        if form.is_valid():
+            saved = form.save()
+            # on success, the request is redirected as a GET
+            return redirect(proposal_decision_path, id=saved.id)
+    else:
+        form = forms.ProjectSettingsForm(instance=proposal)
+    return render(request, 'trigger_app/proposal_form.html', {'form':form, "src_tele": src_tele, "title":title})

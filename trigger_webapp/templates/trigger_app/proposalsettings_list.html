@@ -3,61 +3,112 @@
 {% block content %}
 <title>Current Proposal Settings</title>
 <div class="container-fluid">
-  <h2>MWA proposals</h2>
+  <h2>MWA VCS proposals</h2>
   <table class="fl-table">
     <thead>
     <tr>
-      <th>Telescope</th>
+      <th>ID</th>
+      <th>Proposal ID</th>
+      <th>Source Type</th>
+      <th>Event Telescope</th>
       <th>Project ID</th>
+      <th>Testing?</th>
       <th>Proposal Description</th>
       <th>Proposal Flow Diagram</th>
       <th>Trigger Duration range (s)</th>
-      <th>Pending Duration range (s)</th>
+      <th>Pending Duration range 1 (s)</th>
+      <th>Pending Duration range 2 (s)</th>
       <th>Minimum Fermi Probability</th>
       <th>Minimum SWIFT Rate Significance</th>
       <th>Repointing Limit</th>
-      <th>Testing?</th>
-      <th>GRB?</th>
-      <th>Flare Stars?</th>
-      <th>GW?</th>
-      <th>Neutrinos?</th>
-      <th>Centre Frequency Channel ID</th>
+      <th>Horizon Limit</th>
+      <th>Frequency specifications</th>
       <th>Observing time (s)</th>
-      <th>Calibrator?</th>
-      <th>Calibrato Observing time (s)</th>
-      <th>Frequency Resolution (kHz)</th>
-      <th>Intergration Time (s)</th>
-      <th>Avoid sun?</th>
-      <th>Ring Buffer?</th>
+      <th>Calibraton Observing time (s)</th>
     </tr>
     </thead>
     <!-- Iterate over object_list -->
     {% for object in object_list %}
-    {% if "MWA" in object.telescope.name %}
+    {% if "MWA_VCS" in object.telescope.name %}
     <!-- Display Objects -->
     <tr>
-      <td>{{ object.telescope }}</td>
+      <td><a href='/proposal_edit/{{ object.id }}/' style="text-decoration:None">{{ object.id }}</a></td>
+      <td>{{ object.proposal_id }}</td>
+      <td>{{ object.source_type }}</td>
+      <td>{% if object.event_telescope is None %} All {% else %} {{ object.event_telescope }} {% endif %}</td>
       <td>{{ object.project_id }}</td>
+      <td>{{ object.testing }}</td>
       <td>{{ object.proposal_description }}</td>
       <td><a href='/proposal_decision_path/{{ object.id }}/' style="text-decoration:None">View Flow Diagram</a></td>
       <td>{{ object.trig_min_duration }} - {{ object.trig_max_duration }}</td>
-      <td>{{ object.pending_min_duration }} - {{ object.pending_max_duration }}</td>
+      <td>{{ object.pending_min_duration_1 }} - {{ object.pending_max_duration_1 }}</td>
+      <td>{{ object.pending_min_duration_2 }} - {{ object.pending_max_duration_2 }}</td>
       <td>{{ object.fermi_prob }}</td>
       <td>{{ object.swift_rate_signf }}</td>
       <td>{{ object.repointing_limit }}</td>
-      <td>{{ object.testing }}</td>
-      <td>{% if object.grb        %} &#10004; {% endif %}</td>
-      <td>{% if object.flare_star %} &#10004; {% endif %}</td>
-      <td>{% if object.gw         %} &#10004; {% endif %}</td>
-      <td>{% if object.neutrino   %} &#10004; {% endif %}</td>
-      <td>{{ object.mwa_centrefreq }}</td>
+      <td>{{ object.mwa_horizon_limit }}</td>
+      <td>{{ object.mwa_freqspecs }}</td>
       <td>{{ object.mwa_exptime }}</td>
-      <td>{{ object.mwa_calibrator }}</td>
+      <td>{{ object.mwa_calexptime }}</td>
+    </tr>
+    {% endif %}
+    <!-- If object_list is empty  -->
+    {% empty %}
+    <li>No Settings yet.</li>
+    {% endfor %}
+    </table>
+
+  <h2>MWA Correlate proposals</h2>
+  <table class="fl-table">
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Proposal ID</th>
+      <th>Source Type</th>
+      <th>Event Telescope</th>
+      <th>Project ID</th>
+      <th>Testing?</th>
+      <th>Proposal Description</th>
+      <th>Proposal Flow Diagram</th>
+      <th>Trigger Duration range (s)</th>
+      <th>Pending Duration range 1 (s)</th>
+      <th>Pending Duration range 2 (s)</th>
+      <th>Minimum Fermi Probability</th>
+      <th>Minimum SWIFT Rate Significance</th>
+      <th>Repointing Limit</th>
+      <th>Horizon Limit</th>
+      <th>Frequency specifications</th>
+      <th>Observing time (s)</th>
+      <th>Calibraton Observing time (s)</th>
+      <th>Frequency Resolution (kHz)</th>
+      <th>Intergration Time (s)</th>
+    </tr>
+    </thead>
+    <!-- Iterate over object_list -->
+    {% for object in object_list %}
+    {% if "MWA_correlate" in object.telescope.name %}
+    <!-- Display Objects -->
+    <tr>
+      <td><a href='/proposal_edit/{{ object.id }}/' style="text-decoration:None">{{ object.id }}</a></td>
+      <td>{{ object.proposal_id }}</td>
+      <td>{{ object.source_type }}</td>
+      <td>{% if object.event_telescope is None %} All {% else %} {{ object.event_telescope }} {% endif %}</td>
+      <td>{{ object.project_id }}</td>
+      <td>{{ object.testing }}</td>
+      <td>{{ object.proposal_description }}</td>
+      <td><a href='/proposal_decision_path/{{ object.id }}/' style="text-decoration:None">View Flow Diagram</a></td>
+      <td>{{ object.trig_min_duration }} - {{ object.trig_max_duration }}</td>
+      <td>{{ object.pending_min_duration_1 }} - {{ object.pending_max_duration_1 }}</td>
+      <td>{{ object.pending_min_duration_2 }} - {{ object.pending_max_duration_2 }}</td>
+      <td>{{ object.fermi_prob }}</td>
+      <td>{{ object.swift_rate_signf }}</td>
+      <td>{{ object.repointing_limit }}</td>
+      <td>{{ object.mwa_horizon_limit }}</td>
+      <td>{{ object.mwa_freqspecs }}</td>
+      <td>{{ object.mwa_exptime }}</td>
       <td>{{ object.mwa_calexptime }}</td>
       <td>{{ object.mwa_freqres }}</td>
       <td>{{ object.mwa_inttime }}</td>
-      <td>{{ object.mwa_avoidsun }}</td>
-      <td>{{ object.mwa_buffered }}</td>
     </tr>
     {% endif %}
     <!-- If object_list is empty  -->
@@ -70,25 +121,21 @@
   <table class="fl-table">
     <thead>
     <tr>
-      <th>Telescope</th>
+      <th>ID</th>
+      <th>Proposal ID</th>
+      <th>Source Type</th>
+      <th>Event Telescope</th>
       <th>Project ID</th>
+      <th>Testing?</th>
       <th>Proposal Description</th>
       <th>Proposal Flow Diagram</th>
       <th>Trigger Duration range (s)</th>
-      <th>Pending Duration range (s)</th>
+      <th>Pending Duration range 1 (s)</th>
+      <th>Pending Duration range 2 (s)</th>
       <th>Minimum Fermi Probability</th>
       <th>Minimum SWIFT Rate Significance</th>
-      <th>Repointing Limit</th>
-      <th>Testing?</th>
-      <th>GRB?</th>
-      <th>Flare Stars?</th>
-      <th>GW?</th>
-      <th>Neutrinos?</th>
-      <th>Band 1 Centre Frequency (MHz)</th>
-      <th>Band 2 Centre Frequency (MHz)</th>
-      <th>N Obs</th>
-      <th>Each Observing time (s)</th>
-      <th>Each Calibrator Observing time (s)</th>
+      <th>Repointing Limit</th
+      <th>Horizon Limit</th>
     </tr>
     </thead>
     <!-- Iterate over object_list -->
@@ -96,25 +143,20 @@
     {% if "MWA" not in object.telescope.name %}
     <!-- Display Objects -->
     <tr>
-      <td>{{ object.telescope }}</td>
+      <td><a href='/proposal_edit/{{ object.id }}/' style="text-decoration:None">{{ object.id }}</a></td>
+      <td>{{ object.proposal_id }}</td>
+      <td>{{ object.source_type }}</td>
+      <td>{% if object.event_telescope is None %} All {% else %} {{ object.event_telescope }} {% endif %}</td>
       <td>{{ object.project_id }}</td>
+      <td>{{ object.testing }}</td>
       <td>{{ object.proposal_description }}</td>
       <td><a href='/proposal_decision_path/{{ object.id }}/' style="text-decoration:None">View Flow Diagram</a></td>
       <td>{{ object.trig_min_duration }} - {{ object.trig_max_duration }}</td>
-      <td>{{ object.pending_min_duration }} - {{ object.pending_max_duration }}</td>
+      <td>{{ object.pending_min_duration_1 }} - {{ object.pending_max_duration_1 }}</td>
+      <td>{{ object.pending_min_duration_2 }} - {{ object.pending_max_duration_2 }}</td>
       <td>{{ object.fermi_prob }}</td>
       <td>{{ object.swift_rate_signf }}</td>
       <td>{{ object.repointing_limit }}</td>
-      <td>{{ object.testing }}</td>
-      <td>{% if object.grb        %} &#10004; {% endif %}</td>
-      <td>{% if object.flare_star %} &#10004; {% endif %}</td>
-      <td>{% if object.gw         %} &#10004; {% endif %}</td>
-      <td>{% if object.neutrino   %} &#10004; {% endif %}</td>
-      <td>{{ object.atca_freq1 }}</td>
-      <td>{{ object.atca_freq2 }}</td>
-      <td>{{ object.atca_nobs }}</td>
-      <td>{{ object.atca_exptime }}</td>
-      <td>{{ object.atca_calexptime }}</td>
     </tr>
     {% endif %}
     <!-- If object_list is empty  -->
