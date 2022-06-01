@@ -231,6 +231,14 @@ class parsed_VOEvent:
             self.ignore = True
             return
 
+        # Antares has a flag for real alerts that is worth checking
+        elif v.find(".//Param[@name='isRealAlert']") is not None:
+            if not v.find(".//Param[@name='isRealAlert']").attrib["value"]:
+                # Not a real alert so ignore
+                self.ignore = True
+                return
+
+
         # Check if this is the type of trigger we're looking for
         this_pair = f"{self.telescope}_{self.event_type}"
         if this_pair in self.trig_pairs:
