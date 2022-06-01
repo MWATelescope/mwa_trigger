@@ -219,6 +219,7 @@ class VOEvent(models.Model):
     fermi_most_likely_index = models.FloatField(blank=True, null=True)
     fermi_detection_prob = models.FloatField(blank=True, null=True)
     swift_rate_signif = models.FloatField(blank=True, null=True)
+    antares_rating = models.IntegerField(blank=True, null=True)
 
     class Meta:
         ordering = ['-id']
