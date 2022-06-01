@@ -230,6 +230,13 @@ def proposal_worth_observing(
                     trigger_message=trigger_message,
                 )
                 proj_source_bool = True
+
+            elif prop_dec.proposal.source_type == "FS" and voevent.source_type == "FS":
+                # This proposal wants to observe FSs and there is no FS logic so observe
+                trigger_bool = True
+                trigger_message += f"Triggering on Flare Star {voevent.source_name}.\n "
+                proj_source_bool = True
+
             # TODO set up other source types here
 
             if not proj_source_bool:
