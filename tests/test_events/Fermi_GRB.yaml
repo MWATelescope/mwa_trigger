@@ -1,3 +1,4 @@
+antares_ranking: null
 dec: 48.4167
 err: 4.7333
 event_observed: !!python/object/apply:lxml.objectify.fromstring
@@ -80,6 +81,7 @@ packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=
   \  </Citations>\n  <Description>\n    </Description>\n  <original_prefix>voe</original_prefix>\n\
   </VOEvent>\n"
 ra: 241.6167
+role: observation
 sequence_num: 46
 source_name: null
 source_type: GRB
@@ -95,4 +97,7 @@ trig_pairs:
 - Fermi_GBM_Gnd_Pos
 - Fermi_GBM_Fin_Pos
 - HESS_GRB_To
+- AMON_ICECUBE_BRONZE_Event
+- AMON_ICECUBE_GOLD_Event
+- Antares_Alert
 xml: tests/test_events/Fermi_GRB.xml
