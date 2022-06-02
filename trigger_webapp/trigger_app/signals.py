@@ -236,11 +236,7 @@ def proposal_worth_observing(
                 trigger_bool = True
                 trigger_message += f"Triggering on Flare Star {voevent.source_name}.\n "
                 proj_source_bool = True
-
-            # TODO set up other source types here
-
-
-            if prop_dec.proposal.source_type == "NU" and voevent.source_type == "NU":
+            elif prop_dec.proposal.source_type == "NU" and voevent.source_type == "NU":
                 # This proposal wants to observe GRBs so check if it is worth observing
                 trigger_bool, debug_bool, pending_bool, trigger_message = worth_observing_nu(
                     # event values
@@ -252,6 +248,8 @@ def proposal_worth_observing(
                     trigger_message=trigger_message,
                 )
                 proj_source_bool = True
+
+            # TODO set up other source types here
 
             if not proj_source_bool:
                 # Proposal does not observe this type of source so update message
