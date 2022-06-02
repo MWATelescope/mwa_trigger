@@ -354,18 +354,23 @@ subgraph GRB
   M
   N
 end
-  style L fill:green,color:white
-  style N fill:orange,color:white
-  style R fill:#21B6A8,color:white'''
+  style N fill:orange,color:white'''
     else:
         mermaid_script += '''
   F[GRB] --> END'''
+    if prop_set.source_type == "FS":
+        mermaid_script += f'''
+  E --> G[Flare Star] --> L[Trigger Observation]'''
+    else:
+        mermaid_script += '''
+  E --> G[Flare Star] --> END'''
     mermaid_script += '''
-  E --> G[Flare Star] --> END
   E --> H[GW] --> END
   E --> I[Neutrino] --> END
   style A fill:blue,color:white
-  style END fill:red,color:white'''
+  style END fill:red,color:white
+  style L fill:green,color:white
+  style R fill:#21B6A8,color:white'''
 
     return render(request, 'trigger_app/proposal_decision_path.html', {'proposal':prop_set,
                                                                        'mermaid_script':mermaid_script})
