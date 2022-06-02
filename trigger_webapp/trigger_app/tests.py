@@ -33,11 +33,11 @@ def create_voevent_wrapper(trig, ra_dec):
     )
 
 
-class test_group_01(TestCase):
+class test_grb_group_01(TestCase):
     """Tests that events in a similar position and time will be grouped as possible event associations and trigger an observation
     """
     # Load default fixtures
-    fixtures = ["default_data.yaml", "trigger_app/test_yamls/mwa_proposal_settings.yaml"]
+    fixtures = ["default_data.yaml", "trigger_app/test_yamls/mwa_grb_proposal_settings.yaml"]
     def setUp(self):
         xml_paths = [
             "../tests/test_events/group_01_01_Fermi.xml",
@@ -66,11 +66,11 @@ class test_group_01(TestCase):
         self.assertEqual(ProposalDecision.objects.all().first().decision, 'T')
 
 
-class test_group_02(TestCase):
+class test_grb_group_02(TestCase):
     """Tests that events with the same Trigger ID will be grouped and trigger an observation
     """
     # Load default fixtures
-    fixtures = ["default_data.yaml", "trigger_app/test_yamls/mwa_proposal_settings.yaml"]
+    fixtures = ["default_data.yaml", "trigger_app/test_yamls/mwa_grb_proposal_settings.yaml"]
     def setUp(self):
         xml_paths = [
             "../tests/test_events/group_02_SWIFT_01_BAT_GRB_Pos.xml",
@@ -92,6 +92,37 @@ class test_group_02(TestCase):
     def test_trigger_groups(self):
         # Check there are three VOEvents that were grouped as one by the trigger ID
         self.assertEqual(len(VOEvent.objects.all()), 3)
+        self.assertEqual(len(TriggerID.objects.all()), 1)
+
+    def test_proposal_decision(self):
+        print(ProposalDecision.objects.all())
+        print(f"\n\n!!!!!!!!!!!!!!\n{ProposalDecision.objects.all().first().decision_reason}\n!!!!!!!!!!!!!!!\n\n")
+        self.assertEqual(ProposalDecision.objects.all().first().decision, 'T')
+
+class test_fs(TestCase):
+    """Tests that a flare star VOEvent will trigger an observation
+    """
+    # Load default fixtures
+    fixtures = ["default_data.yaml", "trigger_app/test_yamls/mwa_fs_proposal_settings.yaml"]
+    def setUp(self):
+        xml_paths = [
+            "../tests/test_events/HD_8537_FLARE_STAR_TEST.xml",
+        ]
+
+        # Setup current RA and Dec at zenith for the MWA
+        MWA = EarthLocation(lat='-26:42:11.95', lon='116:40:14.93', height=377.8 * u.m)
+        mwa_coord = coord = SkyCoord(az=0., alt=90., unit=(u.deg, u.deg), frame='altaz', obstime=Time.now(), location=MWA)
+        ra_dec = mwa_coord.icrs
+
+        # Parse and upload the xml file group
+        for xml in xml_paths:
+            trig = parsed_VOEvent(xml)
+            create_voevent_wrapper(trig, ra_dec)
+
+
+    def test_trigger_groups(self):
+        # Check there are three VOEvents that were grouped as one by the trigger ID
+        self.assertEqual(len(VOEvent.objects.all()), 1)
         self.assertEqual(len(TriggerID.objects.all()), 1)
 
     def test_proposal_decision(self):

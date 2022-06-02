@@ -14,6 +14,7 @@ setup(name="mwa_trigger",
       python_requires='>=3.6',
       install_requires=[
             'numpy',
+            'pandas',
             'voevent-parse',
             # The below is only required with GW_LIGO.py which we will likely remove soon
             'healpy',
