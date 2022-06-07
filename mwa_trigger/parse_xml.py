@@ -112,7 +112,13 @@ def get_source_types(telescope, event_type, source_name, v):
         except AttributeError:
             logger.error("Param[@name='GRB_Identified'] not found in XML packet - discarding.")
             grb = False
-        grb = bool(grb) # Make sure it's not a string
+        # Convert string to bool
+        if 'true' in grb.lower().strip():
+            grb = True
+        elif 'false' in grb.lower().strip():
+            grb = False
+        else:
+            logger.error(f"Unrecognised value of Param[@name='GRB_Identified']: {grb}")
     elif telescope == "Fermi":
         #grb = False   # Ignore all Fermi triggers
         grb = True
