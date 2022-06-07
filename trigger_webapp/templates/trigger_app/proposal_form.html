@@ -143,6 +143,8 @@
                 <tr><td>{{ form.atca_band_3mm_freq1.label_tag }}{% help_wrap form.atca_band_3mm_freq1.help_text %}</td><td>{{ form.atca_band_3mm_freq1 }}</td></tr>
                 <tr><td>{{ form.atca_band_3mm_freq2.label_tag }}{% help_wrap form.atca_band_3mm_freq2.help_text %}</td><td>{{ form.atca_band_3mm_freq2 }}</td></tr>
             </table>
+            {% for error in form.atca_band_3mm_freq1.errors %}<div class="alert alert-danger"><strong>{{ form.atca_band_3mm_freq1.label_tag }}{{ error|escape }}</strong></div>{% endfor %}
+            {% for error in form.atca_band_3mm_freq2.errors %}<div class="alert alert-danger"><strong>{{ form.atca_band_3mm_freq2.label_tag }}{{ error|escape }}</strong></div>{% endfor %}
             <hr>
             {{ form.atca_band_7mm }}{{ form.atca_band_7mm.label_tag }}<br>
             <table>
@@ -150,6 +152,8 @@
                 <tr><td>{{ form.atca_band_7mm_freq1.label_tag }}{% help_wrap form.atca_band_7mm_freq1.help_text %}</td><td>{{ form.atca_band_7mm_freq1 }}</td></tr>
                 <tr><td>{{ form.atca_band_7mm_freq2.label_tag }}{% help_wrap form.atca_band_7mm_freq2.help_text %}</td><td>{{ form.atca_band_7mm_freq2 }}</td></tr>
             </table>
+            {% for error in form.atca_band_7mm_freq1.errors %}<div class="alert alert-danger"><strong>{{ form.atca_band_7mm_freq1.label_tag }}{{ error|escape }}</strong></div>{% endfor %}
+            {% for error in form.atca_band_7mm_freq2.errors %}<div class="alert alert-danger"><strong>{{ form.atca_band_7mm_freq2.label_tag }}{{ error|escape }}</strong></div>{% endfor %}
             <hr>
             {{ form.atca_band_15mm }}{{ form.atca_band_15mm.label_tag }}<br>
             <table>
@@ -157,6 +161,8 @@
                 <tr><td>{{ form.atca_band_15mm_freq1.label_tag }}{% help_wrap form.atca_band_15mm_freq1.help_text %}</td><td>{{ form.atca_band_15mm_freq1 }}</td></tr>
                 <tr><td>{{ form.atca_band_15mm_freq2.label_tag }}{% help_wrap form.atca_band_15mm_freq2.help_text %}</td><td>{{ form.atca_band_15mm_freq2 }}</td></tr>
             </table>
+            {% for error in form.atca_band_15mm_freq1.errors %}<div class="alert alert-danger"><strong>{{ form.atca_band_15mm_freq1.label_tag }}{{ error|escape }}</strong></div>{% endfor %}
+            {% for error in form.atca_band_15mm_freq2.errors %}<div class="alert alert-danger"><strong>{{ form.atca_band_15mm_freq2.label_tag }}{{ error|escape }}</strong></div>{% endfor %}
             <hr>
             {{ form.atca_band_4cm }}{{ form.atca_band_4cm.label_tag }}<br>
             <table>
@@ -164,6 +170,8 @@
                 <tr><td>{{ form.atca_band_4cm_freq1.label_tag }}{% help_wrap form.atca_band_4cm_freq1.help_text %}</td><td>{{ form.atca_band_4cm_freq1 }}</td></tr>
                 <tr><td>{{ form.atca_band_4cm_freq2.label_tag }}{% help_wrap form.atca_band_4cm_freq2.help_text %}</td><td>{{ form.atca_band_4cm_freq2 }}</td></tr>
             </table>
+            {% for error in form.atca_band_4cm_freq1.errors %}<div class="alert alert-danger"><strong>{{ form.atca_band_4cm_freq1.label_tag }}{{ error|escape }}</strong></div>{% endfor %}
+            {% for error in form.atca_band_4cm_freq2.errors %}<div class="alert alert-danger"><strong>{{ form.atca_band_4cm_freq2.label_tag }}{{ error|escape }}</strong></div>{% endfor %}
             <hr>{{ form.atca_band_16cm }}{{ form.atca_band_16cm.label_tag }}<br>
             <table>
                 <tr><td>{{ form.atca_band_16cm_exptime.label_tag }}{% help_wrap form.atca_band_16cm_exptime.help_text %}</td><td>{{ form.atca_band_16cm_exptime }}</td></tr>
