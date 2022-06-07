@@ -86,11 +86,14 @@
         <h2>Event Source Settings</h2>
         {% for error in form.source_type.errors %}<div class="alert alert-danger"><strong>{{ error|escape }}</strong></div>{% endfor %}
         <h3>Source duration</h3>
+        <p>{{ form.trig_any_duration.label_tag }}{% help_wrap form.trig_any_duration.help_text %}{{ form.trig_any_duration }}</p>
+        <div id="durations">
         <table>
             <tr><td>Trigger Duration Range (s)  {% help_wrap 'The inclusive duration range of an event that will automatically trigger an observation.' %}</td><td>{{ form.trig_min_duration }}</td><td>{{ form.trig_max_duration }}</td></tr>
             <tr><td>Pending Duration Range 1 (s){% help_wrap 'The inclusive duration range of an event that will notify users and let them decided if an observations should be triggered.' %}</td><td>{{ form.pending_min_duration_1 }}</td><td>{{ form.pending_max_duration_1 }}</td></tr>
             <tr><td>Pending Duration Range 2 (s){% help_wrap 'A second inclusive duration range of an event that will notify users and let them decided if an observations should be triggered.' %}</td><td>{{ form.pending_min_duration_2 }}</td><td>{{ form.pending_max_duration_2 }}</td></tr>
         </table>
+        </div>
         <h3>Source thresholds</h3>
         {{ form.maximum_position_uncertainty.label_tag }}{% help_wrap form.maximum_position_uncertainty.help_text %}{{ form.maximum_position_uncertainty }}
         <div id="fermi_thres">
@@ -240,24 +243,28 @@
             $("#event_telescope").change(function() {
                 console.log($(this).val());
                 if ($(this).val() === "") {
-                    console.log(1);
                     $('#fermi_thres').show();
                     $('#swift_thres').show();
                 } else if ($(this).val() === "Fermi") {
-                    console.log(2);
                     $('#fermi_thres').show();
                     $('#swift_thres').hide();
                 } else if ($(this).val() === "SWIFT") {
-                    console.log(3);
                     $('#fermi_thres').hide();
                     $('#swift_thres').show();
                 } else {
-                    console.log(4);
                     $('#fermi_thres').hide();
                     $('#swift_thres').hide();
                 }
             });
             $("#event_telescope").trigger("change")
+            $("#id_trig_any_duration").change(function() {
+                if ($(this).is(':checked') ) {
+                    $('#durations').hide();
+                } else {
+                    $('#durations').show();
+                }
+            });
+            $("#id_trig_any_duration").trigger("change")
         })
     </script>
 {% endblock %}

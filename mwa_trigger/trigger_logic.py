@@ -10,6 +10,7 @@ def worth_observing_grb(
         fermi_detection_prob=None,
         swift_rate_signif=None,
         # Thresholds
+        trig_any_duration=False,
         trig_min_duration=0.256,
         trig_max_duration=1.023,
         pending_min_duration_1=0.124,
@@ -33,12 +34,14 @@ def worth_observing_grb(
         A GRB detection probabilty that Fermi produces as a percentage.
     swift_rate_signif : `float`, optional
         A rate signigicance that SWIFT produces in sigma.
+    trig_any_duration: `Bool`, optional
+        If True will trigger on an event with any duration including None. Default False.
     trig_min_duration, trig_max_duration : `float`, optional
-        The a trigger duration between trig_min_duration and trig_max_duration will trigger an observation. Default 0.256, 1.023.
+        A trigger duration between trig_min_duration and trig_max_duration will trigger an observation. Default 0.256, 1.023.
     pending_min_duration_1, pending_max_duration_1 : `float`, optional
-        The a trigger duration between pending_min_duration_1 and pending_max_duration_1 will create a pending observation. Default 0.124, 0.255.
+        A trigger duration between pending_min_duration_1 and pending_max_duration_1 will create a pending observation. Default 0.124, 0.255.
     pending_min_duration_2, pending_max_duration_2 : `float`, optional
-        The a trigger duration between pending_min_duration_2 and pending_max_duration_2 will create a pending observation. Default 1.024, 2.048.
+        A trigger duration between pending_min_duration_2 and pending_max_duration_2 will create a pending observation. Default 1.024, 2.048.
     fermi_min_detection_prob : `float`, optional
         The minimum fermi_detection_prob to trigger or create a pending observation. Default: 50.
     swift_min_rate_signif : `float`, optional
@@ -92,7 +95,10 @@ def worth_observing_grb(
         trigger_message += f"No probability metric given so assume it is a GRB.\n "
 
     # Check the duration of the event
-    if trig_duration is not None and likely_bool:
+    if trig_any_duration and likely_bool:
+        trigger_bool = True
+        trigger_message += f"Accepting any trigger duration so triggering.\n "
+    elif trig_duration is not None and likely_bool:
         if trig_min_duration <= trig_duration <= trig_max_duration:
             trigger_bool = True
             trigger_message += f"Trigger duration between {trig_min_duration} and {trig_max_duration} s so triggering.\n "
