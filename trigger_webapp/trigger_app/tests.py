@@ -129,3 +129,41 @@ class test_fs(TestCase):
         print(ProposalDecision.objects.all())
         print(f"\n\n!!!!!!!!!!!!!!\n{ProposalDecision.objects.all().first().decision_reason}\n!!!!!!!!!!!!!!!\n\n")
         self.assertEqual(ProposalDecision.objects.all().first().decision, 'T')
+
+
+class test_hess_any_dur(TestCase):
+    """Tests that a HESS VOEvent will trigger an observation but only if we use a proposal with the any duration flag
+    """
+    # Load default fixtures
+    fixtures = [
+        "default_data.yaml",
+        # Standard proposal that shouldn't trigger
+        "trigger_app/test_yamls/mwa_grb_proposal_settings.yaml",
+        # Hess proposal with the any duration flag that should trigger
+        "trigger_app/test_yamls/mwa_hess_proposal_settings.yaml",
+    ]
+    def setUp(self):
+        xml_paths = [
+            "../tests/test_events/HESS_test_event.xml",
+        ]
+
+        # Setup current RA and Dec at zenith for the MWA
+        MWA = EarthLocation(lat='-26:42:11.95', lon='116:40:14.93', height=377.8 * u.m)
+        mwa_coord = coord = SkyCoord(az=0., alt=90., unit=(u.deg, u.deg), frame='altaz', obstime=Time.now(), location=MWA)
+        ra_dec = mwa_coord.icrs
+
+        # Parse and upload the xml file group
+        for xml in xml_paths:
+            trig = parsed_VOEvent(xml)
+            create_voevent_wrapper(trig, ra_dec)
+
+
+    def test_trigger_groups(self):
+        # Check event was made
+        self.assertEqual(len(VOEvent.objects.all()), 1)
+        self.assertEqual(len(TriggerID.objects.all()), 1)
+
+    def test_proposal_decision(self):
+        # Test only one proposal triggered
+        self.assertEqual(ProposalDecision.objects.filter(proposal__trig_any_duration=True).decision, 'T')
+        self.assertEqual(ProposalDecision.objects.filter(proposal__trig_any_duration=False).decision, 'I')
