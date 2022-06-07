@@ -3,6 +3,7 @@ from django.views.generic.list import ListView
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db import transaction
+from django.db import models as dj_model
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger, InvalidPage
@@ -58,6 +59,14 @@ class VOEventFilter(django_filters.FilterSet):
     class Meta:
         model = models.VOEvent
         fields = '__all__'
+        filter_overrides = {
+            dj_model.CharField: {
+                'filter_class': django_filters.CharFilter,
+                'extra': lambda f: {
+                    'lookup_expr': 'icontains',
+                },
+            },
+        }
 
 
 def VOEventList(request):
