@@ -17,6 +17,7 @@ def create_voevent_wrapper(trig, ra_dec):
         trigger_id=trig.trig_id,
         sequence_num=trig.sequence_num,
         event_type=trig.event_type,
+        antares_ranking=trig.antares_ranking,
         # Sent event up so it's always pointing at zenith
         ra=ra_dec.ra.deg,
         dec=ra_dec.dec.deg,
@@ -98,6 +99,43 @@ class test_grb_group_02(TestCase):
         print(ProposalDecision.objects.all())
         print(f"\n\n!!!!!!!!!!!!!!\n{ProposalDecision.objects.all().first().decision_reason}\n!!!!!!!!!!!!!!!\n\n")
         self.assertEqual(ProposalDecision.objects.all().first().decision, 'T')
+
+
+class test_nu(TestCase):
+    """Tests that a neutrino VOEvent will trigger an observation
+    """
+    # Load default fixtures
+    fixtures = ["default_data.yaml", "trigger_app/test_yamls/mwa_nu_proposal_settings.yaml"]
+    def setUp(self):
+        xml_paths = [
+            "../tests/test_events/Antares_1438351269.xml",
+            "../tests/test_events/IceCube_134191_017593623_0.xml",
+            "../tests/test_events/IceCube_134191_017593623_1.xml",
+        ]
+
+        # Setup current RA and Dec at zenith for the MWA
+        MWA = EarthLocation(lat='-26:42:11.95', lon='116:40:14.93', height=377.8 * u.m)
+        mwa_coord = coord = SkyCoord(az=0., alt=90., unit=(u.deg, u.deg), frame='altaz', obstime=Time.now(), location=MWA)
+        ra_dec = mwa_coord.icrs
+
+        # Parse and upload the xml file group
+        for xml in xml_paths:
+            trig = parsed_VOEvent(xml)
+            create_voevent_wrapper(trig, ra_dec)
+
+
+    def test_trigger_groups(self):
+        # Check there are three VOEvents that were grouped as one by the trigger ID
+        self.assertEqual(len(VOEvent.objects.all()), 3)
+        self.assertEqual(len(TriggerID.objects.all()), 2)
+
+    def test_proposal_decision(self):
+        # Two proposals decisions made
+        self.assertEqual(len(ProposalDecision.objects.all()), 2)
+        # Both triggered
+        for prop_dec in ProposalDecision.objects.all():
+            self.assertEqual(prop_dec.decision, 'T')
+
 
 class test_fs(TestCase):
     """Tests that a flare star VOEvent will trigger an observation

@@ -1,5 +1,4 @@
 import voeventparse
-from . import handlers
 from . import data_load
 import pandas as pd
 
@@ -61,11 +60,23 @@ def get_telescope(ivorn):
 
 def get_event_type(ivorn):
     trig_type_str = ivorn.split("#")[1]
-    for i in range(len(trig_type_str)):
-        # find first integer
-        if trig_type_str[i].isdigit():
-            break
-    return str(trig_type_str[: i - 1])
+    if "LVC" in ivorn:
+        # Do LVS specific parsing
+        return trig_type_str.split("-")[-1]
+    elif "Antares" in ivorn:
+        # Do Antares specific parsing
+        return ivorn.split("Antares_")[-1].split("#")[0]
+    else:
+        # Do default parsing
+        for i in range(len(trig_type_str)):
+            # find first integer
+            if trig_type_str[i].isdigit():
+                break
+        if trig_type_str[i-1] == "_":
+            # skip the _
+            return str(trig_type_str[: i - 1])
+        else:
+            return str(trig_type_str[:i])
 
 
 def load_swift_source_database():
@@ -82,7 +93,7 @@ def get_source_types(telescope, event_type, source_name, v):
         return "GW"
 
     # Check for neutrinos
-    if telescope == "Antares" or ( telescope == "AMON" and event_type == "ICECUBE_GOLD" ):
+    if telescope == "Antares" or ( telescope == "AMON" and "ICECUBE" in event_type ):
         return "NU"
 
     # Check for Flare Stars
@@ -124,6 +135,26 @@ def get_source_types(telescope, event_type, source_name, v):
     return None
 
 
+def get_position_info(v):
+    """
+    Return the ra,dec,err from a given voevent
+    These are typically in degrees, in the J2000 equinox.
+
+    :param v: A VOEvent string, in XML format
+    :return: A tuple of (ra, dec, err) where ra,dec are the coordinates in J2000 and err is the error radius in deg.
+    """
+    try:
+        ra  = float(v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Position2D.Value2.C1)
+        dec = float(v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Position2D.Value2.C2)
+        err = float(v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Position2D.Error2Radius)
+    except:
+        # Try old method if new one doesn't work
+        ra = float(v.find(".//C1"))
+        dec = float(v.find(".//C2"))
+        err = float(v.find('.//Error2Radius'))
+    return ra, dec, err
+
+
 class parsed_VOEvent:
     def __init__(self, xml, packet=None, trig_pairs=None):
         self.xml = xml
@@ -140,6 +171,7 @@ class parsed_VOEvent:
         self.fermi_most_likely_index = None
         self.fermi_detection_prob = None
         self.swift_rate_signif = None
+        self.antares_ranking = None
         self.grb_ident = None
         self.telescope = None
         self.source_name = None
@@ -155,6 +187,13 @@ class parsed_VOEvent:
                 "Fermi_GBM_Gnd_Pos",
                 "Fermi_GBM_Fin_Pos",
                 "HESS_GRB_To",
+                # "LVC_Initial",
+                # "LVC_Preliminary",
+                # "LVC_Retraction",
+                # "LVC_Initial",
+                "AMON_ICECUBE_BRONZE_Event",
+                "AMON_ICECUBE_GOLD_Event",
+                "Antares_Alert",
             ]
         self.parse()
 
@@ -189,9 +228,27 @@ class parsed_VOEvent:
         self.source_type = get_source_types(self.telescope, self.event_type, self.source_name, v)
         logger.debug(f"source types: {self.source_type}")
 
-        # Attempt to get a Trigger ID (for Fermi and SWIFT)
+        # Attempt to get a Trigger ID (for Fermi, SWIFT and Antares)
         if v.find(".//Param[@name='TrigID']") is not None:
             self.trig_id = int(v.find(".//Param[@name='TrigID']").attrib["value"])
+        elif v.find(".//Param[@name='AMON_ID']") is not None:
+            # ICECUBE's ID
+            self.trig_id = int(v.find(".//Param[@name='AMON_ID']").attrib["value"])
+
+        # Check the voevent role (normally observation or test)
+        self.role = v.attrib["role"]
+        if self.role == "test":
+            # Just a test observation so ignore it
+            self.ignore = True
+            return
+
+        # Antares has a flag for real alerts that is worth checking
+        elif v.find(".//Param[@name='isRealAlert']") is not None:
+            if not v.find(".//Param[@name='isRealAlert']").attrib["value"]:
+                # Not a real alert so ignore
+                self.ignore = True
+                return
+
 
         # Check if this is the type of trigger we're looking for
         this_pair = f"{self.telescope}_{self.event_type}"
@@ -247,6 +304,7 @@ class parsed_VOEvent:
         elif self.telescope == "Antares":
             self.trig_duration = None
             self.sequence_num = None
+            self.antares_ranking = int(v.find(".//Param[@name='ranking']").attrib["value"])
 
         self.event_observed = v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Time.TimeInstant.ISOTime
         logger.debug("Trig details:")
@@ -256,5 +314,5 @@ class parsed_VOEvent:
         logger.debug(f"Type: {self.event_type}")
 
         # Get current position
-        self.ra, self.dec, self.err = handlers.get_position_info(v)
+        self.ra, self.dec, self.err = get_position_info(v)
         logger.debug(f"Trig position: {self.ra} {self.dec} {self.err}")

@@ -1,11 +1,17 @@
-dec: null
-err: null
-event_observed: null
-event_type: '143835126'
+antares_ranking: 1
+dec: -21.274
+err: 0.325
+event_observed: !!python/object/apply:lxml.objectify.fromstring
+- !!binary |
+  PElTT1RpbWUgeG1sbnM6dm9lPSJodHRwOi8vd3d3Lml2b2EubmV0L3htbC9WT0V2ZW50L3YyLjAi
+  IHhtbG5zOnhzaT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS9YTUxTY2hlbWEtaW5zdGFuY2UiIHht
+  bG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIj4yMDE5LTExLTI2VDIxOjU1
+  OjM0LjAwMDwvSVNPVGltZT4=
+event_type: Alert
 fermi_detection_prob: null
 fermi_most_likely_index: null
 grb_ident: null
-ignore: true
+ignore: false
 packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=\"\
   ivo://nasa.gsfc.gcn/Antares_Alert#1438351269\" role=\"observation\" version=\"2.0\"\
   \ xsi:schemaLocation=\"http://www.ivoa.net/xml/VOEvent/v1.1 http://www.ivoa.net/xml/VOEvent/VOEvent-v1.1.xsd\"\
@@ -43,7 +49,8 @@ packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=
   \    <Description>This is the position of the neutrino.</Description>\n  </Citations>\n\
   \  <Description>\n    </Description>\n  <original_prefix>voe</original_prefix>\n\
   </VOEvent>\n"
-ra: null
+ra: 156.957
+role: observation
 sequence_num: null
 source_name: null
 source_type: NU
@@ -59,4 +66,7 @@ trig_pairs:
 - Fermi_GBM_Gnd_Pos
 - Fermi_GBM_Fin_Pos
 - HESS_GRB_To
+- AMON_ICECUBE_BRONZE_Event
+- AMON_ICECUBE_GOLD_Event
+- Antares_Alert
 xml: tests/test_events/Antares_1438351269.xml

@@ -364,9 +364,22 @@ end
     else:
         mermaid_script += '''
   E --> G[Flare Star] --> END'''
+    if prop_set.source_type == "NU":
+        mermaid_script += f'''
+  E --> I[Neutrino]
+  I[Neutrino] --> |Antares Event| RANK{{Is the Antares ranking less than or equal to {prop_set.antares_min_ranking}?}}
+  RANK --> |YES| L[Trigger Observation]
+  RANK --> |NO| END
+  I[Neutrino] --> |Non-Antares Event| L[Trigger Observation]
+subgraph NU
+  I
+  RANK
+end'''
+    else:
+        mermaid_script += '''
+  E --> I[Neutrino] --> END'''
     mermaid_script += '''
   E --> H[GW] --> END
-  E --> I[Neutrino] --> END
   style A fill:blue,color:white
   style END fill:red,color:white
   style L fill:green,color:white

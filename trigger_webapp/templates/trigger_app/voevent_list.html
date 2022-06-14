@@ -101,6 +101,7 @@
         {% endif %}
         <th>Fermi Detection Probability (%)</th>
         <th>SWIFT Rate Significance (sigma)</th>
+        <th>Antares Rating</th>
       </tr>
     </thead>
     <!-- Iterate over object_list -->
@@ -147,9 +148,9 @@
         {% endif %}
       {% endif %}
       </td>
-      <td>{% if object.pos_error    is not None %} {{ object.pos_error }}    {% endif %}</td>
       <td>{% if object.fermi_detection_prob is not None %} {{ object.fermi_detection_prob }}  {% endif %}</td>
       <td>{% if object.swift_rate_signif    is not None %} {{ object.swift_rate_signif    }}  {% endif %}</td>
+      <td>{% if object.antares_rating       is not None %} {{ object.antares_rating       }}  {% endif %}</td>
     </tr>
     <!-- If object_list is empty  -->
     {% empty %}

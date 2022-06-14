@@ -38,47 +38,11 @@
         <div id="none">
             <p>Select a source type before choosing an event telescope</p>
         </div>
-        <div id="GRB">
+        <div id="div_event_telescope">
             <table>
                 <tr><td>{{ form.event_telescope.label_tag }}      {% help_wrap form.event_telescope.help_text %}</td><td>
                 <select name="event_telescope" id="event_telescope">
                     <option disabled selected value> Use any telescope </option>
-                    {% for telescope in src_tele.GRB %}
-                        <option value="{{ telescope }}">{{ telescope }}</option>
-                    {% endfor %}
-                </select></td></tr>
-            </table>
-        </div>
-        <div id="FS">
-            <table>
-                <tr><td>{{ form.event_telescope.label_tag }}      {% help_wrap form.event_telescope.help_text %}</td><td>
-                <select name="event_telescope" id="event_telescope">
-                    <option disabled selected value> Use any telescope </option>
-                    {% for telescope in src_tele.FS %}
-                        <option value="{{ telescope }}">{{ telescope }}</option>
-                    {% endfor %}
-                </select></td></tr>
-            </table>
-        </div>
-        <div id="GW">
-            <table>
-                <tr><td>{{ form.event_telescope.label_tag }}      {% help_wrap form.event_telescope.help_text %}</td><td>
-                <select name="event_telescope" id="event_telescope">
-                    <option disabled selected value> Use any telescope </option>
-                    {% for telescope in src_tele.GW %}
-                        <option value="{{ telescope }}">{{ telescope }}</option>
-                    {% endfor %}
-                </select></td></tr>
-            </table>
-        </div>
-        <div id="NU">
-            <table>
-                <tr><td>{{ form.event_telescope.label_tag }}      {% help_wrap form.event_telescope.help_text %}</td><td>
-                <select name="event_telescope" id="event_telescope">
-                    <option disabled selected value> Use any telescope </option>
-                    {% for telescope in src_tele.NU %}
-                        <option value="{{ telescope }}">{{ telescope }}</option>
-                    {% endfor %}
                 </select></td></tr>
             </table>
         </div>
@@ -98,6 +62,9 @@
         </div>
         <div id="swift_thres">
             {{ form.swift_rate_signf.label_tag }}{% help_wrap form.swift_rate_signf.help_text %}{{ form.swift_rate_signf }}
+        </div>
+        <div id="antares_thres">
+            {{ form.antares_min_ranking.label_tag }}{% help_wrap form.antares_min_ranking.help_text %}{{ form.antares_min_ranking }}
         </div>
 
         <hr>
@@ -173,8 +140,13 @@
         <input type="submit" value=Submit>
     </form>
     </div>
+    {{ src_tele.GRB|json_script:"grb_telescope" }}
+    {{ src_tele.FS|json_script:"fs_telescope" }}
+    {{ src_tele.NU|json_script:"nu_telescope" }}
+    {{ src_tele.GW|json_script:"gw_telescope" }}
     <script>
         $(document).ready(function(){
+            // Display observing telescope specific settngs
             $("#id_telescope").change(function() {
                 if ($(this).val() === "MWA_VCS") {
                     $('#mwa').show();
@@ -195,61 +167,80 @@
                 }
             });
             $("#id_telescope").trigger("change")
+
+            // Display source type specific observing telescopes
             $("#id_source_type").change(function() {
-                if ($(this).val() === "GRB") {
-                    $('#GRB').show();
-                    $('#FS').hide();
-                    $('#GW').hide();
-                    $('#NU').hide();
-                    $('#none').hide();
-                } else if ($(this).val() === "FS") {
-                    $('#GRB').hide();
-                    $('#FS').show();
-                    $('#GW').hide();
-                    $('#NU').hide();
-                    $('#none').hide();
-                } else if ($(this).val() === "GW") {
-                    $('#GRB').hide();
-                    $('#FS').hide();
-                    $('#GW').show();
-                    $('#NU').hide();
-                    $('#none').hide();
-                } else if ($(this).val() === "NU") {
-                    $('#GRB').hide();
-                    $('#FS').hide();
-                    $('#GW').hide();
-                    $('#NU').show();
+                // Show telescopes when a source is picked
+                if ($(this).val() === "GRB" || $(this).val() === "FS" || $(this).val() === "NU" || $(this).val() === "GW") {
+                    $('#div_event_telescope').show();
                     $('#none').hide();
                 } else {
-                    $('#GRB').hide();
-                    $('#FS').hide();
-                    $('#GW').hide();
-                    $('#NU').hide();
+                    $('#div_event_telescope').hide();
                     $('#none').show();
                 }
+                // Remove all options
+                selectBox = document.querySelector('#event_telescope')
+                while (selectBox.options.length > 0) {
+                    selectBox.remove(0);
+                }
+                // Get telescope specific list
+                let avail_telesocpes = [];
+                if ($(this).val() === "GRB") {
+                    avail_telesocpes = JSON.parse(document.getElementById('grb_telescope').textContent);
+                } else if ($(this).val() === "FS") {
+                    avail_telesocpes = JSON.parse(document.getElementById('fs_telescope').textContent);
+                } else if ($(this).val() === "GW") {
+                    avail_telesocpes = JSON.parse(document.getElementById('gw_telescope').textContent);
+                } else if ($(this).val() === "NU") {
+                    avail_telesocpes = JSON.parse(document.getElementById('nu_telescope').textContent);
+                } else {
+                    avail_telesocpes = [];
+                }
+                console.log(avail_telesocpes)
+                // Add default
+                const newOption = document.createElement('option');
+                newOption.appendChild(document.createTextNode('Use any telescope'));
+                newOption.setAttribute('value', "");
+                selectBox.appendChild(newOption);
+                // Add the options back dependent on the source type
+                for (let ti in avail_telesocpes) {
+                    const telescope = avail_telesocpes[ti]
+                    console.log(telescope)
+                    const newOption = document.createElement('option');
+                    const optionText = document.createTextNode(telescope);
+                    // set option text
+                    newOption.appendChild(optionText);
+                    // and option value
+                    newOption.setAttribute('value',telescope);
+                    selectBox.appendChild(newOption);
+                }
+                console.log(document.querySelector('#event_telescope').options)
             });
             $("#id_source_type").trigger("change")
-            $("#event_telescope").change(function() {
-                console.log($(this).val());
-                if ($(this).val() === "") {
-                    console.log(1);
+
+            // listen to two fields to work out which thresholds to display
+            document.getElementById("event_telescope").addEventListener("change", threshold_display);
+            document.getElementById("id_source_type").addEventListener("change", threshold_display);
+            function threshold_display() {
+                console.log($("#event_telescope").val());
+                console.log($("#id_source_type").val());
+                if ( ($("#event_telescope").val() === "" || $("#event_telescope").val() === "Fermi") && $("#id_source_type").val() == "GRB" ) {
                     $('#fermi_thres').show();
-                    $('#swift_thres').show();
-                } else if ($(this).val() === "Fermi") {
-                    console.log(2);
-                    $('#fermi_thres').show();
-                    $('#swift_thres').hide();
-                } else if ($(this).val() === "SWIFT") {
-                    console.log(3);
+                } else {
                     $('#fermi_thres').hide();
+                }
+                if ( ($("#event_telescope").val() === "" || $("#event_telescope").val() === "SWIFT") && $("#id_source_type").val() == "GRB" ) {
                     $('#swift_thres').show();
                 } else {
-                    console.log(4);
-                    $('#fermi_thres').hide();
                     $('#swift_thres').hide();
                 }
-            });
-            $("#event_telescope").trigger("change")
+                if ( ($("#event_telescope").val() === "" || $("#event_telescope").val() === "Antares") && $("#id_source_type").val() == "NU" ) {
+                    $('#antares_thres').show();
+                } else {
+                    $('#antares_thres').hide();
+                }
+            }
+            threshold_display();
         })
     </script>
 {% endblock %}

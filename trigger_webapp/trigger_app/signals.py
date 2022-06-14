@@ -7,7 +7,7 @@ from django.conf import settings
 from .models import UserAlerts, AdminAlerts, VOEvent, PossibleEventAssociation, Status, ProposalSettings, ProposalDecision, Observations, TriggerID
 from .telescope_observe import trigger_observation
 
-from mwa_trigger.trigger_logic import worth_observing_grb
+from mwa_trigger.trigger_logic import worth_observing_grb, worth_observing_nu
 
 import os
 from twilio.rest import Client
@@ -235,6 +235,18 @@ def proposal_worth_observing(
                 # This proposal wants to observe FSs and there is no FS logic so observe
                 trigger_bool = True
                 trigger_message += f"Triggering on Flare Star {voevent.source_name}.\n "
+                proj_source_bool = True
+            elif prop_dec.proposal.source_type == "NU" and voevent.source_type == "NU":
+                # This proposal wants to observe GRBs so check if it is worth observing
+                trigger_bool, debug_bool, pending_bool, trigger_message = worth_observing_nu(
+                    # event values
+                    antares_ranking=voevent.antares_ranking,
+                    telescope=voevent.telescope,
+                    # Thresholds
+                    antares_min_ranking=prop_dec.proposal.antares_min_ranking,
+                    # Other
+                    trigger_message=trigger_message,
+                )
                 proj_source_bool = True
 
             # TODO set up other source types here

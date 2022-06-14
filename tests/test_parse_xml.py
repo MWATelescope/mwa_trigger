@@ -6,13 +6,13 @@ from yaml import load, dump, Loader
 from numpy.testing import assert_equal
 
 from mwa_trigger.parse_xml import parsed_VOEvent
-from mwa_trigger.trigger_logic import worth_observing_grb
+from mwa_trigger.trigger_logic import worth_observing_grb, worth_observing_nu
 import voeventparse
 
 import logging
 logger = logging.getLogger(__name__)
 
-def test_trigger_event():
+def test_trigger_grb_event():
     xml_tests = [
                  # A short GRB we would want to trigger on
                  ('Fermi_GRB.xml', None, [True, False, False, 'Fermi GRB probability greater than 50.\n Trigger duration between 0.256 and 1.023 s so triggering.\n ']),
@@ -21,7 +21,7 @@ def test_trigger_event():
                  # A SWIFT trigger that is too long to trigger on
                  ('SWIFT00.xml', None, [False, True, False, 'SWIFT rate significance > 0.000 sigma.\n Trigger duration outside of all time ranges so not triggering.\n ']),
                  # A trigger type that we choose to ignore
-                 ('Antares_1438351269.xml', None, [False, False, False, 'No probability metric given so assume it is a GRB.\n ']),
+                 ('SWIFT_Point_Dir_Change.xml', None, [False, False, False, 'No probability metric given so assume it is a GRB.\n ']),
                 ]
 
     for xml_file, xml_packet, exp_worth_obs in xml_tests:
@@ -38,7 +38,7 @@ def test_trigger_event():
 
         # read in yaml of expected parsed_VOEvent dict
         # dump file for future tests
-        #if xml_file is not None:
+        # if xml_file is not None:
         #    with open(yaml_loc, 'w') as stream:
         #        dump(dict(trig.__dict__), stream)
 
@@ -72,6 +72,92 @@ def test_trigger_event():
         assert_equal(debug_bool, exp_worth_obs[1])
         assert_equal(pending_bool, exp_worth_obs[2])
         assert_equal(trigger_message, exp_worth_obs[3])
+
+def test_trigger_nu_event():
+    xml_tests = [
+                 # An antares neutrino we would want to trigger on
+                 ('Antares_1438351269.xml', None, [True, False, False, 'The Antares ranking (1) is less than or equal to 2 so triggering.\n ']),
+                 # An antares neutrino we would want to trigger on
+                 ('IceCube_134191_017593623_0.xml', None, [True, False, False, 'No thresholds for non Antares telescopes so triggering.\n ']),
+                ]
+
+    for xml_file, xml_packet, exp_worth_obs in xml_tests:
+        # Parse the file
+        xml_loc = os.path.join('tests/test_events', xml_file)
+        yaml_loc = xml_loc[:-4] + ".yaml"
+
+        trig = parsed_VOEvent(xml_loc, packet=xml_packet)
+
+        # read in yaml of expected parsed_VOEvent dict
+        # dump file for future tests
+        # if xml_file is not None:
+        #    with open(yaml_loc, 'w') as stream:
+        #        dump(dict(trig.__dict__), stream)
+
+        # Convert 'event_observed' to string as it's easier to compare than datetime
+        trig.__dict__['event_observed'] = str(trig.__dict__['event_observed'])
+        # Set xml to None to prevent path errors when testing in different locations
+        trig.__dict__['xml'] = None
+        # Read in expected class and do the same
+        with open(yaml_loc, 'r') as stream:
+            expected_trig = load(stream, Loader=Loader)
+            expected_trig['event_observed'] = str(expected_trig['event_observed'])
+            expected_trig['xml'] = None
+            # Put the packet through prettystr so they match
+            expected_trig['packet'] = voeventparse.prettystr(voeventparse.loads(expected_trig['packet'].encode()))
+
+        # Compare to expected
+        assert_equal(trig.__dict__, expected_trig)
+
+        # Send it through trigger logic
+        trigger_bool, debug_bool, pending_bool, trigger_message = worth_observing_nu(
+            antares_ranking=trig.antares_ranking,
+            telescope=trig.telescope,
+        )
+        logger.debug(f"{trigger_bool}, {debug_bool}, {pending_bool}")
+        logger.debug(f"{trigger_message}")
+
+        # Compare to expected
+        assert_equal(trigger_bool, exp_worth_obs[0])
+        assert_equal(debug_bool, exp_worth_obs[1])
+        assert_equal(pending_bool, exp_worth_obs[2])
+        assert_equal(trigger_message, exp_worth_obs[3])
+
+def test_trigger_fs_event():
+    xml_tests = [
+                 # An SWIFT flare star we would want to trigger on
+                 ('HD_8537_FLARE_STAR_TEST.xml', None, ),
+                ]
+
+    for xml_file, xml_packet in xml_tests:
+        # Parse the file
+        xml_loc = os.path.join('tests/test_events', xml_file)
+        yaml_loc = xml_loc[:-4] + ".yaml"
+
+        trig = parsed_VOEvent(xml_loc, packet=xml_packet)
+
+        # read in yaml of expected parsed_VOEvent dict
+        # dump file for future tests
+        # if xml_file is not None:
+        #    with open(yaml_loc, 'w') as stream:
+        #        dump(dict(trig.__dict__), stream)
+
+        # Convert 'event_observed' to string as it's easier to compare than datetime
+        trig.__dict__['event_observed'] = str(trig.__dict__['event_observed'])
+        # Set xml to None to prevent path errors when testing in different locations
+        trig.__dict__['xml'] = None
+        # Read in expected class and do the same
+        with open(yaml_loc, 'r') as stream:
+            expected_trig = load(stream, Loader=Loader)
+            expected_trig['event_observed'] = str(expected_trig['event_observed'])
+            expected_trig['xml'] = None
+            # Put the packet through prettystr so they match
+            expected_trig['packet'] = voeventparse.prettystr(voeventparse.loads(expected_trig['packet'].encode()))
+
+        # Compare to expected
+        assert_equal(trig.__dict__, expected_trig)
+
+        # Always trigger so no trigger logic to test
 
 if __name__ == "__main__":
     """
