@@ -1,6 +1,6 @@
 antares_ranking: null
-dec: null
-err: null
+dec: -72.6159
+err: 0.0
 event_observed: null
 event_type: Point_Dir
 fermi_detection_prob: null
@@ -62,7 +62,7 @@ packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=
   \  <Concept>Swift spacecraft slewing to a preplanned observing target.</Concept>\n\
   \    </Inference>\n  </Why>\n  <Description>\n    </Description>\n  <original_prefix>voe</original_prefix>\n\
   </VOEvent>\n"
-ra: null
+ra: 11.5836
 role: utility
 sequence_num: null
 source_name: null
