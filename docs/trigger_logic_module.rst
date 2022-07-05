@@ -2,7 +2,7 @@ trigger\_logic Module
 =====================
 
 
-.. currentmodule:: mwa_trigger.trigger_logic
+.. currentmodule:: tracet.trigger_logic
 
 worth_observing_grb Function
 ----------------------------

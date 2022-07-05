@@ -6,7 +6,7 @@ import requests
 from astropy.coordinates import Angle
 import astropy.units as u
 
-from mwa_trigger.parse_xml import parsed_VOEvent
+from tracet.parse_xml import parsed_VOEvent
 
 
 def write_and_upload(xml_string):

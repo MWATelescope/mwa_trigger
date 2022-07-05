@@ -12,7 +12,7 @@ The following VOEvent telescope event types can be parsed and put throught our t
    "Fermi", "GBM_Gnd_Pos"
    "Fermi", "GBM_Fin_Pos"
 
-If an Event telescope or type isn't in this list then you will need to update :py:meth:`mwa_trigger.parse_xml.parsed_VOEvent`
+If an Event telescope or type isn't in this list then you will need to update :py:meth:`tracet.parse_xml.parsed_VOEvent`
 
 
 Fermi

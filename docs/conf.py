@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('.'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'mwa_trigger'
+project = 'tracet'
 copyright = '2022, CIC'
 author = 'CIC'
 

@@ -1,7 +1,7 @@
 import os
 # Configure settings for project
 # Need to run this before calling models from application!
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'trigger_webapp.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'webapp_tracet.settings')
 import django
 # Import settings
 django.setup()

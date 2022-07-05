@@ -149,9 +149,14 @@ def get_position_info(v):
         err = float(v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Position2D.Error2Radius)
     except:
         # Try old method if new one doesn't work
-        ra = float(v.find(".//C1"))
-        dec = float(v.find(".//C2"))
-        err = float(v.find('.//Error2Radius'))
+        try:
+            ra = float(v.find(".//C1"))
+            dec = float(v.find(".//C2"))
+            err = float(v.find('.//Error2Radius'))
+        except:
+            ra = None
+            dec = None
+            err = None
     return ra, dec, err
 
 
@@ -235,6 +240,10 @@ class parsed_VOEvent:
             # ICECUBE's ID
             self.trig_id = int(v.find(".//Param[@name='AMON_ID']").attrib["value"])
 
+        # Get current position
+        self.ra, self.dec, self.err = get_position_info(v)
+        logger.debug(f"Trig position: {self.ra} {self.dec} {self.err}")
+
         # Check the voevent role (normally observation or test)
         self.role = v.attrib["role"]
         if self.role == "test":
@@ -313,6 +322,3 @@ class parsed_VOEvent:
         logger.debug(f"Seq#: {self.sequence_num}")
         logger.debug(f"Type: {self.event_type}")
 
-        # Get current position
-        self.ra, self.dec, self.err = get_position_info(v)
-        logger.debug(f"Trig position: {self.ra} {self.dec} {self.err}")
