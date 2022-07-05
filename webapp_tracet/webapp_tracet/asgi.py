@@ -1,5 +1,5 @@
 """
-ASGI config for trigger_webapp project.
+ASGI config for webapp_tracet project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'trigger_webapp.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'webapp_tracet.settings')
 
 application = get_asgi_application()
