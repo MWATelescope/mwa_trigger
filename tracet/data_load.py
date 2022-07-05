@@ -1,5 +1,5 @@
 """
-Loads all the data required by mwa_trigger from the data directory.
+Loads all the data required by tracet from the data directory.
 """
 
 import os

@@ -2,7 +2,7 @@ from django.test import TestCase
 
 from .models import TriggerID, VOEvent, PossibleEventAssociation, ProposalDecision
 
-from mwa_trigger.parse_xml import parsed_VOEvent
+from tracet.parse_xml import parsed_VOEvent
 import astropy.units as u
 from astropy.coordinates import Angle, SkyCoord, EarthLocation
 from astropy.time import Time

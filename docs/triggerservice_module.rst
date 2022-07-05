@@ -2,7 +2,7 @@ triggerservice Module
 =====================
 
 
-.. currentmodule:: mwa_trigger.triggerservice
+.. currentmodule:: tracet.triggerservice
 
 trigger_mwa Function
 --------------------

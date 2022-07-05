@@ -3,7 +3,7 @@
 Gamma-ray Burst Triggering Logic
 ================================
 
-The function used to process GRBs is :py:meth:`mwa_trigger.trigger_logic.worth_observing_grb`.
+The function used to process GRBs is :py:meth:`tracet.trigger_logic.worth_observing_grb`.
 The following flow diagram explains how the inputs to this function are
 used to decide to trigger, ignore or pending a human's decision.
 

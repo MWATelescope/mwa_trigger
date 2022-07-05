@@ -21,7 +21,7 @@ import voeventparse as vp
 from astropy.coordinates import SkyCoord
 from astropy import units as u
 
-from mwa_trigger import parse_xml
+from tracet import parse_xml
 
 import logging
 logger = logging.getLogger(__name__)

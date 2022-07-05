@@ -3,7 +3,7 @@ import astropy.units as u
 from astropy.coordinates import SkyCoord, EarthLocation, AltAz
 from astropy.time import Time
 
-from mwa_trigger.triggerservice import trigger_mwa, trigger_atca
+from tracet.triggerservice import trigger_mwa, trigger_atca
 from .models import Observations, VOEvent
 
 import logging

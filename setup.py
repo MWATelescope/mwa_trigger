@@ -1,16 +1,16 @@
 #! /usr/bin/env python
-"""Setup for mwa_trigger
+"""Setup for tracet
 """
 from setuptools import setup
 
 
-setup(name="mwa_trigger",
+setup(name="tracet",
       version=0.1,
       description="VOEvent handling daemon and library for generating triggered MWA observations",
-      url="https://github.com/ADACS-Australia/mwa_trigger.git",
+      url="https://github.com/ADACS-Australia/tracet.git",
       #long_description=read('README.md'),
-      packages=['mwa_trigger'],
-      package_data={'mwa_trigger':['data/*.txt',]},
+      packages=['tracet'],
+      package_data={'tracet':['data/*.txt',]},
       python_requires='>=3.6',
       install_requires=[
             'numpy',

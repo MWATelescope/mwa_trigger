@@ -3,7 +3,7 @@ VOEvent Handling
 
 The web application listens for VOevents (`Notes on VOEvents <https://voevent.readthedocs.io/en/latest/>`_)
 broadcast by the `4pisky network <https://4pisky.org/voevents/>`_ and a few other private networks.
-These VOEvents are parsed using :py:meth:`mwa_trigger.parse_xml.parsed_VOEvent` to handle the telescope
+These VOEvents are parsed using :py:meth:`tracet.parse_xml.parsed_VOEvent` to handle the telescope
 dependent formatting and extracting the relevant data to the database.
 
 The VOEvents are grouped into TriggerEvents if they're likely the same source (within 100 seconds and a

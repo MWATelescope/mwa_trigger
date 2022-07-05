@@ -7,7 +7,7 @@ from django.conf import settings
 from .models import UserAlerts, AdminAlerts, VOEvent, PossibleEventAssociation, Status, ProposalSettings, ProposalDecision, Observations, TriggerID
 from .telescope_observe import trigger_observation
 
-from mwa_trigger.trigger_logic import worth_observing_grb, worth_observing_nu
+from tracet.trigger_logic import worth_observing_grb, worth_observing_nu
 
 import os
 from twilio.rest import Client

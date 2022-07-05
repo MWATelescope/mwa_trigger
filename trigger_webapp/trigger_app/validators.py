@@ -5,7 +5,7 @@ from django.utils.translation import gettext
 import os
 import logging
 
-from mwa_trigger.triggerservice import trigger_mwa
+from tracet.triggerservice import trigger_mwa
 
 logger = logging.getLogger(__name__)
 

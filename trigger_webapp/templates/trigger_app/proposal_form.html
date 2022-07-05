@@ -81,7 +81,7 @@
             {% for error in form.testing.errors %}<div class="alert alert-danger"><strong>{{ form.testing.label_tag }}{{ error|escape }}</strong></div>{% endfor %}
         </table>
         <div id="mwa">
-            <p>For an explanation of the MWA frequency specifications please see the <a href="https://mwa_trigger.readthedocs.io/en/latest/mwa_frequency_specifications.html">documentation</a></p>
+            <p>For an explanation of the MWA frequency specifications please see the <a href="https://tracet.readthedocs.io/en/latest/mwa_frequency_specifications.html">documentation</a></p>
             <table>
                 <tr><td>{{ form.mwa_freqspecs.label_tag }}  {% help_wrap form.mwa_freqspecs.help_text %}</td>  <td>{{ form.mwa_freqspecs }}</td></tr>
                 <tr><td>{{ form.mwa_exptime.label_tag }}    {% help_wrap form.mwa_exptime.help_text %}</td>    <td>{{ form.mwa_exptime }}</td></tr>

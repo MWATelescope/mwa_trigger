@@ -36,7 +36,7 @@ and nginx should look like this
 .. code-block::
 
    upstream django {
-      server unix:///home/ubuntu/mwa_trigger/trigger_webapp/trigger_webapp.sock;
+      server unix:///home/ubuntu/tracet/trigger_webapp/trigger_webapp.sock;
    }
 
    server {
@@ -47,12 +47,12 @@ and nginx should look like this
       client_max_body_size 75M;
 
       location /static {
-         alias /home/ubuntu/mwa_trigger/trigger_webapp/static;
+         alias /home/ubuntu/tracet/trigger_webapp/static;
       }
 
       location / {
          uwsgi_pass  django;
-         include     /home/ubuntu/mwa_trigger/trigger_webapp/uwsgi_params;
+         include     /home/ubuntu/tracet/trigger_webapp/uwsgi_params;
       }
    }
 
@@ -88,7 +88,7 @@ and update the nginx to
 .. code-block::
 
    location /static {
-      alias /home/ubuntu/mwa_trigger/trigger_webapp/static_host;
+      alias /home/ubuntu/tracet/trigger_webapp/static_host;
    }
 
 Try a simple domain
