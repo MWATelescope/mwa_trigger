@@ -20,7 +20,7 @@ setup(name="tracet",
             'healpy',
             'mwa_pb'
       ],
-      scripts=['trigger_webapp/upload_xml.py'],
+      scripts=['webapp_tracet/upload_xml.py'],
       setup_requires=['pytest-runner'],
       tests_require=['pytest']
 )

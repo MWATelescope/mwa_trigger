@@ -8,7 +8,7 @@ If you use this code to generate observations for your research please cite the 
 
 ## Contents
 
-This repository is made up of the `tracet` python moudle and the `trigger_webapp`.
+This repository is made up of the `tracet` python moudle and the `webapp_tracet`.
 
 ### tracet
 This module contains useful functions such as:
@@ -23,7 +23,7 @@ triggerservice.py - calls the web service to schedule observations with the MWA 
 The full documentation can be found [here](https://tracet.readthedocs.io/en/latest/)
 
 ### Trigger webapp
-A web application that can automatically monitor for VOEvents and trigger observations based on the parameters the user has set. How to install and use the web app is explained in trigger_webapp/README.md.
+A web application that can automatically monitor for VOEvents and trigger observations based on the parameters the user has set. How to install and use the web app is explained in webapp_tracet/README.md.
 
 ## Latency
 

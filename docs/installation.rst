@@ -13,7 +13,7 @@ Then install the python requirements (recommended in its own virtual environment
 
    pip install -r requirements.txt
    pip install .
-   pip install -r trigger_webapp/requirements.txt
+   pip install -r webapp_tracet/requirements.txt
 
 Environment Variables
 ---------------------
@@ -58,7 +58,7 @@ The following commands will set up the Postgres database for the web app. Replac
 Setup database for the first time
 ---------------------------------
 
-Run the following commands from the trigger_webapp subdirectory so Django can setup up the database structure and upload defaults
+Run the following commands from the webapp_tracet subdirectory so Django can setup up the database structure and upload defaults
 
 .. code-block::
 

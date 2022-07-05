@@ -33,10 +33,10 @@ jobs:
       - name: Install tracet
         run: pip install .
       - name: Install web app dependencies
-        run: pip install -r trigger_webapp/requirements.txt
+        run: pip install -r webapp_tracet/requirements.txt
       - name: Run migrations
         run: |
-          cd trigger_webapp
+          cd webapp_tracet
           python manage.py makemigrations trigger_app
           python manage.py migrate trigger_app
           python manage.py migrate
@@ -45,7 +45,7 @@ jobs:
           SYSTEM_ENV: GITHUB_WORKFLOW
       - name: Run tests
         run: |
-          cd trigger_webapp
+          cd webapp_tracet
           python manage.py test
         env:
           SYSTEM_ENV: GITHUB_WORKFLOW
