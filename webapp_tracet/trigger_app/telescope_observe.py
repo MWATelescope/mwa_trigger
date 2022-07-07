@@ -232,9 +232,9 @@ def trigger_atca_observation(
     logger.info(f"Triggering  ATCA at UTC time {Time.now()} ...")
 
     rq = {
-        "source": proposal_decision_model.proposal.source_type,
-        "rightAscension": prop_obj.ra_hms,
-        "declination": prop_obj.dec_dms,
+        "source": prop_obj.source_type,
+        "rightAscension": proposal_decision_model.ra_hms,
+        "declination": proposal_decision_model.dec_dms,
         "project": prop_obj.project_id.id,
         "maxExposureLength": str(timedelta(minutes=prop_obj.atca_max_exptime)),
         "minExposureLength": str(timedelta(minutes=prop_obj.atca_min_exptime)),
