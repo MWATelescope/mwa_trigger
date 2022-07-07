@@ -1,11 +1,10 @@
 APScheduler==3.9.1
 asgiref==3.5.1
 astropy==5.0.4
-atca-rapid-response-api @ git+https://github.com/ste616/atca-rapid-response-api.git@523b47a38db31689d884de9fbd4af170fb1c78ba#subdirectory=python
+atca-rapid-response-api @ git+https://github.com/ste616/atca-rapid-response-api.git@ADACS#subdirectory=python
 attrs==21.4.0
 Automat==20.2.0
 backports.zoneinfo==0.2.1
-cabb-scheduler @ git+https://github.com/ste616/cabb-schedule-api.git@621808bb5b51fb2b029a6be1917715857603321c#subdirectory=python
 certifi==2021.10.8
 charset-normalizer==2.0.12
 Comet==3.1.0
@@ -16,7 +15,6 @@ django-apscheduler==0.6.2
 django-filter==21.1
 djangorestframework==3.13.1
 fonttools==4.33.3
-fourpiskytools @ git+https://github.com/4pisky/fourpiskytools.git@1954e44d77f2e3a39192db0d3e40cef6604ba8c3
 h5py==3.6.0
 healpy==1.15.2
 hyperlink==21.0.0
