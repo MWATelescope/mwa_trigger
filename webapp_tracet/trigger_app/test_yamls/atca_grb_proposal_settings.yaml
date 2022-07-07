@@ -7,6 +7,7 @@
         "password": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJDU0lSTyBBc3Ryb25vbXkgYW5kIFNwYWNlIFNjaWVuY2UiLCJzdWIiOiJBVENBIFJhcGlkIFJlc3BvbnNlIE1vZGUiLCJpYXQiOjE2NDk4OTcxNjUsInByb2plY3RDb2RlIjoiQzMzNzQiLCJzZW1lc3RlciI6IjIwMjJBUFIiLCJuYmYiOjE2NDg3MzE2MDAsImV4cCI6MTY2NDU0NjQwMCwicGlOYW1lIjoiQW5kZXJzb24iLCJwcm9qZWN0VGl0bGUiOiJBVENBIFJhcGlkLVJlc3BvbnNlIGFuZCBNb25pdG9yaW5nIEZvbGxvdy11cCBvZiBIRVNTLWRldGVjdGVkIFRlViBHYW1tYS1yYXkgQnVyc3RzIiwicmVxdWVzdGVkVGltZSI6MTIwLjAsInRlc3QiOnRydWV9.obSnu9yFzsm8_ZBGyWNT736k1YuDduIfi_jZc2cQ_4A",
         "description": "Testing ATCA",
         "telescope": "ATCA",
+        "atca_email": "gemma.anderson@curtin.edu.au",
     }
 },
 {
@@ -41,7 +42,6 @@
         "atca_max_exptime": 60,
         "atca_min_exptime": 1,
         "atca_prioritise_source": false,
-        "atca_email": "gemma.anderson@curtin.edu.au",
     }
 },
 ]

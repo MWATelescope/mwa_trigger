@@ -276,7 +276,7 @@ def trigger_atca_observation(
     # the rapid response service.
     rapidObj = { 'requestDict': rq }
     rapidObj["authenticationToken"] = prop_obj.project_id.password
-    rapidObj["email"] = prop_obj.atca_email
+    rapidObj["email"] = prop_obj.project_id.atca_email
 
     if prop_obj.testing:
         rapidObj["test"] = True

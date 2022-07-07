@@ -4,8 +4,12 @@ from django.utils.translation import gettext
 
 import os
 import logging
+import astropy.units as u
+from astropy.coordinates import SkyCoord, EarthLocation
+from astropy.time import Time
 
 from tracet.triggerservice import trigger_mwa
+import atca_rapid_response_api as arrApi
 
 logger = logging.getLogger(__name__)
 
@@ -127,6 +131,19 @@ def mwa_freqspecs(input_spec, numchannels=24, separator=";"):
 
 
 def atca_freq_bands(min_freq, max_freq, freq, field_name):
+    """Check the users picked frequencies within the bandwidth of the reciever
+
+    Parameters
+    ----------
+    min_freq : `float`
+        Minimum frequency of the reciever in MHz.
+    max_freq : `float`
+        Maximum frequency of the reciever in MHz.
+    freq : `float`
+        The frequency to check in MHz.
+    field_name : `str`
+        The name of the model field you are testing.
+    """
     if freq > max_freq:
         raise forms.ValidationError(gettext(f"{field_name} error: A centre frequency of {freq} MHz would have a maximum above {max_freq} MHz which is outside the bands frequency range."))
     if freq < min_freq:
@@ -134,6 +151,15 @@ def atca_freq_bands(min_freq, max_freq, freq, field_name):
 
 
 def mwa_proposal_id(project_id, secure_key):
+    """Check that the MWA project ID and secure key are valid.
+
+    Parameters
+    ----------
+    project_id : `str`
+        The project ID, e.g. T001.
+    secure_key : `str`
+        The secure key (password) for this project.
+    """
     result = trigger_mwa(
         project_id=project_id,
         secure_key=secure_key,
@@ -163,3 +189,55 @@ def mwa_proposal_id(project_id, secure_key):
             error_message += f"{result['errors'][err_id]}.\n "
         # Return an error as the trigger status
         raise forms.ValidationError({error_message})
+
+def atca_proposal_id(project_id, secure_key, atca_email):
+    """Check that the ATCA project ID and secure key are valid.
+
+    Parameters
+    ----------
+    project_id : `str`
+        The project ID, e.g. T001.
+    secure_key : `str`
+        The secure key (password) for this project.
+    atca_email : `str`
+        The email address of someone that was on the ATCA observing proposal. This is an authentication step.
+    """
+    # Setup current RA and Dec at zenith for ATCA
+    atca = EarthLocation(lat='-30:18:46', lon='149:33:01', height=377.8 * u.m)
+    atca_coord = coord = SkyCoord(az=0., alt=90., unit=(u.deg, u.deg), frame='altaz', obstime=Time.now(), location=atca)
+    ra = atca_coord.icrs.ra.to_string(unit=u.hour, sep=':')[:11]
+    rq = {
+        "source": "Test",
+        "rightAscension": ra,
+        "declination": "-30:18:46",
+        "project": project_id,
+        "maxExposureLength": "00:01:00",
+        "minExposureLength": "00:00:01",
+        "scanType": "Dwell",
+        "4cm": {
+            "use": True,
+            "exposureLength": "00:00:20",
+            "freq1": 5500,
+            "freq2": 9000,
+        },
+    }
+
+    # We have our request now, so we need to craft the service request to submit it to
+    # the rapid response service.
+    rapidObj = { 'requestDict': rq }
+    rapidObj["authenticationToken"] = secure_key
+    rapidObj["email"] = atca_email
+    rapidObj["test"] = True
+    rapidObj["noTimeLimit"] = True
+    rapidObj["noScoreLimit"] = True
+
+    request = arrApi.api(rapidObj)
+    try:
+        result = request.send()
+    except arrApi.responseError as r:
+        logger.error(f"ATCA return message: {r}")
+        raise forms.ValidationError({r})
+
+    # Check if succesful
+    if result is None:
+        raise forms.ValidationError({"Web API error, possible server error"})
