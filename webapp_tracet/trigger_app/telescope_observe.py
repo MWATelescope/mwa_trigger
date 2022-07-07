@@ -2,8 +2,11 @@ import os
 import astropy.units as u
 from astropy.coordinates import SkyCoord, EarthLocation, AltAz
 from astropy.time import Time
+from datetime import timedelta
 
-from tracet.triggerservice import trigger_mwa, trigger_atca
+import atca_rapid_response_api as arrApi
+
+from tracet.triggerservice import trigger_mwa
 from .models import Observations, VOEvent
 
 import logging
@@ -215,7 +218,7 @@ def trigger_atca_observation(
     observations : `list`
         A list of observations that were scheduled by ATCA (currently there is no functionality to record this so will be empty).
     """
-    prop_settings = proposal_decision_model.proposal
+    prop_obj = proposal_decision_model.proposal
 
     # TODO add any schedule checks or observation parsing here
 
@@ -227,19 +230,69 @@ def trigger_atca_observation(
 
     # Not below horizon limit so observer
     logger.info(f"Triggering  ATCA at UTC time {Time.now()} ...")
-    # trigger_atca(
-    #     project_id=prop_settings.project_id,
-    #     secure_key=os.environ.get('ATCA_SECURE_KEY_FILE', None),
-    #     ra=proposal_decision_model.ra, dec=proposal_decision_model.dec,
-    #     source=obsname,
-    #     freqspecs=[prop_settings.atca_freq1, prop_settings.atca_freq2],
-    #     nobs=prop_settings.atca_nobs,
-    #     exptime=prop_settings.atca_exptime,
-    #     calexptime=prop_settings.atca_calexptime,
-    #     pretend=prop_settings.testing,
-    # )
-    # TODO Check if succesful
 
-    # TODO Output the results
+    rq = {
+        "source": proposal_decision_model.proposal.source_type,
+        "rightAscension": prop_obj.ra_hms,
+        "declination": prop_obj.dec_dms,
+        "project": prop_obj.project_id.id,
+        "maxExposureLength": str(timedelta(minutes=prop_obj.atca_max_exptime)),
+        "minExposureLength": str(timedelta(minutes=prop_obj.atca_min_exptime)),
+        "scanType": "Dwell",
+        "3mm": {
+            "use": prop_obj.atca_band_3mm,
+            "exposureLength": str(timedelta(minutes=prop_obj.atca_band_3mm_exptime)),
+            "freq1": prop_obj.atca_band_3mm_freq1,
+            "freq2": prop_obj.atca_band_3mm_freq2,
+        },
+        "7mm": {
+            "use": prop_obj.atca_band_7mm,
+            "exposureLength": str(timedelta(minutes=prop_obj.atca_band_7mm_exptime)),
+            "freq1": prop_obj.atca_band_7mm_freq1,
+            "freq2": prop_obj.atca_band_7mm_freq2,
+        },
+        "15mm": {
+            "use": prop_obj.atca_band_15mm,
+            "exposureLength": str(timedelta(minutes=prop_obj.atca_band_15mm_exptime)),
+            "freq1": prop_obj.atca_band_15mm_freq1,
+            "freq2": prop_obj.atca_band_15mm_freq2,
+        },
+        "4cm": {
+            "use": prop_obj.atca_band_4cm,
+            "exposureLength": str(timedelta(minutes=prop_obj.atca_band_4cm_exptime)),
+            "freq1": prop_obj.atca_band_4cm_freq1,
+            "freq2": prop_obj.atca_band_4cm_freq2,
+        },
+        "16cm": {
+            "use": prop_obj.atca_band_16cm,
+            "exposureLength": str(timedelta(minutes=prop_obj.atca_band_16cm_exptime)),
+        },
+    }
+
+    # We have our request now, so we need to craft the service request to submit it to
+    # the rapid response service.
+    rapidObj = { 'requestDict': rq }
+    rapidObj["authenticationToken"] = prop_obj.project_id.password
+    rapidObj["email"] = prop_obj.atca_email
+
+    if prop_obj.testing:
+        rapidObj["test"] = True
+        rapidObj["noTimeLimit"] = True
+        rapidObj["noScoreLimit"] = True
+
+    request = arrApi.api(rapidObj)
+    try:
+        response = request.send()
+    except arrApi.responseError as r:
+        logger.error(f"ATCA return message: {r}")
+        trigger_message += f"ATCA return message: {r}\n "
+        return 'E', trigger_message, []
+
+    # # Check for errors
+    # if  (not response["authenticationToken"]["received"]) or (not response["authenticationToken"]["verified"]) or \
+    #     (not response["schedule"]["received"]) or (not response["schedule"]["verified"]):
+    #     trigger_message += f"ATCA return message: {r}\n "
+    #     return 'E', trigger_message, []
+
 
     return 'T', trigger_message, []
