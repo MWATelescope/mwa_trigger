@@ -266,6 +266,9 @@ def trigger_atca_observation(
         "16cm": {
             "use": prop_obj.atca_band_16cm,
             "exposureLength": str(timedelta(minutes=prop_obj.atca_band_16cm_exptime)),
+            # Only frequency available due to limited bandwidth
+            "freq1": 2100,
+            "freq2": 2100,
         },
     }
 
