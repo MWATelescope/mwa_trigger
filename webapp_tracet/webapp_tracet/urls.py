@@ -41,4 +41,5 @@ urlpatterns = [
     path('proposal_decision_path/<int:id>/', views.proposal_decision_path),
     path('voevent_view/<int:id>/', views.voevent_view),
     path('voevent_create/', views.voevent_create),
+    path('test_upload_xml/', views.test_upload_xml),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

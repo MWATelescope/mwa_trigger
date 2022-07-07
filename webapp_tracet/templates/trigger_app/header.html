@@ -53,7 +53,12 @@
               <li><a class="dropdown-item" href="/proposal_create/">Create New a Proposal</a></li>
             </ul>
           </li>
+
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="/test_upload_xml/">Testing</a>
+          </li>
         </ul>
+
           {% if user.is_authenticated %}
             <span class="navbar-text active">
               {{ user.username }}

@@ -1,6 +1,8 @@
 import voeventparse
 from . import data_load
 import pandas as pd
+from astropy.coordinates import Angle
+import astropy.units as u
 
 import logging
 
@@ -242,6 +244,12 @@ class parsed_VOEvent:
 
         # Get current position
         self.ra, self.dec, self.err = get_position_info(v)
+        if self.ra is None or self.dec is None:
+            self.ra_hms = None
+            self.dec_dms = None
+        else:
+            self.ra_hms  = Angle(self.ra,  unit=u.deg).to_string(unit=u.hour, sep=':')
+            self.dec_dms = Angle(self.dec, unit=u.deg).to_string(unit=u.deg,  sep=':')
         logger.debug(f"Trig position: {self.ra} {self.dec} {self.err}")
 
         # Check the voevent role (normally observation or test)

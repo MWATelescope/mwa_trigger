@@ -20,6 +20,7 @@ import sys
 import voeventparse as vp
 from astropy.coordinates import SkyCoord
 from astropy import units as u
+import datetime
 
 from tracet import parse_xml
 
@@ -473,3 +474,41 @@ def proposal_form(request, id=None):
     else:
         form = forms.ProjectSettingsForm(instance=proposal)
     return render(request, 'trigger_app/proposal_form.html', {'form':form, "src_tele": src_tele, "title":title})
+
+
+def test_upload_xml(request):
+    proposals = models.ProposalSettings.objects.filter(testing=False)
+    if request.method == "POST":
+        form = forms.TestVOEvent(request.POST)
+        if form.is_valid():
+            # Parse and submit the VOEvent
+            xml_string = str(request.POST['xml_packet'])
+            trig = parse_xml.parsed_VOEvent(None, packet=xml_string)
+            print(trig.event_observed)
+            print(type(trig.event_observed))
+            models.VOEvent.objects.get_or_create(
+                telescope=trig.telescope,
+                xml_packet=xml_string,
+                duration=trig.trig_duration,
+                trigger_id=trig.trig_id,
+                sequence_num=trig.sequence_num,
+                event_type=trig.event_type,
+                role=trig.role,
+                ra=trig.ra,
+                dec=trig.dec,
+                ra_hms=trig.ra_hms,
+                dec_dms=trig.dec_dms,
+                pos_error=trig.err,
+                ignored=trig.ignore,
+                source_name=trig.source_name,
+                source_type=trig.source_type,
+                event_observed=datetime.datetime.strptime(str(trig.event_observed), "%Y-%m-%dT%H:%M:%S.%f"),
+                fermi_most_likely_index=trig.fermi_most_likely_index,
+                fermi_detection_prob=trig.fermi_detection_prob,
+                swift_rate_signif=trig.swift_rate_signif,
+                antares_ranking=trig.antares_ranking,
+            )
+            return HttpResponseRedirect('/')
+    else:
+        form = forms.TestVOEvent()
+    return render(request, 'trigger_app/test_upload_xml_form.html', {'form': form, "proposals": proposals})
