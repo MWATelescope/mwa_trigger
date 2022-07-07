@@ -278,7 +278,7 @@ class UserAlerts(models.Model):
 
 
 class Observations(models.Model):
-    obsid = models.IntegerField(primary_key=True)
+    obsid = models.CharField(max_length=128, primary_key=True)
     telescope = models.ForeignKey(Telescope, to_field="name", verbose_name="Telescope name", on_delete=models.CASCADE)
     proposal_decision_id = models.ForeignKey(ProposalDecision, on_delete=models.SET_NULL, blank=True, null=True)
     website_link = models.URLField(max_length=256)

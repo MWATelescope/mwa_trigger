@@ -297,5 +297,4 @@ def trigger_atca_observation(
     #     trigger_message += f"ATCA return message: {r}\n "
     #     return 'E', trigger_message, []
 
-
-    return 'T', trigger_message, []
+    return 'T', trigger_message, [response["id"]]
