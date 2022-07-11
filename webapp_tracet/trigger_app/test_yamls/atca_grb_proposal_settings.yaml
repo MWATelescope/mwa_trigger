@@ -39,8 +39,8 @@
         "atca_band_7mm_exptime": 20,
         "atca_band_7mm_freq1": 40000,
         "atca_band_7mm_freq2": 45000,
-        "atca_max_exptime": 60,
-        "atca_min_exptime": 1,
+        "atca_max_exptime": 600,
+        "atca_min_exptime": 60,
         "atca_prioritise_source": false,
     }
 },
