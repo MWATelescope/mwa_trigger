@@ -282,7 +282,8 @@ def ProposalDecision_details(request, id):
     telescopes = ".\n".join(list(set(telescopes)))
 
     return render(request, 'trigger_app/proposal_decision_details.html', {'prop_dec':prop_dec,
-                                                                         'telescopes':telescopes})
+                                                                          'telescopes':telescopes,
+                                                                          'voevents': voevents})
 
 
 def ProposalDecision_result(request, id, decision):
