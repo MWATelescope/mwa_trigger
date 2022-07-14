@@ -1,7 +1,6 @@
 .idea
 *.pyc
 .eggs
-webapp_tracet/trigger_app/migrations/
 tests/_trial_temp/
 .voevent_env/
 settings.json
