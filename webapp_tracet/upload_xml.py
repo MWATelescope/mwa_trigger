@@ -12,12 +12,6 @@ from tracet.parse_xml import parsed_VOEvent
 def write_and_upload(xml_string):
     # Parse
     trig = parsed_VOEvent(None, packet=xml_string)
-    if trig.ra is None or trig.dec is None:
-        ra_hms = None
-        dec_dms = None
-    else:
-        ra_hms = Angle(trig.ra, unit=u.deg).to_string(unit=u.hour, sep=':')
-        dec_dms = Angle(trig.dec, unit=u.deg).to_string(unit=u.deg, sep=':')
 
     # Upload
     session = requests.session()
@@ -37,8 +31,8 @@ def write_and_upload(xml_string):
         'role' : trig.role,
         'ra' : trig.ra,
         'dec' : trig.dec,
-        'ra_hms' : ra_hms,
-        'dec_dms': dec_dms,
+        'ra_hms' : trig.ra_hms,
+        'dec_dms' : trig.dec_dms,
         'pos_error' : trig.err,
         'ignored' : trig.ignore,
         'source_name' : trig.source_name,
@@ -46,7 +40,7 @@ def write_and_upload(xml_string):
         'event_observed' : trig.event_observed,
         'fermi_most_likely_index' : trig.fermi_most_likely_index,
         'fermi_detection_prob' : trig.fermi_detection_prob,
-        'swift_rate_signf' : trig.swift_rate_signif,
+        'swift_rate_signif' : trig.swift_rate_signif,
         'antares_ranking' : trig.antares_ranking,
     }
     r = session.post(url, data=data)

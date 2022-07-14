@@ -76,3 +76,8 @@ class TelescopeProjectIDForm(forms.ModelForm):
     class Meta:
         model = TelescopeProjectID
         fields = '__all__'
+
+
+class TestVOEvent(forms.Form):
+    #xml_file = forms.FileField()
+    xml_packet = forms.CharField(max_length=10000, required=False)

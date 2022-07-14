@@ -1,5 +1,7 @@
 {% extends 'trigger_app/header.html' %}
 
+{% load utils %}
+
 {% block content %}
 <title>Proposal Decision Details</title>
 
@@ -12,6 +14,18 @@
   {% endif %}
   <h2>Proposal Decision ID {{ prop_dec.id }}</h2>
   <table class="table-thin">
+    <tr>
+      <td>Event Detected by</td>
+      <td>{{ telescopes }}</td>
+    </tr>
+    <tr>
+      <td>Event Type(s)</td>
+      <td>{{ event_types }}</td>
+    </tr>
+    <tr>
+      <td>Decision</td>
+      <td>{{ prop_dec.get_decision_display }}</td>
+    </tr>
     <tr>
       <td>First Duration (s)</td>
       <td>{{ prop_dec.duration }}</td>
@@ -28,17 +42,106 @@
       <td>Best Position Error (&#176;)</td>
       <td>{{ prop_dec.pos_error }}</td>
     </tr>
-    <tr>
-      <td>Detected by</td>
-      <td>{{ telescopes }}</td>
-    </tr>
-    <tr>
-      <td>Decision</td>
-      <td>{{ prop_dec.get_decision_display }}</td>
-    </tr>
   </table>
   <h3>Log</h3>
   <p style="white-space: pre-wrap">{{ prop_dec.decision_reason }}<p>
   <p>See full trigger event details <a href="/trigger_id_details/{{ prop_dec.trigger_group_id }}/" style="text-decoration:None">here</a></p>
+  <p><a href="https://gcn.gsfc.nasa.gov/gcn3_archive.html">GCN Circulars Archive</a></p>
 </div>
+
+
+  <h2> VOEvents</h2>
+
+  <table class="fl-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Source Type</th>
+        <th>Telescope</th>
+        <th>Event Type</th>
+        <th>Alert Time (UTC)</th>
+        <th>Recieved (UTC)</th>
+        <th>Event ID</th>
+        <th>Source Name</th>
+        <th>Sequence number</th>
+        <th>Duration (s)</th>
+        <th>RA (HH:MM:SS)</th>
+        <th>Dec (DD:MM:SS)</th>
+        {% if poserr_unit == "deg" %}
+          <th><a href="?{% url_switch request 'poserr_unit' %}">Position Error (&#176;)</a></th>
+        {% else %}
+          <th><a href="?{% url_switch request 'poserr_unit' %}">Position Error (arcmin)</a></th>
+        {% endif %}
+        <th>Fermi Detection Probability (%)</th>
+        <th>SWIFT Rate Significance (sigma)</th>
+      </tr>
+    </thead>
+    <!-- Iterate over object_list -->
+    {% for voevent in voevents %}
+    <!-- Display Objects -->
+    {% if voevent.ignored %}
+      <tr class="grey-tr">
+    {% else %}
+      <tr>
+    {% endif %}
+      <td><a href="/voevent_view/{{ voevent.id }}" style="text-decoration:None">{{ voevent.id }}</a></td>
+      <td>{% if voevent.source_type  is not None %} {{ voevent.source_type }}  {% endif %}</td>
+      <td>{{ voevent.telescope }}</td>
+      <td>{{ voevent.event_type }}</td>
+      <td>{{ voevent.event_observed|date:"Y-m-d H:i:s" }}</td>
+      <td>{{ voevent.recieved_data|date:"Y-m-d H:i:s" }}</td>
+      <td>{% if voevent.trigger_id   is not None %} {{ voevent.trigger_id }}   {% endif %}</td>
+      <td>{% if voevent.source_name  is not None %} {{ voevent.source_name }}  {% endif %}</td>
+      <td>{% if voevent.sequence_num is not None %} {{ voevent.sequence_num }} {% endif %}</td>
+      <td>{% if voevent.duration     is not None %} {{ voevent.duration }}     {% endif %}</td>
+      <td>{% if voevent.ra_hms          is not None %} {{ voevent.ra_hms }}          {% endif %}</td>
+      <td>{% if voevent.dec_dms         is not None %} {{ voevent.dec_dms }}         {% endif %}</td>
+      <td>
+      {% if voevent.pos_error    is not None %}
+        {% if poserr_unit == "deg" %}
+          {{ voevent.pos_error }}
+        {% else %}
+          {% multiply voevent.pos_error 60 2 %}
+        {% endif %}
+      {% endif %}
+      </td>
+      <td>{% if voevent.fermi_detection_prob is not None %} {{ voevent.fermi_detection_prob }}  {% endif %}</td>
+      <td>{% if voevent.swift_rate_signif    is not None %} {{ voevent.swift_rate_signif    }}  {% endif %}</td>
+    </tr>
+    <!-- If object_list is empty  -->
+    {% empty %}
+      <tr><td>No VOEvents yet.</td></tr>
+    {% endfor %}
+    </table>
+
+
+    <h2>Observations</h2>
+
+    <table class="fl-table">
+      <thead>
+        <tr>
+          <th>Observation ID</th>
+          <th>Telescope</th>
+          <th>Proposal Decision ID</th>
+          <th>Reason</th>
+        </tr>
+      </thead>
+      <!-- Iterate over object_list -->
+      {% for ob in obs %}
+      <!-- Display Objects -->
+      <tr>
+        {% if ob.website_link is None %}
+          <td>{{ ob.obsid }}</td>
+        {% else %}
+          <td><a href="{{ ob.website_link }}" style="text-decoration:None">{{ ob.obsid }}</a></td>
+        {% endif %}
+        <td>{{ ob.telescope.name }}</td>
+        <td><a href="/proposal_decision_details/{{ ob.proposal_decision_id.id }}" style="text-decoration:None">{{ ob.proposal_decision_id.id }}</a</td>
+        <td>{{ ob.reason }}</td>
+      </tr>
+      <!-- If object_list is empty  -->
+      {% empty %}
+        <tr><td>No observations yet.</td></tr>
+      {% endfor %}
+    </table>
 {% endblock %}
