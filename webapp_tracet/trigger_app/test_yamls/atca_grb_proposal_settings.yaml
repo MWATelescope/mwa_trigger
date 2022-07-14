@@ -27,7 +27,7 @@
         "pending_max_duration_2": 0.255,
         "fermi_prob": 50.0,
         "swift_rate_signf": 0.0,
-        "repointing_limit": 10.0,
+        "repointing_limit": 0.0001,
         "mwa_horizon_limit": 10.0,
         "testing": true,
         "source_type": "GRB",

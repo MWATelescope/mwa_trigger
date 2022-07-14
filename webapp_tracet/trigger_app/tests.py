@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from .models import TriggerID, VOEvent, PossibleEventAssociation, ProposalDecision
+from .models import TriggerID, VOEvent, PossibleEventAssociation, ProposalDecision, Observations
 
 from tracet.parse_xml import parsed_VOEvent
 import astropy.units as u
@@ -9,7 +9,13 @@ from astropy.time import Time
 import datetime
 
 
-def create_voevent_wrapper(trig, ra_dec):
+def create_voevent_wrapper(trig, ra_dec, dec_alter=True):
+    if dec_alter:
+        dec=ra_dec.dec.deg
+        dec_dms=ra_dec.dec.to_string(unit=u.deg, sep=':')
+    else:
+        dec=trig.dec
+        dec_dms=trig.dec_dms
     VOEvent.objects.create(
         telescope=trig.telescope,
         xml_packet=trig.packet,
@@ -20,9 +26,9 @@ def create_voevent_wrapper(trig, ra_dec):
         antares_ranking=trig.antares_ranking,
         # Sent event up so it's always pointing at zenith
         ra=ra_dec.ra.deg,
-        dec=ra_dec.dec.deg,
+        dec=dec,
         ra_hms=ra_dec.ra.to_string(unit=u.hour, sep=':'),
-        dec_dms=ra_dec.dec.to_string(unit=u.deg, sep=':'),
+        dec_dms=dec_dms,
         pos_error=trig.err,
         ignored=trig.ignore,
         source_name=trig.source_name,
@@ -115,6 +121,49 @@ class test_grb_group_02(TestCase):
     def test_atca_proposal_decision(self):
         print(f"\n\n!!!!!!!!!!!!!!\n{ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision_reason}\n!!!!!!!!!!!!!!!\n\n")
         self.assertEqual(ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision, 'T')
+
+class test_grb_group_03(TestCase):
+    """Tests that a strange combination of SWIFT event types
+    """
+    # Load default fixtures
+    fixtures = [
+        "default_data.yaml",
+        "trigger_app/test_yamls/atca_grb_proposal_settings.yaml",
+    ]
+    def setUp(self):
+        xml_paths = [
+            # A poisition but not confirmed what it is
+            "../tests/test_events/group_03_SWIFT_BAT_QuickLook_Pos.xml",
+            # Confirmed the previous alert is a GRB
+            "../tests/test_events/group_03_SWIFT_FOM_Obs.xml",
+            # Improved position that should trigger a new observation
+            "../tests/test_events/group_03_SWIFT_XRT_Pos.xml"
+        ]
+
+        # Setup current RA and Dec at zenith for the MWA
+        MWA = EarthLocation(lat='-26:42:11.95', lon='116:40:14.93', height=377.8 * u.m)
+        mwa_coord = coord = SkyCoord(az=0., alt=90., unit=(u.deg, u.deg), frame='altaz', obstime=Time.now(), location=MWA)
+        ra_dec = mwa_coord.icrs
+
+        # Parse and upload the xml file group
+        for xml in xml_paths:
+            trig = parsed_VOEvent(xml)
+            create_voevent_wrapper(trig, ra_dec, dec_alter=False)
+
+
+    def test_trigger_groups(self):
+        # Check there are three VOEvents that were grouped as one by the trigger ID
+        self.assertEqual(len(VOEvent.objects.all()), 3)
+        self.assertEqual(len(TriggerID.objects.all()), 1)
+
+    def test_atca_proposal_decision(self):
+        # Final proposal dicision was triggered
+        print(f"SWIFT ATCA TEST:{ProposalDecision.objects.all().first().decision_reason}")
+        self.assertEqual(ProposalDecision.objects.all().first().decision, 'T')
+
+    def test_atca_observations_triggered(self):
+        # First observation ignored but two other observations were triggered
+        self.assertEqual(len(Observations.objects.all()), 2)
 
 
 class test_nu(TestCase):
