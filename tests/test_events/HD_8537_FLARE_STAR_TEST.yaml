@@ -118,6 +118,8 @@ trig_duration: 320.0
 trig_id: 809217
 trig_pairs:
 - SWIFT_BAT_GRB_Pos
+- SWIFT_BAT_QuickLook_Pos
+- SWIFT_FOM_Obs
 - SWIFT_XRT_Pos
 - SWIFT_UVOT_Pos
 - Fermi_GBM_Flt_Pos
