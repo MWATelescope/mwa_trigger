@@ -284,11 +284,14 @@ def ProposalDecision_details(request, id):
     telescopes = ".\n".join(list(set(telescopes)))
     event_types = " \n".join(list(set(event_types)))
 
+    observations = models.Observations.objects.filter(proposal_decision_id=id)
+
     content = {
         'prop_dec':prop_dec,
         'telescopes':telescopes,
         'voevents': voevents,
         'event_types': event_types,
+        'obs': observations,
     }
     return render(request, 'trigger_app/proposal_decision_details.html', content)
 

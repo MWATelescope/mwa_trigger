@@ -109,7 +109,38 @@
     </tr>
     <!-- If object_list is empty  -->
     {% empty %}
-    <li>No objects yet.</li>
+      <tr><td>No VOEvents yet.</td></tr>
     {% endfor %}
+    </table>
+
+
+    <h2>Observations</h2>
+
+    <table class="fl-table">
+      <thead>
+        <tr>
+          <th>Observation ID</th>
+          <th>Telescope</th>
+          <th>Proposal Decision ID</th>
+          <th>Reason</th>
+        </tr>
+      </thead>
+      <!-- Iterate over object_list -->
+      {% for ob in obs %}
+      <!-- Display Objects -->
+      <tr>
+        {% if ob.website_link is None %}
+          <td>{{ ob.obsid }}</td>
+        {% else %}
+          <td><a href="{{ ob.website_link }}" style="text-decoration:None">{{ ob.obsid }}</a></td>
+        {% endif %}
+        <td>{{ ob.telescope.name }}</td>
+        <td><a href="/proposal_decision_details/{{ ob.proposal_decision_id.id }}" style="text-decoration:None">{{ ob.proposal_decision_id.id }}</a</td>
+        <td>{{ ob.reason }}</td>
+      </tr>
+      <!-- If object_list is empty  -->
+      {% empty %}
+        <tr><td>No observations yet.</td></tr>
+      {% endfor %}
     </table>
 {% endblock %}
