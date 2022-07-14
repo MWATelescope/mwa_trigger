@@ -1,5 +1,6 @@
 antares_ranking: null
 dec: -72.6159
+dec_dms: '-72:36:57.24'
 err: 0.0
 event_observed: null
 event_type: Point_Dir
@@ -63,6 +64,7 @@ packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=
   \    </Inference>\n  </Why>\n  <Description>\n    </Description>\n  <original_prefix>voe</original_prefix>\n\
   </VOEvent>\n"
 ra: 11.5836
+ra_hms: '0:46:20.064'
 role: utility
 sequence_num: null
 source_name: null

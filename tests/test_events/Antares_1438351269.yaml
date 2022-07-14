@@ -1,5 +1,6 @@
 antares_ranking: 1
 dec: -21.274
+dec_dms: '-21:16:26.4'
 err: 0.325
 event_observed: !!python/object/apply:lxml.objectify.fromstring
 - !!binary |
@@ -50,6 +51,7 @@ packet: "<VOEvent xmlns:xsi=\"https://www.w3.org/2001/XMLSchema-instance\" ivorn
   \  <Description>\n    </Description>\n  <original_prefix>voe</original_prefix>\n\
   </VOEvent>\n"
 ra: 156.957
+ra_hms: '10:27:49.68'
 role: observation
 sequence_num: null
 source_name: null

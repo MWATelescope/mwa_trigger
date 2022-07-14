@@ -1,5 +1,6 @@
 antares_ranking: null
 dec: 7.4438
+dec_dms: '7:26:37.68'
 err: 0.05
 event_observed: !!python/object/apply:lxml.objectify.fromstring
 - !!binary |
@@ -106,6 +107,7 @@ packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=
   \  <Description>\n    </Description>\n  <original_prefix>voe</original_prefix>\n\
   </VOEvent>\n"
 ra: 20.7863
+ra_hms: '1:23:08.712'
 role: observation
 sequence_num: null
 source_name: HD 8357

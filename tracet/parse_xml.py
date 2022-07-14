@@ -248,8 +248,8 @@ class parsed_VOEvent:
             self.ra_hms = None
             self.dec_dms = None
         else:
-            self.ra_hms  = Angle(self.ra,  unit=u.deg).to_string(unit=u.hour, sep=':')
-            self.dec_dms = Angle(self.dec, unit=u.deg).to_string(unit=u.deg,  sep=':')
+            self.ra_hms  = str(Angle(self.ra,  unit=u.deg).to_string(unit=u.hour, sep=':'))
+            self.dec_dms = str(Angle(self.dec, unit=u.deg).to_string(unit=u.deg,  sep=':'))
         logger.debug(f"Trig position: {self.ra} {self.dec} {self.err}")
 
         # Check the voevent role (normally observation or test)
