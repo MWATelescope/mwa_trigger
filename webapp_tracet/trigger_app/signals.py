@@ -47,7 +47,7 @@ def group_trigger(sender, instance, **kwargs):
         # Loop over all proposals settings and see if it's worth reobserving
         proposal_decisions = ProposalDecision.objects.filter(trigger_group_id=trigger_id)
         for prop_dec in proposal_decisions:
-            if prop_dec.decision == "I":
+            if prop_dec.decision == "I" or prop_dec.decision == "E":
                 # Previous events were ignored, check if this new one is up to our standards
                 # Update pos
                 prop_dec.ra = instance.ra
