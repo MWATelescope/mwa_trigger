@@ -276,14 +276,21 @@ def ProposalDecision_details(request, id):
     # Work out all the telescopes that observed the event
     voevents = models.VOEvent.objects.filter(trigger_group_id=prop_dec.trigger_group_id)
     telescopes = []
+    event_types = []
     for voevent in voevents:
         telescopes.append(voevent.telescope)
+        event_types.append(voevent.event_type)
     # Make sure they are unique and put each on a new line
     telescopes = ".\n".join(list(set(telescopes)))
+    event_types = " \n".join(list(set(event_types)))
 
-    return render(request, 'trigger_app/proposal_decision_details.html', {'prop_dec':prop_dec,
-                                                                          'telescopes':telescopes,
-                                                                          'voevents': voevents})
+    content = {
+        'prop_dec':prop_dec,
+        'telescopes':telescopes,
+        'voevents': voevents,
+        'event_types': event_types,
+    }
+    return render(request, 'trigger_app/proposal_decision_details.html', content)
 
 
 def ProposalDecision_result(request, id, decision):
