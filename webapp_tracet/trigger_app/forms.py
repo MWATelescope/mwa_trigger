@@ -3,7 +3,7 @@
 # from built-in library
 from django import forms
 from .models import UserAlerts, ProposalSettings, TelescopeProjectID
-from .validators import atca_freq_bands, mwa_proposal_id, mwa_freqspecs
+from .validators import atca_proposal_id, atca_freq_bands, mwa_proposal_id, mwa_freqspecs
 
 # creating a form
 class UserAlertForm(forms.ModelForm):
@@ -64,8 +64,12 @@ class TelescopeProjectIDForm(forms.ModelForm):
             telescope = self.cleaned_data['telescope']
             if str(telescope).startswith("MWA"):
                 mwa_proposal_id(self.cleaned_data['id'], self.cleaned_data['password'])
-
-                # TODO also check ATCA's project ID
+            elif str(telescope) == "ATCA":
+                atca_proposal_id(
+                    self.cleaned_data['id'],
+                    self.cleaned_data['password'],
+                    self.cleaned_data['atca_email'],
+                )
 
 
     # specify the name of model to use

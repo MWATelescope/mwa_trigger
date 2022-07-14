@@ -38,7 +38,11 @@ class test_grb_group_01(TestCase):
     """Tests that events in a similar position and time will be grouped as possible event associations and trigger an observation
     """
     # Load default fixtures
-    fixtures = ["default_data.yaml", "trigger_app/test_yamls/mwa_grb_proposal_settings.yaml"]
+    fixtures = [
+        "default_data.yaml",
+        "trigger_app/test_yamls/mwa_grb_proposal_settings.yaml",
+        "trigger_app/test_yamls/atca_grb_proposal_settings.yaml",
+    ]
     def setUp(self):
         xml_paths = [
             "../tests/test_events/group_01_01_Fermi.xml",
@@ -62,16 +66,24 @@ class test_grb_group_01(TestCase):
         self.assertEqual(len(VOEvent.objects.all()), 3)
         self.assertEqual(len(PossibleEventAssociation.objects.all()), 1)
 
-    def test_proposal_decision(self):
-        print(f"\n\n!!!!!!!!!!!!!!\n{ProposalDecision.objects.all().first().decision_reason}\n!!!!!!!!!!!!!!!\n\n")
-        self.assertEqual(ProposalDecision.objects.all().first().decision, 'T')
+    def test_mwa_proposal_decision(self):
+        print(f"\n\n!!!!!!!!!!!!!!\n{ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision_reason}\n!!!!!!!!!!!!!!!\n\n")
+        self.assertEqual(ProposalDecision.objects.all().filter(proposal__telescope__name='MWA_VCS').first().decision, 'T')
+
+    def test_atca_proposal_decision(self):
+        print(f"\n\n!!!!!!!!!!!!!!\n{ProposalDecision.objects.all().filter(proposal__telescope__name='ATCA').first().decision_reason}\n!!!!!!!!!!!!!!!\n\n")
+        self.assertEqual(ProposalDecision.objects.all().filter(proposal__telescope__name='ATCA').first().decision, 'T')
 
 
 class test_grb_group_02(TestCase):
     """Tests that events with the same Trigger ID will be grouped and trigger an observation
     """
     # Load default fixtures
-    fixtures = ["default_data.yaml", "trigger_app/test_yamls/mwa_grb_proposal_settings.yaml"]
+    fixtures = [
+        "default_data.yaml",
+        "trigger_app/test_yamls/mwa_grb_proposal_settings.yaml",
+        "trigger_app/test_yamls/atca_grb_proposal_settings.yaml",
+    ]
     def setUp(self):
         xml_paths = [
             "../tests/test_events/group_02_SWIFT_01_BAT_GRB_Pos.xml",
@@ -95,17 +107,24 @@ class test_grb_group_02(TestCase):
         self.assertEqual(len(VOEvent.objects.all()), 3)
         self.assertEqual(len(TriggerID.objects.all()), 1)
 
-    def test_proposal_decision(self):
+    def test_mwa_proposal_decision(self):
         print(ProposalDecision.objects.all())
-        print(f"\n\n!!!!!!!!!!!!!!\n{ProposalDecision.objects.all().first().decision_reason}\n!!!!!!!!!!!!!!!\n\n")
-        self.assertEqual(ProposalDecision.objects.all().first().decision, 'T')
+        print(f"\n\n!!!!!!!!!!!!!!\n{ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision_reason}\n!!!!!!!!!!!!!!!\n\n")
+        self.assertEqual(ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision, 'T')
+
+    def test_atca_proposal_decision(self):
+        print(f"\n\n!!!!!!!!!!!!!!\n{ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision_reason}\n!!!!!!!!!!!!!!!\n\n")
+        self.assertEqual(ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision, 'T')
 
 
 class test_nu(TestCase):
     """Tests that a neutrino VOEvent will trigger an observation
     """
     # Load default fixtures
-    fixtures = ["default_data.yaml", "trigger_app/test_yamls/mwa_nu_proposal_settings.yaml"]
+    fixtures = [
+        "default_data.yaml",
+        "trigger_app/test_yamls/mwa_nu_proposal_settings.yaml",
+    ]
     def setUp(self):
         xml_paths = [
             "../tests/test_events/Antares_1438351269.xml",
@@ -141,7 +160,10 @@ class test_fs(TestCase):
     """Tests that a flare star VOEvent will trigger an observation
     """
     # Load default fixtures
-    fixtures = ["default_data.yaml", "trigger_app/test_yamls/mwa_fs_proposal_settings.yaml"]
+    fixtures = [
+        "default_data.yaml",
+        "trigger_app/test_yamls/mwa_fs_proposal_settings.yaml",
+    ]
     def setUp(self):
         xml_paths = [
             "../tests/test_events/HD_8537_FLARE_STAR_TEST.xml",

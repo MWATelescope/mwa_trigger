@@ -31,8 +31,9 @@ class EventTelescope(models.Model):
 
 class TelescopeProjectID(models.Model):
     id = models.CharField(primary_key=True, max_length=64, verbose_name="Telescope Project ID", help_text="The project ID for the telescope used to automatically schedule observations.")
-    password = models.CharField(max_length=64, verbose_name="Telescope Project Password", help_text="The project password for the telescope used to automatically schedule observations.")
+    password = models.CharField(max_length=1024, verbose_name="Telescope Project Password", help_text="The project password for the telescope used to automatically schedule observations.")
     description = models.CharField(max_length=256, help_text="A brief description of the project.")
+    atca_email = models.CharField(blank=True, null=True, max_length=256, verbose_name="ATCA Proposal Email", help_text="The email address of someone that was on the ATCA observing proposal. This is an authentication step only required for ATCA.")
     telescope = models.ForeignKey(
         Telescope,
         to_field="name",
@@ -87,25 +88,26 @@ class ProposalSettings(models.Model):
     mwa_horizon_limit = models.FloatField(verbose_name="Horizon limit (deg)", help_text="The minimum elevation of the source to observe (in degrees).", default=10.)
 
     # ATCA setting
-    atca_band_3mm = models.BooleanField(default=False, verbose_name="Use 3mm Band?")
+    atca_band_3mm = models.BooleanField(default=False, verbose_name="Use 3mm Band (83-105 GHz)?")
     atca_band_3mm_exptime = models.IntegerField(default=720, verbose_name="Band Exposure Time (mins)", help_text="Total exposure time of the observation cycle at this frequency band.")
     atca_band_3mm_freq1 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 1 (MHz)", help_text="The centre of the first frequency channel in MHz.")
     atca_band_3mm_freq2 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 2 (MHz)", help_text="The centre of the second frequency channel in MHz.")
-    atca_band_7mm = models.BooleanField(default=False, verbose_name="Use 7mm Band?")
+    atca_band_7mm = models.BooleanField(default=False, verbose_name="Use 7mm Band (30-50 GHz)?")
     atca_band_7mm_exptime = models.IntegerField(default=720, verbose_name="Band Exposure Time (mins)", help_text="Total exposure time of the observation cycle at this frequency band.")
     atca_band_7mm_freq1 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 1 (MHz)", help_text="The centre of the first frequency channel in MHz.")
     atca_band_7mm_freq2 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 2 (MHz)", help_text="The centre of the second frequency channel in MHz.")
-    atca_band_15mm = models.BooleanField(default=False, verbose_name="Use 15mm Band?")
+    atca_band_15mm = models.BooleanField(default=False, verbose_name="Use 15mm Band (16-25 GHz)?")
     atca_band_15mm_exptime = models.IntegerField(default=720, verbose_name="Band Exposure Time (mins)", help_text="Total exposure time of the observation cycle at this frequency band.")
     atca_band_15mm_freq1 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 1 (MHz)", help_text="The centre of the first frequency channel in MHz.")
     atca_band_15mm_freq2 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 2 (MHz)", help_text="The centre of the second frequency channel in MHz.")
-    atca_band_4cm = models.BooleanField(default=False, verbose_name="Use 4cm Band?")
+    atca_band_4cm = models.BooleanField(default=False, verbose_name="Use 4cm Band (3.9-11.0 GHz)?")
     atca_band_4cm_exptime = models.IntegerField(default=720, verbose_name="Band Exposure Time (mins)", help_text="Total exposure time of the observation cycle at this frequency band.")
     atca_band_4cm_freq1 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 1 (MHz)", help_text="The centre of the first frequency channel in MHz.")
     atca_band_4cm_freq2 = models.IntegerField(blank=True, null=True, verbose_name="Centre frequency 2 (MHz)", help_text="The centre of the second frequency channel in MHz.")
-    atca_band_16cm = models.BooleanField(default=False, verbose_name="User 16cm Band?")
+    atca_band_16cm = models.BooleanField(default=False, verbose_name="User 16cm Band (1.1-3.1 GHz)?")
     atca_band_16cm_exptime = models.IntegerField(default=720, verbose_name="Band Exposure Time (mins)", help_text="Total exposure time of the observation cycle at this frequency band.")
     atca_max_exptime = models.IntegerField(default=720, verbose_name="Maximum Exposure Time (mins)", help_text="Total exposure time of all the observations combined.")
+    atca_min_exptime = models.IntegerField(default=30,  verbose_name="Minimum Exposure Time (mins)", help_text="Minimum total exposure time of all the observations combined for the observation to be viable. If this amount of time is not available, the observation will not be scheduled.")
     atca_prioritise_source = models.BooleanField(default=False, verbose_name="Prioritise Source?", help_text="Prioritise time on source rather than time on calibrator.")
 
 
@@ -276,7 +278,7 @@ class UserAlerts(models.Model):
 
 
 class Observations(models.Model):
-    obsid = models.IntegerField(primary_key=True)
+    obsid = models.CharField(max_length=128, primary_key=True)
     telescope = models.ForeignKey(Telescope, to_field="name", verbose_name="Telescope name", on_delete=models.CASCADE)
     proposal_decision_id = models.ForeignKey(ProposalDecision, on_delete=models.SET_NULL, blank=True, null=True)
     website_link = models.URLField(max_length=256)

@@ -72,10 +72,12 @@ h3{
     font-weight: normal;
     border: none;
     border-collapse: collapse;
-    width: 100%;
+    /* width: 100%; */
     max-width: 100%;
     white-space: nowrap;
     background-color: white;
+    margin-right: auto;
+    margin-left: auto;
 }
 
 .fl-table td, .fl-table th {
