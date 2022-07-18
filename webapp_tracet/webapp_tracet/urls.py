@@ -42,4 +42,5 @@ urlpatterns = [
     path('voevent_view/<int:id>/', views.voevent_view),
     path('voevent_create/', views.voevent_create),
     path('test_upload_xml/', views.test_upload_xml),
+    path('cancel_atca_observation/<str:id>/', views.cancel_atca_observation),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

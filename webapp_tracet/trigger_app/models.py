@@ -159,11 +159,13 @@ class ProposalDecision(models.Model):
     I = 'I'
     E = 'E'
     T = 'T'
+    C = 'C'
     CHOICES = (
         (P, 'Pending'),
         (I, 'Ignored'),
         (E, 'Error'),
         (T, 'Triggered'),
+        (C, 'Canceled'),
     )
     decision = models.CharField(max_length=32, choices=CHOICES, default=P)
     decision_reason = models.CharField(max_length=2056, blank=True, null=True)

@@ -1,4 +1,3 @@
-#! /usr/bin/env python
 """Tests the parse_xml.py script
 """
 import os

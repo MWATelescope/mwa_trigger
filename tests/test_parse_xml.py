@@ -1,4 +1,3 @@
-#! /usr/bin/env python
 """Tests the parse_xml.py script
 """
 import os
@@ -47,6 +46,8 @@ def parse_xml_test_warpper(xml_tests):
             expected_trig['packet'] = voeventparse.prettystr(voeventparse.loads(expected_trig['packet'].encode()))
 
         # Compare to expected
+        for tkey in trig.__dict__.keys():
+            logger.debug(f"\n{tkey}\n{trig.__dict__[tkey]}\n{expected_trig[tkey]}\n")
         assert_equal(trig.__dict__, expected_trig)
 
 

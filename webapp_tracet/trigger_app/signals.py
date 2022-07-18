@@ -47,14 +47,20 @@ def group_trigger(sender, instance, **kwargs):
         # Loop over all proposals settings and see if it's worth reobserving
         proposal_decisions = ProposalDecision.objects.filter(trigger_group_id=trigger_id)
         for prop_dec in proposal_decisions:
-            if prop_dec.decision == "I" or prop_dec.decision == "E":
+            if prop_dec.decision == "C":
+                # Previous observation canceled so assume no new observations should be triggered
+                prop_dec.decision_reason = f"{prop_dec.decision_reason}Previous observation canceled so not observing VOEvent ID {instance.id}.\n "
+                prop_dec.save()
+            elif prop_dec.decision == "I" or prop_dec.decision == "E":
                 # Previous events were ignored, check if this new one is up to our standards
                 # Update pos
                 prop_dec.ra = instance.ra
                 prop_dec.dec = instance.dec
                 prop_dec.ra_hms = instance.ra_hms
                 prop_dec.dec_dms = instance.dec_dms
-                prop_dec.pos_error = instance.pos_error
+                if instance.pos_error != 0.:
+                    # Don't update pos_error if zero, assume it's a null
+                    prop_dec.pos_error = instance.pos_error
                 proposal_worth_observing(
                     prop_dec,
                     instance,
@@ -71,16 +77,37 @@ def group_trigger(sender, instance, **kwargs):
                     prop_dec.dec = instance.dec
                     prop_dec.ra_hms = instance.ra_hms
                     prop_dec.dec_dms = instance.dec_dms
-                    prop_dec.pos_error = instance.pos_error
+                    if instance.pos_error != 0.:
+                        # Don't update pos_error if zero, assume it's a null
+                        prop_dec.pos_error = instance.pos_error
                     repoint_message = f"Repointing because seperation ({event_sep} deg) is greater than the repointing limit ({prop_dec.proposal.repointing_limit} deg)."
-                    proposal_worth_observing(
+                    # Trigger observation
+                    decision, trigger_message = trigger_observation(
                         prop_dec,
-                        instance,
-                        observation_reason=repoint_message,
-                        trigger_message=f"{prop_dec.decision_reason}{repoint_message}\n "
+                        f"{prop_dec.decision_reason}{repoint_message}\n ",
+                        reason=repoint_message,
                     )
+                    if decision == 'E':
+                        # Error observing so send off debug
+                        debug_bool = True
+                    else:
+                        debug_bool = False
+                    # Update proposal decision and log
+                    prop_dec.decision = decision
+                    prop_dec.decision_reason = trigger_message
+                    prop_dec.save()
 
-        # TODO update the PossibleEventAssociation ra and dec if the position is better.
+                    # send off alert messages to users and admins
+                    send_all_alerts(True, debug_bool, False, prop_dec)
+
+        if instance.pos_error < trigger_id.pos_error  and instance.pos_error != 0.:
+            # Updated trigger group's best position
+            trigger_id.ra = instance.ra
+            trigger_id.dec = instance.dec
+            trigger_id.ra_hms = instance.ra_hms
+            trigger_id.dec_dms = instance.dec_dms
+            trigger_id.pos_error = instance.pos_error
+
         # Update latest_event_observed
         trigger_id.latest_event_observed = instance.event_observed
         trigger_id.save()
@@ -278,9 +305,6 @@ def proposal_worth_observing(
     prop_dec.decision = decision
     prop_dec.decision_reason = trigger_message
     prop_dec.save()
-
-    # TODO do something smart with these results to decide which telescope to observe with
-    # but hopefully the proposal settings will describe if you want to observe or not.
 
     # send off alert messages to users and admins
     send_all_alerts(trigger_bool, debug_bool, pending_bool, prop_dec)

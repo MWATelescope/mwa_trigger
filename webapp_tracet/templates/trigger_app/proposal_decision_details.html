@@ -124,6 +124,7 @@
           <th>Telescope</th>
           <th>Proposal Decision ID</th>
           <th>Reason</th>
+          <th>Cancel Obs?</th>
         </tr>
       </thead>
       <!-- Iterate over object_list -->
@@ -138,6 +139,11 @@
         <td>{{ ob.telescope.name }}</td>
         <td><a href="/proposal_decision_details/{{ ob.proposal_decision_id.id }}" style="text-decoration:None">{{ ob.proposal_decision_id.id }}</a</td>
         <td>{{ ob.reason }}</td>
+        <td>
+          {% if ob.telescope.name == "ATCA" and ob.proposal_decision_id.decision != 'C' %}
+            <button class="btn btn-danger" onclick='var conf = confirm("Are you sure you want to cancel observation {{ ob.obsid }}"); if (conf == true) { window.location = "/cancel_atca_observation/{{ ob.obsid }}";}'>Cancel</button>
+          {% endif %}
+        </td>
       </tr>
       <!-- If object_list is empty  -->
       {% empty %}

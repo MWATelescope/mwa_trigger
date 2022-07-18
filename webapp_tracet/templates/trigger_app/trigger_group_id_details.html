@@ -105,7 +105,7 @@
   </table>
 
 
-  {% if mwa_obs %}
+  {% if obs %}
     <h2>Observations</h2>
 
     <table class="fl-table">
@@ -115,10 +115,11 @@
           <th>Telescope</th>
           <th>Proposal Decision ID</th>
           <th>Reason</th>
+          <th>Cancel Obs?</th>
         </tr>
       </thead>
       <!-- Iterate over object_list -->
-      {% for ob in mwa_obs %}
+      {% for ob in obs %}
       <!-- Display Objects -->
       <tr>
         {% if ob.website_link is None %}
@@ -129,6 +130,11 @@
         <td>{{ ob.telescope.name }}</td>
         <td><a href="/proposal_decision_details/{{ ob.proposal_decision_id.id }}" style="text-decoration:None">{{ ob.proposal_decision_id.id }}</a</td>
         <td>{{ ob.reason }}</td>
+        <td>
+          {% if ob.telescope.name == "ATCA" %}
+            <button class="btn btn-danger" onclick='var conf = confirm("Are you sure you want to cancel observation {{ ob.obsid }}"); if (conf == true) { window.location = "/cancel_atca_observation/{{ ob.obsid }}";}'>Cancel</button>
+          {% endif %}
+        </td>
       </tr>
       <!-- If object_list is empty  -->
       {% empty %}

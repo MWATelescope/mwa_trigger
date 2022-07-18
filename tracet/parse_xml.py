@@ -188,6 +188,8 @@ class parsed_VOEvent:
             # use defaults
             self.trig_pairs = [
                 "SWIFT_BAT_GRB_Pos",
+                "SWIFT_BAT_QuickLook_Pos",
+                "SWIFT_FOM_Obs",
                 "SWIFT_XRT_Pos",
                 "SWIFT_UVOT_Pos",
                 "Fermi_GBM_Flt_Pos",
@@ -248,8 +250,8 @@ class parsed_VOEvent:
             self.ra_hms = None
             self.dec_dms = None
         else:
-            self.ra_hms  = Angle(self.ra,  unit=u.deg).to_string(unit=u.hour, sep=':')
-            self.dec_dms = Angle(self.dec, unit=u.deg).to_string(unit=u.deg,  sep=':')
+            self.ra_hms  = str(Angle(self.ra,  unit=u.deg).to_string(unit=u.hour, sep=':'))
+            self.dec_dms = str(Angle(self.dec, unit=u.deg).to_string(unit=u.deg,  sep=':'))
         logger.debug(f"Trig position: {self.ra} {self.dec} {self.err}")
 
         # Check the voevent role (normally observation or test)
@@ -292,31 +294,33 @@ class parsed_VOEvent:
                 v.find(".//Param[@name='Most_Likely_Prob']").attrib["value"]
             )
         elif self.telescope == "SWIFT":
-            if "BAT" in self.event_type:
-                # Check if SWIFT tracking fails
-                startrack_lost_lock = v.find(
-                    ".//Param[@name='StarTrack_Lost_Lock']"
-                ).attrib["value"]
+            # Check if SWIFT tracking fails
+            startrack_lost_lock = v.find(".//Param[@name='StarTrack_Lost_Lock']")
+            if startrack_lost_lock is None:
+                # No 'StarTrack_Lost_Lock' in xml so assume false
+                startrack_lost_lock = False
+            else:
+                startrack_lost_lock = startrack_lost_lock.attrib["value"]
                 # convert 'true' to True, and everything else to false
-                startrack_lost_lock = startrack_lost_lock.lower() == "true"
-                logger.debug("StarLock OK? {0}".format(not startrack_lost_lock))
-                if startrack_lost_lock:
-                    logger.warning(
-                        "The SWIFT star tracker lost it's lock so ignoring event"
-                    )
-                    self.event_type += " SWIFT lost star tracker"
-                    self.ignore = True
-                    return
+                startrack_lost_lock = (startrack_lost_lock.lower() == "true")
+            logger.debug("StarLock OK? {0}".format(not startrack_lost_lock))
+            if startrack_lost_lock:
+                logger.warning("The SWIFT star tracker lost it's lock so ignoring event")
+                self.event_type += " SWIFT lost star tracker"
+                self.ignore = True
+                return
 
-                # Get time and significance
-                self.trig_duration = float(
-                    v.find(".//Param[@name='Integ_Time']").attrib["value"]
-                )
-                self.sequence_num = None
-                self.swift_rate_signif = float(
-                    v.find(".//Param[@name='Rate_Signif']").attrib["value"]
-                )
-                self.grb_ident = v.find(".//Param[@name='GRB_Identified']").attrib["value"]
+            # Get time and significance
+            trig_duration = v.find(".//Param[@name='Integ_Time']")
+            if trig_duration is not None:
+                self.trig_duration = float(trig_duration.attrib["value"])
+            self.sequence_num = None
+            swift_rate_signif = v.find(".//Param[@name='Rate_Signif']")
+            if swift_rate_signif is not None:
+                self.swift_rate_signif = float(swift_rate_signif.attrib["value"])
+            grb_ident = v.find(".//Param[@name='GRB_Identified']")
+            if grb_ident is not None:
+                self.grb_ident = grb_ident.attrib["value"]
 
         elif self.telescope == "Antares":
             self.trig_duration = None

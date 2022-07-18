@@ -1,5 +1,6 @@
 antares_ranking: null
 dec: 48.4167
+dec_dms: '48:25:00.12'
 err: 4.7333
 event_observed: !!python/object/apply:lxml.objectify.fromstring
 - !!binary |
@@ -81,6 +82,7 @@ packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=
   \  </Citations>\n  <Description>\n    </Description>\n  <original_prefix>voe</original_prefix>\n\
   </VOEvent>\n"
 ra: 241.6167
+ra_hms: '16:06:28.008'
 role: observation
 sequence_num: 46
 source_name: null
@@ -91,6 +93,8 @@ trig_duration: 0.512
 trig_id: 533367528
 trig_pairs:
 - SWIFT_BAT_GRB_Pos
+- SWIFT_BAT_QuickLook_Pos
+- SWIFT_FOM_Obs
 - SWIFT_XRT_Pos
 - SWIFT_UVOT_Pos
 - Fermi_GBM_Flt_Pos
