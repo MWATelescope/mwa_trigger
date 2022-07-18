@@ -5,13 +5,12 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.db import transaction
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger, InvalidPage
+from django.core.paginator import Paginator, InvalidPage
 import django_filters
 
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-import mimetypes
 
 from . import models, serializers, forms, signals
 from .telescope_observe import trigger_observation
@@ -23,6 +22,7 @@ from astropy import units as u
 import datetime
 
 from tracet import parse_xml
+import atca_rapid_response_api as arrApi
 
 import logging
 logger = logging.getLogger(__name__)
@@ -523,3 +523,22 @@ def test_upload_xml(request):
     else:
         form = forms.TestVOEvent()
     return render(request, 'trigger_app/test_upload_xml_form.html', {'form': form, "proposals": proposals})
+
+
+def cancel_atca_observation(request, id=None):
+    # Grab obs and proposal data
+    obs = models.Observations.objects.filter(obsid=id).first()
+    proposal_settings = obs.proposal_decision_id.proposal
+
+    # Create the cancel request
+    rapidObj = { 'requestDict': { 'cancel': obs.obsid, 'project': proposal_settings.project_id.id } }
+    rapidObj["authenticationToken"] = proposal_settings.project_id.password
+    rapidObj["email"] = proposal_settings.project_id.atca_email
+
+    # Send the request.
+    atca_request = arrApi.api(rapidObj)
+    try:
+        response = atca_request.send()
+    except arrApi.responseError as r:
+        print(r.value)
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
