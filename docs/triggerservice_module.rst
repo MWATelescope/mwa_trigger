@@ -8,9 +8,9 @@ trigger_mwa Function
 --------------------
 .. autofunction:: trigger_mwa
 
-trigger_atca Function
----------------------
-.. autofunction:: trigger_atca
+.. trigger_atca Function
+.. ---------------------
+.. .. autofunction:: trigger_atca
 
 web_api Function
 ----------------
