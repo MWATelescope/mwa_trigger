@@ -1,12 +1,11 @@
-<?xml version = '1.0' encoding = 'UTF-8'?>
-<voe:VOEvent
-      ivorn="ivo://nasa.gsfc.gcn/Antares_Alert#1438351269"
+<?xml version='1.0' encoding='UTF-8'?>
+<voe:VOEvent ivorn="ivo://nasa.gsfc.gcn/Antares_Alert#1438351269"
       role="observation"
       version="2.0"
-      xmlns:voe="http://www.ivoa.net/xml/VOEvent/v2.0"
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xmlns:xlink="http://www.w3.org/1999/xlink"
-      xsi:schemaLocation="http://www.ivoa.net/xml/VOEvent/v1.1 http://www.ivoa.net/xml/VOEvent/VOEvent-v1.1.xsd" >
+      xmlns:voe="https://www.ivoa.net/xml/VOEvent/v2.0"
+      xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+      xmlns:xlink="https://www.w3.org/1999/xlink"
+      xsi:schemaLocation="https://www.ivoa.net/xml/VOEvent/v1.1 https://www.ivoa.net/xml/VOEvent/VOEvent-v1.1.xsd" >
     <Who>
         <AuthorIVORN>ivo://nasa.gsfc.tan/gcn</AuthorIVORN>
         <Author>

@@ -1,0 +1,18 @@
+{% extends 'trigger_app/header.html' %}
+
+{% block title %}{{ page.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2>VOEvent Testing</h2>
+    <p>This page is used to test the web app.
+        Below you can input the contents of a VOEvent XML file and submit it.
+        This will cause the web app to treat this as a real VOEvent to test its response.
+        It is best to change all proposals to testing mode before submitting them to assure no telescope time is wasted.</p>
+    <form action = "" method = "post" onsubmit="return confirm('Are you sure you want to submit?{% if proposals %} The following proposals are not in testing mode {% for prop in proposals %} {{ prop.proposal_id }}{%endfor%}. {% endif %}');">
+        {% csrf_token %}
+        <p><textarea name='xml_packet' rows="4" cols="70" class="form-control" placeholder="Enter the VOEvent xml file contents here."></textarea></p>
+        <input type="submit" value=Submit>
+    </form>
+</div>
+{% endblock %}

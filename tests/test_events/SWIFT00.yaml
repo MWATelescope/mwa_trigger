@@ -1,4 +1,6 @@
+antares_ranking: null
 dec: -80.0
+dec_dms: '-80:00:00'
 err: 0.05
 event_observed: !!python/object/apply:lxml.objectify.fromstring
 - !!binary |
@@ -105,6 +107,8 @@ packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=
   \  <Description>\n    </Description>\n  <original_prefix>voe</original_prefix>\n\
   </VOEvent>\n"
 ra: 45.0
+ra_hms: '3:00:00'
+role: observation
 sequence_num: null
 source_name: GRB 170912
 source_type: GRB
@@ -114,10 +118,15 @@ trig_duration: 4.096
 trig_id: 772006
 trig_pairs:
 - SWIFT_BAT_GRB_Pos
+- SWIFT_BAT_QuickLook_Pos
+- SWIFT_FOM_Obs
 - SWIFT_XRT_Pos
 - SWIFT_UVOT_Pos
 - Fermi_GBM_Flt_Pos
 - Fermi_GBM_Gnd_Pos
 - Fermi_GBM_Fin_Pos
 - HESS_GRB_To
+- AMON_ICECUBE_BRONZE_Event
+- AMON_ICECUBE_GOLD_Event
+- Antares_Alert
 xml: tests/test_events/SWIFT00.xml

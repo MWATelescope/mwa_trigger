@@ -2,7 +2,7 @@ parse\_xml Module
 =================
 
 
-.. currentmodule:: mwa_trigger.parse_xml
+.. currentmodule:: tracet.parse_xml
 
 parsed_VOEvent Class
 --------------------

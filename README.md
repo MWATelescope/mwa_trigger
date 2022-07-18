@@ -2,15 +2,15 @@
 
 ## Credit
 This repository was developed for use on the MWA telescope by Andrew Williams with contributions from Paul Hancock.
-The triggering logic for individual handlers were developed by various project groups - see the `__author__` fields in the scripts in the `mwa_trigger/` directory.
+The triggering logic for individual handlers were developed by various project groups - see the `__author__` fields in the scripts in the `tracet/` directory.
 
 If you use this code to generate observations for your research please cite the description paper [Hancock et al, 2019](https://ui.adsabs.harvard.edu/abs/2019PASA...36...46H/abstract), and [Anderson et al, 2021](https://ui.adsabs.harvard.edu/abs/2021PASA...38...26A/abstract)
 
 ## Contents
 
-This repository is made up of the `mwa_trigger` python moudle and the `trigger_webapp`.
+This repository is made up of the `tracet` python moudle and the `webapp_tracet`.
 
-### mwa_trigger
+### tracet
 This module contains useful functions such as:
 
 ```
@@ -20,10 +20,10 @@ trigger_logic.py - decided if the parsed xml is worth observing with several met
 
 triggerservice.py - calls the web service to schedule observations with the MWA and ATCA telescopes.
 ```
-The full documentation can be found [here](https://mwa_trigger.readthedocs.io/en/latest/)
+The full documentation can be found [here](https://tracet.readthedocs.io/en/latest/)
 
 ### Trigger webapp
-A web application that can automatically monitor for VOEvents and trigger observations based on the parameters the user has set. How to install and use the web app is explained in trigger_webapp/README.md.
+A web application that can automatically monitor for VOEvents and trigger observations based on the parameters the user has set. How to install and use the web app is explained in webapp_tracet/README.md.
 
 ## Latency
 

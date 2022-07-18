@@ -1,14 +1,21 @@
-dec: null
-err: null
-event_observed: null
-event_type: '143835126'
+antares_ranking: 1
+dec: -21.274
+dec_dms: '-21:16:26.4'
+err: 0.325
+event_observed: !!python/object/apply:lxml.objectify.fromstring
+- !!binary |
+  PElTT1RpbWUgeG1sbnM6dm9lPSJodHRwczovL3d3dy5pdm9hLm5ldC94bWwvVk9FdmVudC92Mi4w
+  IiB4bWxuczp4c2k9Imh0dHBzOi8vd3d3LnczLm9yZy8yMDAxL1hNTFNjaGVtYS1pbnN0YW5jZSIg
+  eG1sbnM6eGxpbms9Imh0dHBzOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIj4yMDE5LTExLTI2VDIx
+  OjU1OjM0LjAwMDwvSVNPVGltZT4=
+event_type: Alert
 fermi_detection_prob: null
 fermi_most_likely_index: null
 grb_ident: null
-ignore: true
-packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=\"\
+ignore: false
+packet: "<VOEvent xmlns:xsi=\"https://www.w3.org/2001/XMLSchema-instance\" ivorn=\"\
   ivo://nasa.gsfc.gcn/Antares_Alert#1438351269\" role=\"observation\" version=\"2.0\"\
-  \ xsi:schemaLocation=\"http://www.ivoa.net/xml/VOEvent/v1.1 http://www.ivoa.net/xml/VOEvent/VOEvent-v1.1.xsd\"\
+  \ xsi:schemaLocation=\"https://www.ivoa.net/xml/VOEvent/v1.1 https://www.ivoa.net/xml/VOEvent/VOEvent-v1.1.xsd\"\
   >\n  <Who>\n    <AuthorIVORN>ivo://nasa.gsfc.tan/gcn</AuthorIVORN>\n    <Author>\n\
   \      <shortName>Antares (via VO-GCN)</shortName>\n      <contactName>Damien Dornic</contactName>\n\
   \      <contactPhone>+1-33620882320</contactPhone>\n      <contactEmail>dornic@cppm.in2p3.fr</contactEmail>\n\
@@ -43,7 +50,9 @@ packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=
   \    <Description>This is the position of the neutrino.</Description>\n  </Citations>\n\
   \  <Description>\n    </Description>\n  <original_prefix>voe</original_prefix>\n\
   </VOEvent>\n"
-ra: null
+ra: 156.957
+ra_hms: '10:27:49.68'
+role: observation
 sequence_num: null
 source_name: null
 source_type: NU
@@ -53,10 +62,15 @@ trig_duration: null
 trig_id: 1438351269
 trig_pairs:
 - SWIFT_BAT_GRB_Pos
+- SWIFT_BAT_QuickLook_Pos
+- SWIFT_FOM_Obs
 - SWIFT_XRT_Pos
 - SWIFT_UVOT_Pos
 - Fermi_GBM_Flt_Pos
 - Fermi_GBM_Gnd_Pos
 - Fermi_GBM_Fin_Pos
 - HESS_GRB_To
+- AMON_ICECUBE_BRONZE_Event
+- AMON_ICECUBE_GOLD_Event
+- Antares_Alert
 xml: tests/test_events/Antares_1438351269.xml

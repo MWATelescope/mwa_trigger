@@ -29,14 +29,14 @@ First try and get it to work with the nimbus IP as the URL. From directory conta
 
 .. code-block::
 
-   uwsgi --socket trigger_webapp.sock --module trigger_webapp.wsgi --chmod-socket=666
+   uwsgi --socket webapp_tracet.sock --module webapp_tracet.wsgi --chmod-socket=666
 
 and nginx should look like this
 
 .. code-block::
 
    upstream django {
-      server unix:///home/ubuntu/mwa_trigger/trigger_webapp/trigger_webapp.sock;
+      server unix:///home/ubuntu/tracet/webapp_tracet/webapp_tracet.sock;
    }
 
    server {
@@ -47,12 +47,12 @@ and nginx should look like this
       client_max_body_size 75M;
 
       location /static {
-         alias /home/ubuntu/mwa_trigger/trigger_webapp/static;
+         alias /home/ubuntu/tracet/webapp_tracet/static;
       }
 
       location / {
          uwsgi_pass  django;
-         include     /home/ubuntu/mwa_trigger/trigger_webapp/uwsgi_params;
+         include     /home/ubuntu/tracet/webapp_tracet/uwsgi_params;
       }
    }
 
@@ -88,7 +88,7 @@ and update the nginx to
 .. code-block::
 
    location /static {
-      alias /home/ubuntu/mwa_trigger/trigger_webapp/static_host;
+      alias /home/ubuntu/tracet/webapp_tracet/static_host;
    }
 
 Try a simple domain
@@ -109,7 +109,7 @@ nginx errors are in
 
    tail -f cat /var/log/nginx/error.log
 
-All commands assume you're in the trigger_webapp sub directory. You can see the output of the server with
+All commands assume you're in the webapp_tracet sub directory. You can see the output of the server with
 
 .. code-block::
 
@@ -124,7 +124,7 @@ Start the uwsgi server with
 
 .. code-block::
 
-   uwsgi --ini trigger_webapp_uwsgi.ini
+   uwsgi --ini webapp_tracet_uwsgi.ini
 
 This will run in the background and the following sections describe how to restarting and stopping the server.
 
