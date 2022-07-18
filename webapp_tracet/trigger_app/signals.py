@@ -47,7 +47,11 @@ def group_trigger(sender, instance, **kwargs):
         # Loop over all proposals settings and see if it's worth reobserving
         proposal_decisions = ProposalDecision.objects.filter(trigger_group_id=trigger_id)
         for prop_dec in proposal_decisions:
-            if prop_dec.decision == "I" or prop_dec.decision == "E":
+            if prop_dec.decision == "C":
+                # Previous observation canceled so assume no new observations should be triggered
+                prop_dec.decision_reason = f"{prop_dec.decision_reason}Previous observation canceled so not observing VOEvent ID {instance.id}.\n "
+                prop_dec.save()
+            elif prop_dec.decision == "I" or prop_dec.decision == "E":
                 # Previous events were ignored, check if this new one is up to our standards
                 # Update pos
                 prop_dec.ra = instance.ra
