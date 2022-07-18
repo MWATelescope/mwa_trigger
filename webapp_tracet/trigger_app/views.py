@@ -255,16 +255,16 @@ def TriggerID_details(request, tid):
     prop_decs = models.ProposalDecision.objects.filter(trigger_group_id=trigger_event)
 
     # Grab MWA obs if the exist
-    mwa_obs = []
+    obs = []
     for prop_dec in prop_decs:
-        mwa_obs += models.Observations.objects.filter(proposal_decision_id=prop_dec)
+        obs += models.Observations.objects.filter(proposal_decision_id=prop_dec)
 
     # Get position error units
     poserr_unit = request.GET.get('poserr_unit', 'deg')
 
     return render(request, 'trigger_app/trigger_group_id_details.html', {'trigger_event':trigger_event,
                                                                      'voevents':voevents,
-                                                                     'mwa_obs':mwa_obs,
+                                                                     'obs':obs,
                                                                      'prop_decs':prop_decs,
                                                                      'telescopes':telescopes,
                                                                      'poserr_unit':poserr_unit,})
