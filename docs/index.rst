@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to tracet's documentation!
+Welcome to TraceT's documentation!
 =======================================
 
 This documentation is split into three sections.
@@ -13,6 +13,13 @@ observe different sources and explain some of the telescope's VOEvent informatio
 The tracet documentation describes the python package and its functions that can be
 used to parse XML files, decide if sources are worth observing and trigger observations
 with the MWA and ATCA.
+
+.. toctree::
+   :maxdepth: 4
+   :caption: Introduction:
+   
+   what_is_tracet
+   overview_of_tracet
 
 .. toctree::
    :maxdepth: 4
@@ -37,8 +44,14 @@ with the MWA and ATCA.
 
 .. toctree::
    :maxdepth: 4
-   :caption: tracet Package:
+   :caption: TraceT Package:
 
    parse_xml_module
    trigger_logic_module
    triggerservice_module
+
+.. toctree::
+   :maxdepth: 4
+   :caption: Further Reading:
+   
+   glossary
