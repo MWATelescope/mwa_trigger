@@ -529,6 +529,7 @@ def cancel_atca_observation(request, id=None):
     # Grab obs and proposal data
     obs = models.Observations.objects.filter(obsid=id).first()
     proposal_settings = obs.proposal_decision_id.proposal
+    trigger_message = obs.proposal_decision_id.decision_reason
 
     # Create the cancel request
     rapidObj = { 'requestDict': { 'cancel': obs.obsid, 'project': proposal_settings.project_id.id } }
@@ -540,5 +541,16 @@ def cancel_atca_observation(request, id=None):
     try:
         response = atca_request.send()
     except arrApi.responseError as r:
-        print(r.value)
+        logger.error(f"ATCA return message: {r}")
+        trigger_message += f"ATCA cancel failed, return message: {r}\n "
+        decision = 'E'
+    else:
+        trigger_message += f"ATCA observation canceled at {datetime.datetime.utcnow()}. \n"
+        decision = 'C'
+    # Update propocal decision
+    proposal_decision = obs.proposal_decision_id
+    proposal_decision.decision_reason = trigger_message
+    proposal_decision.decision = decision
+    proposal_decision.save()
+
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
