@@ -2,6 +2,7 @@ Installation
 ============
 
 For Ubuntu or Debian Linux:
+
 .. code-block::
 
    sudo apt-get update
