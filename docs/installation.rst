@@ -21,7 +21,7 @@ Environment Variables
 
 To run the web application, you will need to set the following environment variables:
 
-.. csv-table:: Envionment Variables
+.. csv-table::
    :header: "Variable","Description"
 
    "DB_USER","Postgres user name which you will set in the next section."
@@ -32,7 +32,7 @@ To run the web application, you will need to set the following environment varia
    "GMAIL_APP_PASSWORD", "The app password for the mwa.trigger@gmail.com email. This can be supplied by Nick Swainston."
    "MWA_SECURE_KEY", "This a project dependent secure key to schedule MWA observations. Contact the MWA operations team to receive one."
    "ATCA_SECURE_KEY_FILE", "This a project dependent secure key file to schedule ATCA observations. Contact the ATCA operations team to receive one."
-   "SYSTEM_ENV", " Set this either to 'PRODUCTION' to turn off debug and enable CSRF_COOKIE_SECURE, or 'DEVELOPMENT' to turn on debug"
+   "SYSTEM_ENV", "Set this either to 'PRODUCTION' to turn off debug and enable CSRF_COOKIE_SECURE, or 'DEVELOPMENT' to turn on debug"
    "UPLOAD_USER", "A username of an account that will be used by upload_xml.py to upload VOEvents"
    "UPLOAD_PASSWORD", "The password of the upload user"
 
