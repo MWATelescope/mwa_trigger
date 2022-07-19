@@ -1,22 +1,34 @@
+.. _glossary:
+
 Glossary of terms
 =================
 
 GRB
+    A Gamma-Ray Burst
 
 MWA
+    The Murchison Widefield Array, radio telescope in Western Australia
+
 VCS
+    Voltage Capture System, an instrument on the MWA which captures data at the highest time/frequency resolution
+
 ATCA
-SWIFT
+    Australia Telescope Compact Array, radio telescope in New South Wales
+
+*SWIFT*
+    The Neil Gehrels Swift Observatory, a Gamma-Ray telescope in orbit with x-ray, UV, and optical instruments.
+
 Fermi
+    A Gamma-Ray space telescope.
+
 VOEvent
+    Virtual Observatory Event, a format for distributing notices
 
-Proposal
-Alert
+PostgreSQL
+    A database management system, also known as Postrgres
 
-Postgres
 Nimbus
+    A cloud compute system provided by Pawsey.
+
 Pawsey
-Firewall
-IP
-URL
-XML
+    A super-computing facility in Perth. Hosts the MWA data archive, and provides most of the computing support for WA astronomers.
