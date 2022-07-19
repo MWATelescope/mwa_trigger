@@ -1,3 +1,5 @@
+.. _triggerservice:
+
 triggerservice Module
 =====================
 
