@@ -504,8 +504,8 @@ def test_upload_xml(request):
             # Parse and submit the VOEvent
             xml_string = str(request.POST['xml_packet'])
             trig = parse_xml.parsed_VOEvent(None, packet=xml_string)
-            print(trig.event_observed)
-            print(type(trig.event_observed))
+            logger.debug(trig.event_observed)
+            logger.debug(type(trig.event_observed))
             models.VOEvent.objects.get_or_create(
                 telescope=trig.telescope,
                 xml_packet=xml_string,

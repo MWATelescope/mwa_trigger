@@ -246,6 +246,7 @@ def proposal_worth_observing(
                     fermi_detection_prob=voevent.fermi_detection_prob,
                     swift_rate_signif=voevent.swift_rate_signif,
                     # Thresholds
+                    trig_any_duration=prop_dec.proposal.trig_any_duration,
                     trig_min_duration=prop_dec.proposal.trig_min_duration,
                     trig_max_duration=prop_dec.proposal.trig_max_duration,
                     pending_min_duration_1=prop_dec.proposal.pending_min_duration_1,
@@ -340,7 +341,6 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
     next_24h = obstime=Time.now()+delta_24h
     obs_source_altaz = obs_source.transform_to(AltAz(obstime=next_24h, location=location))
     for altaz, time in zip(obs_source_altaz, next_24h):
-        print(time, altaz.alt.deg)
         if altaz.alt.deg <1.:
             # source below horizon so record time
             set_time_utc = time
