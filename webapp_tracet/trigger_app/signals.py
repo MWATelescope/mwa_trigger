@@ -344,6 +344,7 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
         if altaz.alt.deg <1.:
             # source below horizon so record time
             set_time_utc = time
+            break
 
     # Get all admin alert permissions for this project
     admin_alerts = AdminAlerts.objects.filter(proposal=proposal_decision_model.proposal)
