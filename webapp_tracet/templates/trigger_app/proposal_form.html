@@ -49,11 +49,14 @@
         <h2>Event Source Settings</h2>
         {% for error in form.source_type.errors %}<div class="alert alert-danger"><strong>{{ error|escape }}</strong></div>{% endfor %}
         <h3>Source duration</h3>
+        <p>{{ form.trig_any_duration.label_tag }}{% help_wrap form.trig_any_duration.help_text %}{{ form.trig_any_duration }}</p>
+        <div id="durations">
         <table>
             <tr><td>Trigger Duration Range (s)  {% help_wrap 'The inclusive duration range of an event that will automatically trigger an observation.' %}</td><td>{{ form.trig_min_duration }}</td><td>{{ form.trig_max_duration }}</td></tr>
             <tr><td>Pending Duration Range 1 (s){% help_wrap 'The inclusive duration range of an event that will notify users and let them decided if an observations should be triggered.' %}</td><td>{{ form.pending_min_duration_1 }}</td><td>{{ form.pending_max_duration_1 }}</td></tr>
             <tr><td>Pending Duration Range 2 (s){% help_wrap 'A second inclusive duration range of an event that will notify users and let them decided if an observations should be triggered.' %}</td><td>{{ form.pending_min_duration_2 }}</td><td>{{ form.pending_max_duration_2 }}</td></tr>
         </table>
+        </div>
         <h3>Source thresholds</h3>
         {{ form.maximum_position_uncertainty.label_tag }}{% help_wrap form.maximum_position_uncertainty.help_text %}{{ form.maximum_position_uncertainty }}
         <div id="fermi_thres">
@@ -110,6 +113,8 @@
                 <tr><td>{{ form.atca_band_3mm_freq1.label_tag }}{% help_wrap form.atca_band_3mm_freq1.help_text %}</td><td>{{ form.atca_band_3mm_freq1 }}</td></tr>
                 <tr><td>{{ form.atca_band_3mm_freq2.label_tag }}{% help_wrap form.atca_band_3mm_freq2.help_text %}</td><td>{{ form.atca_band_3mm_freq2 }}</td></tr>
             </table>
+            {% for error in form.atca_band_3mm_freq1.errors %}<div class="alert alert-danger"><strong>{{ form.atca_band_3mm_freq1.label_tag }}{{ error|escape }}</strong></div>{% endfor %}
+            {% for error in form.atca_band_3mm_freq2.errors %}<div class="alert alert-danger"><strong>{{ form.atca_band_3mm_freq2.label_tag }}{{ error|escape }}</strong></div>{% endfor %}
             <hr>
             {{ form.atca_band_7mm }}{{ form.atca_band_7mm.label_tag }}<br>
             <table>
@@ -117,6 +122,8 @@
                 <tr><td>{{ form.atca_band_7mm_freq1.label_tag }}{% help_wrap form.atca_band_7mm_freq1.help_text %}</td><td>{{ form.atca_band_7mm_freq1 }}</td></tr>
                 <tr><td>{{ form.atca_band_7mm_freq2.label_tag }}{% help_wrap form.atca_band_7mm_freq2.help_text %}</td><td>{{ form.atca_band_7mm_freq2 }}</td></tr>
             </table>
+            {% for error in form.atca_band_7mm_freq1.errors %}<div class="alert alert-danger"><strong>{{ form.atca_band_7mm_freq1.label_tag }}{{ error|escape }}</strong></div>{% endfor %}
+            {% for error in form.atca_band_7mm_freq2.errors %}<div class="alert alert-danger"><strong>{{ form.atca_band_7mm_freq2.label_tag }}{{ error|escape }}</strong></div>{% endfor %}
             <hr>
             {{ form.atca_band_15mm }}{{ form.atca_band_15mm.label_tag }}<br>
             <table>
@@ -124,6 +131,8 @@
                 <tr><td>{{ form.atca_band_15mm_freq1.label_tag }}{% help_wrap form.atca_band_15mm_freq1.help_text %}</td><td>{{ form.atca_band_15mm_freq1 }}</td></tr>
                 <tr><td>{{ form.atca_band_15mm_freq2.label_tag }}{% help_wrap form.atca_band_15mm_freq2.help_text %}</td><td>{{ form.atca_band_15mm_freq2 }}</td></tr>
             </table>
+            {% for error in form.atca_band_15mm_freq1.errors %}<div class="alert alert-danger"><strong>{{ form.atca_band_15mm_freq1.label_tag }}{{ error|escape }}</strong></div>{% endfor %}
+            {% for error in form.atca_band_15mm_freq2.errors %}<div class="alert alert-danger"><strong>{{ form.atca_band_15mm_freq2.label_tag }}{{ error|escape }}</strong></div>{% endfor %}
             <hr>
             {{ form.atca_band_4cm }}{{ form.atca_band_4cm.label_tag }}<br>
             <table>
@@ -131,6 +140,8 @@
                 <tr><td>{{ form.atca_band_4cm_freq1.label_tag }}{% help_wrap form.atca_band_4cm_freq1.help_text %}</td><td>{{ form.atca_band_4cm_freq1 }}</td></tr>
                 <tr><td>{{ form.atca_band_4cm_freq2.label_tag }}{% help_wrap form.atca_band_4cm_freq2.help_text %}</td><td>{{ form.atca_band_4cm_freq2 }}</td></tr>
             </table>
+            {% for error in form.atca_band_4cm_freq1.errors %}<div class="alert alert-danger"><strong>{{ form.atca_band_4cm_freq1.label_tag }}{{ error|escape }}</strong></div>{% endfor %}
+            {% for error in form.atca_band_4cm_freq2.errors %}<div class="alert alert-danger"><strong>{{ form.atca_band_4cm_freq2.label_tag }}{{ error|escape }}</strong></div>{% endfor %}
             <hr>{{ form.atca_band_16cm }}{{ form.atca_band_16cm.label_tag }}<br>
             <table>
                 <tr><td>{{ form.atca_band_16cm_exptime.label_tag }}{% help_wrap form.atca_band_16cm_exptime.help_text %}</td><td>{{ form.atca_band_16cm_exptime }}</td></tr>
@@ -241,6 +252,14 @@
                 }
             }
             threshold_display();
+            $("#id_trig_any_duration").change(function() {
+                if ($(this).is(':checked') ) {
+                    $('#durations').hide();
+                } else {
+                    $('#durations').show();
+                }
+            });
+            $("#id_trig_any_duration").trigger("change")
         })
     </script>
 {% endblock %}

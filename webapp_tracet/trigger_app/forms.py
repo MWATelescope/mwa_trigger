@@ -15,6 +15,10 @@ class UserAlertForm(forms.ModelForm):
 
 class ProjectSettingsForm(forms.ModelForm):
     def clean(self):
+        # Check proposal ID
+        if len(self.cleaned_data['proposal_id']) < 6 or self.cleaned_data['proposal_id'] is None:
+            raise forms.ValidationError("Please create a proposal ID with at least 6 character")
+
         # Validate that the user chose ATCA Frequency values within each band
         band1 = self.cleaned_data['atca_band_3mm']
         if band1:

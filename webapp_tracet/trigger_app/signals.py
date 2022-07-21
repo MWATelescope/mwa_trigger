@@ -13,7 +13,8 @@ import os
 from twilio.rest import Client
 import datetime
 from astropy import units as u
-from astropy.coordinates import SkyCoord
+from astropy.time import Time
+from astropy.coordinates import SkyCoord, EarthLocation, AltAz
 import numpy as np
 from scipy.stats import norm
 
@@ -245,6 +246,7 @@ def proposal_worth_observing(
                     fermi_detection_prob=voevent.fermi_detection_prob,
                     swift_rate_signif=voevent.swift_rate_signif,
                     # Thresholds
+                    trig_any_duration=prop_dec.proposal.trig_any_duration,
                     trig_min_duration=prop_dec.proposal.trig_min_duration,
                     trig_max_duration=prop_dec.proposal.trig_max_duration,
                     pending_min_duration_1=prop_dec.proposal.pending_min_duration_1,
@@ -321,6 +323,29 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
     # Make sure they are unique and put each on a new line
     telescopes = ", ".join(list(set(telescopes)))
 
+    # Work out when the source will go below the horizon
+    telescope = proposal_decision_model.proposal.telescope
+    location = EarthLocation(
+        lon=telescope.lon*u.deg,
+        lat=telescope.lat*u.deg,
+        height=telescope.height*u.m
+    )
+    obs_source = SkyCoord(
+        proposal_decision_model.ra,
+        proposal_decision_model.dec,
+        #equinox='J2000',
+        unit=(u.deg, u.deg)
+    )
+    # Convert from RA/Dec to Alt/Az
+    delta_24h = np.linspace(0, 1440, 288)*u.min # 24 hours in 5 min increments
+    next_24h = obstime=Time.now()+delta_24h
+    obs_source_altaz = obs_source.transform_to(AltAz(obstime=next_24h, location=location))
+    for altaz, time in zip(obs_source_altaz, next_24h):
+        if altaz.alt.deg <1.:
+            # source below horizon so record time
+            set_time_utc = time
+            break
+
     # Get all admin alert permissions for this project
     admin_alerts = AdminAlerts.objects.filter(proposal=proposal_decision_model.proposal)
     for aa in admin_alerts:
@@ -339,21 +364,21 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
                 obs = Observations.objects.filter(proposal_decision_id=proposal_decision_model)
                 for ob in obs:
                     message_type_text += f"{ob.website_link}\n"
-                send_alert_type(ua.type, ua.address, subject, message_type_text, proposal_decision_model, telescopes)
+                send_alert_type(ua.type, ua.address, subject, message_type_text, proposal_decision_model, telescopes, set_time_utc)
 
             # Debug Alert
             if aa.debug and ua.debug and debug_bool:
                 subject = f"Trigger Web App Debug {proposal_decision_model.id}"
                 message_type_text = f"This is a debug notification from the trigger web service."
-                send_alert_type(ua.type, ua.address, subject, message_type_text, proposal_decision_model, telescopes)
+                send_alert_type(ua.type, ua.address, subject, message_type_text, proposal_decision_model, telescopes, set_time_utc)
 
             # Pending Alert
             if aa.approval and ua.approval and pending_bool:
                 subject = f"PENDING Trigger Web App {proposal_decision_model.id}"
                 message_type_text = f"HUMAN INTERVENTION REQUIRED! The trigger web service is unsure about the following event."
-                send_alert_type(ua.type, ua.address, subject, message_type_text, proposal_decision_model, telescopes)
+                send_alert_type(ua.type, ua.address, subject, message_type_text, proposal_decision_model, telescopes, set_time_utc)
 
-def send_alert_type(alert_type, address, subject, message_type_text, proposal_decision_model, telescopes):
+def send_alert_type(alert_type, address, subject, message_type_text, proposal_decision_model, telescopes, set_time_utc):
     # Set up twillo client for SMS and calls
     client = Client(account_sid, auth_token)
 
@@ -366,12 +391,14 @@ RA:          {proposal_decision_model.ra_hms} hours
 Dec:         {proposal_decision_model.dec_dms} deg
 Error Rad:   {proposal_decision_model.pos_error} deg
 Detected by: {telescopes}
+Event observed (UTC): {proposal_decision_model.trigger_group_id.earliest_event_observed}
+Set time (UTC):       {set_time_utc}
 
 Decision log:
 {proposal_decision_model.decision_reason}
 
 Proposal decision can be seen here:
-http://127.0.0.1:8000/proposal_decision_details/{proposal_decision_model.id}/
+http://https://mwa-trigger.duckdns.org/proposal_decision_details/{proposal_decision_model.id}/
 """
 
     if alert_type == 0:

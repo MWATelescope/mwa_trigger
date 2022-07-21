@@ -3,6 +3,7 @@ from django.views.generic.list import ListView
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db import transaction
+from django.db import models as dj_model
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, InvalidPage
@@ -59,6 +60,14 @@ class VOEventFilter(django_filters.FilterSet):
     class Meta:
         model = models.VOEvent
         fields = '__all__'
+        filter_overrides = {
+            dj_model.CharField: {
+                'filter_class': django_filters.CharFilter,
+                'extra': lambda f: {
+                    'lookup_expr': 'icontains',
+                },
+            },
+        }
 
 
 def VOEventList(request):
@@ -495,8 +504,8 @@ def test_upload_xml(request):
             # Parse and submit the VOEvent
             xml_string = str(request.POST['xml_packet'])
             trig = parse_xml.parsed_VOEvent(None, packet=xml_string)
-            print(trig.event_observed)
-            print(type(trig.event_observed))
+            logger.debug(trig.event_observed)
+            logger.debug(type(trig.event_observed))
             models.VOEvent.objects.get_or_create(
                 telescope=trig.telescope,
                 xml_packet=xml_string,

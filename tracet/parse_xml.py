@@ -3,6 +3,7 @@ from . import data_load
 import pandas as pd
 from astropy.coordinates import Angle
 import astropy.units as u
+import random
 
 import logging
 
@@ -68,6 +69,9 @@ def get_event_type(ivorn):
     elif "Antares" in ivorn:
         # Do Antares specific parsing
         return ivorn.split("Antares_")[-1].split("#")[0]
+    elif "HESS" in ivorn:
+        # Currently one event type for Hess
+        return "GRB_To"
     else:
         # Do default parsing
         for i in range(len(trig_type_str)):
@@ -120,16 +124,27 @@ def get_source_types(telescope, event_type, source_name, v):
     grb = False
     if telescope == "SWIFT":
         # check to see if a GRB was identified
-        try:
-            grb = v.find(".//Param[@name='GRB_Identified']").attrib['value']
-        except AttributeError:
+        grb = v.find(".//Param[@name='GRB_Identified']")
+        if grb is None:
             logger.error("Param[@name='GRB_Identified'] not found in XML packet - discarding.")
             grb = False
-        grb = bool(grb) # Make sure it's not a string
+        else:
+            grb = grb.attrib['value']
+            # Convert string to bool
+            if 'true' in grb.lower().strip():
+                grb = True
+            elif 'false' in grb.lower().strip():
+                grb = False
+            else:
+                logger.error(f"Unrecognised value of Param[@name='GRB_Identified']: {grb}")
+                grb = False
     elif telescope == "Fermi":
         #grb = False   # Ignore all Fermi triggers
         grb = True
         # I could put the most likely index here but it's easier to log in the trigger logic
+    elif telescope == "HESS":
+        # Assume all HESS triggers are GRBs
+        grb = True
     if grb:
         return "GRB"
 
@@ -243,6 +258,9 @@ class parsed_VOEvent:
         elif v.find(".//Param[@name='AMON_ID']") is not None:
             # ICECUBE's ID
             self.trig_id = int(v.find(".//Param[@name='AMON_ID']").attrib["value"])
+        elif self.telescope == "HESS":
+            # Hess has no Trigger ID so make a random one
+            self.trig_id = random.randint(1e8, 1e9)
 
         # Get current position
         self.ra, self.dec, self.err = get_position_info(v)

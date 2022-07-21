@@ -64,6 +64,7 @@ class ProposalSettings(models.Model):
     proposal_id = models.CharField(max_length=16, unique=True, verbose_name="Proposal ID", help_text="A short identifier of the proposal of maximum lenth 16 charcters.")
     proposal_description = models.CharField(max_length=256, help_text="A brief description of the proposal. Only needs to be enough to distinguish it from the other proposals.")
     event_telescope = models.ForeignKey(EventTelescope, to_field="name", help_text="The telescope that this proposal will accept at least one VOEvent from before observing. Leave blank if you want to accept all telescopes.", blank=True, null=True, on_delete=models.SET_NULL)
+    trig_any_duration = models.BooleanField(default=False, verbose_name="Any duration?", help_text="Will trigger on events with any duration which includes if they have None.")
     trig_min_duration = models.FloatField(verbose_name="Min", default=0.256)
     trig_max_duration = models.FloatField(verbose_name="Max", default=1.024)
     pending_min_duration_1 = models.FloatField(verbose_name="Min", default=1.025)
