@@ -18,7 +18,7 @@ def test_trigger_grb_event():
                  # A SWIFT trigger that is too long to trigger on
                  ('SWIFT00.yaml', [False, True, False, 'SWIFT rate significance > 0.000 sigma.\n Trigger duration outside of all time ranges so not triggering.\n ']),
                  # A trigger type that we choose to ignore
-                 ('SWIFT_Point_Dir_Change.yaml', [False, False, False, 'No probability metric given so assume it is a GRB.\n ']),
+                 ('SWIFT_Point_Dir_Change.yaml', [False, True, False, 'No probability metric given so assume it is a GRB.\n No trigger duration (None) so not triggering.\n ']),
                 ]
 
     for yaml_file, exp_worth_obs in xml_tests:
@@ -36,6 +36,7 @@ def test_trigger_grb_event():
             fermi_detection_prob=trig["fermi_detection_prob"],
             swift_rate_signif=trig["swift_rate_signif"],
         )
+        logger.debug(f"{yaml_file}")
         logger.debug(f"{trigger_bool}, {debug_bool}, {pending_bool}")
         logger.debug(f"{trigger_message}")
 
