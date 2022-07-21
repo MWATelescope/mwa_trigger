@@ -1,5 +1,5 @@
 from django.contrib import admin
-from trigger_app.models import VOEvent, PossibleEventAssociation, AdminAlerts, ProposalSettings, ProposalDecision, Telescope, Status, TriggerID, TelescopeProjectID
+from trigger_app.models import VOEvent, PossibleEventAssociation, AdminAlerts, ProposalSettings, ProposalDecision, Telescope, Status, TriggerID, TelescopeProjectID, UserAlerts, Observations
 from trigger_app.forms import ProjectSettingsForm, TelescopeProjectIDForm
 
 
@@ -80,6 +80,8 @@ admin.site.register(VOEvent)
 admin.site.register(TriggerID)
 admin.site.register(PossibleEventAssociation)
 admin.site.register(AdminAlerts)
+admin.site.register(UserAlerts)
 admin.site.register(ProposalDecision)
 admin.site.register(Telescope)
 admin.site.register(Status)
+admin.site.register(Observations)
