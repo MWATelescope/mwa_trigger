@@ -78,13 +78,17 @@
       </td>
       {% for setting in settings %}
         {% if prop_decisions|index:forloop.counter0 == "Ignored" %}
-          <td class="grey-tr">
+          <td><a class="grey-tr"
         {% elif prop_decisions|index:forloop.counter0 == "Error" %}
-          <td class="NegativeTransaction">
+          <td><a class="NegativeTransaction"
+        {% elif prop_decisions|index:forloop.counter0 == "Pending" %}
+          <td><a class="PendingTransaction"
+        {% elif prop_decisions|index:forloop.counter0 == "Triggered" %}
+          <td><a class="PositiveTransaction"
         {% else %}
-          <td>
+          <td><a
         {% endif %}
-        {{ prop_decisions|index:forloop.counter0 }}</td>
+          href="/proposal_decision_details/{{ prop_decisions|index:forloop.counter0 }}/" style="text-decoration:None" >{{ prop_decisions|index:forloop.counter0 }}</a></td>
       {% endfor %}
     </tr>
     {% endfor %}

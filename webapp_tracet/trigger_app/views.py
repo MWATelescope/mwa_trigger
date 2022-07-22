@@ -196,6 +196,7 @@ def home_page(request):
     telescope_list = []
     source_name_list = []
     proposal_decision_list = []
+    proposal_decision_id_list = []
     for trig in recent_triggers:
         trigger_group_voevents = models.VOEvent.objects.filter(trigger_group_id=trig)
         telescope_list.append(
@@ -204,13 +205,17 @@ def home_page(request):
         source_name_list.append(trigger_group_voevents.first().source_name)
         # grab decision for each proposal
         decision_list = []
+        decision_id_list = []
         for prop in prop_settings:
             this_decision = models.ProposalDecision.objects.filter(trigger_group_id=trig, proposal=prop)
             if this_decision.exists():
                 decision_list.append(this_decision.first().get_decision_display())
+                decision_id_list.append(this_decision.first().id)
             else:
                 decision_list.append("")
+                decision_id_list.append("")
         proposal_decision_list.append(decision_list)
+        proposal_decision_id_list.append(decision_id_list)
 
     recent_triggers_info = list(zip(recent_triggers, telescope_list, source_name_list, proposal_decision_list))
 

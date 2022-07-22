@@ -24,6 +24,22 @@ h3{
     color: MediumSeaGreen;
 }
 
+.PendingTransaction {
+    color: blue;
+    animation: animate 0.5s linear infinite;
+}
+@keyframes animate{
+  0%{
+    opacity: 0;
+  }
+  50%{
+    opacity: 1.0;
+  }
+  100%{
+    opacity: 0;
+  }
+}
+
 /* No spacing for comet log */
 .no-breaks{
     margin: 0;
