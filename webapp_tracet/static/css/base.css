@@ -24,6 +24,22 @@ h3{
     color: MediumSeaGreen;
 }
 
+.PendingTransaction {
+    color: blue;
+    animation: animate 0.5s linear infinite;
+}
+@keyframes animate{
+  0%{
+    opacity: 0;
+  }
+  50%{
+    opacity: 1.0;
+  }
+  100%{
+    opacity: 0;
+  }
+}
+
 /* No spacing for comet log */
 .no-breaks{
     margin: 0;
@@ -51,17 +67,11 @@ h3{
 
 /* Simple left aligned thin table */
 .table-thin-left {
-    float: left;
-    width: 100%;
-    max-width: 500px;
     margin-bottom: 1rem;
     vertical-align: top;
-    margin-left: auto;
-    margin-right: 100%;
 }
 .table-thin-left td {
     padding: 0.75rem;
-    vertical-align: top;
     border-top: 1px solid #eceeef;
 }
 

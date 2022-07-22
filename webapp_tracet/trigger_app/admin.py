@@ -71,16 +71,18 @@ class TelescopeProjectIDAdmin(admin.ModelAdmin):
     form = TelescopeProjectIDForm
     model = TelescopeProjectID
 
+class UserAlertsAdmin(admin.ModelAdmin):
+    list_display = ('user', 'proposal', 'type', 'address', 'alert', 'debug', 'approval')
 
 # Register your models here.
 admin.site.register(ProposalSettings, ProposalSettingsAdmin)
 admin.site.register(TelescopeProjectID, TelescopeProjectIDAdmin)
+admin.site.register(UserAlerts, UserAlertsAdmin)
 
 admin.site.register(VOEvent)
 admin.site.register(TriggerID)
 admin.site.register(PossibleEventAssociation)
 admin.site.register(AlertPermission)
-admin.site.register(UserAlerts)
 admin.site.register(ProposalDecision)
 admin.site.register(Telescope)
 admin.site.register(Status)
