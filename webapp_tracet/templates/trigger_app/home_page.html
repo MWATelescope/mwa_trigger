@@ -57,7 +57,7 @@
       {% endfor %}
     </tr>
     </thead>
-    {% for trig, telescope, source_name, prop_decisions in recent_triggers %}
+    {% for trig, telescope, source_name, prop_decisions, prop_decision_ids in recent_triggers %}
     <tr>
       <td><a href="/trigger_id_details/{{ trig.id }}/" style="text-decoration:None">{{ trig.id }}</a></td>
       <td scope="row">{{ trig.recieved_data|date:"Y-m-d H:i:s" }}</td>
@@ -88,11 +88,14 @@
         {% else %}
           <td><a
         {% endif %}
-          href="/proposal_decision_details/{{ prop_decisions|index:forloop.counter0 }}/" style="text-decoration:None" >{{ prop_decisions|index:forloop.counter0 }}</a></td>
+          href="/proposal_decision_details/{{ prop_decision_ids|index:forloop.counter0 }}/" style="text-decoration:None" >{{ prop_decisions|index:forloop.counter0 }}</a></td>
       {% endfor %}
     </tr>
     {% endfor %}
   </table>
+  <div class="mx-auto" style="width: 200px;">
+    <a  class="btn btn-info" href="/trigger_id_log/" role="button">Full Event Group Log</a>
+  </div>
 
   <hr>
   <h2>Current Proposal Settings (Summarised)</h2>

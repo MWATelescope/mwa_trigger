@@ -145,59 +145,15 @@ def PossibleEventAssociationList(request):
     return render(request, 'trigger_app/possible_event_association_list.html', {'object_list':object_list})
 
 
-def TriggerIDList(request):
-    # Find all telescopes for each trigger event
-    trigger_group_ids = models.TriggerID.objects.all()
-    voevents = models.VOEvent.objects.all()
-
-    # Loop over the trigger events and grab all the telescopes and soruces of the VOEvents
-    telescope_list = []
-    source_list = []
-    source_name_list = []
-    for tevent in trigger_group_ids:
-        trigger_group_voevents = voevents.filter(trigger_group_id=tevent)
-        telescope_list.append(
-            ' '.join(set(trigger_group_voevents.values_list('telescope', flat=True)))
-        )
-        sources = trigger_group_voevents.values_list('source_type', flat=True)
-        # remove Nones
-        sources =  [ i for i in sources if i ]
-        if len(sources) > 0:
-            source_list.append(' '.join(set(sources)))
-        else:
-            source_list.append(' ')
-        source_name_list.append(trigger_group_voevents.first().source_name)
-
-
-    # Paginate
-    page = request.GET.get('page', 1)
-    # zip the trigger event and the tevent_telescope_list together so I can loop over both in the html
-    paginator = Paginator(list(zip(trigger_group_ids, telescope_list, source_list, source_name_list)), 100)
-    try:
-        object_list = paginator.page(page)
-    except InvalidPage:
-        object_list = paginator.page(1)
-    return render(request, 'trigger_app/trigger_group_id_list.html', {'object_list':object_list})
-
-
-class CometLogList(ListView):
-    model = models.CometLog
-    paginate_by = 100
-
-class ProposalSettingsList(ListView):
-    model = models.ProposalSettings
-
-
-def home_page(request):
-    comet_status = models.Status.objects.get(name='twistd_comet')
+def grab_decisions_for_event_groups(event_groups):
+    # For the event groups, grab all useful information like each proposal decision was
     prop_settings = models.ProposalSettings.objects.all()
-    recent_triggers = models.TriggerID.objects.all()[:5]
 
     telescope_list = []
     source_name_list = []
     proposal_decision_list = []
     proposal_decision_id_list = []
-    for trig in recent_triggers:
+    for trig in event_groups:
         trigger_group_voevents = models.VOEvent.objects.filter(trigger_group_id=trig)
         telescope_list.append(
             ' '.join(set(trigger_group_voevents.values_list('telescope', flat=True)))
@@ -217,7 +173,41 @@ def home_page(request):
         proposal_decision_list.append(decision_list)
         proposal_decision_id_list.append(decision_id_list)
 
-    recent_triggers_info = list(zip(recent_triggers, telescope_list, source_name_list, proposal_decision_list))
+    # zip into something that you can iterate over in the html
+    return list(zip(event_groups, telescope_list, source_name_list, proposal_decision_list, proposal_decision_id_list))
+
+
+def TriggerIDList(request):
+    prop_settings = models.ProposalSettings.objects.all()
+    trigger_group_ids = models.TriggerID.objects.all()
+
+    recent_triggers_info = grab_decisions_for_event_groups(trigger_group_ids)
+
+    # Paginate
+    page = request.GET.get('page', 1)
+    # zip the trigger event and the tevent_telescope_list together so I can loop over both in the html
+    paginator = Paginator(recent_triggers_info, 100)
+    try:
+        object_list = paginator.page(page)
+    except InvalidPage:
+        object_list = paginator.page(1)
+    return render(request, 'trigger_app/trigger_group_id_list.html', {'object_list':object_list, 'settings':prop_settings})
+
+
+class CometLogList(ListView):
+    model = models.CometLog
+    paginate_by = 100
+
+class ProposalSettingsList(ListView):
+    model = models.ProposalSettings
+
+
+def home_page(request):
+    comet_status = models.Status.objects.get(name='twistd_comet')
+    prop_settings = models.ProposalSettings.objects.all()
+    recent_triggers = models.TriggerID.objects.all()[:5]
+
+    recent_triggers_info = grab_decisions_for_event_groups(recent_triggers)
 
     return render(request, 'trigger_app/home_page.html', {'twistd_comet_status': comet_status,
                                                           'settings':prop_settings,
