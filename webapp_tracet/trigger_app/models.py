@@ -135,9 +135,9 @@ class PossibleEventAssociation(models.Model):
         ordering = ['-id']
 
 
-class TriggerID(models.Model):
+class EventGroup(models.Model):
     id = models.AutoField(primary_key=True)
-    trigger_id = models.BigIntegerField(unique=True)
+    trig_id = models.BigIntegerField(unique=True)
     earliest_event_observed = models.DateTimeField(blank=True, null=True)
     latest_event_observed = models.DateTimeField(blank=True, null=True)
     ra = models.FloatField(blank=True, null=True)
@@ -172,8 +172,8 @@ class ProposalDecision(models.Model):
     decision_reason = models.CharField(max_length=2056, blank=True, null=True)
     proposal = models.ForeignKey(ProposalSettings, on_delete=models.SET_NULL, blank=True, null=True)
     #associated_event_id = models.ForeignKey(PossibleEventAssociation, on_delete=models.SET_NULL, blank=True, null=True)
-    trigger_group_id = models.ForeignKey(TriggerID, on_delete=models.SET_NULL, blank=True, null=True)
-    trigger_id = models.BigIntegerField(blank=True, null=True)
+    event_group_id = models.ForeignKey(EventGroup, on_delete=models.SET_NULL, blank=True, null=True)
+    trig_id = models.BigIntegerField(blank=True, null=True)
     duration = models.FloatField(blank=True, null=True)
     ra = models.FloatField(blank=True, null=True)
     dec = models.FloatField(blank=True, null=True)
@@ -198,14 +198,14 @@ class VOEvent(models.Model):
         blank=True,
         null=True,
     )
-    trigger_group_id = models.ForeignKey(
-        TriggerID,
+    event_group_id = models.ForeignKey(
+        EventGroup,
         on_delete=models.SET_NULL,
         related_name="voevent",
         blank=True,
         null=True,
     )
-    trigger_id = models.BigIntegerField(blank=True, null=True)
+    trig_id = models.BigIntegerField(blank=True, null=True)
     telescope = models.CharField(max_length=64, blank=True, null=True)
     sequence_num = models.IntegerField(blank=True, null=True)
     event_type = models.CharField(max_length=64, blank=True, null=True)

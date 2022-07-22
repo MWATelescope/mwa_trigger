@@ -154,7 +154,7 @@ def grab_decisions_for_event_groups(event_groups):
     proposal_decision_list = []
     proposal_decision_id_list = []
     for trig in event_groups:
-        trigger_group_voevents = models.VOEvent.objects.filter(trigger_group_id=trig)
+        trigger_group_voevents = models.VOEvent.objects.filter(event_group_id=trig)
         telescope_list.append(
             ' '.join(set(trigger_group_voevents.values_list('telescope', flat=True)))
         )
@@ -163,7 +163,7 @@ def grab_decisions_for_event_groups(event_groups):
         decision_list = []
         decision_id_list = []
         for prop in prop_settings:
-            this_decision = models.ProposalDecision.objects.filter(trigger_group_id=trig, proposal=prop)
+            this_decision = models.ProposalDecision.objects.filter(event_group_id=trig, proposal=prop)
             if this_decision.exists():
                 decision_list.append(this_decision.first().get_decision_display())
                 decision_id_list.append(this_decision.first().id)
@@ -177,11 +177,11 @@ def grab_decisions_for_event_groups(event_groups):
     return list(zip(event_groups, telescope_list, source_name_list, proposal_decision_list, proposal_decision_id_list))
 
 
-def TriggerIDList(request):
+def EventGroupList(request):
     prop_settings = models.ProposalSettings.objects.all()
-    trigger_group_ids = models.TriggerID.objects.all()
+    event_group_ids = models.EventGroup.objects.all()
 
-    recent_triggers_info = grab_decisions_for_event_groups(trigger_group_ids)
+    recent_triggers_info = grab_decisions_for_event_groups(event_group_ids)
 
     # Paginate
     page = request.GET.get('page', 1)
@@ -205,7 +205,7 @@ class ProposalSettingsList(ListView):
 def home_page(request):
     comet_status = models.Status.objects.get(name='twistd_comet')
     prop_settings = models.ProposalSettings.objects.all()
-    recent_triggers = models.TriggerID.objects.all()[:5]
+    recent_triggers = models.EventGroup.objects.all()[:5]
 
     recent_triggers_info = grab_decisions_for_event_groups(recent_triggers)
 
@@ -248,15 +248,15 @@ def PossibleEventAssociation_details(request, tid):
                                                                      'poserr_unit':poserr_unit,})
 
 
-def TriggerID_details(request, tid):
-    trigger_event = models.TriggerID.objects.get(id=tid)
+def EventGroup_details(request, tid):
+    trigger_event = models.EventGroup.objects.get(id=tid)
 
     # grab telescope names
-    voevents = models.VOEvent.objects.filter(trigger_group_id=trigger_event)
+    voevents = models.VOEvent.objects.filter(event_group_id=trigger_event)
     telescopes = ' '.join(set(voevents.values_list('telescope', flat=True)))
 
     # list all prop decisions
-    prop_decs = models.ProposalDecision.objects.filter(trigger_group_id=trigger_event)
+    prop_decs = models.ProposalDecision.objects.filter(event_group_id=trigger_event)
 
     # Grab MWA obs if the exist
     obs = []
@@ -278,7 +278,7 @@ def ProposalDecision_details(request, id):
     prop_dec = models.ProposalDecision.objects.get(id=id)
 
     # Work out all the telescopes that observed the event
-    voevents = models.VOEvent.objects.filter(trigger_group_id=prop_dec.trigger_group_id)
+    voevents = models.VOEvent.objects.filter(event_group_id=prop_dec.event_group_id)
     telescopes = []
     event_types = []
     for voevent in voevents:
@@ -505,7 +505,7 @@ def test_upload_xml(request):
                 telescope=trig.telescope,
                 xml_packet=xml_string,
                 duration=trig.trig_duration,
-                trigger_id=trig.trig_id,
+                trig_id=trig.trig_id,
                 sequence_num=trig.sequence_num,
                 event_type=trig.event_type,
                 role=trig.role,

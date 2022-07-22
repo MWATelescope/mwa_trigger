@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from .models import TriggerID, VOEvent, PossibleEventAssociation, ProposalDecision, Observations
+from .models import EventGroup, VOEvent, PossibleEventAssociation, ProposalDecision, Observations
 
 from tracet.parse_xml import parsed_VOEvent
 import astropy.units as u
@@ -20,7 +20,7 @@ def create_voevent_wrapper(trig, ra_dec, dec_alter=True):
         telescope=trig.telescope,
         xml_packet=trig.packet,
         duration=trig.trig_duration,
-        trigger_id=trig.trig_id,
+        trig_id=trig.trig_id,
         sequence_num=trig.sequence_num,
         event_type=trig.event_type,
         antares_ranking=trig.antares_ranking,
@@ -111,7 +111,7 @@ class test_grb_group_02(TestCase):
     def test_trigger_groups(self):
         # Check there are three VOEvents that were grouped as one by the trigger ID
         self.assertEqual(len(VOEvent.objects.all()), 3)
-        self.assertEqual(len(TriggerID.objects.all()), 1)
+        self.assertEqual(len(EventGroup.objects.all()), 1)
 
     def test_mwa_proposal_decision(self):
         print(ProposalDecision.objects.all())
@@ -154,7 +154,7 @@ class test_grb_group_03(TestCase):
     def test_trigger_groups(self):
         # Check there are three VOEvents that were grouped as one by the trigger ID
         self.assertEqual(len(VOEvent.objects.all()), 3)
-        self.assertEqual(len(TriggerID.objects.all()), 1)
+        self.assertEqual(len(EventGroup.objects.all()), 1)
 
     def test_atca_proposal_decision(self):
         # Final proposal dicision was triggered
@@ -195,7 +195,7 @@ class test_nu(TestCase):
     def test_trigger_groups(self):
         # Check there are three VOEvents that were grouped as one by the trigger ID
         self.assertEqual(len(VOEvent.objects.all()), 3)
-        self.assertEqual(len(TriggerID.objects.all()), 2)
+        self.assertEqual(len(EventGroup.objects.all()), 2)
 
     def test_proposal_decision(self):
         # Two proposals decisions made
@@ -232,7 +232,7 @@ class test_fs(TestCase):
     def test_trigger_groups(self):
         # Check there are three VOEvents that were grouped as one by the trigger ID
         self.assertEqual(len(VOEvent.objects.all()), 1)
-        self.assertEqual(len(TriggerID.objects.all()), 1)
+        self.assertEqual(len(EventGroup.objects.all()), 1)
 
     def test_proposal_decision(self):
         print(ProposalDecision.objects.all())
@@ -270,7 +270,7 @@ class test_hess_any_dur(TestCase):
     def test_trigger_groups(self):
         # Check event was made
         self.assertEqual(len(VOEvent.objects.all()), 1)
-        self.assertEqual(len(TriggerID.objects.all()), 1)
+        self.assertEqual(len(EventGroup.objects.all()), 1)
 
     def test_proposal_decision(self):
         # Test only one proposal triggered

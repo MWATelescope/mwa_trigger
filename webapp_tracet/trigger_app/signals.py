@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import UserAlerts, AlertPermission, VOEvent, PossibleEventAssociation, Status, ProposalSettings, ProposalDecision, Observations, TriggerID
+from .models import UserAlerts, AlertPermission, VOEvent, PossibleEventAssociation, Status, ProposalSettings, ProposalDecision, Observations, EventGroup
 from .telescope_observe import trigger_observation
 
 from tracet.trigger_logic import worth_observing_grb, worth_observing_nu
@@ -39,14 +39,14 @@ def group_trigger(sender, instance, **kwargs):
     # ------------------------------------------------------------------------------
     # Look for other events with the same Trigger ID
     # ------------------------------------------------------------------------------
-    trigger_id_filter = TriggerID.objects.filter(trigger_id=instance.trigger_id)
-    if trigger_id_filter.exists():
-        trigger_id = TriggerID.objects.get(trigger_id=instance.trigger_id)
+    event_group = EventGroup.objects.filter(trig_id=instance.trig_id)
+    if event_group.exists():
+        event_group = event_group.first()
         # Trigger event already exists so link the VOEvent (have to update this way to prevent save() triggering this function again)
-        VOEvent.objects.filter(id=instance.id).update(trigger_group_id=trigger_id)
+        VOEvent.objects.filter(id=instance.id).update(event_group_id=event_group)
 
         # Loop over all proposals settings and see if it's worth reobserving
-        proposal_decisions = ProposalDecision.objects.filter(trigger_group_id=trigger_id)
+        proposal_decisions = ProposalDecision.objects.filter(event_group_id=event_group)
         for prop_dec in proposal_decisions:
             if prop_dec.decision == "C":
                 # Previous observation canceled so assume no new observations should be triggered
@@ -101,22 +101,22 @@ def group_trigger(sender, instance, **kwargs):
                     # send off alert messages to users and admins
                     send_all_alerts(True, debug_bool, False, prop_dec)
 
-        if instance.pos_error < trigger_id.pos_error  and instance.pos_error != 0.:
-            # Updated trigger group's best position
-            trigger_id.ra = instance.ra
-            trigger_id.dec = instance.dec
-            trigger_id.ra_hms = instance.ra_hms
-            trigger_id.dec_dms = instance.dec_dms
-            trigger_id.pos_error = instance.pos_error
+        if instance.pos_error < event_group.pos_error  and instance.pos_error != 0.:
+            # Updated event group's best position
+            event_group.ra = instance.ra
+            event_group.dec = instance.dec
+            event_group.ra_hms = instance.ra_hms
+            event_group.dec_dms = instance.dec_dms
+            event_group.pos_error = instance.pos_error
 
         # Update latest_event_observed
-        trigger_id.latest_event_observed = instance.event_observed
-        trigger_id.save()
+        event_group.latest_event_observed = instance.event_observed
+        event_group.save()
 
     else:
         # Make a new trigger group ID
-        new_trig = TriggerID.objects.create(
-            trigger_id=instance.trigger_id,
+        new_trig = EventGroup.objects.create(
+            trig_id=instance.trig_id,
             ra=instance.ra,
             dec=instance.dec,
             ra_hms=instance.ra_hms,
@@ -127,7 +127,7 @@ def group_trigger(sender, instance, **kwargs):
             latest_event_observed=instance.event_observed,
         )
         # Link the VOEvent (have to update this way to prevent save() triggering this function again)
-        VOEvent.objects.filter(id=instance.id).update(trigger_group_id=new_trig)
+        VOEvent.objects.filter(id=instance.id).update(event_group_id=new_trig)
 
         # Loop over settings
         proposal_settings = ProposalSettings.objects.all()
@@ -137,8 +137,8 @@ def group_trigger(sender, instance, **kwargs):
                 #decision=decision,
                 #decision_reason=trigger_message,
                 proposal=prop_set,
-                trigger_group_id=new_trig,
-                trigger_id=instance.trigger_id,
+                event_group_id=new_trig,
+                trig_id=instance.trig_id,
                 duration=instance.duration,
                 ra=instance.ra,
                 dec=instance.dec,
@@ -316,7 +316,7 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
     """
     """
     # Work out all the telescopes that observed the event
-    voevents = VOEvent.objects.filter(trigger_group_id=proposal_decision_model.trigger_group_id)
+    voevents = VOEvent.objects.filter(event_group_id=proposal_decision_model.event_group_id)
     telescopes = []
     for voevent in voevents:
         telescopes.append(voevent.telescope)
@@ -391,7 +391,7 @@ RA:          {proposal_decision_model.ra_hms} hours
 Dec:         {proposal_decision_model.dec_dms} deg
 Error Rad:   {proposal_decision_model.pos_error} deg
 Detected by: {telescopes}
-Event observed (UTC): {proposal_decision_model.trigger_group_id.earliest_event_observed}
+Event observed (UTC): {proposal_decision_model.event_group_id.earliest_event_observed}
 Set time (UTC):       {set_time_utc}
 
 Decision log:
