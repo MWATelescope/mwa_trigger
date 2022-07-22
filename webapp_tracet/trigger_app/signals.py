@@ -398,7 +398,7 @@ Decision log:
 {proposal_decision_model.decision_reason}
 
 Proposal decision can be seen here:
-http://https://mwa-trigger.duckdns.org/proposal_decision_details/{proposal_decision_model.id}/
+https://mwa-trigger.duckdns.org/proposal_decision_details/{proposal_decision_model.id}/
 """
 
     if alert_type == 0:
