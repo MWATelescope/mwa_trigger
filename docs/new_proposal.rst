@@ -28,13 +28,13 @@ button for your proposal in the "Current Proposal Settings (Summarised)" table
 on the home page. You can always edit your settings and thresholds if this is
 not what you require.
 
-Step 3: Update Admin Alerts
----------------------------
+Step 3: Update Alert Permissions
+--------------------------------
 By default, all users will have permission to receive trigger alerts and
 will not have permission to receive pending and debug alerts for all
-proposals. As an admin, you can give users you trust to receive debug
+proposals. As an admin, you can give users you trust permission to receive debug
 and pending alerts and decide if a VOEvent should be triggered on or not. Use the
-`Admin Alert Control <https://mwa-trigger.duckdns.org/admin/trigger_app/adminalerts/>`_
+`Alert Pemission <https://mwa-trigger.duckdns.org/admin/trigger_app/alertpermission/>`_
 page to edit these permissions.
 
 Step 4: Notify Users to Update their Alerts

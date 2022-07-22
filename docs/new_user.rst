@@ -9,14 +9,14 @@ to make them an admin you can edit the user and under permissions, click the sta
 status checkbox.
 
 
-Update Admin Alerts
--------------------
+Update Alert Permissions
+------------------------
 By default, all users will have permission to receive trigger alerts and
 will not have permission to receive pending and debug alerts for all
 proposals. As an admin, you can give the user permission to receive debug
 and pending alerts if you trust them to decide if a VOEvent should be
 triggered or not. Use the
-`Admin Alert Control <http://mwa-trigger.duckdns.org/admin/trigger_app/adminalerts/>`_
+`Alert Permissions <http://mwa-trigger.duckdns.org/admin/trigger_app/alertpermission/>`_
 page to edit these permissions.
 
 Notify the User to Add Alerts

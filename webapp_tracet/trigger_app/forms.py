@@ -27,7 +27,7 @@ class UserAlertForm(forms.ModelForm):
                 )
                 print(f"MESAGESTART{message}MESSGAEEND")
             except TwilioRestException:
-                raise forms.ValidationError("Error sending test text message. Please ensure you have included your area code ad verifyed your number on twilio as explained in https://tracet.readthedocs.io/en/latest/new_user.html#verifying-your-phone-number-on-twilio")
+                raise forms.ValidationError("Error sending test text message. Please ensure you have included your area code and verified your number on Twilio as explained in https://tracet.readthedocs.io/en/latest/new_user.html#verifying-your-phone-number-on-twilio")
 
     # specify the name of model to use
     class Meta:

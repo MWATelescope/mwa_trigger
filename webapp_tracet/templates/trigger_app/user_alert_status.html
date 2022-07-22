@@ -29,7 +29,7 @@
       <td>{{ ua.address }}</td>
 
       <!-- Check if the user recieves this type of alert -->
-      {% if pa.admin.alert %}
+      {% if pa.permission.alert %}
         <!-- True so show what the user has -->
         <td>{{ ua.alert }}</td>
       {% else %}
@@ -37,13 +37,13 @@
         <td>N/A</td>
       {% endif %}
 
-      {% if pa.admin.approval %}
+      {% if pa.permission.approval %}
         <td>{{ ua.approval }}</td>
       {% else %}
         <td>N/A</td>
       {% endif %}
 
-      {% if pa.admin.debug %}
+      {% if pa.permission.debug %}
         <td>{{ ua.debug  }}</td>
       {% else %}
         <td>N/A</td>
@@ -57,7 +57,7 @@
       <td>No Alerts</td>
       <td></td>
 
-      {% if pa.admin.alert %}
+      {% if pa.permission.alert %}
         <!-- True so show what the user has -->
         <td>{{ ua.alert }}</td>
       {% else %}
@@ -65,13 +65,13 @@
         <td>N/A</td>
       {% endif %}
 
-      {% if pa.admin.approval %}
+      {% if pa.permission.approval %}
         <td>{{ ua.approval }}</td>
       {% else %}
         <td>N/A</td>
       {% endif %}
 
-      {% if pa.admin.debug %}
+      {% if pa.permission.debug %}
         <td>{{ ua.debug  }}</td>
       {% else %}
         <td>N/A</td>

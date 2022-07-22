@@ -251,7 +251,7 @@ class Status(models.Model):
     status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES)
 
 
-class AdminAlerts(models.Model):
+class AlertPermission(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     proposal = models.ForeignKey(ProposalSettings, on_delete=models.CASCADE)
     alert = models.BooleanField(default=True)
