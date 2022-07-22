@@ -113,7 +113,7 @@ class ProposalSettings(models.Model):
 
 
     def __str__(self):
-        return f"{self.id}_{self.telescope}_{self.project_id}"
+        return f"{self.proposal_id}"
 
 
 class PossibleEventAssociation(models.Model):

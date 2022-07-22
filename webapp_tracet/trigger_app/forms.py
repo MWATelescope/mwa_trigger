@@ -2,11 +2,33 @@
 # import the standard Django Forms
 # from built-in library
 from django import forms
+
+import os
+from twilio.rest import Client
+from twilio.base.exceptions import TwilioRestException
+
 from .models import UserAlerts, ProposalSettings, TelescopeProjectID
 from .validators import atca_proposal_id, atca_freq_bands, mwa_proposal_id, mwa_freqspecs
 
+account_sid = os.environ.get('TWILIO_ACCOUNT_SID', None)
+auth_token = os.environ.get('TWILIO_AUTH_TOKEN', None)
+
 # creating a form
 class UserAlertForm(forms.ModelForm):
+    def clean(self):
+        if self.cleaned_data['type'] == 1 or self.cleaned_data['type'] == 2:
+            # Test that twilio can send a message to the user
+            client = Client(account_sid, auth_token)
+            try:
+                message = client.messages.create(
+                        to=self.cleaned_data['address'],
+                        from_='+17755216557',
+                        body="This is a test text message from TraceT",
+                )
+                print(f"MESAGESTART{message}MESSGAEEND")
+            except TwilioRestException:
+                raise forms.ValidationError("Error sending test text message. Please ensure you have included your area code ad verifyed your number on twilio as explained in https://tracet.readthedocs.io/en/latest/new_user.html#verifying-your-phone-number-on-twilio")
+
     # specify the name of model to use
     class Meta:
         model = UserAlerts
