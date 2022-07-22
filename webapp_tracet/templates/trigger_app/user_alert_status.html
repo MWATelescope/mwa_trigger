@@ -3,56 +3,88 @@
 {% block content %}
 <title>User Alert Status</title>
 <div class="container py-4">
-  <p>N/A mean the admin has not given you permission to recieve this trigger type. Send them a message if you would like this changed.</p>
+  <h1>User Alert Status</h1>
+  <p>This page shows you what method (if any) TraceT will use to alert you when an observations is triggered (Trigger),
+     when an observation is pending approval of a researcher (Pending Approval) or something strange has happened (Debug)</p>
+  <p>If you see N/A in the below table, it means you don't have permission to recieve that type of alert. If you would like this type of alert, contact an admin and request permission.</p>
+
+  <table class="fl-table">
+    <thead>
+    <tr>
+        <th>Proposal</th>
+        <th>Type</th>
+        <th>Address</th>
+        <th>Trigger</th>
+        <th>Pending Approval</th>
+        <th>Debug</th>
+    </tr>
+    </thead>
 
   {% for pa in prop_alert_list %}
-    <h2>Proposal ID {{ pa.proposal.id }} {{ pa.proposal.telescope }} {{ pa.proposal.project_id }}</h2>
-    <table class="fl-table">
-      <thead>
-      <tr>
-          <th>Type</th>
-          <th>Address</th>
-          <th>Trigger</th>
-          <th>Debug</th>
-          <th>Pending Approval</th>
-      </tr>
-      </thead>
-      <!-- Iterate over ther alerts the user has made -->
-      {% for ua in pa.user %}
-      <!-- Display Objects -->
-      <tr>
-          <td>{{ ua.get_type_display }}</td>
-          <td>{{ ua.address }}</td>
+    <!-- Iterate over ther alerts the user has made -->
+    {% for ua in pa.user %}
+    <tr>
+      <td>{{ ua.proposal.proposal_id }}</td>
+      <td>{{ ua.get_type_display }}</td>
+      <td>{{ ua.address }}</td>
 
-          <!-- Check if the user recieves this type of alert -->
-          {% if pa.admin.alert %}
-            <!-- True so show what the user has -->
-            <td>{{ ua.alert }}</td>
-          {% else %}
-            <!-- False so show N/A because the user can't get this type of alert -->
-            <td>N/A</td>
-          {% endif %}
+      <!-- Check if the user recieves this type of alert -->
+      {% if pa.admin.alert %}
+        <!-- True so show what the user has -->
+        <td>{{ ua.alert }}</td>
+      {% else %}
+        <!-- False so show N/A because the user can't get this type of alert -->
+        <td>N/A</td>
+      {% endif %}
 
-          {% if pa.admin.debug %}
-            <td>{{ ua.debug  }}</td>
-          {% else %}
-            <td>N/A</td>
-          {% endif %}
+      {% if pa.admin.approval %}
+        <td>{{ ua.approval }}</td>
+      {% else %}
+        <td>N/A</td>
+      {% endif %}
 
-          {% if pa.admin.approval %}
-            <td>{{ ua.approval }}</td>
-          {% else %}
-            <td>N/A</td>
-          {% endif %}
+      {% if pa.admin.debug %}
+        <td>{{ ua.debug  }}</td>
+      {% else %}
+        <td>N/A</td>
+      {% endif %}
 
-          <td><a href="/user_alert_delete/{{ ua.id }}/" style="color:Red;">Delete Alert?</a></td>
-      </tr>
-      <!-- If object_list is empty  -->
-      {% empty %}
-      <p>No objects yet.</p>
-      {% endfor %}
-    </table>
-    <p><a href="/user_alert_create/{{ pa.proposal.id }}/">Create a new alert?</a></p>
+      <td><a href="/user_alert_delete/{{ ua.id }}/" style="color:Red;">Delete Alert?</a></td>
+    </tr>
+    {% empty %}
+    <tr class="grey-tr">
+      <td>{{ pa.proposal.proposal_id }}</td>
+      <td>No Alerts</td>
+      <td></td>
+
+      {% if pa.admin.alert %}
+        <!-- True so show what the user has -->
+        <td>{{ ua.alert }}</td>
+      {% else %}
+        <!-- False so show N/A because the user can't get this type of alert -->
+        <td>N/A</td>
+      {% endif %}
+
+      {% if pa.admin.approval %}
+        <td>{{ ua.approval }}</td>
+      {% else %}
+        <td>N/A</td>
+      {% endif %}
+
+      {% if pa.admin.debug %}
+        <td>{{ ua.debug  }}</td>
+      {% else %}
+        <td>N/A</td>
+      {% endif %}
+     </tr>
     {% endfor %}
+  {% endfor %}
+  </table>
+
+  <div class="mx-auto" style="width: 200px;">
+    <a  class="btn btn-info" href="/user_alert_create/{{ pa.proposal.id }}/" role="button">Create a new alert?</a>
+  </div>
+
+
 </div>
 {% endblock %}
