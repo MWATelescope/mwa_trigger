@@ -437,12 +437,11 @@ def user_alert_delete(request, id):
 
 
 @login_required
-def user_alert_create(request, id):
+def user_alert_create(request):
     if request.POST:
         # Create UserAlert that already includes user and proposal
         u = request.user
-        prop = models.ProposalSettings.objects.get(id=id)
-        ua = models.UserAlerts(user=u, proposal=prop)
+        ua = models.UserAlerts(user=u)
         # Let user update everything else
         form = forms.UserAlertForm(request.POST, instance=ua)
         if form.is_valid():

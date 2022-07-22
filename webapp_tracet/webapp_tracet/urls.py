@@ -25,7 +25,7 @@ urlpatterns = [
     path('', views.home_page),
     path('user_alert_status/', views.user_alert_status),
     path('user_alert_delete/<int:id>/', views.user_alert_delete),
-    path('user_alert_create/<int:id>/', views.user_alert_create),
+    path('user_alert_create/', views.user_alert_create),
     path('possible_event_association_log/', views.PossibleEventAssociationList),
     path('possible_event_association_details/<int:tid>/', views.PossibleEventAssociation_details),
     path('trigger_id_log/', views.TriggerIDList),

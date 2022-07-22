@@ -10,7 +10,7 @@ class UserAlertForm(forms.ModelForm):
     # specify the name of model to use
     class Meta:
         model = UserAlerts
-        fields = ['type', 'address', 'alert', 'debug', 'approval']
+        fields = ['proposal', 'type', 'address', 'alert', 'debug', 'approval']
 
 
 class ProjectSettingsForm(forms.ModelForm):
