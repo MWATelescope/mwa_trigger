@@ -1,6 +1,7 @@
 .idea
 *.pyc
 .eggs
+*.egg-info
 tests/_trial_temp/
 .voevent_env/
 settings.json
@@ -10,3 +11,4 @@ webapp_tracet/twistd.pid
 webapp_tracet/static_host/
 webapp_tracet/uwsgi-emperor.log
 webapp_tracet/webapp_tracet.sock
+docs/html/*

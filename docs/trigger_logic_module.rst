@@ -1,3 +1,5 @@
+.. _trigger_logic:
+
 trigger\_logic Module
 =====================
 
