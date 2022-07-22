@@ -11,12 +11,12 @@
 },
 {
     "model": "trigger_app.proposalsettings",
-    "pk": 1,
+    "pk": 2,
     "fields": {
         "telescope": "MWA_VCS",
         "project_id": "T001",
-        "proposal_id": "TEST",
-        "proposal_description": "Testing MWA",
+        "proposal_id": "HESS_TEST",
+        "proposal_description": "Testing HESS with MWA",
         "event_telescope": "HESS",
         "trig_any_duration": true,
         "trig_min_duration": 0.256,

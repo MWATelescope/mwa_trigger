@@ -223,8 +223,13 @@
                     newOption.appendChild(optionText);
                     // and option value
                     newOption.setAttribute('value',telescope);
+                    if (telescope === "{{form.event_telescope.value}}") {
+                        // Select this as that what was previously used
+                        newOption.setAttribute('selected', true);
+                    }
                     selectBox.appendChild(newOption);
                 }
+                console.log("{{form.event_telescope.value}}")
                 console.log(document.querySelector('#event_telescope').options)
             });
             $("#id_source_type").trigger("change")

@@ -98,6 +98,9 @@ def worth_observing_grb(
     if trig_any_duration and likely_bool:
         trigger_bool = True
         trigger_message += f"Accepting any trigger duration so triggering.\n "
+    elif not trig_any_duration and trig_duration is None:
+        debug_bool = True
+        trigger_message += f"No trigger duration (None) so not triggering.\n "
     elif trig_duration is not None and likely_bool:
         if trig_min_duration <= trig_duration <= trig_max_duration:
             trigger_bool = True

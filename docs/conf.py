@@ -18,8 +18,8 @@ sys.path.insert(0, os.path.abspath('.'))
 # -- Project information -----------------------------------------------------
 
 project = 'tracet'
-copyright = '2022, CIC'
-author = 'CIC'
+copyright = '2022, ADACS'
+author = 'ADACS'
 
 # The full version, including alpha/beta/rc tags
 release = '1'
@@ -58,6 +58,8 @@ exclude_patterns = []
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
+html_logo = "figures/TraceT.png"
+
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
