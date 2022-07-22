@@ -113,7 +113,7 @@ class ProposalSettings(models.Model):
 
 
     def __str__(self):
-        return f"{self.id}_{self.telescope}_{self.project_id}"
+        return f"{self.proposal_id}"
 
 
 class PossibleEventAssociation(models.Model):
@@ -251,7 +251,7 @@ class Status(models.Model):
     status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES)
 
 
-class AdminAlerts(models.Model):
+class AlertPermission(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     proposal = models.ForeignKey(ProposalSettings, on_delete=models.CASCADE)
     alert = models.BooleanField(default=True)

@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import UserAlerts, AdminAlerts, VOEvent, PossibleEventAssociation, Status, ProposalSettings, ProposalDecision, Observations, TriggerID
+from .models import UserAlerts, AlertPermission, VOEvent, PossibleEventAssociation, Status, ProposalSettings, ProposalDecision, Observations, TriggerID
 from .telescope_observe import trigger_observation
 
 from tracet.trigger_logic import worth_observing_grb, worth_observing_nu
@@ -347,17 +347,17 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
             break
 
     # Get all admin alert permissions for this project
-    admin_alerts = AdminAlerts.objects.filter(proposal=proposal_decision_model.proposal)
-    for aa in admin_alerts:
+    alert_permissions = AlertPermission.objects.filter(proposal=proposal_decision_model.proposal)
+    for ap in alert_permissions:
         # Grab user
-        user = aa.user
+        user = ap.user
         user_alerts = UserAlerts.objects.filter(user=user, proposal=proposal_decision_model.proposal)
 
         # Send off the alerts of types user defined
         for ua in user_alerts:
             # Check if user can recieve each type of alert
             # Trigger alert
-            if aa.alert and ua.alert and trigger_bool:
+            if ap.alert and ua.alert and trigger_bool:
                 subject = f"Trigger Web App Observation {proposal_decision_model.id}"
                 message_type_text = f"The trigger web service scheduled the following {proposal_decision_model.proposal.telescope} observations:\n"
                 # Send links for each observation
@@ -367,13 +367,13 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
                 send_alert_type(ua.type, ua.address, subject, message_type_text, proposal_decision_model, telescopes, set_time_utc)
 
             # Debug Alert
-            if aa.debug and ua.debug and debug_bool:
+            if ap.debug and ua.debug and debug_bool:
                 subject = f"Trigger Web App Debug {proposal_decision_model.id}"
                 message_type_text = f"This is a debug notification from the trigger web service."
                 send_alert_type(ua.type, ua.address, subject, message_type_text, proposal_decision_model, telescopes, set_time_utc)
 
             # Pending Alert
-            if aa.approval and ua.approval and pending_bool:
+            if ap.approval and ua.approval and pending_bool:
                 subject = f"PENDING Trigger Web App {proposal_decision_model.id}"
                 message_type_text = f"HUMAN INTERVENTION REQUIRED! The trigger web service is unsure about the following event."
                 send_alert_type(ua.type, ua.address, subject, message_type_text, proposal_decision_model, telescopes, set_time_utc)
@@ -398,7 +398,7 @@ Decision log:
 {proposal_decision_model.decision_reason}
 
 Proposal decision can be seen here:
-http://https://mwa-trigger.duckdns.org/proposal_decision_details/{proposal_decision_model.id}/
+https://mwa-trigger.duckdns.org/proposal_decision_details/{proposal_decision_model.id}/
 """
 
     if alert_type == 0:
@@ -432,7 +432,7 @@ def create_admin_alerts_proposal(sender, instance, **kwargs):
         # Create an admin alert for each proposal
         proposal_settings = ProposalSettings.objects.all()
         for prop_set in proposal_settings:
-            s = AdminAlerts(user=instance, proposal=prop_set)
+            s = AlertPermission(user=instance, proposal=prop_set)
             s.save()
 
 
@@ -442,7 +442,7 @@ def create_admin_alerts_user(sender, instance, **kwargs):
         # Create an admin alert for each user
         users = User.objects.all()
         for user in users:
-            s = AdminAlerts(user=user, proposal=instance)
+            s = AlertPermission(user=user, proposal=instance)
             s.save()
 
 
