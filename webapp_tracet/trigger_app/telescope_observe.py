@@ -7,7 +7,7 @@ from datetime import timedelta
 import atca_rapid_response_api as arrApi
 
 from tracet.triggerservice import trigger_mwa
-from .models import Observations, VOEvent
+from .models import Observations, Event
 
 import logging
 logger = logging.getLogger(__name__)
@@ -69,7 +69,7 @@ def trigger_observation(
 
         # Create an observation name
         # Collect event telescopes
-        voevents = VOEvent.objects.filter(event_group_id=proposal_decision_model.event_group_id)
+        voevents = Event.objects.filter(event_group_id=proposal_decision_model.event_group_id)
         telescopes = []
         for voevent in voevents:
             telescopes.append(voevent.telescope)

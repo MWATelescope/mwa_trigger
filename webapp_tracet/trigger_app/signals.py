@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import UserAlerts, AlertPermission, VOEvent, PossibleEventAssociation, Status, ProposalSettings, ProposalDecision, Observations, EventGroup
+from .models import UserAlerts, AlertPermission, Event, PossibleEventAssociation, Status, ProposalSettings, ProposalDecision, Observations, EventGroup
 from .telescope_observe import trigger_observation
 
 from tracet.trigger_logic import worth_observing_grb, worth_observing_nu
@@ -25,13 +25,13 @@ account_sid = os.environ.get('TWILIO_ACCOUNT_SID', None)
 auth_token = os.environ.get('TWILIO_AUTH_TOKEN', None)
 
 
-@receiver(post_save, sender=VOEvent)
+@receiver(post_save, sender=Event)
 def group_trigger(sender, instance, **kwargs):
-    """Check if the latest VOEvent has already been observered or if it is new and update the models accordingly
+    """Check if the latest Event has already been observered or if it is new and update the models accordingly
     """
-    # instance is the new VOEvent
+    # instance is the new Event
     if instance.ignored:
-        # VOEvent ignored so do nothing
+        # Event ignored so do nothing
         return
 
     event_coord = SkyCoord(ra=instance.ra*u.degree, dec=instance.dec*u.degree)
@@ -42,15 +42,15 @@ def group_trigger(sender, instance, **kwargs):
     event_group = EventGroup.objects.filter(trig_id=instance.trig_id)
     if event_group.exists():
         event_group = event_group.first()
-        # Trigger event already exists so link the VOEvent (have to update this way to prevent save() triggering this function again)
-        VOEvent.objects.filter(id=instance.id).update(event_group_id=event_group)
+        # Trigger event already exists so link the Event (have to update this way to prevent save() triggering this function again)
+        Event.objects.filter(id=instance.id).update(event_group_id=event_group)
 
         # Loop over all proposals settings and see if it's worth reobserving
         proposal_decisions = ProposalDecision.objects.filter(event_group_id=event_group)
         for prop_dec in proposal_decisions:
             if prop_dec.decision == "C":
                 # Previous observation canceled so assume no new observations should be triggered
-                prop_dec.decision_reason = f"{prop_dec.decision_reason}Previous observation canceled so not observing VOEvent ID {instance.id}.\n "
+                prop_dec.decision_reason = f"{prop_dec.decision_reason}Previous observation canceled so not observing Event ID {instance.id}.\n "
                 prop_dec.save()
             elif prop_dec.decision == "I" or prop_dec.decision == "E":
                 # Previous events were ignored, check if this new one is up to our standards
@@ -65,7 +65,7 @@ def group_trigger(sender, instance, **kwargs):
                 proposal_worth_observing(
                     prop_dec,
                     instance,
-                    trigger_message=f"{prop_dec.decision_reason}Checking new VOEvent.\n ",
+                    trigger_message=f"{prop_dec.decision_reason}Checking new Event.\n ",
                 )
             elif prop_dec.decision == "T":
                 # Check new event position is further away than the repointing limit
@@ -126,8 +126,8 @@ def group_trigger(sender, instance, **kwargs):
             earliest_event_observed=instance.event_observed,
             latest_event_observed=instance.event_observed,
         )
-        # Link the VOEvent (have to update this way to prevent save() triggering this function again)
-        VOEvent.objects.filter(id=instance.id).update(event_group_id=new_trig)
+        # Link the Event (have to update this way to prevent save() triggering this function again)
+        Event.objects.filter(id=instance.id).update(event_group_id=new_trig)
 
         # Loop over settings
         proposal_settings = ProposalSettings.objects.all()
@@ -158,7 +158,7 @@ def group_trigger(sender, instance, **kwargs):
     early_dt = instance.event_observed - datetime.timedelta(seconds=dt)
     late_dt = instance.event_observed + datetime.timedelta(seconds=dt)
 
-    # Check if the VOEvent was observed after the earliest event observed - 100s
+    # Check if the Event was observed after the earliest event observed - 100s
     #                               and before the latest  event observed + 100s
     association_exists = False
     poss_events = PossibleEventAssociation.objects.filter(earliest_event_observed__lt=late_dt,
@@ -177,8 +177,8 @@ def group_trigger(sender, instance, **kwargs):
                 prev_trig = trig_event
 
     if association_exists:
-        # Trigger event already exists so link the VOEvent (have to update this way to prevent save() triggering this function again)
-        VOEvent.objects.filter(id=instance.id).update(associated_event_id=prev_trig)
+        # Trigger event already exists so link the Event (have to update this way to prevent save() triggering this function again)
+        Event.objects.filter(id=instance.id).update(associated_event_id=prev_trig)
 
         # TODO update the PossibleEventAssociation ra and dec if the position is better.
         # Update latest_event_observed
@@ -198,8 +198,8 @@ def group_trigger(sender, instance, **kwargs):
             earliest_event_observed=instance.event_observed,
             latest_event_observed=instance.event_observed,
         )
-        # Link the VOEvent (have to update this way to prevent save() triggering this function again)
-        VOEvent.objects.filter(id=instance.id).update(associated_event_id=new_trig)
+        # Link the Event (have to update this way to prevent save() triggering this function again)
+        Event.objects.filter(id=instance.id).update(associated_event_id=new_trig)
 
 
 def proposal_worth_observing(
@@ -215,7 +215,7 @@ def proposal_worth_observing(
     prop_dec : `django.db.models.Model`
         The Django ProposalDecision model object.
     voevent : `django.db.models.Model`
-        The Django VOEvent model object.
+        The Django Event model object.
     trigger_message : `str`, optional
         A log of all the decisions made so far so a user can understand why the source was(n't) observed. Default: "".
     observation_reason : `str`, optional
@@ -228,7 +228,7 @@ def proposal_worth_observing(
     # Check if event has an accurate enough position
     if voevent.pos_error > prop_dec.proposal.maximum_position_uncertainty:
         # Ignore the inaccurate event
-        trigger_message += f"The VOEvents positions uncertainty ({voevent.pos_error} deg) is greater than {prop_dec.proposal.maximum_position_uncertainty} so not observing.\n "
+        trigger_message += f"The Events positions uncertainty ({voevent.pos_error} deg) is greater than {prop_dec.proposal.maximum_position_uncertainty} so not observing.\n "
     else:
         # Continue to next test
 
@@ -316,7 +316,7 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
     """
     """
     # Work out all the telescopes that observed the event
-    voevents = VOEvent.objects.filter(event_group_id=proposal_decision_model.event_group_id)
+    voevents = Event.objects.filter(event_group_id=proposal_decision_model.event_group_id)
     telescopes = []
     for voevent in voevents:
         telescopes.append(voevent.telescope)

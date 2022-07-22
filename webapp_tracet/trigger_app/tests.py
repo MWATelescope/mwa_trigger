@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from .models import EventGroup, VOEvent, PossibleEventAssociation, ProposalDecision, Observations
+from .models import EventGroup, Event, PossibleEventAssociation, ProposalDecision, Observations
 
 from tracet.parse_xml import parsed_VOEvent
 import astropy.units as u
@@ -16,7 +16,7 @@ def create_voevent_wrapper(trig, ra_dec, dec_alter=True):
     else:
         dec=trig.dec
         dec_dms=trig.dec_dms
-    VOEvent.objects.create(
+    Event.objects.create(
         telescope=trig.telescope,
         xml_packet=trig.packet,
         duration=trig.trig_duration,
@@ -68,8 +68,8 @@ class test_grb_group_01(TestCase):
 
 
     def test_possible_event_association(self):
-        # Check there are three VOEvents that were grouped as one PossibleEventAssociation
-        self.assertEqual(len(VOEvent.objects.all()), 3)
+        # Check there are three Events that were grouped as one PossibleEventAssociation
+        self.assertEqual(len(Event.objects.all()), 3)
         self.assertEqual(len(PossibleEventAssociation.objects.all()), 1)
 
     def test_mwa_proposal_decision(self):
@@ -109,8 +109,8 @@ class test_grb_group_02(TestCase):
 
 
     def test_trigger_groups(self):
-        # Check there are three VOEvents that were grouped as one by the trigger ID
-        self.assertEqual(len(VOEvent.objects.all()), 3)
+        # Check there are three Events that were grouped as one by the trigger ID
+        self.assertEqual(len(Event.objects.all()), 3)
         self.assertEqual(len(EventGroup.objects.all()), 1)
 
     def test_mwa_proposal_decision(self):
@@ -152,8 +152,8 @@ class test_grb_group_03(TestCase):
 
 
     def test_trigger_groups(self):
-        # Check there are three VOEvents that were grouped as one by the trigger ID
-        self.assertEqual(len(VOEvent.objects.all()), 3)
+        # Check there are three Events that were grouped as one by the trigger ID
+        self.assertEqual(len(Event.objects.all()), 3)
         self.assertEqual(len(EventGroup.objects.all()), 1)
 
     def test_atca_proposal_decision(self):
@@ -167,7 +167,7 @@ class test_grb_group_03(TestCase):
 
 
 class test_nu(TestCase):
-    """Tests that a neutrino VOEvent will trigger an observation
+    """Tests that a neutrino Event will trigger an observation
     """
     # Load default fixtures
     fixtures = [
@@ -193,8 +193,8 @@ class test_nu(TestCase):
 
 
     def test_trigger_groups(self):
-        # Check there are three VOEvents that were grouped as one by the trigger ID
-        self.assertEqual(len(VOEvent.objects.all()), 3)
+        # Check there are three Events that were grouped as one by the trigger ID
+        self.assertEqual(len(Event.objects.all()), 3)
         self.assertEqual(len(EventGroup.objects.all()), 2)
 
     def test_proposal_decision(self):
@@ -206,7 +206,7 @@ class test_nu(TestCase):
 
 
 class test_fs(TestCase):
-    """Tests that a flare star VOEvent will trigger an observation
+    """Tests that a flare star Event will trigger an observation
     """
     # Load default fixtures
     fixtures = [
@@ -230,8 +230,8 @@ class test_fs(TestCase):
 
 
     def test_trigger_groups(self):
-        # Check there are three VOEvents that were grouped as one by the trigger ID
-        self.assertEqual(len(VOEvent.objects.all()), 1)
+        # Check there are three Events that were grouped as one by the trigger ID
+        self.assertEqual(len(Event.objects.all()), 1)
         self.assertEqual(len(EventGroup.objects.all()), 1)
 
     def test_proposal_decision(self):
@@ -241,7 +241,7 @@ class test_fs(TestCase):
 
 
 class test_hess_any_dur(TestCase):
-    """Tests that a HESS VOEvent will trigger an observation but only if we use a proposal with the any duration flag
+    """Tests that a HESS Event will trigger an observation but only if we use a proposal with the any duration flag
     """
     # Load default fixtures
     fixtures = [
@@ -269,7 +269,7 @@ class test_hess_any_dur(TestCase):
 
     def test_trigger_groups(self):
         # Check event was made
-        self.assertEqual(len(VOEvent.objects.all()), 1)
+        self.assertEqual(len(Event.objects.all()), 1)
         self.assertEqual(len(EventGroup.objects.all()), 1)
 
     def test_proposal_decision(self):

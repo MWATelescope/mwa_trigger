@@ -30,7 +30,7 @@ urlpatterns = [
     path('possible_event_association_details/<int:tid>/', views.PossibleEventAssociation_details),
     path('trigger_id_log/', views.EventGroupList),
     path('trigger_id_details/<int:tid>/', views.EventGroup_details),
-    path('voevent_log/', views.VOEventList),
+    path('event_log/', views.EventList),
     path('comet_log/', views.CometLogList.as_view()),
     path('proposal_settings/', views.ProposalSettingsList.as_view()),
     path('proposal_create/', views.proposal_form),

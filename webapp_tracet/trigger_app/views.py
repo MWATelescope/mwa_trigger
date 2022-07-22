@@ -35,7 +35,7 @@ if 'runserver' in sys.argv:
     # Send off start up signal because server is launching in development
     startup_signal.send(sender=startup_signal)
 
-class VOEventFilter(django_filters.FilterSet):
+class EventFilter(django_filters.FilterSet):
     recieved_data = django_filters.DateTimeFromToRangeFilter()
     event_observed = django_filters.DateTimeFromToRangeFilter()
 
@@ -58,7 +58,7 @@ class VOEventFilter(django_filters.FilterSet):
     swift_rate_signif__gte = django_filters.NumberFilter(field_name='swift_rate_signif', lookup_expr='gte')
 
     class Meta:
-        model = models.VOEvent
+        model = models.Event
         fields = '__all__'
         filter_overrides = {
             dj_model.CharField: {
@@ -70,25 +70,25 @@ class VOEventFilter(django_filters.FilterSet):
         }
 
 
-def VOEventList(request):
+def EventList(request):
     # Apply filters
-    f = VOEventFilter(request.GET, queryset=models.VOEvent.objects.all())
-    voevents = f.qs
+    f = EventFilter(request.GET, queryset=models.Event.objects.all())
+    events = f.qs
 
     # Get position error units
     poserr_unit = request.GET.get('poserr_unit', 'deg')
 
     # Paginate
     page = request.GET.get('page', 1)
-    paginator = Paginator(voevents, 100)
+    paginator = Paginator(events, 100)
     try:
-        voevents = paginator.page(page)
+        events = paginator.page(page)
     except InvalidPage:
         # if the page contains no results (EmptyPage exception) or
         # the page number is not an integer (PageNotAnInteger exception)
         # return the first page
-        voevents = paginator.page(1)
-    return render(request, 'trigger_app/voevent_list.html', {'filter': f, "page_obj":voevents, "poserr_unit":poserr_unit})
+        events = paginator.page(1)
+    return render(request, 'trigger_app/voevent_list.html', {'filter': f, "page_obj":events, "poserr_unit":poserr_unit})
 
 
 class ProposalDecisionFilter(django_filters.FilterSet):
@@ -122,15 +122,15 @@ def ProposalDecisionList(request):
 
 def PossibleEventAssociationList(request):
     # Find all telescopes for each trigger event
-    voevents = models.VOEvent.objects.filter(ignored=False)
+    events = models.Event.objects.filter(ignored=False)
     trigger_event = models.PossibleEventAssociation.objects.all()
 
-    # Loop over the trigger events and grab all the telescopes of the VOEvents
+    # Loop over the trigger events and grab all the telescopes of the Events
     tevent_telescope_list = []
     for tevent in trigger_event:
         tevent_telescope_list.append(
             ' '.join(
-                set(voevents.filter(associated_event_id=tevent).values_list('telescope', flat=True))
+                set(events.filter(associated_event_id=tevent).values_list('telescope', flat=True))
             )
         )
 
@@ -153,17 +153,17 @@ def grab_decisions_for_event_groups(event_groups):
     source_name_list = []
     proposal_decision_list = []
     proposal_decision_id_list = []
-    for trig in event_groups:
-        trigger_group_voevents = models.VOEvent.objects.filter(event_group_id=trig)
+    for event_group in event_groups:
+        event_group_events = models.Event.objects.filter(event_group_id=event_group)
         telescope_list.append(
-            ' '.join(set(trigger_group_voevents.values_list('telescope', flat=True)))
+            ' '.join(set(event_group_events.values_list('telescope', flat=True)))
         )
-        source_name_list.append(trigger_group_voevents.first().source_name)
+        source_name_list.append(event_group_events.first().source_name)
         # grab decision for each proposal
         decision_list = []
         decision_id_list = []
         for prop in prop_settings:
-            this_decision = models.ProposalDecision.objects.filter(event_group_id=trig, proposal=prop)
+            this_decision = models.ProposalDecision.objects.filter(event_group_id=event_group, proposal=prop)
             if this_decision.exists():
                 decision_list.append(this_decision.first().get_decision_display())
                 decision_id_list.append(this_decision.first().id)
@@ -225,35 +225,39 @@ def PossibleEventAssociation_details(request, tid):
     trigger_event.dec = c.dec.to_string(unit=u.degree, sep=':')
 
     # grab telescope names
-    voevents = models.VOEvent.objects.filter(associated_event_id=trigger_event)
-    telescopes = ' '.join(set(voevents.values_list('telescope', flat=True)))
+    events = models.Event.objects.filter(associated_event_id=trigger_event)
+    telescopes = ' '.join(set(events.values_list('telescope', flat=True)))
 
     # grab event ID
-    event_id = list(dict.fromkeys(voevents.values_list('trigger_id')))[0][0]
+    event_id = list(dict.fromkeys(events.values_list('trigger_id')))[0][0]
 
     # list all voevents with the same id
     if event_id:
-        event_id_voevents = models.VOEvent.objects.filter(trigger_id=event_id)
+        event_id_events = models.Event.objects.filter(trigger_id=event_id)
     else:
-        event_id_voevents = []
+        event_id_events = []
 
     # Get position error units
     poserr_unit = request.GET.get('poserr_unit', 'deg')
 
-    return render(request, 'trigger_app/possible_event_association_details.html', {'trigger_event':trigger_event,
-                                                                     'voevents':voevents,
-                                                                     'telescopes':telescopes,
-                                                                     'event_id':event_id,
-                                                                     'event_id_voevents':event_id_voevents,
-                                                                     'poserr_unit':poserr_unit,})
+    context = {
+        'trigger_event':trigger_event,
+        'events':events,
+        'telescopes':telescopes,
+        'event_id':event_id,
+        'event_id_events':event_id_events,
+        'poserr_unit':poserr_unit,
+    }
+
+    return render(request, 'trigger_app/possible_event_association_details.html', context)
 
 
 def EventGroup_details(request, tid):
     trigger_event = models.EventGroup.objects.get(id=tid)
 
     # grab telescope names
-    voevents = models.VOEvent.objects.filter(event_group_id=trigger_event)
-    telescopes = ' '.join(set(voevents.values_list('telescope', flat=True)))
+    events = models.Event.objects.filter(event_group_id=trigger_event)
+    telescopes = ' '.join(set(events.values_list('telescope', flat=True)))
 
     # list all prop decisions
     prop_decs = models.ProposalDecision.objects.filter(event_group_id=trigger_event)
@@ -266,24 +270,28 @@ def EventGroup_details(request, tid):
     # Get position error units
     poserr_unit = request.GET.get('poserr_unit', 'deg')
 
-    return render(request, 'trigger_app/trigger_group_id_details.html', {'trigger_event':trigger_event,
-                                                                     'voevents':voevents,
-                                                                     'obs':obs,
-                                                                     'prop_decs':prop_decs,
-                                                                     'telescopes':telescopes,
-                                                                     'poserr_unit':poserr_unit,})
+    context = {
+        'trigger_event':trigger_event,
+        'events':events,
+        'obs':obs,
+        'prop_decs':prop_decs,
+        'telescopes':telescopes,
+        'poserr_unit':poserr_unit,
+    }
+
+    return render(request, 'trigger_app/trigger_group_id_details.html', context)
 
 
 def ProposalDecision_details(request, id):
     prop_dec = models.ProposalDecision.objects.get(id=id)
 
     # Work out all the telescopes that observed the event
-    voevents = models.VOEvent.objects.filter(event_group_id=prop_dec.event_group_id)
+    events = models.Event.objects.filter(event_group_id=prop_dec.event_group_id)
     telescopes = []
     event_types = []
-    for voevent in voevents:
-        telescopes.append(voevent.telescope)
-        event_types.append(voevent.event_type)
+    for event in events:
+        telescopes.append(event.telescope)
+        event_types.append(event.event_type)
     # Make sure they are unique and put each on a new line
     telescopes = ".\n".join(list(set(telescopes)))
     event_types = " \n".join(list(set(event_types)))
@@ -293,7 +301,7 @@ def ProposalDecision_details(request, id):
     content = {
         'prop_dec':prop_dec,
         'telescopes':telescopes,
-        'voevents': voevents,
+        'events': events,
         'event_types': event_types,
         'obs': observations,
     }
@@ -340,7 +348,7 @@ def proposal_decision_path(request, id):
     # Create decision tree flow diagram
     # Set up mermaid javascript
     mermaid_script = f'''flowchart TD
-  A(VOEvent) --> B{{"Have we observed\nthis event before?"}}
+  A(Event) --> B{{"Have we observed\nthis event before?"}}
   B --> |YES| D{{"Is the new event further away than\nthe repointing limit ({prop_set.repointing_limit} degrees)?"}}
   D --> |YES| R(Repoint)
   D --> |NO| END(Ignore)'''
@@ -452,8 +460,8 @@ def user_alert_create(request):
 
 
 def voevent_view(request, id):
-    voevent = models.VOEvent.objects.get(id=id)
-    v = vp.loads(voevent.xml_packet.encode())
+    event = models.Event.objects.get(id=id)
+    v = vp.loads(event.xml_packet.encode())
     xml_pretty_str = vp.prettystr(v)
     return HttpResponse(xml_pretty_str, content_type='text/xml')
 
@@ -461,7 +469,7 @@ def voevent_view(request, id):
 @api_view(['POST'])
 @transaction.atomic
 def voevent_create(request):
-    voe = serializers.VOEventSerializer(data=request.data)
+    voe = serializers.EventSerializer(data=request.data)
     if voe.is_valid():
         voe.save()
         return Response(voe.data, status=status.HTTP_201_CREATED)
@@ -494,14 +502,14 @@ def proposal_form(request, id=None):
 def test_upload_xml(request):
     proposals = models.ProposalSettings.objects.filter(testing=False)
     if request.method == "POST":
-        form = forms.TestVOEvent(request.POST)
+        form = forms.TestEvent(request.POST)
         if form.is_valid():
-            # Parse and submit the VOEvent
+            # Parse and submit the Event
             xml_string = str(request.POST['xml_packet'])
             trig = parse_xml.parsed_VOEvent(None, packet=xml_string)
             logger.debug(trig.event_observed)
             logger.debug(type(trig.event_observed))
-            models.VOEvent.objects.get_or_create(
+            models.Event.objects.get_or_create(
                 telescope=trig.telescope,
                 xml_packet=xml_string,
                 duration=trig.trig_duration,
@@ -525,7 +533,7 @@ def test_upload_xml(request):
             )
             return HttpResponseRedirect('/')
     else:
-        form = forms.TestVOEvent()
+        form = forms.TestEvent()
     return render(request, 'trigger_app/test_upload_xml_form.html', {'form': form, "proposals": proposals})
 
 

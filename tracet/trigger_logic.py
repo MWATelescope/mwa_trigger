@@ -22,14 +22,14 @@ def worth_observing_grb(
         # Other
         trigger_message="",
     ):
-    """Decide if a GRB VOEvent is worth observing.
+    """Decide if a GRB Event is worth observing.
 
     Parameters
     ----------
     trig_duration : `float`, optional
         The duration of the VOevent in seconds.
     fermi_most_likely_index : `int`, optional
-        An index that Fermi uses to describe what sort of source the VOEvent. GRBs are 4 so this is what we check for.
+        An index that Fermi uses to describe what sort of source the Event. GRBs are 4 so this is what we check for.
     fermi_detection_prob : `int`, optional
         A GRB detection probabilty that Fermi produces as a percentage.
     swift_rate_signif : `float`, optional
@@ -127,7 +127,7 @@ def worth_observing_nu(
         # Other
         trigger_message="",
     ):
-    """Decide if a Neutrino VOEvent is worth observing.
+    """Decide if a Neutrino Event is worth observing.
 
     Parameters
     ----------

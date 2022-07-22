@@ -45,20 +45,6 @@ def write_and_upload(xml_string):
     }
     r = session.post(url, data=data)
 
-    # Upload
-    # VOEvent.objects.get_or_create(telescope=trig.telescope,
-    #                               xml_packet=xml_string,
-    #                               duration=trig.trig_duration,
-    #                               trig_id=trig.trig_id,
-    #                               sequence_num=trig.sequence_num,
-    #                               event_type=trig.this_trig_type,
-    #                               ra=trig.ra,
-    #                               dec=trig.dec,
-    #                               pos_error=trig.err,
-    #                               ignored=trig.ignore)
-    # v = voeventparse.loads(xml_string.encode())
-    # print(voeventparse.prettystr(v))
-
 if __name__ == '__main__':
     xml_string = sys.stdin.read()
     write_and_upload(xml_string)
