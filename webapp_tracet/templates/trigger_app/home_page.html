@@ -9,13 +9,15 @@
   <h3 style="text-align: center"><a href="https://tracet.readthedocs.io/" style="text-decoration:None">Documentation</a></h3>
   <hr>
 
-  <h2>VOEvent Receiving Status (twistd comet)</h2>
+  <h2>Broker Status</h2>
   <table class="table-thin-left">
     <thead>
     <tr>
       <th>Status</th>
+      <th>Broker</th>
       <th>Remotes</th>
       <th>TCPs</th>
+      <th>View Log</th>
     </tr>
     </thead>
     <tr>
@@ -24,12 +26,14 @@
       {% else %}
         <td class="PositiveTransaction">
       {% endif %}
-      {{ twistd_comet_status.get_status_display }} </td>
-      <td> {{ remotes }} </td>
-      <td> {{ tcps }} </td>
+        {{ twistd_comet_status.get_status_display }}</td>
+      <td>VOEvent</td>
+      <td>{{ remotes }}</td>
+      <td>{{ tcps }}</td>
+      <td><a href="/comet_log/" style="text-decoration:None">Comet Log</a></td>
     </tr>
   </table>
-  <p><a href="/comet_log/" style="text-decoration:None">View Comet Log</a></p>
+  <p></p>
 
   <hr>
   <h2>Most recent Transient Events</h2>
