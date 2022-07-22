@@ -28,3 +28,9 @@ Users can set multiple alert types per proposal (e.g. email and SMS) and
 per alert type (trigger, pending and debug).
 It is recommended that users set a phone call alert type for pending alerts
 to assure the pending decision is promptly investigated.
+
+Verifying Your Phone Number on Twilio
+-------------------------------------
+Since we use the free version of Twilio, we need to verify a number on Twilio before it can send an SMS or call.
+You will need to contact the admin that has access to the Twilio account so they can do this for you.
+`Here <https://support.twilio.com/hc/en-us/articles/223180048-Adding-a-Verified-Phone-Number-or-Caller-ID-with-Twilio>`_ is a guide on how to verify a phone number on Twilio.
