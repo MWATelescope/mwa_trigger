@@ -490,6 +490,7 @@ def proposal_form(request, id=None):
     return render(request, 'trigger_app/proposal_form.html', {'form':form, "src_tele": src_tele, "title":title})
 
 
+@login_required
 def test_upload_xml(request):
     proposals = models.ProposalSettings.objects.filter(testing=False)
     if request.method == "POST":
