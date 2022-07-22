@@ -1,5 +1,8 @@
-Installation
-============
+Database Installation
+=====================
+
+Dependancies
+------------
 
 For Ubuntu or Debian Linux:
 

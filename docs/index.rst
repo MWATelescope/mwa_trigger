@@ -43,7 +43,8 @@ explanations of the software methodologies and layout (Developer Documentation) 
    :maxdepth: 4
    :caption: Web Application:
 
-   installation
+   database_installation
+   webapp_installation
    running_server
 
 
