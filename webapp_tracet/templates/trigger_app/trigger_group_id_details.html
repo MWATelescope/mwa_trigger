@@ -3,17 +3,17 @@
 {% load utils %}
 
 {% block content %}
-<title>Trigger ID Details</title>
+<title>Event Group Details</title>
 
 <div class="container-sm">
-  <h2>{% if trigger_event.source_type  is not None %} {{ trigger_event.get_source_type_display }} {% endif %} Trigger Group ID {{ trigger_event.id }}</h2>
+  <h2>{% if trigger_event.source_type  is not None %} {{ trigger_event.get_source_type_display }}, {% endif %} Event Group ID {{ trigger_event.id }}</h2>
   <table class="table-thin">
     <tr>
       <td>Telescope(s)</td>
       <td>{{ telescopes }}</td>
     </tr>
     <tr>
-      <td>Trigger ID</td>
+      <td>Trig ID</td>
       <td>{% if trigger_event.trigger_id is not None %}
             {% if 'SWIFT' in telescopes  %}
               <!-- Link to SWIFT telescope page -->
@@ -60,9 +60,9 @@
   <table class="fl-table">
     <thead>
       <tr>
-        <th>ID</th>
+        <th>Decision ID</th>
         <th>Proposal Telsecope</th>
-        <th>Project ID</th>
+        <th>Proposal ID</th>
         <th>Decision</th>
         <th>Decision Reason</th>
         <th>Duration (s)</th>
@@ -83,9 +83,9 @@
     {% endif %}
       <td><a href="/proposal_decision_details/{{ prop_dec.id }}" style="text-decoration:None">{{ prop_dec.id }}</a</td>
       <td>{{ prop_dec.proposal.telescope }}</td>
-      <td>{{ prop_dec.proposal.project_id }}</td>
+      <td>{{ prop_dec.proposal.proposal_id }}</td>
       <td>{{ prop_dec.get_decision_display }}</td>
-      <td>{{ prop_dec.decision_reason }}</td>
+      <td style="white-space:pre">{{ prop_dec.decision_reason }}</td>
       <td>{{ prop_dec.duration }}</td>
       <td>{{ prop_dec.ra }}</td>
       <td>{{ prop_dec.dec }}</td>
@@ -143,18 +143,18 @@
     </table>
   {% endif %}
 
-    <h2> VOEvents</h2>
+    <h2>Events</h2>
 
     <table class="fl-table">
       <thead>
         <tr>
-          <th>ID</th>
+          <th>Event ID</th>
           <th>Source Type</th>
           <th>Telescope</th>
           <th>Event Type</th>
           <th>Alert Time (UTC)</th>
           <th>Recieved (UTC)</th>
-          <th>Event ID</th>
+          <th>Trig ID</th>
           <th>Source Name</th>
           <th>Sequence number</th>
           <th>Duration (s)</th>
@@ -183,7 +183,14 @@
         <td>{{ voevent.event_type }}</td>
         <td>{{ voevent.event_observed|date:"Y-m-d H:i:s" }}</td>
         <td>{{ voevent.recieved_data|date:"Y-m-d H:i:s" }}</td>
-        <td>{% if voevent.trigger_id   is not None %} {{ voevent.trigger_id }}   {% endif %}</td>
+        <td>{% if voevent.trigger_id is not None %}
+              {% if 'SWIFT' in telescopes  %}
+                <!-- Link to SWIFT telescope page -->
+                <a href="https://gcn.gsfc.nasa.gov/other/{{ trigger_event.trigger_id }}.swift" style="text-decoration:None">{{ trigger_event.trigger_id }}</a>
+              {% else %}
+                {{ voevent.trigger_id }}
+              {% endif %}
+            {% endif %}</td>
         <td>{% if voevent.source_name  is not None %} {{ voevent.source_name }}  {% endif %}</td>
         <td>{% if voevent.sequence_num is not None %} {{ voevent.sequence_num }} {% endif %}</td>
         <td>{% if voevent.duration     is not None %} {{ voevent.duration }}     {% endif %}</td>

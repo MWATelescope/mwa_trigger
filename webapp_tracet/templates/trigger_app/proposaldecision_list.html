@@ -5,8 +5,8 @@
 
 <div class="container-fluid">
   <h1>Proposal Decision Log</h1>
-  <h3>Filter VOEvents:</h3>
   <div style="background-color:#f8f8f8; width:90%; margin: 0 auto; padding-bottom: 20px;">
+  <h3>Filter Proposal Decisions:</h3>
   <form action="" method="get">
     <table>
       <tr>
@@ -23,7 +23,8 @@
   <table class="fl-table">
     <thead>
     <tr>
-      <th>ID</th>
+      <th>Decision ID</th>
+      <th>Group ID</th>
       <th>Date (UTC)</th>
       <th>Proposal Telsecope</th>
       <th>Project ID</th>
@@ -42,11 +43,12 @@
       <tr>
     {% endif %}
       <td><a href="/proposal_decision_details/{{ object.id }}/" style="text-decoration:None">{{ object.id }}</a></td>
+      <td><a href="/trigger_id_details/{{ object.trigger_group_id }}/" style="text-decoration:None">{{ object.trigger_group_id }}</a></td>
       <td>{{ object.recieved_data|date:"Y-m-d H:i:s" }}</td>
       <td>{{ object.proposal.telescope }}</td>
       <td>{{ object.proposal.project_id }}</td>
       <td>{{ object.get_decision_display }}</td>
-      <td>{{ object.decision_reason }}</td>
+      <td style="white-space:pre">{{ object.decision_reason }}</td>
       <td>{{ object.duration }}</td>
       <td>{{ object.ra_hms }}</td>
       <td>{{ object.dec_dms }}</td>
