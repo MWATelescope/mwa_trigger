@@ -2,12 +2,11 @@ Using the database
 ==================
 
 
-Manually uploading a VOEvent
-----------------------------
-If you are only pushing static XML files for testing, you won't need the Twisted or Comet packages installed.
+Uploading a test VOEvent
+------------------------
+You can use the `testing <https://mwa-trigger.duckdns.org/test_upload_xml/>`_ page of TraceT to upload a test VOEvent XML file.
 
-You can send a test trigger by doing something like:
+This will be treated as a real event so ensure that all proposals are in testing mode if you do not want to trigger observations.
 
-.. code-block::
-
-   cat trigger.xml | ./upload_xml.py
+You can copy and paste the contents of an XML file into the text box and edit its RA and Dec to ensure it's above the horizon.
+You should also change the group event ID (normally labelled as TrigID), so TraceT knows to treat it as a new event group.
