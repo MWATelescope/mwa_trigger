@@ -79,12 +79,8 @@ admin.site.register(TelescopeProjectID, TelescopeProjectIDAdmin)
 admin.site.register(VOEvent)
 admin.site.register(TriggerID)
 admin.site.register(PossibleEventAssociation)
-<<<<<<< HEAD
 admin.site.register(AlertPermission)
-=======
-admin.site.register(AdminAlerts)
 admin.site.register(UserAlerts)
->>>>>>> master
 admin.site.register(ProposalDecision)
 admin.site.register(Telescope)
 admin.site.register(Status)
