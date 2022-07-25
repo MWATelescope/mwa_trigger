@@ -120,31 +120,6 @@ def ProposalDecisionList(request):
     return render(request, 'trigger_app/proposaldecision_list.html', {'filter': f, "page_obj":ProposalDecision, "poserr_unit":poserr_unit})
 
 
-def PossibleEventAssociationList(request):
-    # Find all telescopes for each trigger event
-    events = models.Event.objects.filter(ignored=False)
-    trigger_event = models.PossibleEventAssociation.objects.all()
-
-    # Loop over the trigger events and grab all the telescopes of the Events
-    tevent_telescope_list = []
-    for tevent in trigger_event:
-        tevent_telescope_list.append(
-            ' '.join(
-                set(events.filter(associated_event_id=tevent).values_list('telescope', flat=True))
-            )
-        )
-
-    # Paginate
-    page = request.GET.get('page', 1)
-    # zip the trigger event and the tevent_telescope_list together so I can loop over both in the html
-    paginator = Paginator(list(zip(trigger_event, tevent_telescope_list)), 100)
-    try:
-        object_list = paginator.page(page)
-    except InvalidPage:
-        object_list = paginator.page(1)
-    return render(request, 'trigger_app/possible_event_association_list.html', {'object_list':object_list})
-
-
 def grab_decisions_for_event_groups(event_groups):
     # For the event groups, grab all useful information like each proposal decision was
     prop_settings = models.ProposalSettings.objects.all()
@@ -198,6 +173,7 @@ class CometLogList(ListView):
     model = models.CometLog
     paginate_by = 100
 
+
 class ProposalSettingsList(ListView):
     model = models.ProposalSettings
 
@@ -205,35 +181,63 @@ class ProposalSettingsList(ListView):
 def home_page(request):
     comet_status = models.Status.objects.get(name='twistd_comet')
     prop_settings = models.ProposalSettings.objects.all()
-    recent_triggers = models.EventGroup.objects.all()[:5]
+    recent_event_groups = models.EventGroup.objects.all()[:5]
 
-    recent_triggers_info = grab_decisions_for_event_groups(recent_triggers)
+    recent_event_group_info = grab_decisions_for_event_groups(recent_event_groups)
 
-    return render(request, 'trigger_app/home_page.html', {'twistd_comet_status': comet_status,
-                                                          'settings':prop_settings,
-                                                          'remotes':", ".join(settings.VOEVENT_REMOTES),
-                                                          'tcps':", ".join(settings.VOEVENT_TCP),
-                                                          "recent_triggers":recent_triggers_info})
+    context = {
+        'twistd_comet_status': comet_status,
+        'settings':prop_settings,
+        'remotes':", ".join(settings.VOEVENT_REMOTES),
+        'tcps':", ".join(settings.VOEVENT_TCP),
+        "recent_event_groups":recent_event_group_info
+    }
+    return render(request, 'trigger_app/home_page.html', context)
+
+
+def PossibleEventAssociationList(request):
+    # Find all telescopes for each trigger event
+    events = models.Event.objects.filter(ignored=False)
+    event_associations = models.PossibleEventAssociation.objects.all()
+
+    # Loop over the trigger events and grab all the telescopes of the Events
+    aevent_telescope_list = []
+    for aevent in event_associations:
+        aevent_telescope_list.append(
+            ' '.join(
+                set(events.filter(associated_event_id=aevent).values_list('telescope', flat=True))
+            )
+        )
+
+    # Paginate
+    page = request.GET.get('page', 1)
+    # zip the trigger event and the tevent_telescope_list together so I can loop over both in the html
+    paginator = Paginator(list(zip(event_associations, aevent_telescope_list)), 100)
+    try:
+        object_list = paginator.page(page)
+    except InvalidPage:
+        object_list = paginator.page(1)
+    return render(request, 'trigger_app/possible_event_association_list.html', {'object_list':object_list})
 
 
 def PossibleEventAssociation_details(request, tid):
-    trigger_event = models.PossibleEventAssociation.objects.get(id=tid)
+    event_association = models.PossibleEventAssociation.objects.get(id=tid)
 
     # covert ra and dec to HH:MM:SS.SS format
-    c = SkyCoord( trigger_event.ra, trigger_event.dec, frame='icrs', unit=(u.deg,u.deg))
-    trigger_event.ra = c.ra.to_string(unit=u.hour, sep=':')
-    trigger_event.dec = c.dec.to_string(unit=u.degree, sep=':')
+    c = SkyCoord( event_association.ra, event_association.dec, frame='icrs', unit=(u.deg,u.deg))
+    event_association.ra = c.ra.to_string(unit=u.hour, sep=':')
+    event_association.dec = c.dec.to_string(unit=u.degree, sep=':')
 
     # grab telescope names
-    events = models.Event.objects.filter(associated_event_id=trigger_event)
+    events = models.Event.objects.filter(associated_event_id=event_association)
     telescopes = ' '.join(set(events.values_list('telescope', flat=True)))
 
-    # grab event ID
-    event_id = list(dict.fromkeys(events.values_list('trigger_id')))[0][0]
+    # grab trig ID
+    trig_event_id = list(dict.fromkeys(events.values_list('trig_id')))[0][0]
 
     # list all voevents with the same id
-    if event_id:
-        event_id_events = models.Event.objects.filter(trigger_id=event_id)
+    if trig_event_id:
+        event_id_events = models.Event.objects.filter(trig_id=trig_event_id)
     else:
         event_id_events = []
 
@@ -241,10 +245,10 @@ def PossibleEventAssociation_details(request, tid):
     poserr_unit = request.GET.get('poserr_unit', 'deg')
 
     context = {
-        'trigger_event':trigger_event,
+        'event_association':event_association,
         'events':events,
         'telescopes':telescopes,
-        'event_id':event_id,
+        'trig_event_id':trig_event_id,
         'event_id_events':event_id_events,
         'poserr_unit':poserr_unit,
     }
@@ -253,14 +257,14 @@ def PossibleEventAssociation_details(request, tid):
 
 
 def EventGroup_details(request, tid):
-    trigger_event = models.EventGroup.objects.get(id=tid)
+    event_group = models.EventGroup.objects.get(id=tid)
 
     # grab telescope names
-    events = models.Event.objects.filter(event_group_id=trigger_event)
+    events = models.Event.objects.filter(event_group_id=event_group)
     telescopes = ' '.join(set(events.values_list('telescope', flat=True)))
 
     # list all prop decisions
-    prop_decs = models.ProposalDecision.objects.filter(event_group_id=trigger_event)
+    prop_decs = models.ProposalDecision.objects.filter(event_group_id=event_group)
 
     # Grab MWA obs if the exist
     obs = []
@@ -271,7 +275,7 @@ def EventGroup_details(request, tid):
     poserr_unit = request.GET.get('poserr_unit', 'deg')
 
     context = {
-        'trigger_event':trigger_event,
+        'event_group':event_group,
         'events':events,
         'obs':obs,
         'prop_decs':prop_decs,
@@ -313,7 +317,7 @@ def ProposalDecision_result(request, id, decision):
 
     if decision:
         # Decision is True (1) so trigger an observation
-        obs_decision, trigger_message = trigger_observation(
+        obs_decision, decision_reason_log = trigger_observation(
             prop_dec,
             f"{prop_dec.decision_reason}User decided to trigger. ",
             reason="First Observation",
@@ -327,7 +331,7 @@ def ProposalDecision_result(request, id, decision):
             trigger_bool = True
             debug_bool = False
 
-        prop_dec.decision_reason = trigger_message
+        prop_dec.decision_reason = decision_reason_log
         prop_dec.decision = obs_decision
 
         # send off alert messages to users and admins
@@ -365,10 +369,10 @@ def proposal_decision_path(request, id):
     if prop_set.source_type == "GRB":
         mermaid_script += f'''
   F --> J{{"Fermi GRB probability > {prop_set.fermi_prob}\\nor\\nSWIFT Rate_signif > {prop_set.swift_rate_signf} sigma"}}
-  J --> |YES| K{{"Trigger duration between\n {prop_set.trig_min_duration} and {prop_set.trig_max_duration} s"}}
+  J --> |YES| K{{"Event duration between\n {prop_set.event_min_duration} and {prop_set.event_max_duration} s"}}
   J --> |NO| END
   K --> |YES| L[Trigger Observation]
-  K --> |NO| M{{"Trigger duration between\n{prop_set.pending_min_duration_1} and {prop_set.pending_max_duration_1} s\nor\n{prop_set.pending_min_duration_2} and {prop_set.pending_max_duration_2} s"}}
+  K --> |NO| M{{"Event duration between\n{prop_set.pending_min_duration_1} and {prop_set.pending_max_duration_1} s\nor\n{prop_set.pending_min_duration_2} and {prop_set.pending_max_duration_2} s"}}
   M --> |YES| N[Pending a human's decision]
   M --> |NO| END
 subgraph GRB
@@ -468,13 +472,13 @@ def voevent_view(request, id):
 
 @api_view(['POST'])
 @transaction.atomic
-def voevent_create(request):
-    voe = serializers.EventSerializer(data=request.data)
-    if voe.is_valid():
-        voe.save()
-        return Response(voe.data, status=status.HTTP_201_CREATED)
+def event_create(request):
+    new_event = serializers.EventSerializer(data=request.data)
+    if new_event.is_valid():
+        new_event.save()
+        return Response(new_event.data, status=status.HTTP_201_CREATED)
     logger.debug(request.data)
-    return Response(voe.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response(new_event.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @login_required
@@ -512,7 +516,7 @@ def test_upload_xml(request):
             models.Event.objects.get_or_create(
                 telescope=trig.telescope,
                 xml_packet=xml_string,
-                duration=trig.trig_duration,
+                duration=trig.event_duration,
                 trig_id=trig.trig_id,
                 sequence_num=trig.sequence_num,
                 event_type=trig.event_type,
@@ -541,7 +545,7 @@ def cancel_atca_observation(request, id=None):
     # Grab obs and proposal data
     obs = models.Observations.objects.filter(obsid=id).first()
     proposal_settings = obs.proposal_decision_id.proposal
-    trigger_message = obs.proposal_decision_id.decision_reason
+    decision_reason_log = obs.proposal_decision_id.decision_reason
 
     # Create the cancel request
     rapidObj = { 'requestDict': { 'cancel': obs.obsid, 'project': proposal_settings.project_id.id } }
@@ -554,14 +558,14 @@ def cancel_atca_observation(request, id=None):
         response = atca_request.send()
     except arrApi.responseError as r:
         logger.error(f"ATCA return message: {r}")
-        trigger_message += f"ATCA cancel failed, return message: {r}\n "
+        decision_reason_log += f"ATCA cancel failed, return message: {r}\n "
         decision = 'E'
     else:
-        trigger_message += f"ATCA observation canceled at {datetime.datetime.utcnow()}. \n"
+        decision_reason_log += f"ATCA observation canceled at {datetime.datetime.utcnow()}. \n"
         decision = 'C'
     # Update propocal decision
     proposal_decision = obs.proposal_decision_id
-    proposal_decision.decision_reason = trigger_message
+    proposal_decision.decision_reason = decision_reason_log
     proposal_decision.decision = decision
     proposal_decision.save()
 

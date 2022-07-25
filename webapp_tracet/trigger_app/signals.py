@@ -65,7 +65,7 @@ def group_trigger(sender, instance, **kwargs):
                 proposal_worth_observing(
                     prop_dec,
                     instance,
-                    trigger_message=f"{prop_dec.decision_reason}Checking new Event.\n ",
+                    decision_reason_log=f"{prop_dec.decision_reason}Checking new Event.\n ",
                 )
             elif prop_dec.decision == "T":
                 # Check new event position is further away than the repointing limit
@@ -83,7 +83,7 @@ def group_trigger(sender, instance, **kwargs):
                         prop_dec.pos_error = instance.pos_error
                     repoint_message = f"Repointing because seperation ({event_sep} deg) is greater than the repointing limit ({prop_dec.proposal.repointing_limit} deg)."
                     # Trigger observation
-                    decision, trigger_message = trigger_observation(
+                    decision, decision_reason_log = trigger_observation(
                         prop_dec,
                         f"{prop_dec.decision_reason}{repoint_message}\n ",
                         reason=repoint_message,
@@ -95,7 +95,7 @@ def group_trigger(sender, instance, **kwargs):
                         debug_bool = False
                     # Update proposal decision and log
                     prop_dec.decision = decision
-                    prop_dec.decision_reason = trigger_message
+                    prop_dec.decision_reason = decision_reason_log
                     prop_dec.save()
 
                     # send off alert messages to users and admins
@@ -135,7 +135,7 @@ def group_trigger(sender, instance, **kwargs):
             # Create a ProposalDecision object to record what each proposal does
             prop_dec = ProposalDecision.objects.create(
                 #decision=decision,
-                #decision_reason=trigger_message,
+                #decision_reason=decision_reason_log,
                 proposal=prop_set,
                 event_group_id=new_trig,
                 trig_id=instance.trig_id,
@@ -205,7 +205,7 @@ def group_trigger(sender, instance, **kwargs):
 def proposal_worth_observing(
         prop_dec,
         voevent,
-        trigger_message="",
+        decision_reason_log="",
         observation_reason="First observation."
     ):
     """For a proposal sees is this voevent is worth observing. If it is will trigger an observation and send off the relevant alerts.
@@ -216,7 +216,7 @@ def proposal_worth_observing(
         The Django ProposalDecision model object.
     voevent : `django.db.models.Model`
         The Django Event model object.
-    trigger_message : `str`, optional
+    decision_reason_log : `str`, optional
         A log of all the decisions made so far so a user can understand why the source was(n't) observed. Default: "".
     observation_reason : `str`, optional
         The reason for this observation. The default is "First Observation" but other potential reasons are "Repointing".
@@ -228,7 +228,7 @@ def proposal_worth_observing(
     # Check if event has an accurate enough position
     if voevent.pos_error > prop_dec.proposal.maximum_position_uncertainty:
         # Ignore the inaccurate event
-        trigger_message += f"The Events positions uncertainty ({voevent.pos_error} deg) is greater than {prop_dec.proposal.maximum_position_uncertainty} so not observing.\n "
+        decision_reason_log += f"The Events positions uncertainty ({voevent.pos_error} deg) is greater than {prop_dec.proposal.maximum_position_uncertainty} so not observing.\n "
     else:
         # Continue to next test
 
@@ -239,16 +239,16 @@ def proposal_worth_observing(
             proj_source_bool = False
             if prop_dec.proposal.source_type == "GRB" and voevent.source_type == "GRB":
                 # This proposal wants to observe GRBs so check if it is worth observing
-                trigger_bool, debug_bool, pending_bool, trigger_message = worth_observing_grb(
+                trigger_bool, debug_bool, pending_bool, decision_reason_log = worth_observing_grb(
                     # event values
-                    trig_duration=voevent.duration,
+                    event_duration=voevent.duration,
                     fermi_most_likely_index=voevent.fermi_most_likely_index,
                     fermi_detection_prob=voevent.fermi_detection_prob,
                     swift_rate_signif=voevent.swift_rate_signif,
                     # Thresholds
-                    trig_any_duration=prop_dec.proposal.trig_any_duration,
-                    trig_min_duration=prop_dec.proposal.trig_min_duration,
-                    trig_max_duration=prop_dec.proposal.trig_max_duration,
+                    event_any_duration=prop_dec.proposal.event_any_duration,
+                    event_min_duration=prop_dec.proposal.event_min_duration,
+                    event_max_duration=prop_dec.proposal.event_max_duration,
                     pending_min_duration_1=prop_dec.proposal.pending_min_duration_1,
                     pending_max_duration_1=prop_dec.proposal.pending_max_duration_1,
                     pending_min_duration_2=prop_dec.proposal.pending_min_duration_2,
@@ -256,25 +256,25 @@ def proposal_worth_observing(
                     fermi_min_detection_prob=prop_dec.proposal.fermi_prob,
                     swift_min_rate_signif=prop_dec.proposal.swift_rate_signf,
                     # Other
-                    trigger_message=trigger_message,
+                    decision_reason_log=decision_reason_log,
                 )
                 proj_source_bool = True
 
             elif prop_dec.proposal.source_type == "FS" and voevent.source_type == "FS":
                 # This proposal wants to observe FSs and there is no FS logic so observe
                 trigger_bool = True
-                trigger_message += f"Triggering on Flare Star {voevent.source_name}.\n "
+                decision_reason_log += f"Triggering on Flare Star {voevent.source_name}.\n "
                 proj_source_bool = True
             elif prop_dec.proposal.source_type == "NU" and voevent.source_type == "NU":
                 # This proposal wants to observe GRBs so check if it is worth observing
-                trigger_bool, debug_bool, pending_bool, trigger_message = worth_observing_nu(
+                trigger_bool, debug_bool, pending_bool, decision_reason_log = worth_observing_nu(
                     # event values
                     antares_ranking=voevent.antares_ranking,
                     telescope=voevent.telescope,
                     # Thresholds
                     antares_min_ranking=prop_dec.proposal.antares_min_ranking,
                     # Other
-                    trigger_message=trigger_message,
+                    decision_reason_log=decision_reason_log,
                 )
                 proj_source_bool = True
 
@@ -282,16 +282,16 @@ def proposal_worth_observing(
 
             if not proj_source_bool:
                 # Proposal does not observe this type of source so update message
-                trigger_message += f"This proposal does not observe {voevent.get_source_type_display()}s.\n "
+                decision_reason_log += f"This proposal does not observe {voevent.get_source_type_display()}s.\n "
         else:
             # Proposal does not observe event from this telescope so update message
-            trigger_message += f"This proposal does not trigger on events from {voevent.telescope}.\n "
+            decision_reason_log += f"This proposal does not trigger on events from {voevent.telescope}.\n "
 
     if trigger_bool:
         # Check if you can observe and if so send off the observation
-        decision, trigger_message = trigger_observation(
+        decision, decision_reason_log = trigger_observation(
             prop_dec,
-            trigger_message,
+            decision_reason_log,
             reason=observation_reason,
         )
         if decision == 'E':
@@ -305,7 +305,7 @@ def proposal_worth_observing(
 
     # Update proposal decision and log
     prop_dec.decision = decision
-    prop_dec.decision_reason = trigger_message
+    prop_dec.decision_reason = decision_reason_log
     prop_dec.save()
 
     # send off alert messages to users and admins

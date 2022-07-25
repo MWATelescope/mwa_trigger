@@ -183,7 +183,7 @@ class parsed_VOEvent:
         self.packet = packet
         self.trig_pairs = trig_pairs
         # Make default Nones if unknown telescope found
-        self.trig_duration = None
+        self.event_duration = None
         self.event_type = None
         self.sequence_num = None
         self.trig_id = None
@@ -298,7 +298,7 @@ class parsed_VOEvent:
 
         # Parse trigger info (telescope dependent)
         if self.telescope == "Fermi":
-            self.trig_duration = float(
+            self.event_duration = float(
                 v.find(".//Param[@name='Trig_Timescale']").attrib["value"]
             )
             self.sequence_num = int(
@@ -329,9 +329,9 @@ class parsed_VOEvent:
                 return
 
             # Get time and significance
-            trig_duration = v.find(".//Param[@name='Integ_Time']")
-            if trig_duration is not None:
-                self.trig_duration = float(trig_duration.attrib["value"])
+            event_duration = v.find(".//Param[@name='Integ_Time']")
+            if event_duration is not None:
+                self.event_duration = float(event_duration.attrib["value"])
             self.sequence_num = None
             swift_rate_signif = v.find(".//Param[@name='Rate_Signif']")
             if swift_rate_signif is not None:
@@ -341,13 +341,13 @@ class parsed_VOEvent:
                 self.grb_ident = grb_ident.attrib["value"]
 
         elif self.telescope == "Antares":
-            self.trig_duration = None
+            self.event_duration = None
             self.sequence_num = None
             self.antares_ranking = int(v.find(".//Param[@name='ranking']").attrib["value"])
 
         self.event_observed = v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Time.TimeInstant.ISOTime
         logger.debug("Trig details:")
-        logger.debug(f"Dur:  {self.trig_duration} s")
+        logger.debug(f"Dur:  {self.event_duration} s")
         logger.debug(f"ID:   {self.trig_id}")
         logger.debug(f"Seq#: {self.sequence_num}")
         logger.debug(f"Type: {self.event_type}")

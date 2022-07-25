@@ -39,9 +39,9 @@ class ProposalSettingsAdmin(admin.ModelAdmin):
                 'atca_band_16cm',
             ),
         }),
-        ("Source Settings: Trigger Duration Range (s)", {
+        ("Source Settings: Event Duration Range (s)", {
             'fields':(
-                ('trig_min_duration', 'trig_max_duration'),
+                ('event_min_duration', 'event_max_duration'),
             ),
             'description': "The inclusive duration range of an event that will automatically trigger an observation.",
         }),

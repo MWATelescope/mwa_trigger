@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 def trigger_observation(
         proposal_decision_model,
-        trigger_message,
+        decision_reason_log,
         reason="First Observation",
     ):
     """Perform any comon observation checks, send off observations with the telescope's function then record observations in the Observations model.
@@ -23,7 +23,7 @@ def trigger_observation(
     ----------
     proposal_decision_model : `django.db.models.Model`
         The Django ProposalDecision model object.
-    trigger_message : `str`
+    decision_reason_log : `str`
         A log of all the decisions made so far so a user can understand why the source was(n't) observed.
     reason : `str`, optional
         The reason for this observation. The default is "First Observation" but other potential reasons are "Repointing".
@@ -32,7 +32,7 @@ def trigger_observation(
     -------
     result : `str`
         The results of the attempt to observer where 'T' means it was triggered, 'I' means it was ignored and 'E' means there was an error.
-    trigger_message : `str`
+    decision_reason_log : `str`
         The updated trigger message to include an observation specific logs.
     """
     # Check if source is above the horizon
@@ -60,7 +60,7 @@ def trigger_observation(
         if alt < proposal_decision_model.proposal.mwa_horizon_limit:
             horizon_message = f"Not triggering due to horizon limit: alt {alt} < {proposal_decision_model.proposal.mwa_horizon_limit}. "
             logger.debug(horizon_message)
-            return 'I', trigger_message + horizon_message
+            return 'I', decision_reason_log + horizon_message
 
     # above the horizon so send off telescope specific set ups
     if proposal_decision_model.proposal.telescope.name.startswith("MWA"):
@@ -78,9 +78,9 @@ def trigger_observation(
         obsname=f'{telescopes}_{proposal_decision_model.trig_id}'
 
         # Check if you can observe and if so send off ATCA observation
-        decision, trigger_message, obsids = trigger_mwa_observation(
+        decision, decision_reason_log, obsids = trigger_mwa_observation(
             proposal_decision_model,
-            trigger_message,
+            decision_reason_log,
             obsname,
             vcsmode=vcsmode,
         )
@@ -96,9 +96,9 @@ def trigger_observation(
     elif proposal_decision_model.proposal.telescope.name == "ATCA":
         # Check if you can observe and if so send off mwa observation
         obsname=f'{proposal_decision_model.trig_id}'
-        decision, trigger_message, obsids = trigger_atca_observation(
+        decision, decision_reason_log, obsids = trigger_atca_observation(
             proposal_decision_model,
-            trigger_message,
+            decision_reason_log,
             obsname,
         )
         for obsid in obsids:
@@ -111,11 +111,11 @@ def trigger_observation(
                 # TODO see if atca has a nice observation details webpage
                 #website_link=f"http://ws.mwatelescope.org/observation/obs/?obsid={obsid}",
             )
-    return decision, trigger_message
+    return decision, decision_reason_log
 
 def trigger_mwa_observation(
         proposal_decision_model,
-        trigger_message,
+        decision_reason_log,
         obsname,
         vcsmode=False,
     ):
@@ -125,7 +125,7 @@ def trigger_mwa_observation(
     ----------
     proposal_decision_model : `django.db.models.Model`
         The Django ProposalDecision model object.
-    trigger_message : `str`
+    decision_reason_log : `str`
         A log of all the decisions made so far so a user can understand why the source was(n't) observed.
     obsname : `str`
         The name of the observation.
@@ -136,7 +136,7 @@ def trigger_mwa_observation(
     -------
     result : `str`
         The results of the attempt to observer where 'T' means it was triggered, 'I' means it was ignored and 'E' means there was an error.
-    trigger_message : `str`
+    decision_reason_log : `str`
         The updated trigger message to include an observation specific logs.
     observations : `list`
         A list of observations that were scheduled by MWA.
@@ -165,14 +165,14 @@ def trigger_mwa_observation(
     logger.debug(f"result: {result}")
     # Check if succesful
     if result is None:
-        trigger_message += f"Web API error, possible server error.\n "
-        return 'E', trigger_message, []
+        decision_reason_log += f"Web API error, possible server error.\n "
+        return 'E', decision_reason_log, []
     if not result['success']:
         # Observation not succesful so record why
         for err_id in result['errors']:
-            trigger_message += f"{result['errors'][err_id]}.\n "
+            decision_reason_log += f"{result['errors'][err_id]}.\n "
         # Return an error as the trigger status
-        return 'E', trigger_message, []
+        return 'E', decision_reason_log, []
 
     # Output the results
     logger.info(f"Trigger sent: {result['success']}")
@@ -190,12 +190,12 @@ def trigger_mwa_observation(
         if r.startswith("INFO:Schedule metadata for"):
             obsids.append(r.split(" for ")[1][:-1])
 
-    return 'T', trigger_message, obsids
+    return 'T', decision_reason_log, obsids
 
 
 def trigger_atca_observation(
         proposal_decision_model,
-        trigger_message,
+        decision_reason_log,
         obsname,
     ):
     """Check if the ATCA telescope can observe, send it off the observation and return any errors.
@@ -204,7 +204,7 @@ def trigger_atca_observation(
     ----------
     proposal_decision_model : `django.db.models.Model`
         The Django ProposalDecision model object.
-    trigger_message : `str`
+    decision_reason_log : `str`
         A log of all the decisions made so far so a user can understand why the source was(n't) observed.
     obsname : `str`
         The name of the observation.
@@ -213,7 +213,7 @@ def trigger_atca_observation(
     -------
     result : `str`
         The results of the attempt to observer where 'T' means it was triggered, 'I' means it was ignored and 'E' means there was an error.
-    trigger_message : `str`
+    decision_reason_log : `str`
         The updated trigger message to include an observation specific logs.
     observations : `list`
         A list of observations that were scheduled by ATCA (currently there is no functionality to record this so will be empty).
@@ -224,9 +224,9 @@ def trigger_atca_observation(
 
     # Check if source is in dec ranges the ATCA can not observe
     if proposal_decision_model.dec > 15.:
-        return 'I', trigger_message + "Source is above a declination of 15 degrees so ATCA can not observe it.\n ", []
+        return 'I', decision_reason_log + "Source is above a declination of 15 degrees so ATCA can not observe it.\n ", []
     elif -5. < proposal_decision_model.dec < 5.:
-        return 'I', trigger_message + "Source is within 5 degrees of the equator (which is riddled with satelite RFI) so ATCA will not observe.\n ", []
+        return 'I', decision_reason_log + "Source is within 5 degrees of the equator (which is riddled with satelite RFI) so ATCA will not observe.\n ", []
 
     # Not below horizon limit so observer
     logger.info(f"Triggering  ATCA at UTC time {Time.now()} ...")
@@ -288,13 +288,13 @@ def trigger_atca_observation(
         response = request.send()
     except arrApi.responseError as r:
         logger.error(f"ATCA return message: {r}")
-        trigger_message += f"ATCA return message: {r}\n "
-        return 'E', trigger_message, []
+        decision_reason_log += f"ATCA return message: {r}\n "
+        return 'E', decision_reason_log, []
 
     # # Check for errors
     # if  (not response["authenticationToken"]["received"]) or (not response["authenticationToken"]["verified"]) or \
     #     (not response["schedule"]["received"]) or (not response["schedule"]["verified"]):
-    #     trigger_message += f"ATCA return message: {r}\n "
-    #     return 'E', trigger_message, []
+    #     decision_reason_log += f"ATCA return message: {r}\n "
+    #     return 'E', decision_reason_log, []
 
-    return 'T', trigger_message, [response["id"]]
+    return 'T', decision_reason_log, [response["id"]]

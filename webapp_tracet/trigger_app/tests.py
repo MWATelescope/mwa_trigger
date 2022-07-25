@@ -19,7 +19,7 @@ def create_voevent_wrapper(trig, ra_dec, dec_alter=True):
     Event.objects.create(
         telescope=trig.telescope,
         xml_packet=trig.packet,
-        duration=trig.trig_duration,
+        duration=trig.event_duration,
         trig_id=trig.trig_id,
         sequence_num=trig.sequence_num,
         event_type=trig.event_type,
@@ -274,5 +274,5 @@ class test_hess_any_dur(TestCase):
 
     def test_proposal_decision(self):
         # Test only one proposal triggered
-        self.assertEqual(ProposalDecision.objects.filter(proposal__trig_any_duration=True).first().decision, 'T')
-        self.assertEqual(ProposalDecision.objects.filter(proposal__trig_any_duration=False).first().decision, 'I')
+        self.assertEqual(ProposalDecision.objects.filter(proposal__event_any_duration=True).first().decision, 'T')
+        self.assertEqual(ProposalDecision.objects.filter(proposal__event_any_duration=False).first().decision, 'I')

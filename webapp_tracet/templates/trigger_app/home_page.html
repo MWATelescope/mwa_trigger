@@ -57,7 +57,7 @@
       {% endfor %}
     </tr>
     </thead>
-    {% for trig, telescope, source_name, prop_decisions, prop_decision_ids in recent_triggers %}
+    {% for trig, telescope, source_name, prop_decisions, prop_decision_ids in recent_event_groups %}
     <tr>
       <td><a href="/trigger_id_details/{{ trig.id }}/" style="text-decoration:None">{{ trig.id }}</a></td>
       <td scope="row">{{ trig.recieved_data|date:"Y-m-d H:i:s" }}</td>

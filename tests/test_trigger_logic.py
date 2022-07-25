@@ -14,15 +14,15 @@ logger = logging.getLogger(__name__)
 def test_trigger_grb_event():
     xml_tests = [
                  # A short GRB we would want to trigger on
-                 ('Fermi_GRB.yaml', [True, False, False, 'Fermi GRB probability greater than 50.\n Trigger duration between 0.256 and 1.023 s so triggering.\n ']),
+                 ('Fermi_GRB.yaml', [True, False, False, 'Fermi GRB probability greater than 50.\n Event duration between 0.256 and 1.023 s so triggering.\n ']),
                  # A SWIFT trigger that is too long to trigger on
-                 ('SWIFT00.yaml', [False, True, False, 'SWIFT rate significance > 0.000 sigma.\n Trigger duration outside of all time ranges so not triggering.\n ']),
+                 ('SWIFT00.yaml', [False, True, False, 'SWIFT rate significance > 0.000 sigma.\n Event duration outside of all time ranges so not triggering.\n ']),
                  # A trigger type that we choose to ignore
-                 ('SWIFT_Point_Dir_Change.yaml', [False, True, False, 'No probability metric given so assume it is a GRB.\n No trigger duration (None) so not triggering.\n ']),
+                 ('SWIFT_Point_Dir_Change.yaml', [False, True, False, 'No probability metric given so assume it is a GRB.\n No event duration (None) so not triggering.\n ']),
                 ]
 
     for yaml_file, exp_worth_obs in xml_tests:
-        exp_trigger_bool, exp_debug_bool, exp_pending_bool, exp_trigger_message = exp_worth_obs
+        exp_trigger_bool, exp_debug_bool, exp_pending_bool, exp_decision_reason_log = exp_worth_obs
         # Open the preparsed file
         yaml_loc = os.path.join('tests/test_events', yaml_file)
         # Read in expected class and do the same
@@ -30,21 +30,21 @@ def test_trigger_grb_event():
             trig = load(stream, Loader=Loader)
 
         # Send it through trigger logic
-        trigger_bool, debug_bool, pending_bool, trigger_message = worth_observing_grb(
-            trig_duration=trig["trig_duration"],
+        trigger_bool, debug_bool, pending_bool, decision_reason_log = worth_observing_grb(
+            event_duration=trig["event_duration"],
             fermi_most_likely_index=trig["fermi_most_likely_index"],
             fermi_detection_prob=trig["fermi_detection_prob"],
             swift_rate_signif=trig["swift_rate_signif"],
         )
         logger.debug(f"{yaml_file}")
         logger.debug(f"{trigger_bool}, {debug_bool}, {pending_bool}")
-        logger.debug(f"{trigger_message}")
+        logger.debug(f"{decision_reason_log}")
 
         # Compare to expected
         assert_equal(trigger_bool, exp_trigger_bool)
         assert_equal(debug_bool, exp_debug_bool)
         assert_equal(pending_bool, exp_pending_bool)
-        assert_equal(trigger_message, exp_trigger_message)
+        assert_equal(decision_reason_log, exp_decision_reason_log)
 
 def test_trigger_nu_event():
     xml_tests = [
@@ -55,7 +55,7 @@ def test_trigger_nu_event():
                 ]
 
     for yaml_file, exp_worth_obs in xml_tests:
-        exp_trigger_bool, exp_debug_bool, exp_pending_bool, exp_trigger_message = exp_worth_obs
+        exp_trigger_bool, exp_debug_bool, exp_pending_bool, exp_decision_reason_log = exp_worth_obs
         # Open the preparsed file
         yaml_loc = os.path.join('tests/test_events', yaml_file)
         # Read in expected class and do the same
@@ -63,18 +63,18 @@ def test_trigger_nu_event():
             trig = load(stream, Loader=Loader)
 
         # Send it through trigger logic
-        trigger_bool, debug_bool, pending_bool, trigger_message = worth_observing_nu(
+        trigger_bool, debug_bool, pending_bool, decision_reason_log = worth_observing_nu(
             antares_ranking=trig["antares_ranking"],
             telescope=trig["telescope"],
         )
         logger.debug(f"{trigger_bool}, {debug_bool}, {pending_bool}")
-        logger.debug(f"{trigger_message}")
+        logger.debug(f"{decision_reason_log}")
 
         # Compare to expected
         assert_equal(trigger_bool, exp_trigger_bool)
         assert_equal(debug_bool, exp_debug_bool)
         assert_equal(pending_bool, exp_pending_bool)
-        assert_equal(trigger_message, exp_trigger_message)
+        assert_equal(decision_reason_log, exp_decision_reason_log)
 
 
 if __name__ == "__main__":
