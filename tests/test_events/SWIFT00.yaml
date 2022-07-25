@@ -114,7 +114,7 @@ source_name: GRB 170912
 source_type: GRB
 swift_rate_signif: 13.74
 telescope: SWIFT
-trig_duration: 4.096
+event_duration: 4.096
 trig_id: 772006
 trig_pairs:
 - SWIFT_BAT_GRB_Pos

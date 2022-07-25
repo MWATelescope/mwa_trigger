@@ -70,7 +70,7 @@ source_name: null
 source_type: NU
 swift_rate_signif: null
 telescope: AMON
-trig_duration: null
+event_duration: null
 trig_id: 13419117593623
 trig_pairs:
 - SWIFT_BAT_GRB_Pos
