@@ -37,11 +37,11 @@
     </tr>
     <tr>
       <td>Best Right Acension</td>
-      <td>{{ event_group.ra }}</td>
+      <td>{{ event_group.ra_hms }}</td>
     </tr>
     <tr>
       <td>Best Declination</td>
-      <td>{{ event_group.dec }}</td>
+      <td>{{ event_group.dec_dms }}</td>
     </tr>
     <tr>
       {% if poserr_unit == "deg" %}
@@ -66,8 +66,8 @@
         <th>Decision</th>
         <th>Decision Reason</th>
         <th>Duration (s)</th>
-        <th>Right Acension (&#176;)</th>
-        <th>Declination (&#176;)</th>
+        <th>RA (HH:MM:SS)</th>
+        <th>Dec (DD:MM:SS)</th>
         {% if poserr_unit == "deg" %}
           <th><a href="?{% url_switch request 'poserr_unit' %}">Position Error (&#176;)</a></th>
         {% else %}
@@ -87,8 +87,8 @@
       <td>{{ prop_dec.get_decision_display }}</td>
       <td style="white-space:pre">{{ prop_dec.decision_reason }}</td>
       <td>{{ prop_dec.duration }}</td>
-      <td>{{ prop_dec.ra }}</td>
-      <td>{{ prop_dec.dec }}</td>
+      <td>{{ prop_dec.ra_hms }}</td>
+      <td>{{ prop_dec.dec_dms }}</td>
       <td>
       {% if prop_dec.pos_error    is not None %}
         {% if poserr_unit == "deg" %}
