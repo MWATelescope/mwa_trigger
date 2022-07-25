@@ -43,7 +43,7 @@
       <tr>
     {% endif %}
       <td><a href="/proposal_decision_details/{{ object.id }}/" style="text-decoration:None">{{ object.id }}</a></td>
-      <td><a href="/trigger_id_details/{{ object.event_group_id }}/" style="text-decoration:None">{{ object.event_group_id }}</a></td>
+      <td><a href="/event_group_details/{{ object.event_group_id }}/" style="text-decoration:None">{{ object.event_group_id }}</a></td>
       <td>{{ object.recieved_data|date:"Y-m-d H:i:s" }}</td>
       <td>{{ object.proposal.telescope }}</td>
       <td>{{ object.proposal.project_id }}</td>

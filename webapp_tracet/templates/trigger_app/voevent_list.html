@@ -132,7 +132,7 @@
         <!-- Don't make a link because there is no trigger event -->
         <td></td>
       {% else %}
-        <td><a href="/trigger_id_details/{{ object.event_group_id }}/" style="text-decoration:None">{{ object.event_group_id}}</a></td>
+        <td><a href="/event_group_details/{{ object.event_group_id }}/" style="text-decoration:None">{{ object.event_group_id}}</a></td>
       {% endif %}
       <td>{% if object.source_name  is not None %} {{ object.source_name }}  {% endif %}</td>
       <td>{% if object.sequence_num is not None %} {{ object.sequence_num }} {% endif %}</td>

@@ -59,7 +59,7 @@
     </thead>
     {% for trig, telescope, source_name, prop_decisions, prop_decision_ids in recent_event_groups %}
     <tr>
-      <td><a href="/trigger_id_details/{{ trig.id }}/" style="text-decoration:None">{{ trig.id }}</a></td>
+      <td><a href="/event_group_details/{{ trig.id }}/" style="text-decoration:None">{{ trig.id }}</a></td>
       <td scope="row">{{ trig.recieved_data|date:"Y-m-d H:i:s" }}</td>
       <td scope="row">{{ telescope }}</td>
       {% if telescope == "SWIFT" %}
@@ -94,7 +94,7 @@
     {% endfor %}
   </table>
   <div class="mx-auto" style="width: 200px;">
-    <a  class="btn btn-info" href="/trigger_id_log/" role="button">Full Event Group Log</a>
+    <a  class="btn btn-info" href="/event_group_log/" role="button">Full Event Group Log</a>
   </div>
 
   <hr>
