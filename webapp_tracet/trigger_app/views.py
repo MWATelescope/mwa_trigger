@@ -117,7 +117,7 @@ def ProposalDecisionList(request):
         # the page number is not an integer (PageNotAnInteger exception)
         # return the first page
         ProposalDecision = paginator.page(1)
-    return render(request, 'trigger_app/proposaldecision_list.html', {'filter': f, "page_obj":ProposalDecision, "poserr_unit":poserr_unit})
+    return render(request, 'trigger_app/proposal_decision_list.html', {'filter': f, "page_obj":ProposalDecision, "poserr_unit":poserr_unit})
 
 
 def grab_decisions_for_event_groups(event_groups):
@@ -166,7 +166,7 @@ def EventGroupList(request):
         object_list = paginator.page(page)
     except InvalidPage:
         object_list = paginator.page(1)
-    return render(request, 'trigger_app/trigger_group_id_list.html', {'object_list':object_list, 'settings':prop_settings})
+    return render(request, 'trigger_app/event_group_list.html', {'object_list':object_list, 'settings':prop_settings})
 
 
 class CometLogList(ListView):
@@ -283,7 +283,7 @@ def EventGroup_details(request, tid):
         'poserr_unit':poserr_unit,
     }
 
-    return render(request, 'trigger_app/trigger_group_id_details.html', context)
+    return render(request, 'trigger_app/event_group_details.html', context)
 
 
 def ProposalDecision_details(request, id):
