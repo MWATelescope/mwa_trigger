@@ -64,9 +64,9 @@
       <td scope="row">{{ telescope }}</td>
       {% if telescope == "SWIFT" %}
         <!-- Link to SWIFT telescope page -->
-        <td><a href="https://gcn.gsfc.nasa.gov/other/{{ trig.trigger_id }}.swift" style="text-decoration:None">{{ trig.trigger_id }}</a></td>
+        <td><a href="https://gcn.gsfc.nasa.gov/other/{{ trig.trig_id }}.swift" style="text-decoration:None">{{ trig.trig_id }}</a></td>
       {% else %}
-        <td>{{ trig.trigger_id }}</td>
+        <td>{{ trig.trig_id }}</td>
       {% endif %}
       <td scope="row">{{ trig.source_type }}</td>
       <td scope="row">

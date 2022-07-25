@@ -96,7 +96,7 @@
       <td>{{ event.event_type }}</td>
       <td>{{ event.event_observed|date:"Y-m-d H:i:s" }}</td>
       <td>{{ event.recieved_data|date:"Y-m-d H:i:s" }}</td>
-      <td>{% if event.trigger_id   is not None %} {{ event.trigger_id }}   {% endif %}</td>
+      <td>{% if event.trig_id   is not None %} {{ event.trig_id }}   {% endif %}</td>
       <td>{% if event.source_name  is not None %} {{ event.source_name }}  {% endif %}</td>
       <td>{% if event.sequence_num is not None %} {{ event.sequence_num }} {% endif %}</td>
       <td>{% if event.duration     is not None %} {{ event.duration }}     {% endif %}</td>
@@ -160,7 +160,7 @@
         <td>{{ event.event_type }}</td>
         <td>{{ event.event_observed|date:"Y-m-d H:i:s" }}</td>
         <td>{{ event.recieved_data|date:"Y-m-d H:i:s" }}</td>
-        <td>{% if event.trigger_id   is not None %} {{ event.trigger_id }}   {% endif %}</td>
+        <td>{% if event.trig_id   is not None %} {{ event.trig_id }}   {% endif %}</td>
         <td>{% if event.source_name  is not None %} {{ event.source_name }}  {% endif %}</td>
         <td>{% if event.sequence_num is not None %} {{ event.sequence_num }} {% endif %}</td>
         <td>{% if event.duration     is not None %} {{ event.duration }}     {% endif %}</td>

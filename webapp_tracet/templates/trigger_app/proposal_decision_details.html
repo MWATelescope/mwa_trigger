@@ -90,7 +90,12 @@
       <td>{{ event.event_type }}</td>
       <td>{{ event.event_observed|date:"Y-m-d H:i:s" }}</td>
       <td>{{ event.recieved_data|date:"Y-m-d H:i:s" }}</td>
-      <td>{% if event.trig_id   is not None %} {{ event.trig_id }}   {% endif %}</td>
+      {% if event.telescope == "SWIFT" %}
+        <!-- Link to SWIFT telescope page -->
+        <td><a href="https://gcn.gsfc.nasa.gov/other/{{ event.trig_id }}.swift" style="text-decoration:None">{{ event.trig_id }}</a></td>
+      {% else %}
+        <td>{{ event.trig_id }}</td>
+      {% endif %}
       <td>{% if event.source_name  is not None %} {{ event.source_name }}  {% endif %}</td>
       <td>{% if event.sequence_num is not None %} {{ event.sequence_num }} {% endif %}</td>
       <td>{% if event.duration     is not None %} {{ event.duration }}     {% endif %}</td>
