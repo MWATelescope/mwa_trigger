@@ -52,16 +52,14 @@ explanations of the software methodologies and layout (Developer Documentation) 
    :maxdepth: 4
    :caption: Developer Documentation:
 
-   layout
+   developer_documentation
 
 
 .. toctree::
    :maxdepth: 4
    :caption: TraceT Package:
 
-   parse_xml_module
-   trigger_logic_module
-   triggerservice_module
+   tracet_module
 
 
 .. toctree::

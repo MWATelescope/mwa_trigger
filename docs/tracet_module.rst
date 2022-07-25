@@ -1,3 +1,31 @@
+.. _parse_xml:
+
+parse\_xml Module
+=================
+
+.. currentmodule:: tracet.parse_xml
+
+parsed_VOEvent Class
+--------------------
+
+.. autoclass:: parsed_VOEvent
+
+
+
+.. _trigger_logic:
+
+trigger\_logic Module
+=====================
+
+
+.. currentmodule:: tracet.trigger_logic
+
+worth_observing_grb Function
+----------------------------
+
+.. autofunction:: worth_observing_grb
+
+
 .. _triggerservice:
 
 triggerservice Module
@@ -10,9 +38,6 @@ trigger_mwa Function
 --------------------
 .. autofunction:: trigger_mwa
 
-.. trigger_atca Function
-.. ---------------------
-.. .. autofunction:: trigger_atca
 
 web_api Function
 ----------------
