@@ -368,7 +368,16 @@ def proposal_decision_path(request, id):
   E --> F[GRB]'''
     if prop_set.source_type == "GRB":
         mermaid_script += f'''
-  F --> J{{"Fermi GRB probability > {prop_set.fermi_prob}\\nor\\nSWIFT Rate_signif > {prop_set.swift_rate_signf} sigma"}}
+  F --> J{{"Fermi GRB probability > {prop_set.fermi_prob}\\nor\\nSWIFT Rate_signif > {prop_set.swift_rate_signf} sigma"}}'''
+        if prop_set.event_any_duration:
+            mermaid_script += f'''
+  J --> |YES| L[Trigger Observation]
+subgraph GRB
+  J
+  L
+end'''
+        else:
+            mermaid_script += f'''
   J --> |YES| K{{"Event duration between\n {prop_set.event_min_duration} and {prop_set.event_max_duration} s"}}
   J --> |NO| END
   K --> |YES| L[Trigger Observation]
