@@ -181,8 +181,9 @@ class ProposalSettingsList(ListView):
 def home_page(request):
     comet_status = models.Status.objects.get(name='twistd_comet')
     prop_settings = models.ProposalSettings.objects.all()
-    recent_event_groups = models.EventGroup.objects.all()[:5]
 
+    # Filter out ignored event groups and show only the 5 most recent
+    recent_event_groups = models.EventGroup.objects.filter(ignored=False)[:5]
     recent_event_group_info = grab_decisions_for_event_groups(recent_event_groups)
 
     context = {
