@@ -30,7 +30,18 @@ SOURCE_TELESCOPES = {
 }
 
 def get_telescope(ivorn):
-    # Check ivorn for the telescope name
+    """Check ivorn for the telescope name
+
+    Parameters
+    ----------
+    ivorn : `str`
+        Descriptor string of the event.
+
+    Returns
+    -------
+    telescope : `str`
+        The telescope name.
+    """
 
     # Swift docs: https://gcn.gsfc.nasa.gov/swift.html
     if ivorn.startswith("ivo://nasa.gsfc.gcn/SWIFT#"):
@@ -62,6 +73,18 @@ def get_telescope(ivorn):
 
 
 def get_event_type(ivorn):
+    """Get the type of event from the ivorn
+
+    Parameters
+    ----------
+    ivorn : `str`
+        Descriptor string of the event.
+
+    Returns
+    -------
+    event_type : `str`
+        The type of the event
+    """
     trig_type_str = ivorn.split("#")[1]
     if "LVC" in ivorn:
         # Do LVS specific parsing
@@ -86,13 +109,31 @@ def get_event_type(ivorn):
 
 
 def load_swift_source_database():
+    """Load the SWIFT source database file within the repo into a pandas dataframe.
+    """
     df = pd.read_table(data_load.SWIFT_FLARE_STAR_NAMES, sep='|', header=0, comment="+", skiprows=41, usecols=list(range(1,15)), skipinitialspace=True)
     df = df[df['ROW'] != 'ROW']
     return df
 
 
 def get_source_types(telescope, event_type, source_name, v):
-    """
+    """Predict what the source type of the event.
+
+    Parameters
+    ----------
+    telescope : `str`
+        The name of the telescope that observed this event.
+    event_type : `str`
+        The type of the event that is extracted from the ivorn (e.g. BAT_GRB_Pos).
+    source_name : `str`
+        The name of the source from the telescope.
+    v : `object`
+        The xml loaded into the voeventparse class.
+
+    Returns
+    -------
+    source_type : `str`
+        Source typre of the event (GRB, FS, NU or GW).
     """
     #Check for Gravitational Waves
     if telescope in SOURCE_TELESCOPES["GW"]:
@@ -153,12 +194,17 @@ def get_source_types(telescope, event_type, source_name, v):
 
 
 def get_position_info(v):
-    """
-    Return the ra,dec,err from a given voevent
-    These are typically in degrees, in the J2000 equinox.
+    """Get the ra,dec,err from a given voevent.
 
-    :param v: A VOEvent string, in XML format
-    :return: A tuple of (ra, dec, err) where ra,dec are the coordinates in J2000 and err is the error radius in deg.
+    Parameters
+    ----------
+    v : `object`
+        The xml loaded into the voeventparse class.
+
+    Returns
+    -------
+    ra, dec, err : `tuple`
+        A tuple of (ra, dec, err) where ra,dec are the coordinates in J2000 and err is the error radius in deg.
     """
     try:
         ra  = float(v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Position2D.Value2.C1)
@@ -178,27 +224,70 @@ def get_position_info(v):
 
 
 class parsed_VOEvent:
+    """Parses a VOEvent XML file or packet and extracts the useful information from most telescope formats.
+
+    Parameters
+    ----------
+    xml : `str`
+        The location of an XML file you wish to parse
+    packet : `str`, optional
+        The contents of an XML file you wish to parse (instead of the file).
+    trig_pairs : `list`, optional
+        A list of strings in the format "{telescope}_{event_type}" that you consider interesting.
+
+    Attributes
+    ----------
+    xml : `str`
+        The location of an XML file you wish to parse.
+    packet : `str`
+        The contents of an XML file you wish to parse (instead of the file).
+    trig_pairs : `list`
+        A list of strings in the format "{telescope}_{event_type}" that you consider interesting.
+    event_duration : `float`
+        The duration of the event in seconds.
+    event_observed : DateTime
+        The date and time that event was observed.
+    telescope : `str`
+        The name of the telescope that observed this event.
+    event_type : `str`
+        The type of the event that is extracted from the ivorn (e.g. BAT_GRB_Pos).
+    ra : `float`
+        The right ascension in degrees.
+    ra_hms : `str`
+        The right ascension in the format "HH:MM:SS.SS".
+    dec : `float`
+        The declination in degrees.
+    dec_dms : `str`
+        The declination in the format "DD:MM:SS.SS".
+    err : `float`
+        The uncertainty in the event position in degrees.
+    ignore : `bool`
+        If the event should be ignored (e.g. test or unknown events).
+    source_type : `str`
+        The predicted source type (GRB, FS, NU or GW).
+    trig_id : `int`
+        The ID the telescope has given the event.
+    sequence_num : `int`
+        What number/sequence this event is for the trig_id group.
+    source_name : `str`
+        The name of the source from the telescope.
+    grb_ident : `bool`
+        If the telescope has identified it as a GRB.
+    role : `str`
+        The role of the observation (eg. test or observation).
+    ntares_ranking : 1
+        The rating (1 is best) for Antares sources.
+    fermi_detection_prob : `float`
+        The probability the source is real the Fermi provides (it appears to be a percentage).
+    fermi_most_likely_index : `int`
+        An index that Fermi uses to describe what sort of source the Event is. GRBs are four, so this is what we check for.
+    swift_rate_signif :  `float`
+        The "RATE_SIGNIF" (appears to be a signal-to-noise ratio) to observe for SWIFT sources (in sigma).
+    """
     def __init__(self, xml, packet=None, trig_pairs=None):
         self.xml = xml
         self.packet = packet
         self.trig_pairs = trig_pairs
-        # Make default Nones if unknown telescope found
-        self.event_duration = None
-        self.event_type = None
-        self.sequence_num = None
-        self.trig_id = None
-        self.ra = None
-        self.dec = None
-        self.err = None
-        self.fermi_most_likely_index = None
-        self.fermi_detection_prob = None
-        self.swift_rate_signif = None
-        self.antares_ranking = None
-        self.grb_ident = None
-        self.telescope = None
-        self.source_name = None
-        self.source_type = None
-        self.event_observed = None
         if self.trig_pairs is None:
             # use defaults
             self.trig_pairs = [
@@ -219,12 +308,31 @@ class parsed_VOEvent:
                 "AMON_ICECUBE_GOLD_Event",
                 "Antares_Alert",
             ]
+        # Make default Nones if unknown telescope found
+        self.event_duration = None
+        self.event_type = None
+        self.sequence_num = None
+        self.trig_id = None
+        self.ra = None
+        self.dec = None
+        self.err = None
+        self.fermi_most_likely_index = None
+        self.fermi_detection_prob = None
+        self.swift_rate_signif = None
+        self.antares_ranking = None
+        self.grb_ident = None
+        self.telescope = None
+        self.source_name = None
+        self.source_type = None
+        self.event_observed = None
         self.parse()
 
     def __iter__(self):
         return self.__dict__.iteritems()
 
     def parse(self):
+        """Parses the XML into the class attributes. This is run when the class is initiated.
+        """
         # Read in xml
         if self.packet is None:
             with open(self.xml, "rb") as f:
