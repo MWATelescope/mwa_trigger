@@ -147,6 +147,7 @@ class EventGroup(models.Model):
     pos_error = models.FloatField(blank=True, null=True)
     recieved_data = models.DateTimeField(auto_now_add=True, blank=True)
     source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, null=True)
+    ignored = models.BooleanField(default=True)
 
     def __str__(self):
         return str(self.id)

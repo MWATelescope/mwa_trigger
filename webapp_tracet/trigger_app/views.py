@@ -181,8 +181,9 @@ class ProposalSettingsList(ListView):
 def home_page(request):
     comet_status = models.Status.objects.get(name='twistd_comet')
     prop_settings = models.ProposalSettings.objects.all()
-    recent_event_groups = models.EventGroup.objects.all()[:5]
 
+    # Filter out ignored event groups and show only the 5 most recent
+    recent_event_groups = models.EventGroup.objects.filter(ignored=False)[:5]
     recent_event_group_info = grab_decisions_for_event_groups(recent_event_groups)
 
     context = {
@@ -368,7 +369,16 @@ def proposal_decision_path(request, id):
   E --> F[GRB]'''
     if prop_set.source_type == "GRB":
         mermaid_script += f'''
-  F --> J{{"Fermi GRB probability > {prop_set.fermi_prob}\\nor\\nSWIFT Rate_signif > {prop_set.swift_rate_signf} sigma"}}
+  F --> J{{"Fermi GRB probability > {prop_set.fermi_prob}\\nor\\nSWIFT Rate_signif > {prop_set.swift_rate_signf} sigma"}}'''
+        if prop_set.event_any_duration:
+            mermaid_script += f'''
+  J --> |YES| L[Trigger Observation]
+subgraph GRB
+  J
+  L
+end'''
+        else:
+            mermaid_script += f'''
   J --> |YES| K{{"Event duration between\n {prop_set.event_min_duration} and {prop_set.event_max_duration} s"}}
   J --> |NO| END
   K --> |YES| L[Trigger Observation]
