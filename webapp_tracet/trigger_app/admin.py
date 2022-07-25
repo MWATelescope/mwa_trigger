@@ -1,5 +1,5 @@
 from django.contrib import admin
-from trigger_app.models import VOEvent, PossibleEventAssociation, AlertPermission, ProposalSettings, ProposalDecision, Telescope, Status, TriggerID, TelescopeProjectID, UserAlerts, Observations
+from trigger_app.models import Event, PossibleEventAssociation, AlertPermission, ProposalSettings, ProposalDecision, Telescope, Status, EventGroup, TelescopeProjectID, UserAlerts, Observations
 from trigger_app.forms import ProjectSettingsForm, TelescopeProjectIDForm
 
 
@@ -39,9 +39,9 @@ class ProposalSettingsAdmin(admin.ModelAdmin):
                 'atca_band_16cm',
             ),
         }),
-        ("Source Settings: Trigger Duration Range (s)", {
+        ("Source Settings: Event Duration Range (s)", {
             'fields':(
-                ('trig_min_duration', 'trig_max_duration'),
+                ('event_min_duration', 'event_max_duration'),
             ),
             'description': "The inclusive duration range of an event that will automatically trigger an observation.",
         }),
@@ -79,8 +79,8 @@ admin.site.register(ProposalSettings, ProposalSettingsAdmin)
 admin.site.register(TelescopeProjectID, TelescopeProjectIDAdmin)
 admin.site.register(UserAlerts, UserAlertsAdmin)
 
-admin.site.register(VOEvent)
-admin.site.register(TriggerID)
+admin.site.register(Event)
+admin.site.register(EventGroup)
 admin.site.register(PossibleEventAssociation)
 admin.site.register(AlertPermission)
 admin.site.register(ProposalDecision)

@@ -104,6 +104,6 @@ class TelescopeProjectIDForm(forms.ModelForm):
         fields = '__all__'
 
 
-class TestVOEvent(forms.Form):
+class TestEvent(forms.Form):
     #xml_file = forms.FileField()
     xml_packet = forms.CharField(max_length=10000, required=False)

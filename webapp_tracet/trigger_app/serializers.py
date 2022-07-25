@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from . import models
 
-class VOEventSerializer(serializers.ModelSerializer):
+class EventSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.VOEvent
+        model = models.Event
         fields = '__all__'

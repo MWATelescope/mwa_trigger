@@ -71,7 +71,7 @@ source_name: null
 source_type: null
 swift_rate_signif: null
 telescope: SWIFT
-trig_duration: null
+event_duration: null
 trig_id: 48767
 trig_pairs:
 - SWIFT_BAT_GRB_Pos

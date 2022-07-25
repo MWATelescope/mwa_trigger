@@ -89,7 +89,7 @@ source_name: null
 source_type: GRB
 swift_rate_signif: null
 telescope: Fermi
-trig_duration: 0.512
+event_duration: 0.512
 trig_id: 533367528
 trig_pairs:
 - SWIFT_BAT_GRB_Pos

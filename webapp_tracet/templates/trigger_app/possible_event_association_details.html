@@ -6,7 +6,7 @@
 <title>Possible Event Association Details</title>
 
 <div class="container-sm">
-  <h2>{% if trigger_event.source_type  is not None %} {{ trigger_event.get_source_type_display }} {% endif %} Possible Event Association ID {{ trigger_event.id }}</h2>
+  <h2>{% if event_association.source_type  is not None %} {{ event_association.get_source_type_display }} {% endif %} Possible Event Association ID {{ event_association.id }}</h2>
   <table class="table-thin">
     <tr>
       <td>Telescope(s)</td>
@@ -14,49 +14,49 @@
     </tr>
     <tr>
       <td>Event ID</td>
-      <td>{% if event_id is not None %}
+      <td>{% if trig_event_id is not None %}
             {% if 'SWIFT' in telescopes  %}
               <!-- Link to SWIFT telescope page -->
-              <a href="https://gcn.gsfc.nasa.gov/other/{{ event_id }}.swift" style="text-decoration:None">{{ event_id }}</a>
+              <a href="https://gcn.gsfc.nasa.gov/other/{{ trig_event_id }}.swift" style="text-decoration:None">{{ trig_event_id }}</a>
             {% else %}
-              {{ event_id }}
+              {{ trig_event_id }}
             {% endif %}
           {% endif %}</td>
     </tr>
     <tr>
       <td>Recieved (UTC)</td>
-      <td>{{ trigger_event.recieved_data|date:"Y-m-d H:i:s" }}</td>
+      <td>{{ event_association.recieved_data|date:"Y-m-d H:i:s" }}</td>
     </tr>
     <tr>
       <td>Earliest Event Observed (UTC)</td>
-      <td>{{ trigger_event.earliest_event_observed|date:"Y-m-d H:i:s" }}</td>
+      <td>{{ event_association.earliest_event_observed|date:"Y-m-d H:i:s" }}</td>
     </tr>
     <tr>
       <td>Latest Event Observed (UTC)</td>
-      <td>{{ trigger_event.latest_event_observed|date:"Y-m-d H:i:s" }}</td>
+      <td>{{ event_association.latest_event_observed|date:"Y-m-d H:i:s" }}</td>
     </tr>
     <tr>
       <td>Best Right Acension</td>
-      <td>{{ trigger_event.ra }}</td>
+      <td>{{ event_association.ra }}</td>
     </tr>
     <tr>
       <td>Best Declination</td>
-      <td>{{ trigger_event.dec }}</td>
+      <td>{{ event_association.dec }}</td>
     </tr>
     <tr>
       {% if poserr_unit == "deg" %}
         <td>Best Position Error (&#176;)</td>
-        <td>{{ trigger_event.pos_error }}</td>
+        <td>{{ event_association.pos_error }}</td>
       {% else %}
         <td>Best Position Error (arcmin)</td>
-        <td>{% multiply trigger_event.pos_error 60 2 %}</td>
+        <td>{% multiply event_association.pos_error 60 2 %}</td>
       {% endif %}
     </tr>
   </table>
 </div>
 
 <div class="container-fluid">
-  <h2>Possibily Associated VOEvents</h2>
+  <h2>Possibily Associated Events</h2>
 
   <table class="fl-table">
     <thead>
@@ -83,36 +83,36 @@
       </tr>
     </thead>
     <!-- Iterate over object_list -->
-    {% for voevent in voevents %}
+    {% for event in events %}
     <!-- Display Objects -->
-    {% if voevent.ignored %}
+    {% if event.ignored %}
       <tr class="grey-tr">
     {% else %}
       <tr>
     {% endif %}
-      <td><a href="/voevent_view/{{ voevent.id }}" style="text-decoration:None">{{ voevent.id }}</a></td>
-      <td>{% if voevent.source_type  is not None %} {{ voevent.source_type }}  {% endif %}</td>
-      <td>{{ voevent.telescope }}</td>
-      <td>{{ voevent.event_type }}</td>
-      <td>{{ voevent.event_observed|date:"Y-m-d H:i:s" }}</td>
-      <td>{{ voevent.recieved_data|date:"Y-m-d H:i:s" }}</td>
-      <td>{% if voevent.trigger_id   is not None %} {{ voevent.trigger_id }}   {% endif %}</td>
-      <td>{% if voevent.source_name  is not None %} {{ voevent.source_name }}  {% endif %}</td>
-      <td>{% if voevent.sequence_num is not None %} {{ voevent.sequence_num }} {% endif %}</td>
-      <td>{% if voevent.duration     is not None %} {{ voevent.duration }}     {% endif %}</td>
-      <td>{% if voevent.ra_hms          is not None %} {{ voevent.ra_hms }}          {% endif %}</td>
-      <td>{% if voevent.dec_dms         is not None %} {{ voevent.dec_dms }}         {% endif %}</td>
+      <td><a href="/voevent_view/{{ event.id }}" style="text-decoration:None">{{ event.id }}</a></td>
+      <td>{% if event.source_type  is not None %} {{ event.source_type }}  {% endif %}</td>
+      <td>{{ event.telescope }}</td>
+      <td>{{ event.event_type }}</td>
+      <td>{{ event.event_observed|date:"Y-m-d H:i:s" }}</td>
+      <td>{{ event.recieved_data|date:"Y-m-d H:i:s" }}</td>
+      <td>{% if event.trig_id   is not None %} {{ event.trig_id }}   {% endif %}</td>
+      <td>{% if event.source_name  is not None %} {{ event.source_name }}  {% endif %}</td>
+      <td>{% if event.sequence_num is not None %} {{ event.sequence_num }} {% endif %}</td>
+      <td>{% if event.duration     is not None %} {{ event.duration }}     {% endif %}</td>
+      <td>{% if event.ra_hms          is not None %} {{ event.ra_hms }}          {% endif %}</td>
+      <td>{% if event.dec_dms         is not None %} {{ event.dec_dms }}         {% endif %}</td>
       <td>
-      {% if voevent.pos_error    is not None %}
+      {% if event.pos_error    is not None %}
         {% if poserr_unit == "deg" %}
-          {{ voevent.pos_error }}
+          {{ event.pos_error }}
         {% else %}
-          {% multiply voevent.pos_error 60 2 %}
+          {% multiply event.pos_error 60 2 %}
         {% endif %}
       {% endif %}
       </td>
-      <td>{% if voevent.fermi_detection_prob is not None %} {{ voevent.fermi_detection_prob }}  {% endif %}</td>
-      <td>{% if voevent.swift_rate_signif    is not None %} {{ voevent.swift_rate_signif    }}  {% endif %}</td>
+      <td>{% if event.fermi_detection_prob is not None %} {{ event.fermi_detection_prob }}  {% endif %}</td>
+      <td>{% if event.swift_rate_signif    is not None %} {{ event.swift_rate_signif    }}  {% endif %}</td>
     </tr>
     <!-- If object_list is empty  -->
     {% empty %}
@@ -147,36 +147,36 @@
         </tr>
       </thead>
       <!-- Iterate over object_list -->
-      {% for voevent in event_id_voevents %}
+      {% for event in event_id_events %}
       <!-- Display Objects -->
-      {% if voevent.ignored %}
+      {% if event.ignored %}
         <tr class="grey-tr">
       {% else %}
         <tr>
       {% endif %}
-        <td><a href="/voevent_view/{{ voevent.id }}" style="text-decoration:None">{{ voevent.id }}</a></td>
-        <td>{% if voevent.source_type  is not None %} {{ voevent.source_type }}  {% endif %}</td>
-        <td>{{ voevent.telescope }}</td>
-        <td>{{ voevent.event_type }}</td>
-        <td>{{ voevent.event_observed|date:"Y-m-d H:i:s" }}</td>
-        <td>{{ voevent.recieved_data|date:"Y-m-d H:i:s" }}</td>
-        <td>{% if voevent.trigger_id   is not None %} {{ voevent.trigger_id }}   {% endif %}</td>
-        <td>{% if voevent.source_name  is not None %} {{ voevent.source_name }}  {% endif %}</td>
-        <td>{% if voevent.sequence_num is not None %} {{ voevent.sequence_num }} {% endif %}</td>
-        <td>{% if voevent.duration     is not None %} {{ voevent.duration }}     {% endif %}</td>
-        <td>{% if voevent.ra_hms          is not None %} {{ voevent.ra_hms }}          {% endif %}</td>
-        <td>{% if voevent.dec_dms         is not None %} {{ voevent.dec_dms }}         {% endif %}</td>
+        <td><a href="/voevent_view/{{ event.id }}" style="text-decoration:None">{{ event.id }}</a></td>
+        <td>{% if event.source_type  is not None %} {{ event.source_type }}  {% endif %}</td>
+        <td>{{ event.telescope }}</td>
+        <td>{{ event.event_type }}</td>
+        <td>{{ event.event_observed|date:"Y-m-d H:i:s" }}</td>
+        <td>{{ event.recieved_data|date:"Y-m-d H:i:s" }}</td>
+        <td>{% if event.trig_id   is not None %} {{ event.trig_id }}   {% endif %}</td>
+        <td>{% if event.source_name  is not None %} {{ event.source_name }}  {% endif %}</td>
+        <td>{% if event.sequence_num is not None %} {{ event.sequence_num }} {% endif %}</td>
+        <td>{% if event.duration     is not None %} {{ event.duration }}     {% endif %}</td>
+        <td>{% if event.ra_hms          is not None %} {{ event.ra_hms }}          {% endif %}</td>
+        <td>{% if event.dec_dms         is not None %} {{ event.dec_dms }}         {% endif %}</td>
         <td>
-        {% if voevent.pos_error    is not None %}
+        {% if event.pos_error    is not None %}
           {% if poserr_unit == "deg" %}
-            {{ voevent.pos_error }}
+            {{ event.pos_error }}
           {% else %}
-            {% multiply voevent.pos_error 60 2 %}
+            {% multiply event.pos_error 60 2 %}
           {% endif %}
         {% endif %}
         </td>
-        <td>{% if voevent.fermi_detection_prob is not None %} {{ voevent.fermi_detection_prob }}  {% endif %}</td>
-        <td>{% if voevent.swift_rate_signif    is not None %} {{ voevent.swift_rate_signif    }}  {% endif %}</td>
+        <td>{% if event.fermi_detection_prob is not None %} {{ event.fermi_detection_prob }}  {% endif %}</td>
+        <td>{% if event.swift_rate_signif    is not None %} {{ event.swift_rate_signif    }}  {% endif %}</td>
       </tr>
       <!-- If object_list is empty  -->
       {% empty %}

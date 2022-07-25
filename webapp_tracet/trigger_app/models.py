@@ -24,7 +24,7 @@ class Telescope(models.Model):
 
 
 class EventTelescope(models.Model):
-    name = models.CharField(max_length=64, verbose_name="Event Telescope name", help_text="Telescope that we receive VOEvents from (e.g. SWIFT or Fermi)", unique=True)
+    name = models.CharField(max_length=64, verbose_name="Event Telescope name", help_text="Telescope that we receive Events from (e.g. SWIFT or Fermi)", unique=True)
     def __str__(self):
         return f"{self.name}"
 
@@ -63,15 +63,15 @@ class ProposalSettings(models.Model):
     )
     proposal_id = models.CharField(max_length=16, unique=True, verbose_name="Proposal ID", help_text="A short identifier of the proposal of maximum lenth 16 charcters.")
     proposal_description = models.CharField(max_length=256, help_text="A brief description of the proposal. Only needs to be enough to distinguish it from the other proposals.")
-    event_telescope = models.ForeignKey(EventTelescope, to_field="name", help_text="The telescope that this proposal will accept at least one VOEvent from before observing. Leave blank if you want to accept all telescopes.", blank=True, null=True, on_delete=models.SET_NULL)
-    trig_any_duration = models.BooleanField(default=False, verbose_name="Any duration?", help_text="Will trigger on events with any duration which includes if they have None.")
-    trig_min_duration = models.FloatField(verbose_name="Min", default=0.256)
-    trig_max_duration = models.FloatField(verbose_name="Max", default=1.024)
+    event_telescope = models.ForeignKey(EventTelescope, to_field="name", help_text="The telescope that this proposal will accept at least one Event from before observing. Leave blank if you want to accept all telescopes.", blank=True, null=True, on_delete=models.SET_NULL)
+    event_any_duration = models.BooleanField(default=False, verbose_name="Any duration?", help_text="Will trigger on events with any duration which includes if they have None.")
+    event_min_duration = models.FloatField(verbose_name="Min", default=0.256)
+    event_max_duration = models.FloatField(verbose_name="Max", default=1.024)
     pending_min_duration_1 = models.FloatField(verbose_name="Min", default=1.025)
     pending_max_duration_1 = models.FloatField(verbose_name="Max", default=2.056)
     pending_min_duration_2 = models.FloatField(verbose_name="Min", default=0.128)
     pending_max_duration_2 = models.FloatField(verbose_name="Max", default=0.255)
-    maximum_position_uncertainty = models.FloatField(verbose_name="Maximum Position Uncertainty (deg)", help_text="A VOEvent must have less than or equal to this position uncertainty to be observed.", default=0.05)
+    maximum_position_uncertainty = models.FloatField(verbose_name="Maximum Position Uncertainty (deg)", help_text="A Event must have less than or equal to this position uncertainty to be observed.", default=0.05)
     fermi_prob = models.FloatField(help_text="The minimum probability to observe for Fermi sources (it appears to be a percentage, e.g. 50).", default=50)
     swift_rate_signf = models.FloatField(help_text="The minimum \"RATE_SIGNIF\" (appears to be a signal-to-noise ratio) to observe for SWIFT sources (in sigma).", default=0.)
     antares_min_ranking = models.IntegerField(help_text="The minimum rating (1 is best) to observe for Antares sources.", default=2)
@@ -135,9 +135,9 @@ class PossibleEventAssociation(models.Model):
         ordering = ['-id']
 
 
-class TriggerID(models.Model):
+class EventGroup(models.Model):
     id = models.AutoField(primary_key=True)
-    trigger_id = models.BigIntegerField(unique=True)
+    trig_id = models.BigIntegerField(unique=True)
     earliest_event_observed = models.DateTimeField(blank=True, null=True)
     latest_event_observed = models.DateTimeField(blank=True, null=True)
     ra = models.FloatField(blank=True, null=True)
@@ -172,8 +172,8 @@ class ProposalDecision(models.Model):
     decision_reason = models.CharField(max_length=2056, blank=True, null=True)
     proposal = models.ForeignKey(ProposalSettings, on_delete=models.SET_NULL, blank=True, null=True)
     #associated_event_id = models.ForeignKey(PossibleEventAssociation, on_delete=models.SET_NULL, blank=True, null=True)
-    trigger_group_id = models.ForeignKey(TriggerID, on_delete=models.SET_NULL, blank=True, null=True)
-    trigger_id = models.BigIntegerField(blank=True, null=True)
+    event_group_id = models.ForeignKey(EventGroup, on_delete=models.SET_NULL, blank=True, null=True)
+    trig_id = models.BigIntegerField(blank=True, null=True)
     duration = models.FloatField(blank=True, null=True)
     ra = models.FloatField(blank=True, null=True)
     dec = models.FloatField(blank=True, null=True)
@@ -189,7 +189,7 @@ class ProposalDecision(models.Model):
         ordering = ['-id']
 
 
-class VOEvent(models.Model):
+class Event(models.Model):
     id = models.AutoField(primary_key=True)
     associated_event_id = models.ForeignKey(
         PossibleEventAssociation,
@@ -198,14 +198,14 @@ class VOEvent(models.Model):
         blank=True,
         null=True,
     )
-    trigger_group_id = models.ForeignKey(
-        TriggerID,
+    event_group_id = models.ForeignKey(
+        EventGroup,
         on_delete=models.SET_NULL,
         related_name="voevent",
         blank=True,
         null=True,
     )
-    trigger_id = models.BigIntegerField(blank=True, null=True)
+    trig_id = models.BigIntegerField(blank=True, null=True)
     telescope = models.CharField(max_length=64, blank=True, null=True)
     sequence_num = models.IntegerField(blank=True, null=True)
     event_type = models.CharField(max_length=64, blank=True, null=True)

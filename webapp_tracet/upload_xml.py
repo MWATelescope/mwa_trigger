@@ -18,14 +18,14 @@ def write_and_upload(xml_string):
     session.auth = (os.environ['UPLOAD_USER'], os.environ['UPLOAD_PASSWORD'])
     SYSTEM_ENV = os.environ.get('SYSTEM_ENV', None)
     if SYSTEM_ENV == 'PRODUCTION' or SYSTEM_ENV == 'STAGING':
-        url = 'https://mwa-trigger.duckdns.org/voevent_create/'
+        url = 'https://mwa-trigger.duckdns.org/event_create/'
     else:
-        url = 'http://127.0.0.1:8000/voevent_create/'
+        url = 'http://127.0.0.1:8000/event_create/'
     data = {
         'telescope' : trig.telescope,
         'xml_packet' : xml_string,
-        'duration' : trig.trig_duration,
-        'trigger_id' : trig.trig_id,
+        'duration' : trig.event_duration,
+        'trig_id' : trig.trig_id,
         'sequence_num' : trig.sequence_num,
         'event_type' : trig.event_type,
         'role' : trig.role,
@@ -44,20 +44,6 @@ def write_and_upload(xml_string):
         'antares_ranking' : trig.antares_ranking,
     }
     r = session.post(url, data=data)
-
-    # Upload
-    # VOEvent.objects.get_or_create(telescope=trig.telescope,
-    #                               xml_packet=xml_string,
-    #                               duration=trig.trig_duration,
-    #                               trigger_id=trig.trig_id,
-    #                               sequence_num=trig.sequence_num,
-    #                               event_type=trig.this_trig_type,
-    #                               ra=trig.ra,
-    #                               dec=trig.dec,
-    #                               pos_error=trig.err,
-    #                               ignored=trig.ignore)
-    # v = voeventparse.loads(xml_string.encode())
-    # print(voeventparse.prettystr(v))
 
 if __name__ == '__main__':
     xml_string = sys.stdin.read()

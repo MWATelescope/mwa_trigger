@@ -49,10 +49,10 @@
         <h2>Event Source Settings</h2>
         {% for error in form.source_type.errors %}<div class="alert alert-danger"><strong>{{ error|escape }}</strong></div>{% endfor %}
         <h3>Source duration</h3>
-        <p>{{ form.trig_any_duration.label_tag }}{% help_wrap form.trig_any_duration.help_text %}{{ form.trig_any_duration }}</p>
+        <p>{{ form.event_any_duration.label_tag }}{% help_wrap form.event_any_duration.help_text %}{{ form.event_any_duration }}</p>
         <div id="durations">
         <table>
-            <tr><td>Trigger Duration Range (s)  {% help_wrap 'The inclusive duration range of an event that will automatically trigger an observation.' %}</td><td>{{ form.trig_min_duration }}</td><td>{{ form.trig_max_duration }}</td></tr>
+            <tr><td>Trigger Duration Range (s)  {% help_wrap 'The inclusive duration range of an event that will automatically trigger an observation.' %}</td><td>{{ form.event_min_duration }}</td><td>{{ form.event_max_duration }}</td></tr>
             <tr><td>Pending Duration Range 1 (s){% help_wrap 'The inclusive duration range of an event that will notify users and let them decided if an observations should be triggered.' %}</td><td>{{ form.pending_min_duration_1 }}</td><td>{{ form.pending_max_duration_1 }}</td></tr>
             <tr><td>Pending Duration Range 2 (s){% help_wrap 'A second inclusive duration range of an event that will notify users and let them decided if an observations should be triggered.' %}</td><td>{{ form.pending_min_duration_2 }}</td><td>{{ form.pending_max_duration_2 }}</td></tr>
         </table>
@@ -257,14 +257,14 @@
                 }
             }
             threshold_display();
-            $("#id_trig_any_duration").change(function() {
+            $("#id_event_any_duration").change(function() {
                 if ($(this).is(':checked') ) {
                     $('#durations').hide();
                 } else {
                     $('#durations').show();
                 }
             });
-            $("#id_trig_any_duration").trigger("change")
+            $("#id_event_any_duration").trigger("change")
         })
     </script>
 {% endblock %}

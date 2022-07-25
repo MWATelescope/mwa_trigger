@@ -114,7 +114,7 @@ source_name: HD 8357
 source_type: FS
 swift_rate_signif: 0.0
 telescope: SWIFT
-trig_duration: 320.0
+event_duration: 320.0
 trig_id: 809217
 trig_pairs:
 - SWIFT_BAT_GRB_Pos
