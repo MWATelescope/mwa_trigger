@@ -27,7 +27,7 @@
       {% endfor %}
     </tr>
     </thead>
-    {% for event_group, telescope, source_name, prop_decisions, prop_decision_ids in object_list %}
+    {% for event_group, telescope, source_name, prop_decisions, prop_decision_ids in page_obj %}
     {% if event_group.ignored %}
       <tr class="grey-tr">
     {% else %}

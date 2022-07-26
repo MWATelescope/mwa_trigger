@@ -166,7 +166,7 @@ def EventGroupList(request):
         object_list = paginator.page(page)
     except InvalidPage:
         object_list = paginator.page(1)
-    return render(request, 'trigger_app/event_group_list.html', {'object_list':object_list, 'settings':prop_settings})
+    return render(request, 'trigger_app/event_group_list.html', {'page_obj':object_list, 'settings':prop_settings})
 
 
 class CometLogList(ListView):
