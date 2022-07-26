@@ -7,6 +7,14 @@
 <div class="container-fluid">
   <h1>Event Group Log</h1>
 
+  <div style="background-color:#f8f8f8; width:500px; margin: 0 auto; padding-bottom: 20px;">
+    <h3>Filter Event Groups:</h3>
+    <form action="" method="get">
+      <p>{{ filter.form.ignored.label_tag }} {{ filter.form.ignored }}</p>
+      <input class="btn btn-primary" type="submit" />
+    </form>
+    </div>
+
   <table class="fl-table">
     <col>
     <colgroup span="{{ settings|length }}"></colgroup>
