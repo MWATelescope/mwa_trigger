@@ -126,7 +126,6 @@ def get_source_types(telescope, event_type, source_name, v):
         # check to see if a GRB was identified
         grb = v.find(".//Param[@name='GRB_Identified']")
         if grb is None:
-            logger.error("Param[@name='GRB_Identified'] not found in XML packet - discarding.")
             grb = False
         else:
             grb = grb.attrib['value']
@@ -145,6 +144,11 @@ def get_source_types(telescope, event_type, source_name, v):
     elif telescope == "HESS":
         # Assume all HESS triggers are GRBs
         grb = True
+    if not grb:
+        # Perform second check using the declared source name
+        if source_name is not None:
+            if "GRB" in source_name:
+                grb = True
     if grb:
         return "GRB"
 
@@ -240,8 +244,11 @@ class parsed_VOEvent:
         self.event_type = get_event_type(v.attrib["ivorn"])
 
         # See if the trigger has a source name
-        if self.telescope == "SWIFT" and self.event_type == "BAT_GRB_Pos":
-            self.source_name = str(v.Why.Inference.Name)
+        if self.telescope == "SWIFT":
+            try:
+                self.source_name = str(v.Why.Inference.Name)
+            except AttributeError:
+                self.source_name = None
         elif self.telescope == "MAXI":
             # MAXI uses a Source_Name parameter
             src = v.find(".//Param[@name='Source_Name']")
