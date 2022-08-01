@@ -2,6 +2,7 @@ antares_ranking: null
 dec: -72.6159
 dec_dms: '-72:36:57.24'
 err: 0.0
+event_duration: null
 event_observed: null
 event_type: Point_Dir
 fermi_detection_prob: null
@@ -66,12 +67,12 @@ packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=
 ra: 11.5836
 ra_hms: '0:46:20.064'
 role: utility
+self_generated_trig_id: false
 sequence_num: null
 source_name: null
 source_type: null
 swift_rate_signif: null
 telescope: SWIFT
-event_duration: null
 trig_id: 48767
 trig_pairs:
 - SWIFT_BAT_GRB_Pos
