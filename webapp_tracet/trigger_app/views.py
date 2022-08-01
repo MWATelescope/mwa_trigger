@@ -151,10 +151,17 @@ def grab_decisions_for_event_groups(event_groups):
     # zip into something that you can iterate over in the html
     return list(zip(event_groups, telescope_list, source_name_list, proposal_decision_list, proposal_decision_id_list))
 
+class EventGroupFilter(django_filters.FilterSet):
+    class Meta:
+        model = models.EventGroup
+        fields = '__all__'
 
 def EventGroupList(request):
+    # Apply filters
+    f = EventGroupFilter(request.GET, queryset=models.EventGroup.objects.all())
+    event_group_ids = f.qs
+
     prop_settings = models.ProposalSettings.objects.all()
-    event_group_ids = models.EventGroup.objects.all()
 
     recent_triggers_info = grab_decisions_for_event_groups(event_group_ids)
 
@@ -166,7 +173,7 @@ def EventGroupList(request):
         object_list = paginator.page(page)
     except InvalidPage:
         object_list = paginator.page(1)
-    return render(request, 'trigger_app/event_group_list.html', {'object_list':object_list, 'settings':prop_settings})
+    return render(request, 'trigger_app/event_group_list.html', {'filter': f, 'page_obj':object_list, 'settings':prop_settings})
 
 
 class CometLogList(ListView):

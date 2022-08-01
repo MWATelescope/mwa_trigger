@@ -63,6 +63,11 @@
             <span class="navbar-text active">
               {{ user.username }}
             </span>
+            {% if user.is_staff %}
+              <span class="navbar-text active">
+                <a class="nav-link" href="/admin/">Admin Page</a>
+              </span>
+            {% endif %}
             <span class="navbar-text">
               <a class="nav-link" href="{% url 'password_change' %}">Change Password</a>
             </span>

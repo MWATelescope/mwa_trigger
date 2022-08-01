@@ -1,7 +1,7 @@
 APScheduler==3.9.1
 asgiref==3.5.1
 astropy==5.0.4
-atca-rapid-response-api @ git+https://github.com/ste616/atca-rapid-response-api.git@ADACS#subdirectory=python
+atca-rapid-response-api @ git+https://github.com/ste616/atca-rapid-response-api.git#subdirectory=python
 attrs==21.4.0
 Automat==20.2.0
 backports.zoneinfo==0.2.1
