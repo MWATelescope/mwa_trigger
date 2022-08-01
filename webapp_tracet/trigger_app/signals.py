@@ -348,6 +348,8 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
     delta_24h = np.linspace(0, 1440, 288)*u.min # 24 hours in 5 min increments
     next_24h = obstime=Time.now()+delta_24h
     obs_source_altaz = obs_source.transform_to(AltAz(obstime=next_24h, location=location))
+    # capture circumpolar source case
+    set_time_utc = None
     for altaz, time in zip(obs_source_altaz, next_24h):
         if altaz.alt.deg <1.:
             # source below horizon so record time
