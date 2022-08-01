@@ -21,6 +21,7 @@ def create_voevent_wrapper(trig, ra_dec, dec_alter=True):
         xml_packet=trig.packet,
         duration=trig.event_duration,
         trig_id=trig.trig_id,
+        self_generated_trig_id=trig.self_generated_trig_id,
         sequence_num=trig.sequence_num,
         event_type=trig.event_type,
         antares_ranking=trig.antares_ranking,

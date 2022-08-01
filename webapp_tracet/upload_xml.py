@@ -3,8 +3,6 @@
 import os
 import sys
 import requests
-from astropy.coordinates import Angle
-import astropy.units as u
 
 from tracet.parse_xml import parsed_VOEvent
 
@@ -26,6 +24,7 @@ def write_and_upload(xml_string):
         'xml_packet' : xml_string,
         'duration' : trig.event_duration,
         'trig_id' : trig.trig_id,
+        'self_generated_trig_id' : trig.self_generated_trig_id,
         'sequence_num' : trig.sequence_num,
         'event_type' : trig.event_type,
         'role' : trig.role,

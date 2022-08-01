@@ -3,7 +3,7 @@ from . import data_load
 import pandas as pd
 from astropy.coordinates import Angle
 import astropy.units as u
-import random
+import uuid
 
 import logging
 
@@ -187,6 +187,7 @@ class parsed_VOEvent:
         self.event_type = None
         self.sequence_num = None
         self.trig_id = None
+        self.self_generated_trig_id = False
         self.ra = None
         self.dec = None
         self.err = None
@@ -258,9 +259,10 @@ class parsed_VOEvent:
         elif v.find(".//Param[@name='AMON_ID']") is not None:
             # ICECUBE's ID
             self.trig_id = int(v.find(".//Param[@name='AMON_ID']").attrib["value"])
-        elif self.telescope == "HESS":
+        else:
             # Hess has no Trigger ID so make a random one
-            self.trig_id = random.randint(1e8, 1e9)
+            self.trig_id = int(str(uuid.uuid4().int)[:12])
+            self.self_generated_trig_id = True
 
         # Get current position
         self.ra, self.dec, self.err = get_position_info(v)
