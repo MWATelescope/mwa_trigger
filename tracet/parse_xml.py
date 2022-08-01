@@ -212,6 +212,7 @@ class parsed_VOEvent:
                 "SWIFT_FOM_Obs",
                 "SWIFT_XRT_Pos",
                 "SWIFT_UVOT_Pos",
+                "SWIFT_SC_Slew",
                 "Fermi_GBM_Flt_Pos",
                 "Fermi_GBM_Gnd_Pos",
                 "Fermi_GBM_Fin_Pos",
