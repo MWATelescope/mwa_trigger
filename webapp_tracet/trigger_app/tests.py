@@ -16,11 +16,17 @@ def create_voevent_wrapper(trig, ra_dec, dec_alter=True):
     else:
         dec=trig.dec
         dec_dms=trig.dec_dms
+    # Checks for no event observed
+    if trig.event_observed is None:
+        event_observed = None
+    else:
+        event_observed = datetime.datetime.strptime(str(trig.event_observed), "%Y-%m-%dT%H:%M:%S.%f")
     Event.objects.create(
         telescope=trig.telescope,
         xml_packet=trig.packet,
         duration=trig.event_duration,
         trig_id=trig.trig_id,
+        self_generated_trig_id=trig.self_generated_trig_id,
         sequence_num=trig.sequence_num,
         event_type=trig.event_type,
         antares_ranking=trig.antares_ranking,
@@ -33,7 +39,7 @@ def create_voevent_wrapper(trig, ra_dec, dec_alter=True):
         ignored=trig.ignore,
         source_name=trig.source_name,
         source_type=trig.source_type,
-        event_observed=datetime.datetime.strptime(str(trig.event_observed), "%Y-%m-%dT%H:%M:%S.%f"),
+        event_observed=event_observed,
         fermi_most_likely_index=trig.fermi_most_likely_index,
         fermi_detection_prob=trig.fermi_detection_prob,
         swift_rate_signif=trig.swift_rate_signif,
@@ -164,6 +170,48 @@ class test_grb_group_03(TestCase):
     def test_atca_observations_triggered(self):
         # First observation ignored but two other observations were triggered
         self.assertEqual(len(Observations.objects.all()), 2)
+
+class test_grb_group_04(TestCase):
+    """Tests that a new strange combination of SWIFT event types
+    """
+    # Load default fixtures
+    fixtures = [
+        "default_data.yaml",
+        "trigger_app/test_yamls/mwa_short_grb_proposal_settings.yaml",
+    ]
+    def setUp(self):
+        xml_paths = [
+            # A GRB position that doesn't include a event duration
+            "../tests/test_events/group_04_01_SWIFT_BAT_QuickLookPos.xml",
+            # Includes an event duration so trigger
+            "../tests/test_events/group_04_02_SWIFT_SC_Slew.xml",
+            # A follow up position but since there is zero position error should do nothing
+            "../tests/test_events/group_04_03_SWIFT_FOM_Obs.xml",
+            # Another follow up event which should cause nothing
+            "../tests/test_events/group_04_04_COUNTERPART.xml",
+        ]
+
+        # Setup current RA and Dec at zenith for the MWA
+        MWA = EarthLocation(lat='-26:42:11.95', lon='116:40:14.93', height=377.8 * u.m)
+        mwa_coord = coord = SkyCoord(az=0., alt=90., unit=(u.deg, u.deg), frame='altaz', obstime=Time.now(), location=MWA)
+        ra_dec = mwa_coord.icrs
+
+        # Parse and upload the xml file group
+        for xml in xml_paths:
+            trig = parsed_VOEvent(xml)
+            create_voevent_wrapper(trig, ra_dec, dec_alter=False)
+
+
+    def test_trigger_groups(self):
+        # Check there are three Events that were grouped as one by the trigger ID
+        self.assertEqual(len(Event.objects.all()), 4)
+        self.assertEqual(len(EventGroup.objects.all()), 1)
+
+    def test_proposal_decision(self):
+        # Final proposal dicision was triggered
+        print(f"SWIFT SHORT GRB MWA TEST:{ProposalDecision.objects.all().first().decision_reason}")
+        self.assertEqual(ProposalDecision.objects.all().first().decision, 'T')
+        self.assertEqual(len(ProposalDecision.objects.all()), 1)
 
 
 class test_nu(TestCase):

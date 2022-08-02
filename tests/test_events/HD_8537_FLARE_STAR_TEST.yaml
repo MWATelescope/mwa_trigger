@@ -2,6 +2,7 @@ antares_ranking: null
 dec: 7.4438
 dec_dms: '7:26:37.68'
 err: 0.05
+event_duration: 320.0
 event_observed: !!python/object/apply:lxml.objectify.fromstring
 - !!binary |
   PElTT1RpbWUgeG1sbnM6dm9lPSJodHRwOi8vd3d3Lml2b2EubmV0L3htbC9WT0V2ZW50L3YyLjAi
@@ -109,12 +110,12 @@ packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=
 ra: 20.7863
 ra_hms: '1:23:08.712'
 role: observation
+self_generated_trig_id: false
 sequence_num: null
 source_name: HD 8357
 source_type: FS
 swift_rate_signif: 0.0
 telescope: SWIFT
-event_duration: 320.0
 trig_id: 809217
 trig_pairs:
 - SWIFT_BAT_GRB_Pos
@@ -122,6 +123,7 @@ trig_pairs:
 - SWIFT_FOM_Obs
 - SWIFT_XRT_Pos
 - SWIFT_UVOT_Pos
+- SWIFT_SC_Slew
 - Fermi_GBM_Flt_Pos
 - Fermi_GBM_Gnd_Pos
 - Fermi_GBM_Fin_Pos

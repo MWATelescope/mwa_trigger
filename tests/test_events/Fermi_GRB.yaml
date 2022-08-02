@@ -2,6 +2,7 @@ antares_ranking: null
 dec: 48.4167
 dec_dms: '48:25:00.12'
 err: 4.7333
+event_duration: 0.512
 event_observed: !!python/object/apply:lxml.objectify.fromstring
 - !!binary |
   PElTT1RpbWUgeG1sbnM6dm9lPSJodHRwOi8vd3d3Lml2b2EubmV0L3htbC9WT0V2ZW50L3YyLjAi
@@ -84,12 +85,12 @@ packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=
 ra: 241.6167
 ra_hms: '16:06:28.008'
 role: observation
+self_generated_trig_id: false
 sequence_num: 46
 source_name: null
 source_type: GRB
 swift_rate_signif: null
 telescope: Fermi
-event_duration: 0.512
 trig_id: 533367528
 trig_pairs:
 - SWIFT_BAT_GRB_Pos
@@ -97,6 +98,7 @@ trig_pairs:
 - SWIFT_FOM_Obs
 - SWIFT_XRT_Pos
 - SWIFT_UVOT_Pos
+- SWIFT_SC_Slew
 - Fermi_GBM_Flt_Pos
 - Fermi_GBM_Gnd_Pos
 - Fermi_GBM_Fin_Pos

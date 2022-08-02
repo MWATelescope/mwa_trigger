@@ -30,23 +30,40 @@ def group_trigger(sender, instance, **kwargs):
     """Check if the latest Event has already been observered or if it is new and update the models accordingly
     """
     # instance is the new Event
+
+    # ------------------------------------------------------------------------------
+    # Look for other events with the same Trig ID
+    # ------------------------------------------------------------------------------
+    event_group = EventGroup.objects.filter(trig_id=instance.trig_id)
+    if event_group.exists():
+        event_group = event_group.first()
+        # Trigger event already exists so just link the Event (outside of if)
+    else:
+        # Make a new trigger group ID
+        event_group = EventGroup.objects.create(
+            trig_id=instance.trig_id,
+            ra=instance.ra,
+            dec=instance.dec,
+            ra_hms=instance.ra_hms,
+            dec_dms=instance.dec_dms,
+            pos_error=instance.pos_error,
+            source_type=instance.source_type,
+            earliest_event_observed=instance.event_observed,
+            latest_event_observed=instance.event_observed,
+        )
+    # Link the Event (have to update this way to prevent save() triggering this function again)
+    Event.objects.filter(id=instance.id).update(event_group_id=event_group)
+
+
     if instance.ignored:
         # Event ignored so do nothing
         return
 
     event_coord = SkyCoord(ra=instance.ra*u.degree, dec=instance.dec*u.degree)
 
-    # ------------------------------------------------------------------------------
-    # Look for other events with the same Trigger ID
-    # ------------------------------------------------------------------------------
-    event_group = EventGroup.objects.filter(trig_id=instance.trig_id)
-    if event_group.exists():
-        event_group = event_group.first()
-        # Trigger event already exists so link the Event (have to update this way to prevent save() triggering this function again)
-        Event.objects.filter(id=instance.id).update(event_group_id=event_group)
-
+    proposal_decisions = ProposalDecision.objects.filter(event_group_id=event_group)
+    if proposal_decisions.exists():
         # Loop over all proposals settings and see if it's worth reobserving
-        proposal_decisions = ProposalDecision.objects.filter(event_group_id=event_group)
         for prop_dec in proposal_decisions:
             if prop_dec.decision == "C":
                 # Previous observation canceled so assume no new observations should be triggered
@@ -114,20 +131,7 @@ def group_trigger(sender, instance, **kwargs):
         event_group.save()
 
     else:
-        # Make a new trigger group ID
-        new_trig = EventGroup.objects.create(
-            trig_id=instance.trig_id,
-            ra=instance.ra,
-            dec=instance.dec,
-            ra_hms=instance.ra_hms,
-            dec_dms=instance.dec_dms,
-            pos_error=instance.pos_error,
-            source_type=instance.source_type,
-            earliest_event_observed=instance.event_observed,
-            latest_event_observed=instance.event_observed,
-        )
-        # Link the Event (have to update this way to prevent save() triggering this function again)
-        Event.objects.filter(id=instance.id).update(event_group_id=new_trig)
+        # First unignored event so create proposal decisions objects
 
         # Loop over settings
         proposal_settings = ProposalSettings.objects.all()
@@ -137,7 +141,7 @@ def group_trigger(sender, instance, **kwargs):
                 #decision=decision,
                 #decision_reason=decision_reason_log,
                 proposal=prop_set,
-                event_group_id=new_trig,
+                event_group_id=event_group,
                 trig_id=instance.trig_id,
                 duration=instance.duration,
                 ra=instance.ra,
@@ -148,6 +152,10 @@ def group_trigger(sender, instance, **kwargs):
             )
             # Check if it's worth triggering an obs
             proposal_worth_observing(prop_dec, instance)
+
+        # Mark as unignored event
+        event_group.ignored = False
+        event_group.save()
 
     # ------------------------------------------------------------------------------
     # Look for associated events (in time and space) which includes other telescopes
@@ -340,6 +348,8 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
     delta_24h = np.linspace(0, 1440, 288)*u.min # 24 hours in 5 min increments
     next_24h = obstime=Time.now()+delta_24h
     obs_source_altaz = obs_source.transform_to(AltAz(obstime=next_24h, location=location))
+    # capture circumpolar source case
+    set_time_utc = None
     for altaz, time in zip(obs_source_altaz, next_24h):
         if altaz.alt.deg <1.:
             # source below horizon so record time

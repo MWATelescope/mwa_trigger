@@ -7,6 +7,14 @@
 <div class="container-fluid">
   <h1>Event Group Log</h1>
 
+  <div style="background-color:#f8f8f8; width:500px; margin: 0 auto; padding-bottom: 20px;">
+    <h3>Filter Event Groups:</h3>
+    <form action="" method="get">
+      <p>{{ filter.form.ignored.label_tag }} {{ filter.form.ignored }}</p>
+      <input class="btn btn-primary" type="submit" />
+    </form>
+    </div>
+
   <table class="fl-table">
     <col>
     <colgroup span="{{ settings|length }}"></colgroup>
@@ -27,23 +35,27 @@
       {% endfor %}
     </tr>
     </thead>
-    {% for trig, telescope, source_name, prop_decisions, prop_decision_ids in object_list %}
-    <tr>
-      <td><a href="/trigger_id_details/{{ trig.id }}/" style="text-decoration:None">{{ trig.id }}</a></td>
-      <td scope="row">{{ trig.recieved_data|date:"Y-m-d H:i:s" }}</td>
+    {% for event_group, telescope, source_name, prop_decisions, prop_decision_ids in page_obj %}
+    {% if event_group.ignored %}
+      <tr class="grey-tr">
+    {% else %}
+      <tr>
+    {% endif %}
+      <td><a href="/event_group_details/{{ event_group.id }}/" style="text-decoration:None">{{ event_group.id }}</a></td>
+      <td scope="row">{{ event_group.recieved_data|date:"Y-m-d H:i:s" }}</td>
       <td scope="row">{{ telescope }}</td>
       {% if telescope == "SWIFT" %}
         <!-- Link to SWIFT telescope page -->
-        <td><a href="https://gcn.gsfc.nasa.gov/other/{{ trig.trig_id }}.swift" style="text-decoration:None">{{ trig.trig_id }}</a></td>
+        <td><a href="https://gcn.gsfc.nasa.gov/other/{{ event_group.trig_id }}.swift" style="text-decoration:None">{{ event_group.trig_id }}</a></td>
       {% else %}
-        <td>{{ trig.trig_id }}</td>
+        <td>{{ event_group.trig_id }}</td>
       {% endif %}
-      <td scope="row">{{ trig.source_type }}</td>
+      <td scope="row">{{ event_group.source_type }}</td>
       <td scope="row">
-        {% if trig.source_type == "FS" %}
-          { source_name }}
+        {% if event_group.source_type == "FS" %}
+          {{ source_name }}
         {% else %}
-          {{ trig.source_type }}{{ trig.earliest_event_observed|date:"ymd" }}
+          {{ event_group.source_type }}{{ event_group.earliest_event_observed|date:"ymd" }}
         {% endif %}
       </td>
       {% for setting in settings %}

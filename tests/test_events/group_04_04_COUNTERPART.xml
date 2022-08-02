@@ -1,0 +1,78 @@
+<VOEvent xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance" ivorn="ivo://nasa.gsfc.gcn/COUNTERPART#Position_2022-07-30T15:50:54.00_1118357-578" role="observation" version="2.0" xsi:schemaLocation="http://www.ivoa.net/xml/VOEvent/v2.0 http://www.ivoa.net/xml/VOEvent/VOEvent-v2.0.xsd">
+    <Who>
+        <AuthorIVORN>ivo://nasa.gsfc.tan/gcn</AuthorIVORN>
+        <Author>
+            <shortName>VO-GCN</shortName>
+            <contactName>Phil_Evans</contactName>
+        </Author>
+        <Date>2022-07-31T02:51:19</Date>
+        <Description>This VOEvent message was created with GCN VOE version: 15.08 17jun22</Description>
+    </Who>
+    <What>
+        <Param name="Packet_Type" value="45" />
+        <Param name="Pkt_Ser_Num" value="19" />
+        <Param name="TrigID" value="1118357" ucd="meta.id" />
+        <Param name="Burst_TJD" value="19790" unit="days" ucd="time" />
+        <Param name="Burst_SOD" value="57054.00" unit="sec" ucd="time" />
+        <Param name="Intensity" value="0.07" unit="mag" ucd="???" />
+        <Param name="Inten_Uncert" value="0.18" unit="mag" ucd="???" />
+        <Param name="Filter" value="29" unit="dn" ucd="???" />
+        <Param name="Seeing" value="0.00" unit="arcsec" ucd="instr.obsty.site.seeing" />
+        <Param name="Submitter" value="Phil_Evans" />
+        <Param name="Telescope" value="Swift-XRT" />
+        <Param name="Coords_Type" value="1" unit="dn" />
+        <Param name="Coords_String" value="source_object" />
+        <Group name="Obs_Support_Info">
+            <Description>The Sun and Moon values are valid at the time the VOEvent XML message was created.</Description>
+            <Param name="Sun_RA" value="130.33" unit="deg" ucd="pos.eq.ra" />
+            <Param name="Sun_Dec" value="18.29" unit="deg" ucd="pos.eq.dec" />
+            <Param name="Sun_Distance" value="108.92" unit="deg" ucd="pos.angDistance" />
+            <Param name="Sun_Hr_Angle" value="-6.35" unit="hr" />
+            <Param name="Moon_RA" value="158.29" unit="deg" ucd="pos.eq.ra" />
+            <Param name="Moon_Dec" value="14.32" unit="deg" ucd="pos.eq.dec" />
+            <Param name="MOON_Distance" value="95.80" unit="deg" ucd="pos.angDistance" />
+            <Param name="Moon_Illum" value="5.33" unit="%" ucd="arith.ratio" />
+            <Param name="Galactic_Long" value="313.82" unit="deg" ucd="pos.galactic.lon" />
+            <Param name="Galactic_Lat" value="-9.39" unit="deg" ucd="pos.galactic.lat" />
+            <Param name="Ecliptic_Long" value="247.57" unit="deg" ucd="pos.ecliptic.lon" />
+            <Param name="Ecliptic_Lat" value="-49.54" unit="deg" ucd="pos.ecliptic.lat" />
+        </Group>
+        <Description>An optical, radio, or other-band detection of the counterpart to a GRB.</Description>
+    </What>
+    <WhereWhen>
+        <ObsDataLocation>
+            <ObservatoryLocation id="GEOLUN" />
+            <ObservationLocation>
+                <AstroCoordSystem id="UTC-FK5-GEO" />
+                <AstroCoords coord_system_id="UTC-FK5-GEO">
+                    <Time unit="s">
+                        <TimeInstant>
+                            <ISOTime>2022-07-30T15:50:54.00</ISOTime>
+                        </TimeInstant>
+                    </Time>
+                    <Position2D unit="deg">
+                        <Name1>RA</Name1>
+                        <Name2>Dec</Name2>
+                        <Value2>
+                            <C1>225.0142</C1>
+                            <C2>-69.4959</C2>
+                        </Value2>
+                        <Error2Radius>0.0018</Error2Radius>
+                    </Position2D>
+                </AstroCoords>
+            </ObservationLocation>
+        </ObsDataLocation>
+        <Description>The RA,Dec coordinates are of the type: source_object.</Description>
+    </WhereWhen>
+    <How>
+        <Description>GRB Afterglow Counterpart</Description>
+        <Reference uri="http://gcn.gsfc.nasa.gov/counterpart.html" type="url" />
+    </How>
+    <Why>
+        <Inference probability="0.9">
+            <Concept>process.variation.burst;em.gamma</Concept>
+        </Inference>
+    </Why>
+    <Description></Description>
+    <original_prefix>voe</original_prefix>
+</VOEvent>

@@ -147,6 +147,7 @@ class EventGroup(models.Model):
     pos_error = models.FloatField(blank=True, null=True)
     recieved_data = models.DateTimeField(auto_now_add=True, blank=True)
     source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, null=True)
+    ignored = models.BooleanField(default=True)
 
     def __str__(self):
         return str(self.id)
@@ -206,6 +207,7 @@ class Event(models.Model):
         null=True,
     )
     trig_id = models.BigIntegerField(blank=True, null=True)
+    self_generated_trig_id = models.BooleanField(default=True)
     telescope = models.CharField(max_length=64, blank=True, null=True)
     sequence_num = models.IntegerField(blank=True, null=True)
     event_type = models.CharField(max_length=64, blank=True, null=True)
