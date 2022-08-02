@@ -3,7 +3,7 @@ from . import data_load
 import pandas as pd
 from astropy.coordinates import Angle
 import astropy.units as u
-import random
+import uuid
 
 import logging
 
@@ -126,7 +126,6 @@ def get_source_types(telescope, event_type, source_name, v):
         # check to see if a GRB was identified
         grb = v.find(".//Param[@name='GRB_Identified']")
         if grb is None:
-            logger.error("Param[@name='GRB_Identified'] not found in XML packet - discarding.")
             grb = False
         else:
             grb = grb.attrib['value']
@@ -145,6 +144,11 @@ def get_source_types(telescope, event_type, source_name, v):
     elif telescope == "HESS":
         # Assume all HESS triggers are GRBs
         grb = True
+    if not grb:
+        # Perform second check using the declared source name
+        if source_name is not None:
+            if "GRB" in source_name:
+                grb = True
     if grb:
         return "GRB"
 
@@ -187,6 +191,7 @@ class parsed_VOEvent:
         self.event_type = None
         self.sequence_num = None
         self.trig_id = None
+        self.self_generated_trig_id = False
         self.ra = None
         self.dec = None
         self.err = None
@@ -207,6 +212,7 @@ class parsed_VOEvent:
                 "SWIFT_FOM_Obs",
                 "SWIFT_XRT_Pos",
                 "SWIFT_UVOT_Pos",
+                "SWIFT_SC_Slew",
                 "Fermi_GBM_Flt_Pos",
                 "Fermi_GBM_Gnd_Pos",
                 "Fermi_GBM_Fin_Pos",
@@ -239,8 +245,11 @@ class parsed_VOEvent:
         self.event_type = get_event_type(v.attrib["ivorn"])
 
         # See if the trigger has a source name
-        if self.telescope == "SWIFT" and self.event_type == "BAT_GRB_Pos":
-            self.source_name = str(v.Why.Inference.Name)
+        if self.telescope == "SWIFT":
+            try:
+                self.source_name = str(v.Why.Inference.Name)
+            except AttributeError:
+                self.source_name = None
         elif self.telescope == "MAXI":
             # MAXI uses a Source_Name parameter
             src = v.find(".//Param[@name='Source_Name']")
@@ -258,9 +267,10 @@ class parsed_VOEvent:
         elif v.find(".//Param[@name='AMON_ID']") is not None:
             # ICECUBE's ID
             self.trig_id = int(v.find(".//Param[@name='AMON_ID']").attrib["value"])
-        elif self.telescope == "HESS":
+        else:
             # Hess has no Trigger ID so make a random one
-            self.trig_id = random.randint(1e8, 1e9)
+            self.trig_id = int(str(uuid.uuid4().int)[:12])
+            self.self_generated_trig_id = True
 
         # Get current position
         self.ra, self.dec, self.err = get_position_info(v)

@@ -2,6 +2,7 @@ antares_ranking: 1
 dec: -21.274
 dec_dms: '-21:16:26.4'
 err: 0.325
+event_duration: null
 event_observed: !!python/object/apply:lxml.objectify.fromstring
 - !!binary |
   PElTT1RpbWUgeG1sbnM6dm9lPSJodHRwczovL3d3dy5pdm9hLm5ldC94bWwvVk9FdmVudC92Mi4w
@@ -53,12 +54,12 @@ packet: "<VOEvent xmlns:xsi=\"https://www.w3.org/2001/XMLSchema-instance\" ivorn
 ra: 156.957
 ra_hms: '10:27:49.68'
 role: observation
+self_generated_trig_id: false
 sequence_num: null
 source_name: null
 source_type: NU
 swift_rate_signif: null
 telescope: Antares
-event_duration: null
 trig_id: 1438351269
 trig_pairs:
 - SWIFT_BAT_GRB_Pos
@@ -66,6 +67,7 @@ trig_pairs:
 - SWIFT_FOM_Obs
 - SWIFT_XRT_Pos
 - SWIFT_UVOT_Pos
+- SWIFT_SC_Slew
 - Fermi_GBM_Flt_Pos
 - Fermi_GBM_Gnd_Pos
 - Fermi_GBM_Fin_Pos
