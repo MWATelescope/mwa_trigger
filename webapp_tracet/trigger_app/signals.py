@@ -125,7 +125,7 @@ def group_trigger(sender, instance, **kwargs):
                     # send off alert messages to users and admins
                     send_all_alerts(True, debug_bool, False, prop_dec)
 
-        if instance.pos_error < event_group.pos_error  and instance.pos_error != 0.:
+        if instance.pos_error < event_group.pos_error and instance.pos_error != 0.:
             # Updated event group's best position
             event_group.ra = instance.ra
             event_group.dec = instance.dec
@@ -245,7 +245,10 @@ def proposal_worth_observing(
     trigger_bool = debug_bool = pending_bool = False
 
     # Check if event has an accurate enough position
-    if voevent.pos_error > prop_dec.proposal.maximum_position_uncertainty:
+    if prop_dec.pos_error == 0.0:
+        # Ignore the inaccurate event
+        decision_reason_log += f"The Events positions uncertainty is 0.0 which is likely an error so not observing.\n "
+    elif voevent.pos_error > prop_dec.proposal.maximum_position_uncertainty:
         # Ignore the inaccurate event
         decision_reason_log += f"The Events positions uncertainty ({voevent.pos_error} deg) is greater than {prop_dec.proposal.maximum_position_uncertainty} so not observing.\n "
     else:
