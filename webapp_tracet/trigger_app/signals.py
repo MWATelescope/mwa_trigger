@@ -17,6 +17,7 @@ from astropy.time import Time
 from astropy.coordinates import SkyCoord, EarthLocation, AltAz
 import numpy as np
 from scipy.stats import norm
+import threading
 
 import logging
 logger = logging.getLogger(__name__)
@@ -24,12 +25,16 @@ logger = logging.getLogger(__name__)
 account_sid = os.environ.get('TWILIO_ACCOUNT_SID', None)
 auth_token = os.environ.get('TWILIO_AUTH_TOKEN', None)
 
+signal_lock = threading.Lock()
+
 
 @receiver(post_save, sender=Event)
 def group_trigger(sender, instance, **kwargs):
     """Check if the latest Event has already been observered or if it is new and update the models accordingly
     """
     # instance is the new Event
+    # Lock this function so only one event can be processed at once
+    #signal_lock.aquire()
 
     # ------------------------------------------------------------------------------
     # Look for other events with the same Trig ID
@@ -57,6 +62,8 @@ def group_trigger(sender, instance, **kwargs):
 
     if instance.ignored:
         # Event ignored so do nothing
+        # Release the lock
+        # signal_lock.release()
         return
 
     event_coord = SkyCoord(ra=instance.ra*u.degree, dec=instance.dec*u.degree)
@@ -208,6 +215,10 @@ def group_trigger(sender, instance, **kwargs):
         )
         # Link the Event (have to update this way to prevent save() triggering this function again)
         Event.objects.filter(id=instance.id).update(associated_event_id=new_trig)
+
+
+    # Release the lock
+    # signal_lock.release()
 
 
 def proposal_worth_observing(
