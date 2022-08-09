@@ -1,5 +1,4 @@
 from django.db.models.signals import pre_save, post_save
-from django.db import transaction
 from django.dispatch import receiver, Signal
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
@@ -18,7 +17,7 @@ from astropy.time import Time
 from astropy.coordinates import SkyCoord, EarthLocation, AltAz
 import numpy as np
 from scipy.stats import norm
-from threading import Lock, Thread
+import threading
 
 import logging
 logger = logging.getLogger(__name__)
@@ -26,55 +25,45 @@ logger = logging.getLogger(__name__)
 account_sid = os.environ.get('TWILIO_ACCOUNT_SID', None)
 auth_token = os.environ.get('TWILIO_AUTH_TOKEN', None)
 
-signal_lock = Lock()
+signal_lock = threading.Lock()
 
 
 @receiver(post_save, sender=Event)
-def thread_handler(sender, instance, **kwargs):
-    Thread(
-        target=group_trigger,
-        args=(sender, instance),
-        kwargs=kwargs,
-    ).start()
-
 def group_trigger(sender, instance, **kwargs):
     """Check if the latest Event has already been observered or if it is new and update the models accordingly
     """
     # instance is the new Event
     # Lock this function so only one event can be processed at once
-    signal_lock.acquire()
-    try:
+    #signal_lock.aquire()
 
-        # ------------------------------------------------------------------------------
-        # Look for other events with the same Trig ID
-        # ------------------------------------------------------------------------------
-        event_group = EventGroup.objects.filter(trig_id=instance.trig_id)
-        if event_group.exists():
-            event_group = event_group.first()
-            # Trigger event already exists so just link the Event (outside of if)
-        else:
-            # Make a new trigger group ID
-            event_group = EventGroup.objects.create(
-                trig_id=instance.trig_id,
-                ra=instance.ra,
-                dec=instance.dec,
-                ra_hms=instance.ra_hms,
-                dec_dms=instance.dec_dms,
-                pos_error=instance.pos_error,
-                source_type=instance.source_type,
-                earliest_event_observed=instance.event_observed,
-                latest_event_observed=instance.event_observed,
-            )
-            event_group.save()
-        # Link the Event (have to update this way to prevent save() triggering this function again)
-        Event.objects.filter(id=instance.id).update(event_group_id=event_group)
-    finally:
-        # Release the lock
-        signal_lock.release()
+    # ------------------------------------------------------------------------------
+    # Look for other events with the same Trig ID
+    # ------------------------------------------------------------------------------
+    event_group = EventGroup.objects.filter(trig_id=instance.trig_id)
+    if event_group.exists():
+        event_group = event_group.first()
+        # Trigger event already exists so just link the Event (outside of if)
+    else:
+        # Make a new trigger group ID
+        event_group = EventGroup.objects.create(
+            trig_id=instance.trig_id,
+            ra=instance.ra,
+            dec=instance.dec,
+            ra_hms=instance.ra_hms,
+            dec_dms=instance.dec_dms,
+            pos_error=instance.pos_error,
+            source_type=instance.source_type,
+            earliest_event_observed=instance.event_observed,
+            latest_event_observed=instance.event_observed,
+        )
+    # Link the Event (have to update this way to prevent save() triggering this function again)
+    Event.objects.filter(id=instance.id).update(event_group_id=event_group)
 
 
     if instance.ignored:
         # Event ignored so do nothing
+        # Release the lock
+        # signal_lock.release()
         return
 
     event_coord = SkyCoord(ra=instance.ra*u.degree, dec=instance.dec*u.degree)
@@ -188,7 +177,7 @@ def group_trigger(sender, instance, **kwargs):
     #                               and before the latest  event observed + 100s
     association_exists = False
     poss_events = PossibleEventAssociation.objects.filter(earliest_event_observed__lt=late_dt,
-                                                    latest_event_observed__gt=early_dt)
+                                                      latest_event_observed__gt=early_dt)
     if poss_events.exists():
         for trig_event in poss_events:
             # Calculate 95% confidence interval seperation
@@ -226,6 +215,10 @@ def group_trigger(sender, instance, **kwargs):
         )
         # Link the Event (have to update this way to prevent save() triggering this function again)
         Event.objects.filter(id=instance.id).update(associated_event_id=new_trig)
+
+
+    # Release the lock
+    # signal_lock.release()
 
 
 def proposal_worth_observing(
