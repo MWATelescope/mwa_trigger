@@ -8,10 +8,11 @@ from twilio.rest import Client
 from twilio.base.exceptions import TwilioRestException
 
 from .models import UserAlerts, ProposalSettings, TelescopeProjectID
-from .validators import atca_proposal_id, atca_freq_bands, mwa_proposal_id, mwa_freqspecs
+from .validators import atca_proposal_id, atca_freq_bands, mwa_proposal_id, mwa_freqspecs, mwa_horizon_limit
 
 account_sid = os.environ.get('TWILIO_ACCOUNT_SID', None)
 auth_token = os.environ.get('TWILIO_AUTH_TOKEN', None)
+my_number = os.environ.get('TWILIO_PHONE_NUMBER', None)
 
 # creating a form
 class UserAlertForm(forms.ModelForm):
@@ -22,7 +23,7 @@ class UserAlertForm(forms.ModelForm):
             try:
                 message = client.messages.create(
                         to=self.cleaned_data['address'],
-                        from_='+17755216557',
+                        from_=my_number,
                         body="This is a test text message from TraceT",
                 )
                 print(f"MESAGESTART{message}MESSGAEEND")
@@ -41,41 +42,49 @@ class ProjectSettingsForm(forms.ModelForm):
         if len(self.cleaned_data['proposal_id']) < 6 or self.cleaned_data['proposal_id'] is None:
             raise forms.ValidationError("Please create a proposal ID with at least 6 character")
 
-        # Validate that the user chose ATCA Frequency values within each band
-        band1 = self.cleaned_data['atca_band_3mm']
-        if band1:
-            # min_freq, max_freq, freq, field_name
-            atca_freq_bands(83000, 105000, self.cleaned_data['atca_band_3mm_freq1'], 'atca_band_3mm_freq1')
-            atca_freq_bands(83000, 105000, self.cleaned_data['atca_band_3mm_freq2'], 'atca_band_3mm_freq2')
-        band2 = self.cleaned_data['atca_band_7mm']
-        if band2:
-            atca_freq_bands(30000, 50000, self.cleaned_data['atca_band_7mm_freq1'], 'atca_band_7mm_freq1')
-            atca_freq_bands(30000, 50000, self.cleaned_data['atca_band_7mm_freq2'], 'atca_band_7mm_freq2')
-        band3 = self.cleaned_data['atca_band_15mm']
-        if band3:
-            atca_freq_bands(16000, 25000, self.cleaned_data['atca_band_15mm_freq1'], 'atca_band_15mm_freq1')
-            atca_freq_bands(16000, 25000, self.cleaned_data['atca_band_15mm_freq2'], 'atca_band_15mm_freq2')
-        band4 = self.cleaned_data['atca_band_4cm']
-        if band4:
-            atca_freq_bands(3900, 11000, self.cleaned_data['atca_band_4cm_freq1'], 'atca_band_4cm_freq1')
-            atca_freq_bands(3900, 11000, self.cleaned_data['atca_band_4cm_freq2'], 'atca_band_4cm_freq2')
 
-
-        # Make sure the project ID is works
+        # Telescope specific validation
         if 'telescope' in self.cleaned_data.keys():
             telescope = self.cleaned_data['telescope']
             if str(telescope).startswith("MWA"):
+                # MWA validation
 
                 # Check the MWA frequency channel specifications are valid
                 if self.cleaned_data['mwa_freqspecs']:
                     mwa_freqspecs(self.cleaned_data['mwa_freqspecs'])
                 else:
                     raise forms.ValidationError({'mwa_freqspecs': "No Frequency channel Specifications suppled."})
+
+                # Check user selected a horizon limit that won't be rejected by the MWA backend
+                mwa_horizon_limit(self.cleaned_data['mwa_horizon_limit'])
+
             elif str(telescope) == "ATCA":
+                # ATCA validation
+
+                # Check user has chosen at least one band
                 if not self.cleaned_data['atca_band_3mm'] and not self.cleaned_data['atca_band_7mm'] and \
                    not self.cleaned_data['atca_band_15mm'] and not self.cleaned_data['atca_band_4cm'] and \
                    not self.cleaned_data['atca_band_16cm']:
                     raise forms.ValidationError("Please choose at least 1 ATCA frequency band.")
+
+                # Validate that the user chose ATCA Frequency values within each band
+                band1 = self.cleaned_data['atca_band_3mm']
+                if band1:
+                    # min_freq, max_freq, freq, field_name
+                    atca_freq_bands(83000, 105000, self.cleaned_data['atca_band_3mm_freq1'], 'atca_band_3mm_freq1')
+                    atca_freq_bands(83000, 105000, self.cleaned_data['atca_band_3mm_freq2'], 'atca_band_3mm_freq2')
+                band2 = self.cleaned_data['atca_band_7mm']
+                if band2:
+                    atca_freq_bands(30000, 50000, self.cleaned_data['atca_band_7mm_freq1'], 'atca_band_7mm_freq1')
+                    atca_freq_bands(30000, 50000, self.cleaned_data['atca_band_7mm_freq2'], 'atca_band_7mm_freq2')
+                band3 = self.cleaned_data['atca_band_15mm']
+                if band3:
+                    atca_freq_bands(16000, 25000, self.cleaned_data['atca_band_15mm_freq1'], 'atca_band_15mm_freq1')
+                    atca_freq_bands(16000, 25000, self.cleaned_data['atca_band_15mm_freq2'], 'atca_band_15mm_freq2')
+                band4 = self.cleaned_data['atca_band_4cm']
+                if band4:
+                    atca_freq_bands(3900, 11000, self.cleaned_data['atca_band_4cm_freq1'], 'atca_band_4cm_freq1')
+                    atca_freq_bands(3900, 11000, self.cleaned_data['atca_band_4cm_freq2'], 'atca_band_4cm_freq2')
 
 
     # specify the name of model to use

@@ -6,7 +6,7 @@ from trigger_app.forms import ProjectSettingsForm, TelescopeProjectIDForm
 class ProposalSettingsAdmin(admin.ModelAdmin):
     form = ProjectSettingsForm
     model = ProposalSettings
-    list_display = ('id', 'telescope', 'project_id', 'proposal_description')
+    list_display = ('id', 'proposal_id', 'project_id', 'proposal_description')
     fieldsets = (
         ("Telescope Settings: Common", {
             'fields':(

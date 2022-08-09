@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 account_sid = os.environ.get('TWILIO_ACCOUNT_SID', None)
 auth_token = os.environ.get('TWILIO_AUTH_TOKEN', None)
+my_number = os.environ.get('TWILIO_PHONE_NUMBER', None)
 
 
 @receiver(post_save, sender=Event)
@@ -34,23 +35,19 @@ def group_trigger(sender, instance, **kwargs):
     # ------------------------------------------------------------------------------
     # Look for other events with the same Trig ID
     # ------------------------------------------------------------------------------
-    event_group = EventGroup.objects.filter(trig_id=instance.trig_id)
-    if event_group.exists():
-        event_group = event_group.first()
-        # Trigger event already exists so just link the Event (outside of if)
-    else:
-        # Make a new trigger group ID
-        event_group = EventGroup.objects.create(
-            trig_id=instance.trig_id,
-            ra=instance.ra,
-            dec=instance.dec,
-            ra_hms=instance.ra_hms,
-            dec_dms=instance.dec_dms,
-            pos_error=instance.pos_error,
-            source_type=instance.source_type,
-            earliest_event_observed=instance.event_observed,
-            latest_event_observed=instance.event_observed,
-        )
+    event_group = EventGroup.objects.get_or_create(
+        trig_id=instance.trig_id,
+        defaults={
+            "ra": instance.ra,
+            "dec": instance.dec,
+            "ra_hms": instance.ra_hms,
+            "dec_dms": instance.dec_dms,
+            "pos_error": instance.pos_error,
+            "source_type": instance.source_type,
+            "earliest_event_observed": instance.event_observed,
+            "latest_event_observed": instance.event_observed,
+        },
+    )[0]
     # Link the Event (have to update this way to prevent save() triggering this function again)
     Event.objects.filter(id=instance.id).update(event_group_id=event_group)
 
@@ -118,7 +115,7 @@ def group_trigger(sender, instance, **kwargs):
                     # send off alert messages to users and admins
                     send_all_alerts(True, debug_bool, False, prop_dec)
 
-        if instance.pos_error < event_group.pos_error  and instance.pos_error != 0.:
+        if instance.pos_error < event_group.pos_error and instance.pos_error != 0.:
             # Updated event group's best position
             event_group.ra = instance.ra
             event_group.dec = instance.dec
@@ -234,7 +231,10 @@ def proposal_worth_observing(
     trigger_bool = debug_bool = pending_bool = False
 
     # Check if event has an accurate enough position
-    if voevent.pos_error > prop_dec.proposal.maximum_position_uncertainty:
+    if prop_dec.pos_error == 0.0:
+        # Ignore the inaccurate event
+        decision_reason_log += f"The Events positions uncertainty is 0.0 which is likely an error so not observing.\n "
+    elif voevent.pos_error > prop_dec.proposal.maximum_position_uncertainty:
         # Ignore the inaccurate event
         decision_reason_log += f"The Events positions uncertainty ({voevent.pos_error} deg) is greater than {prop_dec.proposal.maximum_position_uncertainty} so not observing.\n "
     else:
@@ -368,8 +368,8 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
             # Check if user can recieve each type of alert
             # Trigger alert
             if ap.alert and ua.alert and trigger_bool:
-                subject = f"Trigger Web App Observation {proposal_decision_model.id}"
-                message_type_text = f"The trigger web service scheduled the following {proposal_decision_model.proposal.telescope} observations:\n"
+                subject = f"TraceT Triggered Observation {proposal_decision_model.id}"
+                message_type_text = f"Tracet scheduled the following {proposal_decision_model.proposal.telescope} observations:\n"
                 # Send links for each observation
                 obs = Observations.objects.filter(proposal_decision_id=proposal_decision_model)
                 for ob in obs:
@@ -378,14 +378,14 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
 
             # Debug Alert
             if ap.debug and ua.debug and debug_bool:
-                subject = f"Trigger Web App Debug {proposal_decision_model.id}"
-                message_type_text = f"This is a debug notification from the trigger web service."
+                subject = f"TraceT Debug {proposal_decision_model.id}"
+                message_type_text = f"This is a debug notification from TraceT."
                 send_alert_type(ua.type, ua.address, subject, message_type_text, proposal_decision_model, telescopes, set_time_utc)
 
             # Pending Alert
             if ap.approval and ua.approval and pending_bool:
-                subject = f"PENDING Trigger Web App {proposal_decision_model.id}"
-                message_type_text = f"HUMAN INTERVENTION REQUIRED! The trigger web service is unsure about the following event."
+                subject = f"PENDING TraceT Trigger {proposal_decision_model.id}"
+                message_type_text = f"HUMAN INTERVENTION REQUIRED! TraceT is unsure about the following event."
                 send_alert_type(ua.type, ua.address, subject, message_type_text, proposal_decision_model, telescopes, set_time_utc)
 
 def send_alert_type(alert_type, address, subject, message_type_text, proposal_decision_model, telescopes, set_time_utc):
@@ -396,13 +396,15 @@ def send_alert_type(alert_type, address, subject, message_type_text, proposal_de
     message_text = f"""{message_type_text}
 
 Event Details are:
+Detected by: {telescopes}
+Event Type:  {proposal_decision_model.event_group_id.source_type}
 Duration:    {proposal_decision_model.duration}
 RA:          {proposal_decision_model.ra_hms} hours
 Dec:         {proposal_decision_model.dec_dms} deg
 Error Rad:   {proposal_decision_model.pos_error} deg
-Detected by: {telescopes}
 Event observed (UTC): {proposal_decision_model.event_group_id.earliest_event_observed}
 Set time (UTC):       {set_time_utc}
+TraceT proposal:      {proposal_decision_model.proposal.proposal_id}
 
 Decision log:
 {proposal_decision_model.decision_reason}
@@ -424,7 +426,7 @@ https://mwa-trigger.duckdns.org/proposal_decision_details/{proposal_decision_mod
         # Send an SMS
         message = client.messages.create(
                     to=address,
-                    from_='+17755216557',
+                    from_=my_number,
                     body=message_text,
         )
     elif alert_type == 2:
@@ -432,7 +434,7 @@ https://mwa-trigger.duckdns.org/proposal_decision_details/{proposal_decision_mod
         call = client.calls.create(
                     url='http://demo.twilio.com/docs/voice.xml',
                     to=address,
-                    from_='+17755216557',
+                    from_=my_number,
         )
 
 

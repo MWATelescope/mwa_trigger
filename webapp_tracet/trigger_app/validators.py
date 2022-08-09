@@ -130,6 +130,18 @@ def mwa_freqspecs(input_spec, numchannels=24, separator=";"):
     return freqs
 
 
+def mwa_horizon_limit(horizon_limit):
+    """Check user selected a horizon limit that won't be rejected by the MWA backend.
+
+    Parameters
+    ----------
+    horizon_limit : `float`
+        The selected horizion limit in degrees.
+    """
+    if horizon_limit < 10:
+        raise forms.ValidationError(gettext(f"Horizon limit error: The horizion limit must be over 10 degrees or the MWA back end will reject it."))
+
+
 def atca_freq_bands(min_freq, max_freq, freq, field_name):
     """Check the users picked frequencies within the bandwidth of the reciever
 
