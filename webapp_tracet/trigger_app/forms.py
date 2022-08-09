@@ -12,6 +12,7 @@ from .validators import atca_proposal_id, atca_freq_bands, mwa_proposal_id, mwa_
 
 account_sid = os.environ.get('TWILIO_ACCOUNT_SID', None)
 auth_token = os.environ.get('TWILIO_AUTH_TOKEN', None)
+my_number = os.environ.get('TWILIO_PHONE_NUMBER', None)
 
 # creating a form
 class UserAlertForm(forms.ModelForm):
@@ -22,7 +23,7 @@ class UserAlertForm(forms.ModelForm):
             try:
                 message = client.messages.create(
                         to=self.cleaned_data['address'],
-                        from_='+17755216557',
+                        from_=my_number,
                         body="This is a test text message from TraceT",
                 )
                 print(f"MESAGESTART{message}MESSGAEEND")

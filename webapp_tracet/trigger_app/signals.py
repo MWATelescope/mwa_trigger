@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 account_sid = os.environ.get('TWILIO_ACCOUNT_SID', None)
 auth_token = os.environ.get('TWILIO_AUTH_TOKEN', None)
+my_number = os.environ.get('TWILIO_PHONE_NUMBER', None)
 
 
 @receiver(post_save, sender=Event)
@@ -425,7 +426,7 @@ https://mwa-trigger.duckdns.org/proposal_decision_details/{proposal_decision_mod
         # Send an SMS
         message = client.messages.create(
                     to=address,
-                    from_='+17755216557',
+                    from_=my_number,
                     body=message_text,
         )
     elif alert_type == 2:
@@ -433,7 +434,7 @@ https://mwa-trigger.duckdns.org/proposal_decision_details/{proposal_decision_mod
         call = client.calls.create(
                     url='http://demo.twilio.com/docs/voice.xml',
                     to=address,
-                    from_='+17755216557',
+                    from_=my_number,
         )
 
 
