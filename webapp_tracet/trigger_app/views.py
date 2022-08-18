@@ -149,7 +149,7 @@ def grab_decisions_for_event_groups(event_groups):
         proposal_decision_id_list.append(decision_id_list)
 
     # zip into something that you can iterate over in the html
-    return list(zip(event_groups, telescope_list, source_name_list, proposal_decision_list, proposal_decision_id_list))
+    return list(zip(event_groups, telescope_list, source_name_list, proposal_decision_list, proposal_decision_id_list)), event_groups
 
 class EventGroupFilter(django_filters.FilterSet):
     class Meta:
@@ -163,17 +163,18 @@ def EventGroupList(request):
 
     prop_settings = models.ProposalSettings.objects.all()
 
-    recent_triggers_info = grab_decisions_for_event_groups(event_group_ids)
-
     # Paginate
     page = request.GET.get('page', 1)
     # zip the trigger event and the tevent_telescope_list together so I can loop over both in the html
-    paginator = Paginator(recent_triggers_info, 100)
+    paginator = Paginator(event_group_ids, 100)
     try:
-        object_list = paginator.page(page)
+        event_group_ids_paged = paginator.page(page)
     except InvalidPage:
-        object_list = paginator.page(1)
-    return render(request, 'trigger_app/event_group_list.html', {'filter': f, 'page_obj':object_list, 'settings':prop_settings})
+        event_group_ids_paged = paginator.page(1)
+
+    recent_triggers_info, page_obj = grab_decisions_for_event_groups(event_group_ids_paged)
+
+    return render(request, 'trigger_app/event_group_list.html', {'filter': f, 'page_obj': page_obj, "trigger_info":recent_triggers_info, 'settings':prop_settings})
 
 
 class CometLogList(ListView):
@@ -191,7 +192,7 @@ def home_page(request):
 
     # Filter out ignored event groups and show only the 5 most recent
     recent_event_groups = models.EventGroup.objects.filter(ignored=False)[:5]
-    recent_event_group_info = grab_decisions_for_event_groups(recent_event_groups)
+    recent_event_group_info, _ = grab_decisions_for_event_groups(recent_event_groups)
 
     context = {
         'twistd_comet_status': comet_status,
