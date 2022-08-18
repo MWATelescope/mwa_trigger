@@ -396,6 +396,7 @@ def send_alert_type(alert_type, address, subject, message_type_text, proposal_de
     message_text = f"""{message_type_text}
 
 Event Details are:
+TraceT proposal:      {proposal_decision_model.proposal.proposal_id}
 Detected by: {telescopes}
 Event Type:  {proposal_decision_model.event_group_id.source_type}
 Duration:    {proposal_decision_model.duration}
@@ -404,7 +405,6 @@ Dec:         {proposal_decision_model.dec_dms} deg
 Error Rad:   {proposal_decision_model.pos_error} deg
 Event observed (UTC): {proposal_decision_model.event_group_id.earliest_event_observed}
 Set time (UTC):       {set_time_utc}
-TraceT proposal:      {proposal_decision_model.proposal.proposal_id}
 
 Decision log:
 {proposal_decision_model.decision_reason}
