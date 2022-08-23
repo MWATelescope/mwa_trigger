@@ -314,11 +314,12 @@ class parsed_VOEvent:
             # use defaults
             self.trig_pairs = [
                 "SWIFT_BAT_GRB_Pos",
-                "SWIFT_BAT_QuickLook_Pos",
-                "SWIFT_FOM_Obs",
                 "SWIFT_XRT_Pos",
                 "SWIFT_UVOT_Pos",
-                "SWIFT_SC_Slew",
+                # Ignoring the below as they don't give additional information
+                # "SWIFT_BAT_QuickLook_Pos",
+                # "SWIFT_SC_Slew",
+                # "SWIFT_FOM_Obs",
                 "Fermi_GBM_Flt_Pos",
                 "Fermi_GBM_Gnd_Pos",
                 "Fermi_GBM_Fin_Pos",
