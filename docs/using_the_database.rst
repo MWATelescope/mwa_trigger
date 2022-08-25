@@ -4,7 +4,7 @@ Using the database
 
 Uploading a VOEvent
 ------------------------
-You can use the `testing <https://mwa-trigger.duckdns.org/test_upload_xml/>`_ page of TraceT to upload a VOEvent XML file.
+You can use the `testing <https://tracet.duckdns.org/test_upload_xml/>`_ page of TraceT to upload a VOEvent XML file.
 This can be used to test the web app (see if tracet behaves the way you expect)
 or to trigger an observation (often due to something going wrong and your want to manually trigger an observation).
 

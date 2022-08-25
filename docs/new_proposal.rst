@@ -14,7 +14,7 @@ Step 1: Creating the Proposal
 -----------------------------
 
 Admin users can create and edit proposals in the
-`Edit Proposal Settings <https://mwa-trigger.duckdns.org/proposal_create/>`_
+`Edit Proposal Settings <https://tracet.duckdns.org/proposal_create/>`_
 page. Each item has a description which should be sufficient to set up your proposal.
 
 
@@ -34,14 +34,14 @@ By default, all users will have permission to receive trigger alerts and
 will not have permission to receive pending and debug alerts for all
 proposals. As an admin, you can give users you trust permission to receive debug
 and pending alerts and decide if a VOEvent should be triggered on or not. Use the
-`Alert Pemission <https://mwa-trigger.duckdns.org/admin/trigger_app/alertpermission/>`_
+`Alert Pemission <https://tracet.duckdns.org/admin/trigger_app/alertpermission/>`_
 page to edit these permissions.
 
 Step 4: Notify Users to Update their Alerts
 -------------------------------------------
 All users have proposal specific alert settings, so to receive an alert for
 your proposal, all users must update their alerts on the
-`User Alert Control  <https://mwa-trigger.duckdns.org/user_alert_status/>`_ page.
+`User Alert Control  <https://tracet.duckdns.org/user_alert_status/>`_ page.
 Users can set multiple alert types per proposal (e.g. email and SMS) and
 per alert type (trigger, pending and debug).
 It is recommended that users set a phone call alert type for pending alerts
