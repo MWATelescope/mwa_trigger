@@ -117,6 +117,9 @@ def ProposalDecisionList(request):
         # the page number is not an integer (PageNotAnInteger exception)
         # return the first page
         ProposalDecision = paginator.page(1)
+
+    strip_time_stamp(ProposalDecision)
+
     return render(request, 'trigger_app/proposal_decision_list.html', {'filter': f, "page_obj":ProposalDecision, "poserr_unit":poserr_unit})
 
 
@@ -265,6 +268,15 @@ def PossibleEventAssociation_details(request, tid):
     return render(request, 'trigger_app/possible_event_association_details.html', context)
 
 
+def strip_time_stamp(prop_decs):
+    for prop_dec in prop_decs:
+        prop_dec_lines = prop_dec.decision_reason.split("\n")
+        stripped_lines = []
+        for line in prop_dec_lines:
+            stripped_lines.append(line[28:])
+        prop_dec.decision_reason = "\n".join(stripped_lines)
+
+
 def EventGroup_details(request, tid):
     event_group = models.EventGroup.objects.get(id=tid)
 
@@ -275,10 +287,11 @@ def EventGroup_details(request, tid):
     # list all prop decisions
     prop_decs = models.ProposalDecision.objects.filter(event_group_id=event_group)
 
-    # Grab MWA obs if the exist
+    # Grab obs if the exist
     obs = []
     for prop_dec in prop_decs:
         obs += models.Observations.objects.filter(proposal_decision_id=prop_dec)
+    strip_time_stamp(prop_decs)
 
     # Get position error units
     poserr_unit = request.GET.get('poserr_unit', 'deg')
