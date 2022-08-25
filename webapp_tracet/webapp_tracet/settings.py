@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'www.mwa-trigger.duckdns.org', 'mwa-trigger.duckdns.org', '146.118.70.58']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'www.mwa-trigger.duckdns.org', 'mwa-trigger.duckdns.org', 'www.tracet.duckdns.org', 'tracet.duckdns.org', '146.118.70.58']
 
 # Remote broadcasters we subscribe to for VOEvents
 VOEVENT_REMOTES = ["voevent.4pisky.org"]
