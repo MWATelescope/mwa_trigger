@@ -64,7 +64,7 @@ def group_trigger(sender, instance, **kwargs):
         for prop_dec in proposal_decisions:
             if prop_dec.decision == "C":
                 # Previous observation canceled so assume no new observations should be triggered
-                prop_dec.decision_reason = f"{prop_dec.decision_reason}Previous observation canceled so not observing Event ID {instance.id}.\n "
+                prop_dec.decision_reason = f"{prop_dec.decision_reason}{datetime.datetime.utcnow()}: Event ID {instance.id:7d}: Previous observation canceled so not observing . \n"
                 prop_dec.save()
             elif prop_dec.decision == "I" or prop_dec.decision == "E":
                 # Previous events were ignored, check if this new one is up to our standards
@@ -79,7 +79,7 @@ def group_trigger(sender, instance, **kwargs):
                 proposal_worth_observing(
                     prop_dec,
                     instance,
-                    decision_reason_log=f"{prop_dec.decision_reason}Checking new Event.\n ",
+                    decision_reason_log=f"{prop_dec.decision_reason}{datetime.datetime.utcnow()}: Event ID {instance.id:7d}: Checking new Event. \n",
                 )
             elif prop_dec.decision == "T":
                 # Check new event position is further away than the repointing limit
@@ -95,11 +95,11 @@ def group_trigger(sender, instance, **kwargs):
                     if instance.pos_error != 0.:
                         # Don't update pos_error if zero, assume it's a null
                         prop_dec.pos_error = instance.pos_error
-                    repoint_message = f"Repointing because seperation ({event_sep} deg) is greater than the repointing limit ({prop_dec.proposal.repointing_limit} deg)."
+                    repoint_message = f"{datetime.datetime.utcnow()}: Event ID {instance.id:7d}: Repointing because seperation ({event_sep:.4f} deg) is greater than the repointing limit ({prop_dec.proposal.repointing_limit:.4f} deg)."
                     # Trigger observation
                     decision, decision_reason_log = trigger_observation(
                         prop_dec,
-                        f"{prop_dec.decision_reason}{repoint_message}\n ",
+                        f"{prop_dec.decision_reason}{repoint_message} \n",
                         reason=repoint_message,
                     )
                     if decision == 'E':
@@ -233,10 +233,10 @@ def proposal_worth_observing(
     # Check if event has an accurate enough position
     if prop_dec.pos_error == 0.0:
         # Ignore the inaccurate event
-        decision_reason_log += f"The Events positions uncertainty is 0.0 which is likely an error so not observing.\n "
+        decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {voevent.id:7d}: The Events positions uncertainty is 0.0 which is likely an error so not observing. \n"
     elif voevent.pos_error > prop_dec.proposal.maximum_position_uncertainty:
         # Ignore the inaccurate event
-        decision_reason_log += f"The Events positions uncertainty ({voevent.pos_error} deg) is greater than {prop_dec.proposal.maximum_position_uncertainty} so not observing.\n "
+        decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {voevent.id:7d}: The Events positions uncertainty ({voevent.pos_error:.4f} deg) is greater than {prop_dec.proposal.maximum_position_uncertainty:.4f} so not observing. \n"
     else:
         # Continue to next test
 
@@ -271,7 +271,7 @@ def proposal_worth_observing(
             elif prop_dec.proposal.source_type == "FS" and voevent.source_type == "FS":
                 # This proposal wants to observe FSs and there is no FS logic so observe
                 trigger_bool = True
-                decision_reason_log += f"Triggering on Flare Star {voevent.source_name}.\n "
+                decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {voevent.id:7d}: Triggering on Flare Star {voevent.source_name}. \n"
                 proj_source_bool = True
             elif prop_dec.proposal.source_type == "NU" and voevent.source_type == "NU":
                 # This proposal wants to observe GRBs so check if it is worth observing
@@ -290,10 +290,10 @@ def proposal_worth_observing(
 
             if not proj_source_bool:
                 # Proposal does not observe this type of source so update message
-                decision_reason_log += f"This proposal does not observe {voevent.get_source_type_display()}s.\n "
+                decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {voevent.id:7d}: This proposal does not observe {voevent.get_source_type_display()}s. \n"
         else:
             # Proposal does not observe event from this telescope so update message
-            decision_reason_log += f"This proposal does not trigger on events from {voevent.telescope}.\n "
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {voevent.id:7d}: This proposal does not trigger on events from {voevent.telescope}. \n"
 
     if trigger_bool:
         # Check if you can observe and if so send off the observation
@@ -396,6 +396,7 @@ def send_alert_type(alert_type, address, subject, message_type_text, proposal_de
     message_text = f"""{message_type_text}
 
 Event Details are:
+TraceT proposal:      {proposal_decision_model.proposal.proposal_id}
 Detected by: {telescopes}
 Event Type:  {proposal_decision_model.event_group_id.source_type}
 Duration:    {proposal_decision_model.duration}
@@ -404,7 +405,6 @@ Dec:         {proposal_decision_model.dec_dms} deg
 Error Rad:   {proposal_decision_model.pos_error} deg
 Event observed (UTC): {proposal_decision_model.event_group_id.earliest_event_observed}
 Set time (UTC):       {set_time_utc}
-TraceT proposal:      {proposal_decision_model.proposal.proposal_id}
 
 Decision log:
 {proposal_decision_model.decision_reason}

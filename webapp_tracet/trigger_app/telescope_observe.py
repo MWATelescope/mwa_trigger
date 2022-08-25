@@ -62,15 +62,15 @@ def trigger_observation(
         alt_end = obs_source_altaz_end.alt.deg
         logger.debug(f"Triggered observation at an elevation of {alt_beg} to elevation of {alt_end}")
         if alt_beg < proposal_decision_model.proposal.mwa_horizon_limit and alt_end < proposal_decision_model.proposal.mwa_horizon_limit:
-            horizon_message = f"Not triggering due to horizon limit: alt_beg {alt_beg} < {proposal_decision_model.proposal.mwa_horizon_limit} and alt_end {alt_end} < {proposal_decision_model.proposal.mwa_horizon_limit}. "
+            horizon_message = f"Not triggering due to horizon limit: alt_beg {alt_beg:.4f} < {proposal_decision_model.proposal.mwa_horizon_limit:.4f} and alt_end {alt_end:.4f} < {proposal_decision_model.proposal.mwa_horizon_limit:.4f}. "
             logger.debug(horizon_message)
             return 'I', decision_reason_log + horizon_message
         elif alt_beg < proposal_decision_model.proposal.mwa_horizon_limit:
             # Warn them in the log
-            decision_reason_log += f"Warning: The source is below the horizion limit at the start of the observation alt_beg {alt_beg}. \n"
+            decision_reason_log += f"Warning: The source is below the horizion limit at the start of the observation alt_beg {alt_beg:.4f}. \n"
         elif alt_end < proposal_decision_model.proposal.mwa_horizon_limit:
             # Warn them in the log
-            decision_reason_log += f"Warning: The source will set below the horizion limit by the end of the observation alt_end {alt_end}. \n"
+            decision_reason_log += f"Warning: The source will set below the horizion limit by the end of the observation alt_end {alt_end:.4f}. \n"
 
     # above the horizon so send off telescope specific set ups
     if proposal_decision_model.proposal.telescope.name.startswith("MWA"):
