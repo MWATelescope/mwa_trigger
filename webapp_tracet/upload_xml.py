@@ -16,7 +16,7 @@ def write_and_upload(xml_string):
     session.auth = (os.environ['UPLOAD_USER'], os.environ['UPLOAD_PASSWORD'])
     SYSTEM_ENV = os.environ.get('SYSTEM_ENV', None)
     if SYSTEM_ENV == 'PRODUCTION' or SYSTEM_ENV == 'STAGING':
-        url = 'https://mwa-trigger.duckdns.org/event_create/'
+        url = 'https://tracet.duckdns.org/event_create/'
     else:
         url = 'http://127.0.0.1:8000/event_create/'
     data = {
