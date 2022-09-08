@@ -64,7 +64,7 @@ def group_trigger(sender, instance, **kwargs):
         for prop_dec in proposal_decisions:
             if prop_dec.decision == "C":
                 # Previous observation canceled so assume no new observations should be triggered
-                prop_dec.decision_reason = f"{prop_dec.decision_reason}{datetime.datetime.utcnow()}: Event ID {instance.id:7d}: Previous observation canceled so not observing . \n"
+                prop_dec.decision_reason += f"{datetime.datetime.utcnow()}: Event ID {instance.id}: Previous observation canceled so not observing . \n"
                 prop_dec.save()
             elif prop_dec.decision == "I" or prop_dec.decision == "E":
                 # Previous events were ignored, check if this new one is up to our standards
@@ -76,10 +76,10 @@ def group_trigger(sender, instance, **kwargs):
                 if instance.pos_error != 0.:
                     # Don't update pos_error if zero, assume it's a null
                     prop_dec.pos_error = instance.pos_error
+                    prop_dec.decision_reason = f"{prop_dec.decision_reason}{datetime.datetime.utcnow()}: Event ID {instance.id}: Checking new Event. \n",
                 proposal_worth_observing(
                     prop_dec,
                     instance,
-                    decision_reason_log=f"{prop_dec.decision_reason}{datetime.datetime.utcnow()}: Event ID {instance.id:7d}: Checking new Event. \n",
                 )
             elif prop_dec.decision == "T":
                 # Check new event position is further away than the repointing limit
@@ -95,12 +95,13 @@ def group_trigger(sender, instance, **kwargs):
                     if instance.pos_error != 0.:
                         # Don't update pos_error if zero, assume it's a null
                         prop_dec.pos_error = instance.pos_error
-                    repoint_message = f"{datetime.datetime.utcnow()}: Event ID {instance.id:7d}: Repointing because seperation ({event_sep:.4f} deg) is greater than the repointing limit ({prop_dec.proposal.repointing_limit:.4f} deg)."
+                    repoint_message = f"{datetime.datetime.utcnow()}: Event ID {instance.id}: Repointing because seperation ({event_sep:.4f} deg) is greater than the repointing limit ({prop_dec.proposal.repointing_limit:.4f} deg)."
                     # Trigger observation
                     decision, decision_reason_log = trigger_observation(
                         prop_dec,
                         f"{prop_dec.decision_reason}{repoint_message} \n",
                         reason=repoint_message,
+                        event_id=instance.id,
                     )
                     if decision == 'E':
                         # Error observing so send off debug
@@ -135,8 +136,7 @@ def group_trigger(sender, instance, **kwargs):
         for prop_set in proposal_settings:
             # Create a ProposalDecision object to record what each proposal does
             prop_dec = ProposalDecision.objects.create(
-                #decision=decision,
-                #decision_reason=decision_reason_log,
+                decision_reason=f"{datetime.datetime.utcnow()}: Event ID {instance.id}: Beginning event analysis. \n",
                 proposal=prop_set,
                 event_group_id=event_group,
                 trig_id=instance.trig_id,
@@ -210,7 +210,6 @@ def group_trigger(sender, instance, **kwargs):
 def proposal_worth_observing(
         prop_dec,
         voevent,
-        decision_reason_log="",
         observation_reason="First observation."
     ):
     """For a proposal sees is this voevent is worth observing. If it is will trigger an observation and send off the relevant alerts.
@@ -221,22 +220,21 @@ def proposal_worth_observing(
         The Django ProposalDecision model object.
     voevent : `django.db.models.Model`
         The Django Event model object.
-    decision_reason_log : `str`, optional
-        A log of all the decisions made so far so a user can understand why the source was(n't) observed. Default: "".
     observation_reason : `str`, optional
         The reason for this observation. The default is "First Observation" but other potential reasons are "Repointing".
     """
 
     # Defaults if not worth observing
     trigger_bool = debug_bool = pending_bool = False
+    decision_reason_log = str(prop_dec.decision_reason)
 
     # Check if event has an accurate enough position
     if prop_dec.pos_error == 0.0:
         # Ignore the inaccurate event
-        decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {voevent.id:7d}: The Events positions uncertainty is 0.0 which is likely an error so not observing. \n"
+        decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {voevent.id}: The Events positions uncertainty is 0.0 which is likely an error so not observing. \n"
     elif voevent.pos_error > prop_dec.proposal.maximum_position_uncertainty:
         # Ignore the inaccurate event
-        decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {voevent.id:7d}: The Events positions uncertainty ({voevent.pos_error:.4f} deg) is greater than {prop_dec.proposal.maximum_position_uncertainty:.4f} so not observing. \n"
+        decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {voevent.id}: The Events positions uncertainty ({voevent.pos_error:.4f} deg) is greater than {prop_dec.proposal.maximum_position_uncertainty:.4f} so not observing. \n"
     else:
         # Continue to next test
 
@@ -265,13 +263,14 @@ def proposal_worth_observing(
                     swift_min_rate_signif=prop_dec.proposal.swift_rate_signf,
                     # Other
                     decision_reason_log=decision_reason_log,
+                    event_id=voevent.id,
                 )
                 proj_source_bool = True
 
             elif prop_dec.proposal.source_type == "FS" and voevent.source_type == "FS":
                 # This proposal wants to observe FSs and there is no FS logic so observe
                 trigger_bool = True
-                decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {voevent.id:7d}: Triggering on Flare Star {voevent.source_name}. \n"
+                decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {voevent.id}: Triggering on Flare Star {voevent.source_name}. \n"
                 proj_source_bool = True
             elif prop_dec.proposal.source_type == "NU" and voevent.source_type == "NU":
                 # This proposal wants to observe GRBs so check if it is worth observing
@@ -283,6 +282,7 @@ def proposal_worth_observing(
                     antares_min_ranking=prop_dec.proposal.antares_min_ranking,
                     # Other
                     decision_reason_log=decision_reason_log,
+                    event_id=voevent.id,
                 )
                 proj_source_bool = True
 
@@ -290,10 +290,10 @@ def proposal_worth_observing(
 
             if not proj_source_bool:
                 # Proposal does not observe this type of source so update message
-                decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {voevent.id:7d}: This proposal does not observe {voevent.get_source_type_display()}s. \n"
+                decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {voevent.id}: This proposal does not observe {voevent.get_source_type_display()}s. \n"
         else:
             # Proposal does not observe event from this telescope so update message
-            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {voevent.id:7d}: This proposal does not trigger on events from {voevent.telescope}. \n"
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {voevent.id}: This proposal does not trigger on events from {voevent.telescope}. \n"
 
     if trigger_bool:
         # Check if you can observe and if so send off the observation
@@ -301,6 +301,7 @@ def proposal_worth_observing(
             prop_dec,
             decision_reason_log,
             reason=observation_reason,
+            event_id=voevent.id,
         )
         if decision == 'E':
             # Error observing so send off debug

@@ -1,8 +1,7 @@
-import os
 import astropy.units as u
 from astropy.coordinates import SkyCoord, EarthLocation, AltAz
 from astropy.time import Time
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 import atca_rapid_response_api as arrApi
 
@@ -16,6 +15,7 @@ def trigger_observation(
         proposal_decision_model,
         decision_reason_log,
         reason="First Observation",
+        event_id=None,
     ):
     """Perform any comon observation checks, send off observations with the telescope's function then record observations in the Observations model.
 
@@ -27,6 +27,8 @@ def trigger_observation(
         A log of all the decisions made so far so a user can understand why the source was(n't) observed.
     reason : `str`, optional
         The reason for this observation. The default is "First Observation" but other potential reasons are "Repointing".
+    event_id : `int`, optional
+        An Event ID that will be recorded in the decision_reason_log. Default: None.
 
     Returns
     -------
@@ -62,17 +64,18 @@ def trigger_observation(
         alt_end = obs_source_altaz_end.alt.deg
         logger.debug(f"Triggered observation at an elevation of {alt_beg} to elevation of {alt_end}")
         if alt_beg < proposal_decision_model.proposal.mwa_horizon_limit and alt_end < proposal_decision_model.proposal.mwa_horizon_limit:
-            horizon_message = f"Not triggering due to horizon limit: alt_beg {alt_beg:.4f} < {proposal_decision_model.proposal.mwa_horizon_limit:.4f} and alt_end {alt_end:.4f} < {proposal_decision_model.proposal.mwa_horizon_limit:.4f}. "
+            horizon_message = f"{datetime.utcnow()}: Event ID {event_id}: Not triggering due to horizon limit: alt_beg {alt_beg:.4f} < {proposal_decision_model.proposal.mwa_horizon_limit:.4f} and alt_end {alt_end:.4f} < {proposal_decision_model.proposal.mwa_horizon_limit:.4f}. "
             logger.debug(horizon_message)
             return 'I', decision_reason_log + horizon_message
         elif alt_beg < proposal_decision_model.proposal.mwa_horizon_limit:
             # Warn them in the log
-            decision_reason_log += f"Warning: The source is below the horizion limit at the start of the observation alt_beg {alt_beg:.4f}. \n"
+            decision_reason_log += f"{datetime.utcnow()}: Event ID {event_id}: Warning: The source is below the horizion limit at the start of the observation alt_beg {alt_beg:.4f}. \n"
         elif alt_end < proposal_decision_model.proposal.mwa_horizon_limit:
             # Warn them in the log
-            decision_reason_log += f"Warning: The source will set below the horizion limit by the end of the observation alt_end {alt_end:.4f}. \n"
+            decision_reason_log += f"{datetime.utcnow()}: Event ID {event_id}: Warning: The source will set below the horizion limit by the end of the observation alt_end {alt_end:.4f}. \n"
 
     # above the horizon so send off telescope specific set ups
+    decision_reason_log += f"{datetime.utcnow()}: Event ID {event_id}: Above horizon so attempting to observer with {proposal_decision_model.proposal.telescope.name}. \n"
     if proposal_decision_model.proposal.telescope.name.startswith("MWA"):
         # If telescope ends in VCS then this proposal is for observing in VCS mode
         vcsmode = proposal_decision_model.proposal.telescope.name.endswith("VCS")
@@ -93,6 +96,7 @@ def trigger_observation(
             decision_reason_log,
             obsname,
             vcsmode=vcsmode,
+            event_id=event_id,
         )
         for obsid in obsids:
             # Create new obsid model
@@ -110,6 +114,7 @@ def trigger_observation(
             proposal_decision_model,
             decision_reason_log,
             obsname,
+            event_id=event_id,
         )
         for obsid in obsids:
             # Create new obsid model
@@ -128,6 +133,7 @@ def trigger_mwa_observation(
         decision_reason_log,
         obsname,
         vcsmode=False,
+        event_id=None,
     ):
     """Check if the MWA can observe then send it off the observation.
 
@@ -141,6 +147,8 @@ def trigger_mwa_observation(
         The name of the observation.
     vcsmode : `boolean`, optional
         True to observe in VCS mode and False to observe in correlator/imaging mode. Default: False
+    event_id : `int`, optional
+        An Event ID that will be recorded in the decision_reason_log. Default: None.
 
     Returns
     -------
@@ -175,12 +183,12 @@ def trigger_mwa_observation(
     logger.debug(f"result: {result}")
     # Check if succesful
     if result is None:
-        decision_reason_log += f"Web API error, possible server error.\n "
+        decision_reason_log += f"{datetime.utcnow()}: Event ID {event_id}: Web API error, possible server error.\n "
         return 'E', decision_reason_log, []
     if not result['success']:
         # Observation not succesful so record why
         for err_id in result['errors']:
-            decision_reason_log += f"{result['errors'][err_id]}.\n "
+            decision_reason_log += f"{datetime.utcnow()}: Event ID {event_id}: {result['errors'][err_id]}.\n "
         # Return an error as the trigger status
         return 'E', decision_reason_log, []
 
@@ -207,6 +215,7 @@ def trigger_atca_observation(
         proposal_decision_model,
         decision_reason_log,
         obsname,
+        event_id=None,
     ):
     """Check if the ATCA telescope can observe, send it off the observation and return any errors.
 
@@ -218,6 +227,8 @@ def trigger_atca_observation(
         A log of all the decisions made so far so a user can understand why the source was(n't) observed.
     obsname : `str`
         The name of the observation.
+    event_id : `int`, optional
+        An Event ID that will be recorded in the decision_reason_log. Default: None.
 
     Returns
     -------
@@ -234,9 +245,9 @@ def trigger_atca_observation(
 
     # Check if source is in dec ranges the ATCA can not observe
     if proposal_decision_model.dec > 15.:
-        return 'I', decision_reason_log + "Source is above a declination of 15 degrees so ATCA can not observe it.\n ", []
+        return 'I', f"{decision_reason_log}{datetime.utcnow()}: Event ID {event_id}: Source is above a declination of 15 degrees so ATCA can not observe it.\n ", []
     elif -5. < proposal_decision_model.dec < 5.:
-        return 'I', decision_reason_log + "Source is within 5 degrees of the equator (which is riddled with satelite RFI) so ATCA will not observe.\n ", []
+        return 'I', f"{decision_reason_log}{datetime.utcnow()}: Event ID {event_id}: Source is within 5 degrees of the equator (which is riddled with satelite RFI) so ATCA will not observe.\n ", []
 
     # Not below horizon limit so observer
     logger.info(f"Triggering  ATCA at UTC time {Time.now()} ...")
@@ -298,7 +309,7 @@ def trigger_atca_observation(
         response = request.send()
     except arrApi.responseError as r:
         logger.error(f"ATCA return message: {r}")
-        decision_reason_log += f"ATCA return message: {r}\n "
+        decision_reason_log += f"{datetime.utcnow()}: Event ID {event_id}: ATCA return message: {r}\n "
         return 'E', decision_reason_log, []
 
     # # Check for errors
