@@ -79,11 +79,11 @@ class test_grb_group_01(TestCase):
         self.assertEqual(len(PossibleEventAssociation.objects.all()), 1)
 
     def test_mwa_proposal_decision(self):
-        print(f"\n\n!!!!!!!!!!!!!!\n{ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision_reason}\n!!!!!!!!!!!!!!!\n\n")
+        print(f"\n\ntest_grb_group_01 MWA proposal decison:\n{ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision_reason}\n\n")
         self.assertEqual(ProposalDecision.objects.all().filter(proposal__telescope__name='MWA_VCS').first().decision, 'T')
 
     def test_atca_proposal_decision(self):
-        print(f"\n\n!!!!!!!!!!!!!!\n{ProposalDecision.objects.all().filter(proposal__telescope__name='ATCA').first().decision_reason}\n!!!!!!!!!!!!!!!\n\n")
+        print(f"\n\ntest_grb_group_01 ATCA proposal decison:\n{ProposalDecision.objects.all().filter(proposal__telescope__name='ATCA').first().decision_reason}\n\n")
         self.assertEqual(ProposalDecision.objects.all().filter(proposal__telescope__name='ATCA').first().decision, 'T')
 
 
@@ -121,11 +121,11 @@ class test_grb_group_02(TestCase):
 
     def test_mwa_proposal_decision(self):
         print(ProposalDecision.objects.all())
-        print(f"\n\n!!!!!!!!!!!!!!\n{ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision_reason}\n!!!!!!!!!!!!!!!\n\n")
+        print(f"\n\ntest_grb_group_02 MWA proposal decison:\n{ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision_reason}\n\n")
         self.assertEqual(ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision, 'T')
 
     def test_atca_proposal_decision(self):
-        print(f"\n\n!!!!!!!!!!!!!!\n{ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision_reason}\n!!!!!!!!!!!!!!!\n\n")
+        print(f"\n\ntest_grb_group_02 ATCA proposal decison:\n{ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision_reason}\n\n")
         self.assertEqual(ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision, 'T')
 
 
@@ -162,6 +162,7 @@ class test_nu(TestCase):
 
     def test_proposal_decision(self):
         # Two proposals decisions made
+        print(f"\n\ntest_nu proposal decison:\n{ProposalDecision.objects.all().first().decision_reason}\n\n")
         self.assertEqual(len(ProposalDecision.objects.all()), 2)
         # Both triggered
         for prop_dec in ProposalDecision.objects.all():
@@ -199,7 +200,7 @@ class test_fs(TestCase):
 
     def test_proposal_decision(self):
         print(ProposalDecision.objects.all())
-        print(f"\n\n!!!!!!!!!!!!!!\n{ProposalDecision.objects.all().first().decision_reason}\n!!!!!!!!!!!!!!!\n\n")
+        print(f"\n\ntest_fs proposal decison:\n{ProposalDecision.objects.all().first().decision_reason}\n\n")
         self.assertEqual(ProposalDecision.objects.all().first().decision, 'T')
 
 
