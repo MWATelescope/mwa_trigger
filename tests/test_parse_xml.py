@@ -1,11 +1,10 @@
 """Tests the parse_xml.py script
 """
 import os
-from yaml import load, dump, Loader
+from yaml import load, Loader
 from numpy.testing import assert_equal
 
 from tracet.parse_xml import parsed_VOEvent
-from tracet.trigger_logic import worth_observing_grb, worth_observing_nu
 import voeventparse
 
 import logging
