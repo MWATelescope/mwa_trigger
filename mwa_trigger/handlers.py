@@ -194,6 +194,7 @@ class TriggerEvent(object):
                               unit=(astropy.units.deg, astropy.units.deg))
         obs_source.location = MWAPOS
         t = Time.now()
+        t.delta_ut1_utc = 0   # Prevent automatic IERS data download
         obs_source.obstime = t
 
         # figure out the altitude of the target

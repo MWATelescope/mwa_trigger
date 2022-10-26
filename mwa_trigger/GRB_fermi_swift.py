@@ -36,6 +36,7 @@ SWIFT_SHORT_VCS_TIME = 15   # How many minutes to request if this is a VCS trigg
 
 PROJECT_ID = 'G0055'
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
+PRETEND = True   # If True, override the 'pretend' flag passed, and never actually schedule observations
 
 # Email these addresses when we trigger on an event
 NOTIFY_LIST = ["Paul.Hancock@curtin.edu.au", "Gemma.Anderson@curtin.edu.au", "Andrew.Williams@curtin.edu.au", "jun.tian@postgrad.curtin.edu.au"]
@@ -100,7 +101,7 @@ def processevent(event='', pretend=True):
     isgrb = is_grb(v)
     log.debug("GRB? {0}".format(isgrb))
     if isgrb:
-        handle_grb(v, pretend=pretend)
+        handle_grb(v, pretend=(pretend or PRETEND))
 
     log.info("Finished.")
     return isgrb     # True if we're handling this event, False if we're rejecting it
@@ -469,7 +470,7 @@ def handle_grb(v, pretend=False):
     result = grb.trigger_observation(ttype=this_trig_type,
                                      obsname=trig_id,
                                      time_min=req_time_min,
-                                     pretend=pretend,
+                                     pretend=(pretend or PRETEND),
                                      project_id=PROJECT_ID,
                                      secure_key=SECURE_KEY,
                                      email_tolist=NOTIFY_LIST,
