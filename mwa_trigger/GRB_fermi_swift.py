@@ -36,7 +36,7 @@ SWIFT_SHORT_VCS_TIME = 15   # How many minutes to request if this is a VCS trigg
 
 PROJECT_ID = 'G0055'
 SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
-PRETEND = True   # If True, override the 'pretend' flag passed, and never actually schedule observations
+PRETEND = False   # If True, override the 'pretend' flag passed, and never actually schedule observations
 
 # Email these addresses when we trigger on an event
 NOTIFY_LIST = ["Paul.Hancock@curtin.edu.au", "Gemma.Anderson@curtin.edu.au", "Andrew.Williams@curtin.edu.au", "jun.tian@postgrad.curtin.edu.au"]
