@@ -1,0 +1,41 @@
+{
+  "errors": {},
+  "params":
+    {
+      "pretty": 0,
+      "project_id": "T001",
+      "group_id": None,
+      "secure_key": "TestingOnly",
+      "ralist": [336.6237324680802],
+      "declist": [-26.816830129551757],
+      "altlist": None,
+      "azlist": None,
+      "sourcelist": None,
+      "freqspecs": ["121,24"],
+      "creator": "VOEvent_Auto_Trigger",
+      "obsname": "SWIFT_1093742",
+      "nobs": 1,
+      "exptime": 800,
+      "calexptime": 300,
+      "freqres": 40,
+      "inttime": 0.5,
+      "calname": "CenA",
+      "avoidsun": True,
+      "pretend": True,
+    },
+  "clear":
+    {
+      "retcode": 0,
+      "command": "/home/mwa/MandC/obssched/clear_schedule.py --stoptime=++1116 --force",
+      "stdout": "Pretending: command not run",
+      "stderr": "Pretending: command not run",
+    },
+  "schedule":
+    {
+      "commands": '/home/mwa/MandC/obssched/schedule_observation.py --starttime=1357456760 --stoptime=++800s --shifttime=800 --freq="121,24" --obsname="SWIFT_1093742" --creator="VOEvent_Auto_Trigger" --mode=MWAX_VCS --project=T001 --groupid=1357456760 --alt=80.348000 --az=45.000000 --verbose --ut ;\n/home/mwa/MandC/obssched/schedule_observation.py --starttime=1357457568 --stoptime=++300s --freq="121,24" --freqres=40 --inttime=0.5 --obsname="SWIFT_1093742 Cal: CenA at 121,24" --creator="VOEvent_Auto_Trigger" --project=T001 --groupid=1357456760 --calibration --calibrators=CenA --source="CenA" --verbose --ut',
+      "retcode": 0,
+      "stdout": "Pretending: commands not run",
+      "stderr": "Pretending: commands not run",
+    },
+  "success": True,
+}

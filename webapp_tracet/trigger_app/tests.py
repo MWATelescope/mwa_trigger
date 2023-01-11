@@ -2,6 +2,7 @@ from django.test import TestCase
 from unittest.mock import patch
 
 from .models import EventGroup, Event, PossibleEventAssociation, ProposalDecision, Observations
+from yaml import load, Loader, safe_load
 
 from tracet.parse_xml import parsed_VOEvent
 import astropy.units as u
@@ -57,8 +58,14 @@ class test_grb_group_01(TestCase):
         "trigger_app/test_yamls/atca_grb_proposal_settings.yaml",
     ]
 
-    @patch('trigger_app.telescope_observe.trigger_mwa', return_value={'errors': {}, 'params': {'pretty': 0, 'project_id': 'T001', 'group_id': None, 'secure_key': 'TestingOnly', 'ralist': [336.6237324680802], 'declist': [-26.816830129551757], 'altlist': None, 'azlist': None, 'sourcelist': None, 'freqspecs': ['121,24'], 'creator': 'VOEvent_Auto_Trigger', 'obsname': 'SWIFT_1093742', 'nobs': 1, 'exptime': 800, 'calexptime': 300, 'freqres': 40, 'inttime': 0.5, 'calname': 'CenA', 'avoidsun': True, 'pretend': True}, 'clear': {'retcode': 0, 'command': '/home/mwa/MandC/obssched/clear_schedule.py --stoptime=++1116 --force', 'stdout': 'Pretending: command not run', 'stderr': 'Pretending: command not run'}, 'schedule': {'commands': '/home/mwa/MandC/obssched/schedule_observation.py --starttime=1357456760 --stoptime=++800s --shifttime=800 --freq="121,24" --obsname="SWIFT_1093742" --creator="VOEvent_Auto_Trigger" --mode=MWAX_VCS --project=T001 --groupid=1357456760 --alt=80.348000 --az=45.000000 --verbose --ut ;\n/home/mwa/MandC/obssched/schedule_observation.py --starttime=1357457568 --stoptime=++300s --freq="121,24" --freqres=40 --inttime=0.5 --obsname="SWIFT_1093742 Cal: CenA at 121,24" --creator="VOEvent_Auto_Trigger" --project=T001 --groupid=1357456760 --calibration --calibrators=CenA --source="CenA" --verbose --ut', 'retcode': 0, 'stdout': 'Pretending: commands not run', 'stderr': 'Pretending: commands not run'}, 'success': True})
-    @patch('atca_rapid_response_api.api.send', return_value={"id": "obsid", "authenticationToken": {"received": 'true', "verified": 'false'}, "overrideProject": {"code": 'null', "sufficientScore": 'false', "score": 0.0}, "scheduledProject": {"codes": [], "emails": [], "startTimes": [], "endTimes": []}, "schedule": {"received": 'false', "valid": 'false', "targetName": 'null'}, "observations": {"hoursRequested": 0, "maxSearchHours": 100, "hoursAllocated": 0, "hoursRequestedMinimum": 'null', "projectHoursRemaining": 0, "startDate": 'null', "endDate": 'null'}, "testMode": 'false', "cancel": 'false', "testing": {"noScoreLimit": 'false', "noTimeLimit": 'false', "limitTimeHours": 0, "CABBMode": "ca_2048_2048_2f"}, "id": "pv3nkiuruz0qk2lx11pp", "error": "Detected an expired token: Signature has expired."})
+    with open('trigger_app/test_yamls/trigger_mwa_test.yaml', 'r') as file:
+        trigger_mwa_test = safe_load(file)
+
+    with open('trigger_app/test_yamls/atca_test_api_response.yaml', 'r') as file:
+        atca_test_api_response = safe_load(file)
+
+    @patch('trigger_app.telescope_observe.trigger_mwa', return_value=trigger_mwa_test)
+    @patch('atca_rapid_response_api.api.send', return_value=atca_test_api_response)
     def setUp(self, fake_atca_api, fake_mwa_api):
         
         xml_paths = [
@@ -102,8 +109,14 @@ class test_grb_group_02(TestCase):
         "trigger_app/test_yamls/atca_grb_proposal_settings.yaml",
     ]
     
-    @patch('trigger_app.telescope_observe.trigger_mwa', return_value={'errors': {}, 'params': {'pretty': 0, 'project_id': 'T001', 'group_id': None, 'secure_key': 'TestingOnly', 'ralist': [336.6237324680802], 'declist': [-26.816830129551757], 'altlist': None, 'azlist': None, 'sourcelist': None, 'freqspecs': ['121,24'], 'creator': 'VOEvent_Auto_Trigger', 'obsname': 'SWIFT_1093742', 'nobs': 1, 'exptime': 800, 'calexptime': 300, 'freqres': 40, 'inttime': 0.5, 'calname': 'CenA', 'avoidsun': True, 'pretend': True}, 'clear': {'retcode': 0, 'command': '/home/mwa/MandC/obssched/clear_schedule.py --stoptime=++1116 --force', 'stdout': 'Pretending: command not run', 'stderr': 'Pretending: command not run'}, 'schedule': {'commands': '/home/mwa/MandC/obssched/schedule_observation.py --starttime=1357456760 --stoptime=++800s --shifttime=800 --freq="121,24" --obsname="SWIFT_1093742" --creator="VOEvent_Auto_Trigger" --mode=MWAX_VCS --project=T001 --groupid=1357456760 --alt=80.348000 --az=45.000000 --verbose --ut ;\n/home/mwa/MandC/obssched/schedule_observation.py --starttime=1357457568 --stoptime=++300s --freq="121,24" --freqres=40 --inttime=0.5 --obsname="SWIFT_1093742 Cal: CenA at 121,24" --creator="VOEvent_Auto_Trigger" --project=T001 --groupid=1357456760 --calibration --calibrators=CenA --source="CenA" --verbose --ut', 'retcode': 0, 'stdout': 'Pretending: commands not run', 'stderr': 'Pretending: commands not run'}, 'success': True})
-    @patch('atca_rapid_response_api.api.send', return_value={"id": "obsid", "authenticationToken": {"received": 'true', "verified": 'false'}, "overrideProject": {"code": 'null', "sufficientScore": 'false', "score": 0.0}, "scheduledProject": {"codes": [], "emails": [], "startTimes": [], "endTimes": []}, "schedule": {"received": 'false', "valid": 'false', "targetName": 'null'}, "observations": {"hoursRequested": 0, "maxSearchHours": 100, "hoursAllocated": 0, "hoursRequestedMinimum": 'null', "projectHoursRemaining": 0, "startDate": 'null', "endDate": 'null'}, "testMode": 'false', "cancel": 'false', "testing": {"noScoreLimit": 'false', "noTimeLimit": 'false', "limitTimeHours": 0, "CABBMode": "ca_2048_2048_2f"}, "id": "pv3nkiuruz0qk2lx11pp", "error": "Detected an expired token: Signature has expired."})
+    with open('trigger_app/test_yamls/trigger_mwa_test.yaml', 'r') as file:
+        trigger_mwa_test = safe_load(file)
+
+    with open('trigger_app/test_yamls/atca_test_api_response.yaml', 'r') as file:
+        atca_test_api_response = safe_load(file)
+
+    @patch('trigger_app.telescope_observe.trigger_mwa', return_value=trigger_mwa_test)
+    @patch('atca_rapid_response_api.api.send', return_value=atca_test_api_response)
     def setUp(self, fake_atca_api, fake_mwa_api):
         xml_paths = [
             "../tests/test_events/group_02_SWIFT_01_BAT_GRB_Pos.xml",
@@ -145,8 +158,15 @@ class test_nu(TestCase):
         "default_data.yaml",
         "trigger_app/test_yamls/mwa_nu_proposal_settings.yaml",
     ]
-    @patch('trigger_app.telescope_observe.trigger_mwa', return_value={'errors': {}, 'params': {'pretty': 0, 'project_id': 'T001', 'group_id': None, 'secure_key': 'TestingOnly', 'ralist': [336.6237324680802], 'declist': [-26.816830129551757], 'altlist': None, 'azlist': None, 'sourcelist': None, 'freqspecs': ['121,24'], 'creator': 'VOEvent_Auto_Trigger', 'obsname': 'SWIFT_1093742', 'nobs': 1, 'exptime': 800, 'calexptime': 300, 'freqres': 40, 'inttime': 0.5, 'calname': 'CenA', 'avoidsun': True, 'pretend': True}, 'clear': {'retcode': 0, 'command': '/home/mwa/MandC/obssched/clear_schedule.py --stoptime=++1116 --force', 'stdout': 'Pretending: command not run', 'stderr': 'Pretending: command not run'}, 'schedule': {'commands': '/home/mwa/MandC/obssched/schedule_observation.py --starttime=1357456760 --stoptime=++800s --shifttime=800 --freq="121,24" --obsname="SWIFT_1093742" --creator="VOEvent_Auto_Trigger" --mode=MWAX_VCS --project=T001 --groupid=1357456760 --alt=80.348000 --az=45.000000 --verbose --ut ;\n/home/mwa/MandC/obssched/schedule_observation.py --starttime=1357457568 --stoptime=++300s --freq="121,24" --freqres=40 --inttime=0.5 --obsname="SWIFT_1093742 Cal: CenA at 121,24" --creator="VOEvent_Auto_Trigger" --project=T001 --groupid=1357456760 --calibration --calibrators=CenA --source="CenA" --verbose --ut', 'retcode': 0, 'stdout': 'Pretending: commands not run', 'stderr': 'Pretending: commands not run'}, 'success': True})
-    @patch('atca_rapid_response_api.api.send', return_value={"id": "obsid", "authenticationToken": {"received": 'true', "verified": 'false'}, "overrideProject": {"code": 'null', "sufficientScore": 'false', "score": 0.0}, "scheduledProject": {"codes": [], "emails": [], "startTimes": [], "endTimes": []}, "schedule": {"received": 'false', "valid": 'false', "targetName": 'null'}, "observations": {"hoursRequested": 0, "maxSearchHours": 100, "hoursAllocated": 0, "hoursRequestedMinimum": 'null', "projectHoursRemaining": 0, "startDate": 'null', "endDate": 'null'}, "testMode": 'false', "cancel": 'false', "testing": {"noScoreLimit": 'false', "noTimeLimit": 'false', "limitTimeHours": 0, "CABBMode": "ca_2048_2048_2f"}, "id": "pv3nkiuruz0qk2lx11pp", "error": "Detected an expired token: Signature has expired."})
+
+    with open('trigger_app/test_yamls/trigger_mwa_test.yaml', 'r') as file:
+        trigger_mwa_test = safe_load(file)
+
+    with open('trigger_app/test_yamls/atca_test_api_response.yaml', 'r') as file:
+        atca_test_api_response = safe_load(file)
+
+    @patch('trigger_app.telescope_observe.trigger_mwa', return_value=trigger_mwa_test)
+    @patch('atca_rapid_response_api.api.send', return_value=atca_test_api_response)
     def setUp(self, fake_atca_api, fake_mwa_api):
         xml_paths = [
             "../tests/test_events/Antares_1438351269.xml",
@@ -187,8 +207,15 @@ class test_fs(TestCase):
         "default_data.yaml",
         "trigger_app/test_yamls/mwa_fs_proposal_settings.yaml",
     ]
-    @patch('trigger_app.telescope_observe.trigger_mwa', return_value={'errors': {}, 'params': {'pretty': 0, 'project_id': 'T001', 'group_id': None, 'secure_key': 'TestingOnly', 'ralist': [336.6237324680802], 'declist': [-26.816830129551757], 'altlist': None, 'azlist': None, 'sourcelist': None, 'freqspecs': ['121,24'], 'creator': 'VOEvent_Auto_Trigger', 'obsname': 'SWIFT_1093742', 'nobs': 1, 'exptime': 800, 'calexptime': 300, 'freqres': 40, 'inttime': 0.5, 'calname': 'CenA', 'avoidsun': True, 'pretend': True}, 'clear': {'retcode': 0, 'command': '/home/mwa/MandC/obssched/clear_schedule.py --stoptime=++1116 --force', 'stdout': 'Pretending: command not run', 'stderr': 'Pretending: command not run'}, 'schedule': {'commands': '/home/mwa/MandC/obssched/schedule_observation.py --starttime=1357456760 --stoptime=++800s --shifttime=800 --freq="121,24" --obsname="SWIFT_1093742" --creator="VOEvent_Auto_Trigger" --mode=MWAX_VCS --project=T001 --groupid=1357456760 --alt=80.348000 --az=45.000000 --verbose --ut ;\n/home/mwa/MandC/obssched/schedule_observation.py --starttime=1357457568 --stoptime=++300s --freq="121,24" --freqres=40 --inttime=0.5 --obsname="SWIFT_1093742 Cal: CenA at 121,24" --creator="VOEvent_Auto_Trigger" --project=T001 --groupid=1357456760 --calibration --calibrators=CenA --source="CenA" --verbose --ut', 'retcode': 0, 'stdout': 'Pretending: commands not run', 'stderr': 'Pretending: commands not run'}, 'success': True})
-    @patch('atca_rapid_response_api.api.send', return_value={"id": "obsid", "authenticationToken": {"received": 'true', "verified": 'false'}, "overrideProject": {"code": 'null', "sufficientScore": 'false', "score": 0.0}, "scheduledProject": {"codes": [], "emails": [], "startTimes": [], "endTimes": []}, "schedule": {"received": 'false', "valid": 'false', "targetName": 'null'}, "observations": {"hoursRequested": 0, "maxSearchHours": 100, "hoursAllocated": 0, "hoursRequestedMinimum": 'null', "projectHoursRemaining": 0, "startDate": 'null', "endDate": 'null'}, "testMode": 'false', "cancel": 'false', "testing": {"noScoreLimit": 'false', "noTimeLimit": 'false', "limitTimeHours": 0, "CABBMode": "ca_2048_2048_2f"}, "id": "pv3nkiuruz0qk2lx11pp", "error": "Detected an expired token: Signature has expired."})
+
+    with open('trigger_app/test_yamls/trigger_mwa_test.yaml', 'r') as file:
+        trigger_mwa_test = safe_load(file)
+
+    with open('trigger_app/test_yamls/atca_test_api_response.yaml', 'r') as file:
+        atca_test_api_response = safe_load(file)
+
+    @patch('trigger_app.telescope_observe.trigger_mwa', return_value=trigger_mwa_test)
+    @patch('atca_rapid_response_api.api.send', return_value=atca_test_api_response)
     def setUp(self, fake_atca_api, fake_mwa_api):
         xml_paths = [
             "../tests/test_events/HD_8537_FLARE_STAR_TEST.xml",
@@ -227,8 +254,15 @@ class test_hess_any_dur(TestCase):
         # Hess proposal with the any duration flag that should trigger
         "trigger_app/test_yamls/mwa_hess_proposal_settings.yaml",
     ]
-    @patch('trigger_app.telescope_observe.trigger_mwa', return_value={'errors': {}, 'params': {'pretty': 0, 'project_id': 'T001', 'group_id': None, 'secure_key': 'TestingOnly', 'ralist': [336.6237324680802], 'declist': [-26.816830129551757], 'altlist': None, 'azlist': None, 'sourcelist': None, 'freqspecs': ['121,24'], 'creator': 'VOEvent_Auto_Trigger', 'obsname': 'SWIFT_1093742', 'nobs': 1, 'exptime': 800, 'calexptime': 300, 'freqres': 40, 'inttime': 0.5, 'calname': 'CenA', 'avoidsun': True, 'pretend': True}, 'clear': {'retcode': 0, 'command': '/home/mwa/MandC/obssched/clear_schedule.py --stoptime=++1116 --force', 'stdout': 'Pretending: command not run', 'stderr': 'Pretending: command not run'}, 'schedule': {'commands': '/home/mwa/MandC/obssched/schedule_observation.py --starttime=1357456760 --stoptime=++800s --shifttime=800 --freq="121,24" --obsname="SWIFT_1093742" --creator="VOEvent_Auto_Trigger" --mode=MWAX_VCS --project=T001 --groupid=1357456760 --alt=80.348000 --az=45.000000 --verbose --ut ;\n/home/mwa/MandC/obssched/schedule_observation.py --starttime=1357457568 --stoptime=++300s --freq="121,24" --freqres=40 --inttime=0.5 --obsname="SWIFT_1093742 Cal: CenA at 121,24" --creator="VOEvent_Auto_Trigger" --project=T001 --groupid=1357456760 --calibration --calibrators=CenA --source="CenA" --verbose --ut', 'retcode': 0, 'stdout': 'Pretending: commands not run', 'stderr': 'Pretending: commands not run'}, 'success': True})
-    @patch('atca_rapid_response_api.api.send', return_value={"id": "obsid", "authenticationToken": {"received": 'true', "verified": 'false'}, "overrideProject": {"code": 'null', "sufficientScore": 'false', "score": 0.0}, "scheduledProject": {"codes": [], "emails": [], "startTimes": [], "endTimes": []}, "schedule": {"received": 'false', "valid": 'false', "targetName": 'null'}, "observations": {"hoursRequested": 0, "maxSearchHours": 100, "hoursAllocated": 0, "hoursRequestedMinimum": 'null', "projectHoursRemaining": 0, "startDate": 'null', "endDate": 'null'}, "testMode": 'false', "cancel": 'false', "testing": {"noScoreLimit": 'false', "noTimeLimit": 'false', "limitTimeHours": 0, "CABBMode": "ca_2048_2048_2f"}, "id": "pv3nkiuruz0qk2lx11pp", "error": "Detected an expired token: Signature has expired."})
+    
+    with open('trigger_app/test_yamls/trigger_mwa_test.yaml', 'r') as file:
+        trigger_mwa_test = safe_load(file)
+
+    with open('trigger_app/test_yamls/atca_test_api_response.yaml', 'r') as file:
+        atca_test_api_response = safe_load(file)
+
+    @patch('trigger_app.telescope_observe.trigger_mwa', return_value=trigger_mwa_test)
+    @patch('atca_rapid_response_api.api.send', return_value=atca_test_api_response)
     def setUp(self, fake_atca_api, fake_mwa_api):
         xml_paths = [
             "../tests/test_events/HESS_test_event.xml",
