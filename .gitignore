@@ -12,3 +12,4 @@ webapp_tracet/static_host/
 webapp_tracet/uwsgi-emperor.log
 webapp_tracet/webapp_tracet.sock
 docs/html/*
+.env
