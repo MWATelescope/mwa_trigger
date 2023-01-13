@@ -79,7 +79,7 @@ def test_parse_fs_event():
     ]
     parse_xml_test_warpper(xml_tests)
 
-# Process LVK BNS/NSBH early warning, preliminary, initial, update and retracted
+# Process LVK BNS/NSBH/BBH early warning, preliminary, initial, update and retracted
 # GCN alerts that we want to trigger MWA. Include skymap for initial, update. Include retracted information.
 def test_parse_lvk_early_event():
     xml_tests = [

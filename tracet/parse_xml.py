@@ -287,6 +287,8 @@ class parsed_VOEvent:
         An index that Fermi uses to describe what sort of source the Event is. GRBs are four, so this is what we check for.
     swift_rate_signif :  `float`
         The "RATE_SIGNIF" (appears to be a signal-to-noise ratio) to observe for SWIFT sources (in sigma).
+    false_alarm_rate_hz : `str`
+        False alarm rate, a statistic that is used to describe the significance of a gravitational-wave event.
     lvc_classification_BNS : `float`
         Likelyhood of the event being a BNS (0-1 range)
     lvc_classification_NSBH : `float`
@@ -493,6 +495,7 @@ class parsed_VOEvent:
 
             if self.event_type == 'EarlyWarning' or self.event_type == 'Preliminary' or self.event_type == 'Initial' or self.event_type == 'Update':
                 # Capture Probabilities of observations for proposals and analysis
+                self.false_alarm_rate_hz = str(v.find(".//Param[@name='FAR']").attrib["value"])
                 self.lvc_classification_BNS = float(v.find(".//Param[@name='BNS']").attrib["value"])
                 self.lvc_classification_NSBH = float(v.find(".//Param[@name='NSBH']").attrib["value"])
                 self.lvc_classification_BBH = float(v.find(".//Param[@name='BBH']").attrib["value"])
