@@ -1,6 +1,8 @@
 from django.test import TestCase
+from unittest.mock import patch
 
 from .models import EventGroup, Event, PossibleEventAssociation, ProposalDecision, Observations
+from yaml import load, Loader, safe_load
 
 from tracet.parse_xml import parsed_VOEvent
 import astropy.units as u
@@ -55,7 +57,17 @@ class test_grb_group_01(TestCase):
         "trigger_app/test_yamls/mwa_grb_proposal_settings.yaml",
         "trigger_app/test_yamls/atca_grb_proposal_settings.yaml",
     ]
-    def setUp(self):
+
+    with open('trigger_app/test_yamls/trigger_mwa_test.yaml', 'r') as file:
+        trigger_mwa_test = safe_load(file)
+
+    with open('trigger_app/test_yamls/atca_test_api_response.yaml', 'r') as file:
+        atca_test_api_response = safe_load(file)
+
+    @patch('trigger_app.telescope_observe.trigger_mwa', return_value=trigger_mwa_test)
+    @patch('atca_rapid_response_api.api.send', return_value=atca_test_api_response)
+    def setUp(self, fake_atca_api, fake_mwa_api):
+        
         xml_paths = [
             "../tests/test_events/group_01_01_Fermi.xml",
             "../tests/test_events/group_01_02_Fermi.xml",
@@ -81,7 +93,7 @@ class test_grb_group_01(TestCase):
     def test_mwa_proposal_decision(self):
         print(f"\n\ntest_grb_group_01 MWA proposal decison:\n{ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision_reason}\n\n")
         self.assertEqual(ProposalDecision.objects.all().filter(proposal__telescope__name='MWA_VCS').first().decision, 'T')
-
+    
     def test_atca_proposal_decision(self):
         print(f"\n\ntest_grb_group_01 ATCA proposal decison:\n{ProposalDecision.objects.all().filter(proposal__telescope__name='ATCA').first().decision_reason}\n\n")
         self.assertEqual(ProposalDecision.objects.all().filter(proposal__telescope__name='ATCA').first().decision, 'T')
@@ -96,7 +108,16 @@ class test_grb_group_02(TestCase):
         "trigger_app/test_yamls/mwa_grb_proposal_settings.yaml",
         "trigger_app/test_yamls/atca_grb_proposal_settings.yaml",
     ]
-    def setUp(self):
+    
+    with open('trigger_app/test_yamls/trigger_mwa_test.yaml', 'r') as file:
+        trigger_mwa_test = safe_load(file)
+
+    with open('trigger_app/test_yamls/atca_test_api_response.yaml', 'r') as file:
+        atca_test_api_response = safe_load(file)
+
+    @patch('trigger_app.telescope_observe.trigger_mwa', return_value=trigger_mwa_test)
+    @patch('atca_rapid_response_api.api.send', return_value=atca_test_api_response)
+    def setUp(self, fake_atca_api, fake_mwa_api):
         xml_paths = [
             "../tests/test_events/group_02_SWIFT_01_BAT_GRB_Pos.xml",
             "../tests/test_events/group_02_SWIFT_02_XRT_Pos.xml",
@@ -137,7 +158,16 @@ class test_nu(TestCase):
         "default_data.yaml",
         "trigger_app/test_yamls/mwa_nu_proposal_settings.yaml",
     ]
-    def setUp(self):
+
+    with open('trigger_app/test_yamls/trigger_mwa_test.yaml', 'r') as file:
+        trigger_mwa_test = safe_load(file)
+
+    with open('trigger_app/test_yamls/atca_test_api_response.yaml', 'r') as file:
+        atca_test_api_response = safe_load(file)
+
+    @patch('trigger_app.telescope_observe.trigger_mwa', return_value=trigger_mwa_test)
+    @patch('atca_rapid_response_api.api.send', return_value=atca_test_api_response)
+    def setUp(self, fake_atca_api, fake_mwa_api):
         xml_paths = [
             "../tests/test_events/Antares_1438351269.xml",
             "../tests/test_events/IceCube_134191_017593623_0.xml",
@@ -177,7 +207,16 @@ class test_fs(TestCase):
         "default_data.yaml",
         "trigger_app/test_yamls/mwa_fs_proposal_settings.yaml",
     ]
-    def setUp(self):
+
+    with open('trigger_app/test_yamls/trigger_mwa_test.yaml', 'r') as file:
+        trigger_mwa_test = safe_load(file)
+
+    with open('trigger_app/test_yamls/atca_test_api_response.yaml', 'r') as file:
+        atca_test_api_response = safe_load(file)
+
+    @patch('trigger_app.telescope_observe.trigger_mwa', return_value=trigger_mwa_test)
+    @patch('atca_rapid_response_api.api.send', return_value=atca_test_api_response)
+    def setUp(self, fake_atca_api, fake_mwa_api):
         xml_paths = [
             "../tests/test_events/HD_8537_FLARE_STAR_TEST.xml",
         ]
@@ -215,7 +254,16 @@ class test_hess_any_dur(TestCase):
         # Hess proposal with the any duration flag that should trigger
         "trigger_app/test_yamls/mwa_hess_proposal_settings.yaml",
     ]
-    def setUp(self):
+    
+    with open('trigger_app/test_yamls/trigger_mwa_test.yaml', 'r') as file:
+        trigger_mwa_test = safe_load(file)
+
+    with open('trigger_app/test_yamls/atca_test_api_response.yaml', 'r') as file:
+        atca_test_api_response = safe_load(file)
+
+    @patch('trigger_app.telescope_observe.trigger_mwa', return_value=trigger_mwa_test)
+    @patch('atca_rapid_response_api.api.send', return_value=atca_test_api_response)
+    def setUp(self, fake_atca_api, fake_mwa_api):
         xml_paths = [
             "../tests/test_events/HESS_test_event.xml",
         ]

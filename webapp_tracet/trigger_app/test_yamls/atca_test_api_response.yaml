@@ -1,0 +1,29 @@
+{
+  "authenticationToken": { "received": "true", "verified": "false" },
+  "overrideProject":
+    { "code": "null", "sufficientScore": "false", "score": 0.0 },
+  "scheduledProject":
+    { "codes": [], "emails": [], "startTimes": [], "endTimes": [] },
+  "schedule": { "received": "false", "valid": "false", "targetName": "null" },
+  "observations":
+    {
+      "hoursRequested": 0,
+      "maxSearchHours": 100,
+      "hoursAllocated": 0,
+      "hoursRequestedMinimum": "null",
+      "projectHoursRemaining": 0,
+      "startDate": "null",
+      "endDate": "null",
+    },
+  "testMode": "false",
+  "cancel": "false",
+  "testing":
+    {
+      "noScoreLimit": "false",
+      "noTimeLimit": "false",
+      "limitTimeHours": 0,
+      "CABBMode": "ca_2048_2048_2f",
+    },
+  "id": "pv3nkiuruz0qk2lx11pp",
+  "error": "Detected an expired token: Signature has expired.",
+}
