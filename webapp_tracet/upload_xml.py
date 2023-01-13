@@ -10,7 +10,6 @@ from tracet.parse_xml import parsed_VOEvent
 def write_and_upload(xml_string):
     # Parse
     trig = parsed_VOEvent(None, packet=xml_string)
-
     # Upload
     session = requests.session()
     session.auth = (os.environ['UPLOAD_USER'], os.environ['UPLOAD_PASSWORD'])
@@ -19,6 +18,7 @@ def write_and_upload(xml_string):
         url = 'https://tracet.duckdns.org/event_create/'
     else:
         url = 'http://127.0.0.1:8000/event_create/'
+
     data = {
         'telescope' : trig.telescope,
         'xml_packet' : xml_string,

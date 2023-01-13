@@ -287,6 +287,18 @@ class parsed_VOEvent:
         An index that Fermi uses to describe what sort of source the Event is. GRBs are four, so this is what we check for.
     swift_rate_signif :  `float`
         The "RATE_SIGNIF" (appears to be a signal-to-noise ratio) to observe for SWIFT sources (in sigma).
+    lvc_classification_BNS : `float`
+        Likelyhood of the event being a BNS (0-1 range)
+    lvc_classification_NSBH : `float`
+        Likelyhood of the event being a NSBH (0-1 range)
+    lvc_classification_BBH : `float`
+        Likelyhood of the event being a BBH (0-1 range)
+    lvc_classification_Terrestrial : `float`
+        Likelyhood of the event being terrestrial (noise) (0-1 range)
+    retraction_message : `string`
+        Message for why observation has been retracted
+    skymap_fits : `string`
+        The contents of a sky map (shows GW probability) in a multi-order FITS format as a Base64-encoded string.
     """
     def __init__(self, xml, packet=None, trig_pairs=None):
         self.xml = xml
@@ -310,6 +322,12 @@ class parsed_VOEvent:
         self.source_name = None
         self.source_type = None
         self.event_observed = None
+        self.lvc_classification_BNS = None
+        self.lvc_classification_NSBH = None
+        self.lvc_classification_BBH = None
+        self.lvc_classification_Terrestrial = None
+        self.retraction_message = None
+        self.skymap_fits = None
         if self.trig_pairs is None:
             # use defaults
             self.trig_pairs = [
@@ -324,10 +342,11 @@ class parsed_VOEvent:
                 "Fermi_GBM_Gnd_Pos",
                 "Fermi_GBM_Fin_Pos",
                 "HESS_GRB_To",
-                # "LVC_Initial",
-                # "LVC_Preliminary",
-                # "LVC_Retraction",
-                # "LVC_Initial",
+                "LVC_EarlyWarning",
+                "LVC_Preliminary",
+                "LVC_Initial",
+                "LVC_Update",
+                "LVC_Retraction",
                 "AMON_ICECUBE_BRONZE_Event",
                 "AMON_ICECUBE_GOLD_Event",
                 "Antares_Alert",
@@ -371,15 +390,18 @@ class parsed_VOEvent:
         self.source_type = get_source_types(self.telescope, self.event_type, self.source_name, v)
         logger.debug(f"source types: {self.source_type}")
 
-        # Attempt to get a Trigger ID (for Fermi, SWIFT and Antares)
+        # Attempt to get a Trigger ID (for Fermi, SWIFT, Antares and LVC)
         if v.find(".//Param[@name='TrigID']") is not None:
-            self.trig_id = int(v.find(".//Param[@name='TrigID']").attrib["value"])
+            self.trig_id = str(v.find(".//Param[@name='TrigID']").attrib["value"])
         elif v.find(".//Param[@name='AMON_ID']") is not None:
             # ICECUBE's ID
-            self.trig_id = int(v.find(".//Param[@name='AMON_ID']").attrib["value"])
+            self.trig_id = str(v.find(".//Param[@name='AMON_ID']").attrib["value"])
+        elif v.find(".//Param[@name='GraceID']") is not None:
+            # ICECUBE's ID
+            self.trig_id = str(v.find(".//Param[@name='GraceID']").attrib["value"])
         else:
             # Hess has no Trigger ID so make a random one
-            self.trig_id = int(str(uuid.uuid4().int)[:12])
+            self.trig_id = str(uuid.uuid4().int)[:12]
             self.self_generated_trig_id = True
 
         # Get current position
@@ -391,12 +413,12 @@ class parsed_VOEvent:
             self.ra_hms  = str(Angle(self.ra,  unit=u.deg).to_string(unit=u.hour, sep=':'))
             self.dec_dms = str(Angle(self.dec, unit=u.deg).to_string(unit=u.deg,  sep=':'))
         logger.debug(f"Trig position: {self.ra} {self.dec} {self.err}")
-
         # Check the voevent role (normally observation or test)
         self.role = v.attrib["role"]
         if self.role == "test":
             # Just a test observation so ignore it
             self.ignore = True
+            print('Just a test observation so ignore it')
             return
 
         # Antares has a flag for real alerts that is worth checking
@@ -404,8 +426,8 @@ class parsed_VOEvent:
             if not v.find(".//Param[@name='isRealAlert']").attrib["value"]:
                 # Not a real alert so ignore
                 self.ignore = True
+                print('Not a real alert so ignore')
                 return
-
 
         # Check if this is the type of trigger we're looking for
         this_pair = f"{self.telescope}_{self.event_type}"
@@ -413,9 +435,9 @@ class parsed_VOEvent:
             self.ignore = False
         else:
             # Unknown telescope so ignoring
+            print('Unknown telescope so ignoring')
             self.ignore = True
             return
-
         # Parse trigger info (telescope dependent)
         if self.telescope == "Fermi":
             self.event_duration = float(
@@ -465,6 +487,25 @@ class parsed_VOEvent:
             self.sequence_num = None
             self.antares_ranking = int(v.find(".//Param[@name='ranking']").attrib["value"])
 
+        elif self.telescope == "LVC":
+            self.event_duration = None
+            self.sequence_num = None
+
+            if self.event_type == 'EarlyWarning' or self.event_type == 'Preliminary' or self.event_type == 'Initial' or self.event_type == 'Update':
+                # Capture Probabilities of observations for proposals and analysis
+                self.lvc_classification_BNS = float(v.find(".//Param[@name='BNS']").attrib["value"])
+                self.lvc_classification_NSBH = float(v.find(".//Param[@name='NSBH']").attrib["value"])
+                self.lvc_classification_BBH = float(v.find(".//Param[@name='BBH']").attrib["value"])
+                self.lvc_classification_Terrestrial = float(v.find(".//Param[@name='Terrestrial']").attrib["value"])
+
+            if self.event_type == 'Initial' or self.event_type == 'Update':
+                # Initial and Update alerts should contain skymap data as URL
+                str(v.find(".//Param[@name='skymap_fits']").attrib["value"])
+ 
+            if self.event_type == 'Retraction':
+                # Capture message that comes with retraction
+                self.retraction_message = str(v.Citations.Description)
+                    
         self.event_observed = v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Time.TimeInstant.ISOTime
         logger.debug("Trig details:")
         logger.debug(f"Dur:  {self.event_duration} s")

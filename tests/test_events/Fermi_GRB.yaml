@@ -13,6 +13,10 @@ fermi_detection_prob: 94
 fermi_most_likely_index: 4
 grb_ident: null
 ignore: false
+lvc_classification_BBH: null
+lvc_classification_BNS: null
+lvc_classification_NSBH: null
+lvc_classification_Terrestrial: null
 packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=\"\
   ivo://nasa.gsfc.gcn/Fermi#GBM_Flt_Pos_2017-11-26T05:38:43.71_533367528_46-276\"\
   \ role=\"observation\" version=\"2.0\" xsi:schemaLocation=\"http://www.ivoa.net/xml/VOEvent/v2.0\
@@ -84,14 +88,16 @@ packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=
   </VOEvent>\n"
 ra: 241.6167
 ra_hms: '16:06:28.008'
+retraction_message: null
 role: observation
 self_generated_trig_id: false
 sequence_num: 46
+skymap_fits: null
 source_name: null
 source_type: GRB
 swift_rate_signif: null
 telescope: Fermi
-trig_id: 533367528
+trig_id: '533367528'
 trig_pairs:
 - SWIFT_BAT_GRB_Pos
 - SWIFT_XRT_Pos
@@ -100,6 +106,11 @@ trig_pairs:
 - Fermi_GBM_Gnd_Pos
 - Fermi_GBM_Fin_Pos
 - HESS_GRB_To
+- LVC_EarlyWarning
+- LVC_Preliminary
+- LVC_Initial
+- LVC_Update
+- LVC_Retraction
 - AMON_ICECUBE_BRONZE_Event
 - AMON_ICECUBE_GOLD_Event
 - Antares_Alert

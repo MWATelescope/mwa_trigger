@@ -13,6 +13,10 @@ fermi_detection_prob: null
 fermi_most_likely_index: null
 grb_ident: 'true'
 ignore: false
+lvc_classification_BBH: null
+lvc_classification_BNS: null
+lvc_classification_NSBH: null
+lvc_classification_Terrestrial: null
 packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=\"\
   ivo://nasa.gsfc.gcn/SWIFT#BAT_GRB_Pos_772006-7987\" role=\"observation\" version=\"\
   2.0\" xsi:schemaLocation=\"http://www.ivoa.net/xml/VOEvent/v2.0  http://www.ivoa.net/xml/VOEvent/VOEvent-v2.0.xsd\"\
@@ -109,14 +113,16 @@ packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=
   </VOEvent>\n"
 ra: 45.0
 ra_hms: '3:00:00'
+retraction_message: null
 role: observation
 self_generated_trig_id: false
 sequence_num: null
+skymap_fits: null
 source_name: GRB 170912
 source_type: GRB
 swift_rate_signif: 13.74
 telescope: SWIFT
-trig_id: 772006
+trig_id: '772006'
 trig_pairs:
 - SWIFT_BAT_GRB_Pos
 - SWIFT_XRT_Pos
@@ -125,6 +131,11 @@ trig_pairs:
 - Fermi_GBM_Gnd_Pos
 - Fermi_GBM_Fin_Pos
 - HESS_GRB_To
+- LVC_EarlyWarning
+- LVC_Preliminary
+- LVC_Initial
+- LVC_Update
+- LVC_Retraction
 - AMON_ICECUBE_BRONZE_Event
 - AMON_ICECUBE_GOLD_Event
 - Antares_Alert
