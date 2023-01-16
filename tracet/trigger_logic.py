@@ -121,63 +121,6 @@ def worth_observing_grb(
 
     return trigger_bool, debug_bool, pending_bool, decision_reason_log
 
-
-def worth_observing_nu(
-        # event values
-        antares_ranking=None,
-        telescope=None,
-        # Thresholds
-        antares_min_ranking=2,
-        # Other
-        decision_reason_log="",
-        event_id=None,
-    ):
-    """Decide if a Neutrino Event is worth observing.
-
-    Parameters
-    ----------
-    antares_ranking : `int`, optional
-        The rank of antaras event. Default: None.
-    telescope : `int`, optional
-        The rank of telescope of the event. Default: None.
-    antares_min_ranking : `int`, optional
-        The minimum (inclusive) rank of antaras events. Default: 2.
-    decision_reason_log : `str`
-        A log of all the decisions made so far so a user can understand why the source was(n't) observed. Default: "".
-    event_id : `int`, optional
-        An Event ID that will be recorded in the decision_reason_log. Default: None.
-
-    Returns
-    -------
-    trigger_bool : `boolean`
-        If True an observations should be triggered.
-    debug_bool : `boolean`
-        If True a debug alert should be sent out.
-    pending_bool : `boolean`
-        If True will create a pending observation and wait for human intervention.
-    decision_reason_log : `str`
-        A log of all the decisions made so far so a user can understand why the source was(n't) observed.
-    """
-    # Setup up defaults
-    trigger_bool = False
-    debug_bool = False
-    pending_bool = False
-
-    if telescope == "Antares":
-        # Check the Antares ranking
-        if antares_ranking <= antares_min_ranking:
-            trigger_bool = True
-            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The Antares ranking ({antares_ranking}) is less than or equal to {antares_min_ranking} so triggering. \n"
-        else:
-            debug_bool = True
-            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The Antares ranking ({antares_ranking}) is greater than {antares_min_ranking} so not triggering. \n"
-    else:
-        trigger_bool = True
-        decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: No thresholds for non Antares telescopes so triggering. \n"
-
-    return trigger_bool, debug_bool, pending_bool, decision_reason_log
-
-
 def worth_observing_nu(
         # event values
         antares_ranking=None,
