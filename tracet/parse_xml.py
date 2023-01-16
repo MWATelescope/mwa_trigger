@@ -269,7 +269,7 @@ class parsed_VOEvent:
         If the event should be ignored (e.g. test or unknown events).
     source_type : `str`
         The predicted source type (GRB, FS, NU or GW).
-    trig_id : `int`
+    trig_id : `str`
         The ID the telescope has given the event.
     sequence_num : `int`
         What number/sequence this event is for the trig_id group.
@@ -399,7 +399,7 @@ class parsed_VOEvent:
             # ICECUBE's ID
             self.trig_id = str(v.find(".//Param[@name='AMON_ID']").attrib["value"])
         elif v.find(".//Param[@name='GraceID']") is not None:
-            # ICECUBE's ID
+            # The gracedb ID for GW
             self.trig_id = str(v.find(".//Param[@name='GraceID']").attrib["value"])
         else:
             # Hess has no Trigger ID so make a random one
@@ -415,6 +415,9 @@ class parsed_VOEvent:
             self.ra_hms  = str(Angle(self.ra,  unit=u.deg).to_string(unit=u.hour, sep=':'))
             self.dec_dms = str(Angle(self.dec, unit=u.deg).to_string(unit=u.deg,  sep=':'))
         logger.debug(f"Trig position: {self.ra} {self.dec} {self.err}")
+
+        self.event_observed = v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Time.TimeInstant.ISOTime
+        
         # Check the voevent role (normally observation or test)
         self.role = v.attrib["role"]
         if self.role == "test":
@@ -509,7 +512,6 @@ class parsed_VOEvent:
                 # Capture message that comes with retraction
                 self.retraction_message = str(v.Citations.Description)
                     
-        self.event_observed = v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Time.TimeInstant.ISOTime
         logger.debug("Trig details:")
         logger.debug(f"Dur:  {self.event_duration} s")
         logger.debug(f"ID:   {self.trig_id}")
