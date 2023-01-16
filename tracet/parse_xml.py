@@ -3,6 +3,11 @@ from . import data_load
 import pandas as pd
 from astropy.coordinates import Angle
 import astropy.units as u
+from astropy.table import Table
+import astropy_healpix as ah
+import numpy as np
+import urllib.request
+import os
 import uuid
 
 import logging
@@ -330,6 +335,10 @@ class parsed_VOEvent:
         self.lvc_classification_Terrestrial = None
         self.retraction_message = None
         self.skymap_fits = None
+        self.prob_density_tile = None
+        self.right_ascension_degrees = None
+        self.decension_degrees = None
+
         if self.trig_pairs is None:
             # use defaults
             self.trig_pairs = [
@@ -506,8 +515,23 @@ class parsed_VOEvent:
 
             if self.event_type == 'Initial' or self.event_type == 'Update':
                 # Initial and Update alerts should contain skymap data as URL
-                str(v.find(".//Param[@name='skymap_fits']").attrib["value"])
- 
+                self.skymap_fits = str(v.find(".//Param[@name='skymap_fits']").attrib["value"])
+
+                url =  self.skymap_fits
+                urllib.request.urlretrieve(url, "skymap.fits")
+
+                skymap = Table.read("skymap.fits")
+                i = np.argmax(skymap['PROBDENSITY'])
+                self.prob_density_tile = float(skymap[i]['PROBDENSITY'] * (np.pi / 180)**2)
+                
+                uniq = skymap[i]['UNIQ']
+                level, ipix = ah.uniq_to_level_ipix(uniq)
+                nside = ah.level_to_nside(level)
+                ra, dec = ah.healpix_to_lonlat(ipix, nside, order='nested')
+                self.right_ascension_degrees = float(ra.deg)
+                self.decension_degrees = float(dec.deg)
+                os.remove("skymap.fits")
+
             if self.event_type == 'Retraction':
                 # Capture message that comes with retraction
                 self.retraction_message = str(v.Citations.Description)

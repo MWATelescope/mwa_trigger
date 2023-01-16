@@ -79,6 +79,16 @@ class ProposalSettings(models.Model):
     testing = models.BooleanField(default=False, help_text="If testing, will not schedule any observations.")
     source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, verbose_name="What type of source to will you trigger on?")
 
+    # GW settings
+    # maximum_false_alarm_rate_hz = models.FloatField(verbose_name="Maximum False alarm rate for GW candidates with this strength or greater (Hz)", help_text="A Event must have less than or equal to this rate to be observed.", default=0.05)
+    # SOURCE_CHOICES = (
+    #     (GRB, 'Gamma-ray burst'),
+    #     (FS, 'Flare star'),
+    #     (NU, 'Neutrino'),
+    #     (GW, 'Gravitational wave'),
+    # )
+    # Instruments_used_for_event = 
+
     # MWA settings
     mwa_freqspecs = models.CharField(default="144,24", max_length=256, verbose_name="MWA frequency specifications", help_text="The frequency channels IDs for the MWA to observe at.")
     mwa_nobs = models.IntegerField(default=1, verbose_name="Number of Observations", help_text="The number of observations to schedule.")
@@ -127,6 +137,7 @@ class PossibleEventAssociation(models.Model):
     pos_error = models.FloatField(blank=True, null=True)
     recieved_data = models.DateTimeField(auto_now_add=True, blank=True)
     source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, null=True)
+    event_observed = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return str(self.id)
@@ -148,6 +159,7 @@ class EventGroup(models.Model):
     recieved_data = models.DateTimeField(auto_now_add=True, blank=True)
     source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, null=True)
     ignored = models.BooleanField(default=True)
+    event_observed = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return str(self.id)

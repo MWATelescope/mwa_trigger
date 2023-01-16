@@ -1,6 +1,7 @@
 antares_ranking: null
 dec: null
 dec_dms: null
+decension_degrees: null
 err: null
 event_duration: null
 event_observed: !!python/object/apply:lxml.objectify.fromstring
@@ -52,9 +53,11 @@ packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:sc
   \  <EventIVORN cite=\"supersedes\">ivo://gwnet/LVC#MS181101ab-1-EarlyWarning</EventIVORN>\n\
   \    <Description>Determined to not be a viable GW event candidate</Description>\n\
   \  </Citations>\n  <original_prefix>voe</original_prefix>\n</VOEvent>\n"
+prob_density_tile: null
 ra: null
 ra_hms: null
 retraction_message: Determined to not be a viable GW event candidate
+right_ascension_degrees: null
 role: observation
 self_generated_trig_id: false
 sequence_num: null

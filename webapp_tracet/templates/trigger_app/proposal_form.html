@@ -58,14 +58,19 @@
         </table>
         </div>
         <h3>Source thresholds</h3>
-        {{ form.maximum_position_uncertainty.label_tag }}{% help_wrap form.maximum_position_uncertainty.help_text %}{{ form.maximum_position_uncertainty }}
+        <div id="position_thres">
+            {{ form.maximum_position_uncertainty.label_tag }}{% help_wrap form.maximum_position_uncertainty.help_text %}{{ form.maximum_position_uncertainty }}
+        </div>
         <div id="fermi_thres">
+            {{ form.maximum_position_uncertainty.label_tag }}{% help_wrap form.maximum_position_uncertainty.help_text %}{{ form.maximum_position_uncertainty }}
             {{ form.fermi_prob.label_tag }}{% help_wrap form.fermi_prob.help_text %}{{ form.fermi_prob }}
         </div>
         <div id="swift_thres">
+            {{ form.maximum_position_uncertainty.label_tag }}{% help_wrap form.maximum_position_uncertainty.help_text %}{{ form.maximum_position_uncertainty }}
             {{ form.swift_rate_signf.label_tag }}{% help_wrap form.swift_rate_signf.help_text %}{{ form.swift_rate_signf }}
         </div>
         <div id="antares_thres">
+            {{ form.maximum_position_uncertainty.label_tag }}{% help_wrap form.maximum_position_uncertainty.help_text %}{{ form.maximum_position_uncertainty }}
             {{ form.antares_min_ranking.label_tag }}{% help_wrap form.antares_min_ranking.help_text %}{{ form.antares_min_ranking }}
         </div>
 
@@ -254,6 +259,11 @@
                     $('#antares_thres').show();
                 } else {
                     $('#antares_thres').hide();
+                }
+                if ( ($("#event_telescope").val() === "" || $("#event_telescope").val() === "LVC") && $("#id_source_type").val() == "GW" ) {
+                    $('#position_thres_').hide();
+                } else {
+                    $('#position_thres').show();
                 }
             }
             threshold_display();

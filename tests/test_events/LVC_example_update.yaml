@@ -1,6 +1,7 @@
 antares_ranking: null
 dec: null
 dec_dms: null
+decension_degrees: -17.856895095545468
 err: null
 event_duration: null
 event_observed: !!python/object/apply:lxml.objectify.fromstring
@@ -97,13 +98,15 @@ packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:sc
   \  <EventIVORN cite=\"supersedes\">ivo://gwnet/LVC#MS181101ab-1-EarlyWarning</EventIVORN>\n\
   \    <Description>Updated localization is now available</Description>\n  </Citations>\n\
   \  <original_prefix>voe</original_prefix>\n</VOEvent>\n"
+prob_density_tile: 0.0782516470191411
 ra: null
 ra_hms: null
 retraction_message: null
+right_ascension_degrees: 194.30419921874997
 role: observation
 self_generated_trig_id: false
 sequence_num: null
-skymap_fits: null
+skymap_fits: https://emfollow.docs.ligo.org/userguide/_static/bayestar.multiorder.fits,0
 source_name: null
 source_type: GW
 swift_rate_signif: null

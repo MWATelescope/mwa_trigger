@@ -1,6 +1,7 @@
 antares_ranking: null
 dec: -72.6159
 dec_dms: '-72:36:57.24'
+decension_degrees: null
 err: 0.0
 event_duration: null
 event_observed: !!python/object/apply:lxml.objectify.fromstring
@@ -72,9 +73,11 @@ packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=
   \  <Concept>Swift spacecraft slewing to a preplanned observing target.</Concept>\n\
   \    </Inference>\n  </Why>\n  <Description>\n    </Description>\n  <original_prefix>voe</original_prefix>\n\
   </VOEvent>\n"
+prob_density_tile: null
 ra: 11.5836
 ra_hms: '0:46:20.064'
 retraction_message: null
+right_ascension_degrees: null
 role: utility
 self_generated_trig_id: false
 sequence_num: null
