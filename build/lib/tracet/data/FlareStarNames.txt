@@ -1,0 +1,24 @@
+1H 0123+075
+AT Mic
+AU Mic
+CC Eri
+CF Tuc
+CN Leo
+DM-216267
+EQ Peg
+GT Mus
+HD 8357
+HR 1099
+II Peg
+IM Peg
+ROSS1280
+SZ Psc
+UV Cet
+UV Ceti
+UX Ari
+V1054Oph
+V1216Sgr
+V645Cen
+VY Ari
+Wolf424
+YZ Cmi
