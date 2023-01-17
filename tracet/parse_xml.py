@@ -11,6 +11,7 @@ import os
 import uuid
 
 import logging
+import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -308,10 +309,6 @@ class parsed_VOEvent:
         The contents of a sky map (shows GW probability) in a multi-order FITS format as a Base64-encoded string.
     lvc_prob_density_tile : `float`
         Shows GW probability of the hights prob tile in the skymap
-    lvc_right_ascension_degrees : `float`
-        Right ascension of highest probability position in degrees
-    lvc_declination_degrees : `string`
-        Declination of highest probability position in degrees
     """
     def __init__(self, xml, packet=None, trig_pairs=None):
         self.xml = xml
@@ -342,8 +339,6 @@ class parsed_VOEvent:
         self.lvc_retraction_message = None
         self.lvc_skymap_fits = None
         self.lvc_prob_density_tile = None
-        self.lvc_right_ascension_degrees = None
-        self.lvc_declination_degrees = None
 
         if self.trig_pairs is None:
             # use defaults
@@ -431,8 +426,10 @@ class parsed_VOEvent:
             self.dec_dms = str(Angle(self.dec, unit=u.deg).to_string(unit=u.deg,  sep=':'))
         logger.debug(f"Trig position: {self.ra} {self.dec} {self.err}")
 
-        self.event_observed = v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Time.TimeInstant.ISOTime
-        
+        # Get observed time as UTC
+        voevent_event_observed_utc = voeventparse.convenience.get_event_time_as_utc(v)
+        self.event_observed  = datetime.datetime.strptime(str(voevent_event_observed_utc)[:19], "%Y-%m-%d %H:%M:%S")
+
         # Check the voevent role (normally observation or test)
         self.role = v.attrib["role"]
         if self.role == "test":
@@ -534,8 +531,12 @@ class parsed_VOEvent:
                 level, ipix = ah.uniq_to_level_ipix(uniq)
                 nside = ah.level_to_nside(level)
                 ra, dec = ah.healpix_to_lonlat(ipix, nside, order='nested')
-                self.lvc_right_ascension_degrees = float(ra.deg)
-                self.lvc_declination_degrees = float(dec.deg)
+                self.ra = float(ra.deg)
+                self.dec = float(dec.deg)
+
+                self.ra_hms  = str(Angle(self.ra,  unit=u.deg).to_string(unit=u.hour, sep=':'))
+                self.dec_dms = str(Angle(self.dec,  unit=u.deg).to_string(unit=u.deg, sep=':'))
+
                 os.remove("skymap.fits")
 
             if self.event_type == 'Retraction':

@@ -542,8 +542,6 @@ def test_upload_xml(request):
             # Parse and submit the Event
             xml_string = str(request.POST['xml_packet'])
             trig = parse_xml.parsed_VOEvent(None, packet=xml_string)
-            logger.debug(trig.event_observed)
-            logger.debug(type(trig.event_observed))
             models.Event.objects.get_or_create(
                 telescope=trig.telescope,
                 xml_packet=xml_string,
@@ -560,7 +558,7 @@ def test_upload_xml(request):
                 ignored=trig.ignore,
                 source_name=trig.source_name,
                 source_type=trig.source_type,
-                event_observed=datetime.datetime.strptime(str(trig.event_observed), "%Y-%m-%dT%H:%M:%S.%f"),
+                event_observed=trig.event_observed,
                 fermi_most_likely_index=trig.fermi_most_likely_index,
                 fermi_detection_prob=trig.fermi_detection_prob,
                 swift_rate_signif=trig.swift_rate_signif,

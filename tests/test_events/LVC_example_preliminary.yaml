@@ -3,11 +3,7 @@ dec: null
 dec_dms: null
 err: null
 event_duration: null
-event_observed: !!python/object/apply:lxml.objectify.fromstring
-- !!binary |
-  PElTT1RpbWUgeG1sbnM6eHNpPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxL1hNTFNjaGVtYS1pbnN0
-  YW5jZSIgeG1sbnM6dm9lPSJodHRwOi8vd3d3Lml2b2EubmV0L3htbC9WT0V2ZW50L3YyLjAiPjIw
-  MTgtMTEtMDFUMjI6MjI6NDYuNjU0NDM3WjwvSVNPVGltZT4=
+event_observed: 2018-11-01 22:22:46
 event_type: Preliminary
 false_alarm_rate_hz: '9.11069936486e-14'
 fermi_detection_prob: null
@@ -18,10 +14,8 @@ lvc_classification_BBH: 0.03
 lvc_classification_BNS: 0.95
 lvc_classification_NSBH: 0.01
 lvc_classification_Terrestrial: 0.01
-lvc_declination_degrees: null
 lvc_prob_density_tile: null
 lvc_retraction_message: null
-lvc_right_ascension_degrees: null
 lvc_skymap_fits: null
 packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"\
   http://www.ivoa.net/xml/VOEvent/v2.0 http://www.ivoa.net/xml/VOEvent/VOEvent-v2.0.xsd\"\

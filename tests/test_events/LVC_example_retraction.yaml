@@ -3,11 +3,7 @@ dec: null
 dec_dms: null
 err: null
 event_duration: null
-event_observed: !!python/object/apply:lxml.objectify.fromstring
-- !!binary |
-  PElTT1RpbWUgeG1sbnM6eHNpPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxL1hNTFNjaGVtYS1pbnN0
-  YW5jZSIgeG1sbnM6dm9lPSJodHRwOi8vd3d3Lml2b2EubmV0L3htbC9WT0V2ZW50L3YyLjAiPjIw
-  MTgtMTEtMDFUMjI6MjI6NDYuNjU0NDM3WjwvSVNPVGltZT4=
+event_observed: 2018-11-01 22:22:46
 event_type: Retraction
 fermi_detection_prob: null
 fermi_most_likely_index: null
@@ -17,10 +13,8 @@ lvc_classification_BBH: null
 lvc_classification_BNS: null
 lvc_classification_NSBH: null
 lvc_classification_Terrestrial: null
-lvc_declination_degrees: null
 lvc_prob_density_tile: null
 lvc_retraction_message: Determined to not be a viable GW event candidate
-lvc_right_ascension_degrees: null
 lvc_skymap_fits: null
 packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"\
   http://www.ivoa.net/xml/VOEvent/v2.0 http://www.ivoa.net/xml/VOEvent/VOEvent-v2.0.xsd\"\

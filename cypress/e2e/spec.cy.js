@@ -1,5 +1,6 @@
-describe('template spec', () => {
+describe('webpage loads and connects to broker', () => {
   it('passes', () => {
-    cy.visit('https://example.cypress.io')
+    cy.visit('/')
+    cy.get('.PositiveTransaction').exists
   })
 })
