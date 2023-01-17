@@ -302,10 +302,16 @@ class parsed_VOEvent:
         Likelyhood of the event being a BBH (0-1 range)
     lvc_classification_Terrestrial : `float`
         Likelyhood of the event being terrestrial (noise) (0-1 range)
-    retraction_message : `string`
+    lvc_retraction_message : `string`
         Message for why observation has been retracted
-    skymap_fits : `string`
+    lvc_skymap_fits : `string`
         The contents of a sky map (shows GW probability) in a multi-order FITS format as a Base64-encoded string.
+    lvc_prob_density_tile : `float`
+        Shows GW probability of the hights prob tile in the skymap
+    lvc_right_ascension_degrees : `float`
+        Right ascension of highest probability position in degrees
+    lvc_declination_degrees : `string`
+        Declination of highest probability position in degrees
     """
     def __init__(self, xml, packet=None, trig_pairs=None):
         self.xml = xml
@@ -333,11 +339,11 @@ class parsed_VOEvent:
         self.lvc_classification_NSBH = None
         self.lvc_classification_BBH = None
         self.lvc_classification_Terrestrial = None
-        self.retraction_message = None
-        self.skymap_fits = None
-        self.prob_density_tile = None
-        self.right_ascension_degrees = None
-        self.decension_degrees = None
+        self.lvc_retraction_message = None
+        self.lvc_skymap_fits = None
+        self.lvc_prob_density_tile = None
+        self.lvc_right_ascension_degrees = None
+        self.lvc_declination_degrees = None
 
         if self.trig_pairs is None:
             # use defaults
@@ -515,26 +521,26 @@ class parsed_VOEvent:
 
             if self.event_type == 'Initial' or self.event_type == 'Update':
                 # Initial and Update alerts should contain skymap data as URL
-                self.skymap_fits = str(v.find(".//Param[@name='skymap_fits']").attrib["value"])
+                self.lvc_skymap_fits = str(v.find(".//Param[@name='skymap_fits']").attrib["value"])
 
-                url =  self.skymap_fits
+                url =  self.lvc_skymap_fits
                 urllib.request.urlretrieve(url, "skymap.fits")
 
                 skymap = Table.read("skymap.fits")
                 i = np.argmax(skymap['PROBDENSITY'])
-                self.prob_density_tile = float(skymap[i]['PROBDENSITY'] * (np.pi / 180)**2)
+                self.lvc_prob_density_tile = float(skymap[i]['PROBDENSITY'] * (np.pi / 180)**2)
                 
                 uniq = skymap[i]['UNIQ']
                 level, ipix = ah.uniq_to_level_ipix(uniq)
                 nside = ah.level_to_nside(level)
                 ra, dec = ah.healpix_to_lonlat(ipix, nside, order='nested')
-                self.right_ascension_degrees = float(ra.deg)
-                self.decension_degrees = float(dec.deg)
+                self.lvc_right_ascension_degrees = float(ra.deg)
+                self.lvc_declination_degrees = float(dec.deg)
                 os.remove("skymap.fits")
 
             if self.event_type == 'Retraction':
                 # Capture message that comes with retraction
-                self.retraction_message = str(v.Citations.Description)
+                self.lvc_retraction_message = str(v.Citations.Description)
                     
         logger.debug("Trig details:")
         logger.debug(f"Dur:  {self.event_duration} s")

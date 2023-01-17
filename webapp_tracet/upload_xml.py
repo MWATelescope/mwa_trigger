@@ -5,11 +5,14 @@ import sys
 import requests
 
 from tracet.parse_xml import parsed_VOEvent
+import logging
+logger = logging.getLogger(__name__)
 
 
 def write_and_upload(xml_string):
     # Parse
     trig = parsed_VOEvent(None, packet=xml_string)
+    logger.debug(trig)
     # Upload
     session = requests.session()
     session.auth = (os.environ['UPLOAD_USER'], os.environ['UPLOAD_PASSWORD'])

@@ -1,7 +1,6 @@
 antares_ranking: null
 dec: -80.0
 dec_dms: '-80:00:00'
-decension_degrees: null
 err: 0.05
 event_duration: 4.096
 event_observed: !!python/object/apply:lxml.objectify.fromstring
@@ -18,6 +17,11 @@ lvc_classification_BBH: null
 lvc_classification_BNS: null
 lvc_classification_NSBH: null
 lvc_classification_Terrestrial: null
+lvc_declination_degrees: null
+lvc_prob_density_tile: null
+lvc_retraction_message: null
+lvc_right_ascension_degrees: null
+lvc_skymap_fits: null
 packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=\"\
   ivo://nasa.gsfc.gcn/SWIFT#BAT_GRB_Pos_772006-7987\" role=\"observation\" version=\"\
   2.0\" xsi:schemaLocation=\"http://www.ivoa.net/xml/VOEvent/v2.0  http://www.ivoa.net/xml/VOEvent/VOEvent-v2.0.xsd\"\
@@ -112,15 +116,11 @@ packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=
   \     <Concept>process.variation.burst;em.gamma</Concept>\n    </Inference>\n  </Why>\n\
   \  <Description>\n    </Description>\n  <original_prefix>voe</original_prefix>\n\
   </VOEvent>\n"
-prob_density_tile: null
 ra: 45.0
 ra_hms: '3:00:00'
-retraction_message: null
-right_ascension_degrees: null
 role: observation
 self_generated_trig_id: false
 sequence_num: null
-skymap_fits: null
 source_name: GRB 170912
 source_type: GRB
 swift_rate_signif: 13.74
