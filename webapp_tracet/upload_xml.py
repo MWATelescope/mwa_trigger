@@ -10,9 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 def write_and_upload(xml_string):
-    # Parse
-    trig = parsed_VOEvent(None, packet=xml_string)
-    logger.debug(trig)
+
     # Upload
     session = requests.session()
     session.auth = (os.environ['UPLOAD_USER'], os.environ['UPLOAD_PASSWORD'])
@@ -22,30 +20,10 @@ def write_and_upload(xml_string):
     else:
         url = 'http://127.0.0.1:8000/event_create/'
 
-    data = {
-        'telescope' : trig.telescope,
-        'xml_packet' : xml_string,
-        'duration' : trig.event_duration,
-        'trig_id' : trig.trig_id,
-        'self_generated_trig_id' : trig.self_generated_trig_id,
-        'sequence_num' : trig.sequence_num,
-        'event_type' : trig.event_type,
-        'role' : trig.role,
-        'ra' : trig.ra,
-        'dec' : trig.dec,
-        'ra_hms' : trig.ra_hms,
-        'dec_dms' : trig.dec_dms,
-        'pos_error' : trig.err,
-        'ignored' : trig.ignore,
-        'source_name' : trig.source_name,
-        'source_type' : trig.source_type,
-        'event_observed' : trig.event_observed,
-        'fermi_most_likely_index' : trig.fermi_most_likely_index,
-        'fermi_detection_prob' : trig.fermi_detection_prob,
-        'swift_rate_signif' : trig.swift_rate_signif,
-        'antares_ranking' : trig.antares_ranking,
-    }
-    r = session.post(url, data=data)
+    # Parse
+    data = parsed_VOEvent(None, packet=xml_string)
+    data.xml_packet = xml_string
+    session.post(url, data=data)
 
 if __name__ == '__main__':
     xml_string = sys.stdin.read()

@@ -55,8 +55,8 @@ def group_trigger(sender, instance, **kwargs):
     if instance.ignored:
         # Event ignored so do nothing
         return
-
-    event_coord = SkyCoord(ra=instance.ra*u.degree, dec=instance.dec*u.degree)
+    if(instance.ra and instance.dec):
+        event_coord = SkyCoord(ra=instance.ra*u.degree, dec=instance.dec*u.degree)
 
     proposal_decisions = ProposalDecision.objects.filter(event_group_id=event_group)
     if proposal_decisions.exists():

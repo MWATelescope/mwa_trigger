@@ -445,6 +445,7 @@ class parsed_VOEvent:
                 self.ignore = True
                 print('Not a real alert so ignore')
                 return
+        logger.debug("this is a test action")
 
         # Check if this is the type of trigger we're looking for
         this_pair = f"{self.telescope}_{self.event_type}"
@@ -507,6 +508,7 @@ class parsed_VOEvent:
         elif self.telescope == "LVC":
             self.event_duration = None
             self.sequence_num = None
+            logger.info("LVC telescope")
 
             if self.event_type == 'EarlyWarning' or self.event_type == 'Preliminary' or self.event_type == 'Initial' or self.event_type == 'Update':
                 # Capture Probabilities of observations for proposals and analysis
@@ -517,6 +519,9 @@ class parsed_VOEvent:
                 self.lvc_classification_Terrestrial = float(v.find(".//Param[@name='Terrestrial']").attrib["value"])
 
             if self.event_type == 'Initial' or self.event_type == 'Update':
+                logger.info("Parsing skymap")
+
+
                 # Initial and Update alerts should contain skymap data as URL
                 self.lvc_skymap_fits = str(v.find(".//Param[@name='skymap_fits']").attrib["value"])
 
@@ -531,6 +536,9 @@ class parsed_VOEvent:
                 level, ipix = ah.uniq_to_level_ipix(uniq)
                 nside = ah.level_to_nside(level)
                 ra, dec = ah.healpix_to_lonlat(ipix, nside, order='nested')
+
+                logger.info("Successfully parsed Skymap")
+
                 self.ra = float(ra.deg)
                 self.dec = float(dec.deg)
 

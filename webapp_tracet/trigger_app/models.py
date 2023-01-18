@@ -240,6 +240,13 @@ class Event(models.Model):
     fermi_detection_prob = models.FloatField(blank=True, null=True)
     swift_rate_signif = models.FloatField(blank=True, null=True)
     antares_ranking = models.IntegerField(blank=True, null=True)
+    lvc_classification_BNS = models.FloatField(blank=True, null=True)
+    lvc_classification_NSBH = models.FloatField(blank=True, null=True)
+    lvc_classification_BBH = models.FloatField(blank=True, null=True)
+    lvc_classification_Terrestrial = models.FloatField(blank=True, null=True)
+    lvc_retraction_message = models.CharField(max_length=10000, blank=True, null=True)
+    lvc_skymap_fits =  models.CharField(max_length=256, blank=True, null=True)
+    lvc_prob_density_tile = models.FloatField(blank=True, null=True)
 
     class Meta:
         ordering = ['-id']
