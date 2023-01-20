@@ -112,7 +112,7 @@ describe('LVC events that don\'t trigger the proposal show as ignored', () => {
 
 describe.only('LVC events that trigger the proposal show as observed', () => {
   it('upload lvc early warning real event and trigger an MWA observation with twilio notifications', () => {
-    const graceDBId = "MS22111s"
+    const graceDBId = "MS44441s"
 
     cy.login()
     cy.visit('/')
