@@ -436,9 +436,14 @@ subgraph NU
 end'''
     else:
         mermaid_script += '''
-  E --> I[Neutrino] --> END'''
+    E --> I[Neutrino] --> END'''
+    if prop_set.source_type == "GW":
+        mermaid_script += f'''
+    E --> H[GW] --> L[Trigger Observation]''' 
+    else:
+        mermaid_script += f'''
+    E --> H[GW] --> END'''
     mermaid_script += '''
-  E --> H[GW] --> END
   style A fill:blue,color:white
   style END fill:red,color:white
   style L fill:green,color:white
@@ -542,12 +547,30 @@ def test_upload_xml(request):
             # Parse and submit the Event
             xml_string = str(request.POST['xml_packet'])
             trig = parse_xml.parsed_VOEvent(None, packet=xml_string)
-            trig.xml_packet = xml_string
-            logger.debug(str(trig))
-            new_event = serializers.EventSerializer(data=trig)
-            if new_event.is_valid():
-                new_event.get_or_create()
-
+            logger.debug(trig.event_observed)
+            logger.debug(type(trig.event_observed))
+            models.Event.objects.get_or_create(
+                telescope=trig.telescope,
+                xml_packet=xml_string,
+                duration=trig.event_duration,
+                trig_id=trig.trig_id,
+                sequence_num=trig.sequence_num,
+                event_type=trig.event_type,
+                role=trig.role,
+                ra=trig.ra,
+                dec=trig.dec,
+                ra_hms=trig.ra_hms,
+                dec_dms=trig.dec_dms,
+                pos_error=trig.err,
+                ignored=trig.ignore,
+                source_name=trig.source_name,
+                source_type=trig.source_type,
+                event_observed=datetime.datetime.strptime(str(trig.event_observed), "%Y-%m-%d %H:%M:%S"),
+                fermi_most_likely_index=trig.fermi_most_likely_index,
+                fermi_detection_prob=trig.fermi_detection_prob,
+                swift_rate_signif=trig.swift_rate_signif,
+                antares_ranking=trig.antares_ranking,
+            )
             return HttpResponseRedirect('/')
     else:
         form = forms.TestEvent()

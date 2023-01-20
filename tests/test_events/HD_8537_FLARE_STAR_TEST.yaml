@@ -3,7 +3,11 @@ dec: 7.4438
 dec_dms: '7:26:37.68'
 err: 0.05
 event_duration: 320.0
-event_observed: 2018-02-08 22:58:59
+event_observed: !!python/object/apply:lxml.objectify.fromstring
+- !!binary |
+  PElTT1RpbWUgeG1sbnM6dm9lPSJodHRwOi8vd3d3Lml2b2EubmV0L3htbC9WT0V2ZW50L3YyLjAi
+  IHhtbG5zOnhzaT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS9YTUxTY2hlbWEtaW5zdGFuY2UiPjIw
+  MTgtMDItMDhUMjI6NTg6NTkuNTU8L0lTT1RpbWU+
 event_type: BAT_GRB_Pos
 fermi_detection_prob: null
 fermi_most_likely_index: null

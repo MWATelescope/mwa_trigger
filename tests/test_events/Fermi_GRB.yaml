@@ -3,7 +3,11 @@ dec: 48.4167
 dec_dms: '48:25:00.12'
 err: 4.7333
 event_duration: 0.512
-event_observed: 2017-11-26 05:38:43
+event_observed: !!python/object/apply:lxml.objectify.fromstring
+- !!binary |
+  PElTT1RpbWUgeG1sbnM6dm9lPSJodHRwOi8vd3d3Lml2b2EubmV0L3htbC9WT0V2ZW50L3YyLjAi
+  IHhtbG5zOnhzaT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS9YTUxTY2hlbWEtaW5zdGFuY2UiPjIw
+  MTctMTEtMjZUMDU6Mzg6NDMuNzE8L0lTT1RpbWU+
 event_type: GBM_Flt_Pos
 fermi_detection_prob: 94
 fermi_most_likely_index: 4

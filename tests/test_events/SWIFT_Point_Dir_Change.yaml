@@ -3,7 +3,11 @@ dec: -72.6159
 dec_dms: '-72:36:57.24'
 err: 0.0
 event_duration: null
-event_observed: 2017-11-28 08:22:38
+event_observed: !!python/object/apply:lxml.objectify.fromstring
+- !!binary |
+  PElTT1RpbWUgeG1sbnM6dm9lPSJodHRwOi8vd3d3Lml2b2EubmV0L3htbC9WT0V2ZW50L3YyLjAi
+  IHhtbG5zOnhzaT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS9YTUxTY2hlbWEtaW5zdGFuY2UiPjIw
+  MTctMTEtMjhUMDg6MjI6MzguMDA8L0lTT1RpbWU+
 event_type: Point_Dir
 fermi_detection_prob: null
 fermi_most_likely_index: null

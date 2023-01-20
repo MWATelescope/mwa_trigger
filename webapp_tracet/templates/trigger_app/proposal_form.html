@@ -48,8 +48,10 @@
         <hr>
         <h2>Event Source Settings</h2>
         {% for error in form.source_type.errors %}<div class="alert alert-danger"><strong>{{ error|escape }}</strong></div>{% endfor %}
-        <h3>Source duration</h3>
-        <p>{{ form.event_any_duration.label_tag }}{% help_wrap form.event_any_duration.help_text %}{{ form.event_any_duration }}</p>
+        <div id="source_duration">
+            <h3>Source duration</h3>
+            <p>{{ form.event_any_duration.label_tag }}{% help_wrap form.event_any_duration.help_text %}{{ form.event_any_duration }}</p>
+        </div>
         <div id="durations">
         <table>
             <tr><td>Trigger Duration Range (s)  {% help_wrap 'The inclusive duration range of an event that will automatically trigger an observation.' %}</td><td>{{ form.event_min_duration }}</td><td>{{ form.event_max_duration }}</td></tr>
@@ -73,6 +75,16 @@
             {{ form.maximum_position_uncertainty.label_tag }}{% help_wrap form.maximum_position_uncertainty.help_text %}{{ form.maximum_position_uncertainty }}
             {{ form.antares_min_ranking.label_tag }}{% help_wrap form.antares_min_ranking.help_text %}{{ form.antares_min_ranking }}
         </div>
+        <div id="lvc_thres">
+            <table>
+                <tr><td>{{ form.maximum_terrestial_probability.label_tag }}{% help_wrap form.maximum_terrestial_probability.help_text %}{{ form.maximum_terrestial_probability }}</td></tr>
+                <tr><td>{{ form.minimum_neutron_star_probability.label_tag }}{% help_wrap form.minimum_neutron_star_probability.help_text %}{{ form.minimum_neutron_star_probability }}</td></tr>
+                <tr><td>{{ form.minimum_mass_gap_probability.label_tag }}{% help_wrap form.minimum_mass_gap_probability.help_text %}{{ form.minimum_mass_gap_probability }}</td></tr>
+                <tr><td>{{ form.start_observation_at_high_sensitivity.label_tag }}{% help_wrap form.start_observation_at_high_sensitivity.help_text %}{{ form.start_observation_at_high_sensitivity }}</td></tr>
+                <tr><td>{{ form.update_observation_using_skymap.label_tag }}{% help_wrap form.update_observation_using_skymap.help_text %}{{ form.update_observation_using_skymap }}</td></tr>
+                <tr><td>{{ form.cancel_observation_on_retraction.label_tag }}{% help_wrap form.cancel_observation_on_retraction.help_text %}{{ form.cancel_observation_on_retraction }}</td></tr>
+            </table>
+        </div> 
 
         <hr>
         <h2>Target Telescope Settings</h2>
@@ -261,9 +273,11 @@
                     $('#antares_thres').hide();
                 }
                 if ( ($("#event_telescope").val() === "" || $("#event_telescope").val() === "LVC") && $("#id_source_type").val() == "GW" ) {
-                    $('#position_thres_').hide();
+                    $('#lvc_thres').show();
+                    $('#source_duration').hide();
                 } else {
-                    $('#position_thres').show();
+                    $('#lvc_thres').hide();
+                    $('#source_duration').show();
                 }
             }
             threshold_display();

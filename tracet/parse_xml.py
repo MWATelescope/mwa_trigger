@@ -427,8 +427,7 @@ class parsed_VOEvent:
         logger.debug(f"Trig position: {self.ra} {self.dec} {self.err}")
 
         # Get observed time as UTC
-        voevent_event_observed_utc = voeventparse.convenience.get_event_time_as_utc(v)
-        self.event_observed  = datetime.datetime.strptime(str(voevent_event_observed_utc)[:19], "%Y-%m-%d %H:%M:%S")
+        self.event_observed = v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Time.TimeInstant.ISOTime
 
         # Check the voevent role (normally observation or test)
         self.role = v.attrib["role"]
@@ -436,7 +435,6 @@ class parsed_VOEvent:
             # Just a test observation so ignore it
             self.ignore = True
             print('Just a test observation so ignore it')
-            return
 
         # Antares has a flag for real alerts that is worth checking
         elif v.find(".//Param[@name='isRealAlert']") is not None:
@@ -512,16 +510,12 @@ class parsed_VOEvent:
 
             if self.event_type == 'EarlyWarning' or self.event_type == 'Preliminary' or self.event_type == 'Initial' or self.event_type == 'Update':
                 # Capture Probabilities of observations for proposals and analysis
-                self.false_alarm_rate_hz = str(v.find(".//Param[@name='FAR']").attrib["value"])
-                self.lvc_classification_BNS = float(v.find(".//Param[@name='BNS']").attrib["value"])
-                self.lvc_classification_NSBH = float(v.find(".//Param[@name='NSBH']").attrib["value"])
-                self.lvc_classification_BBH = float(v.find(".//Param[@name='BBH']").attrib["value"])
-                self.lvc_classification_Terrestrial = float(v.find(".//Param[@name='Terrestrial']").attrib["value"])
+                self.mass_gap_probability = float(v.find(".//Param[@name='HasMassGap']").attrib["value"])
+                self.neutron_star_probability = float(v.find(".//Param[@name='HasNS']").attrib["value"])
+                self.terrestial_probability = float(v.find(".//Param[@name='Terrestrial']").attrib["value"])
 
             if self.event_type == 'Initial' or self.event_type == 'Update':
                 logger.info("Parsing skymap")
-
-
                 # Initial and Update alerts should contain skymap data as URL
                 self.lvc_skymap_fits = str(v.find(".//Param[@name='skymap_fits']").attrib["value"])
 

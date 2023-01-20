@@ -7,7 +7,7 @@ from django.conf import settings
 from .models import UserAlerts, AlertPermission, Event, PossibleEventAssociation, Status, ProposalSettings, ProposalDecision, Observations, EventGroup
 from .telescope_observe import trigger_observation
 
-from tracet.trigger_logic import worth_observing_grb, worth_observing_nu
+from tracet.trigger_logic import worth_observing_grb, worth_observing_nu, worth_observing_gw
 
 import os
 from twilio.rest import Client
@@ -232,7 +232,7 @@ def proposal_worth_observing(
     if prop_dec.pos_error == 0.0:
         # Ignore the inaccurate event
         decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {voevent.id}: The Events positions uncertainty is 0.0 which is likely an error so not observing. \n"
-    elif voevent.pos_error > prop_dec.proposal.maximum_position_uncertainty:
+    elif voevent.pos_error and (voevent.pos_error > prop_dec.proposal.maximum_position_uncertainty):
         # Ignore the inaccurate event
         decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {voevent.id}: The Events positions uncertainty ({voevent.pos_error:.4f} deg) is greater than {prop_dec.proposal.maximum_position_uncertainty:.4f} so not observing. \n"
     else:
@@ -286,6 +286,24 @@ def proposal_worth_observing(
                 )
                 proj_source_bool = True
 
+            elif prop_dec.proposal.source_type == "GW" and voevent.source_type == "GW":
+                # This proposal wants to observe GRBs so check if it is worth observing
+                trigger_bool, debug_bool, pending_bool, decision_reason_log = worth_observing_gw(
+                    # event values
+                    # terrestial_probability=voevent.lvc_classification_Terrestrial,
+                    # neutron_star_probability=voevent.lvc_classification_Terrestrial,
+                    # mass_gap_probability=
+                    # event_type=voevent.event_type
+                    # telescope=voevent.telescope,
+                    # Thresholds
+                    # maximum_terrestial_probability=prop_dec.proposal.antares_min_ranking,
+                    # minimum_neutron_star_probability=,
+                    # minimum_mass_gap_probability=,
+                    # # Other
+                    # decision_reason_log=decision_reason_log,
+                    # event_id=voevent.id,
+                )
+                proj_source_bool = True
             # TODO set up other source types here
 
             if not proj_source_bool:

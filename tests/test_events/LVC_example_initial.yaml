@@ -3,20 +3,25 @@ dec: -17.856895095545468
 dec_dms: '-17:51:24.82234396'
 err: null
 event_duration: null
-event_observed: 2018-11-01 22:22:46
+event_observed: !!python/object/apply:lxml.objectify.fromstring
+- !!binary |
+  PElTT1RpbWUgeG1sbnM6eHNpPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxL1hNTFNjaGVtYS1pbnN0
+  YW5jZSIgeG1sbnM6dm9lPSJodHRwOi8vd3d3Lml2b2EubmV0L3htbC9WT0V2ZW50L3YyLjAiPjIw
+  MTgtMTEtMDFUMjI6MjI6NDYuNjU0NDM3WjwvSVNPVGltZT4=
 event_type: Initial
-false_alarm_rate_hz: '9.11069936486e-14'
 fermi_detection_prob: null
 fermi_most_likely_index: null
 grb_ident: null
 ignore: false
-lvc_classification_BBH: 0.03
-lvc_classification_BNS: 0.95
-lvc_classification_NSBH: 0.01
-lvc_classification_Terrestrial: 0.01
+lvc_classification_BBH: null
+lvc_classification_BNS: null
+lvc_classification_NSBH: null
+lvc_classification_Terrestrial: null
 lvc_prob_density_tile: 0.0782516470191411
 lvc_retraction_message: null
 lvc_skymap_fits: https://emfollow.docs.ligo.org/userguide/_static/bayestar.multiorder.fits,0
+mass_gap_probability: 0.01
+neutron_star_probability: 0.95
 packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"\
   http://www.ivoa.net/xml/VOEvent/v2.0 http://www.ivoa.net/xml/VOEvent/VOEvent-v2.0.xsd\"\
   \ version=\"2.0\" role=\"observation\" ivorn=\"ivo://gwnet/LVC#MS181101ab-3-Initial\"\
@@ -104,6 +109,7 @@ source_name: null
 source_type: GW
 swift_rate_signif: null
 telescope: LVC
+terrestial_probability: 0.01
 trig_id: MS181101ab
 trig_pairs:
 - SWIFT_BAT_GRB_Pos

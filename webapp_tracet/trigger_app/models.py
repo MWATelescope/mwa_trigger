@@ -77,17 +77,15 @@ class ProposalSettings(models.Model):
     antares_min_ranking = models.IntegerField(help_text="The minimum rating (1 is best) to observe for Antares sources.", default=2)
     repointing_limit = models.FloatField(verbose_name="Repointing Limit (deg)", help_text="An updated position must be at least this far away from a current observation before repointing (in degrees).", default=10.)
     testing = models.BooleanField(default=False, help_text="If testing, will not schedule any observations.")
-    source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, verbose_name="What type of source to will you trigger on?")
+    source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, verbose_name="What type of source will you trigger on?")
 
     # GW settings
-    # maximum_false_alarm_rate_hz = models.FloatField(verbose_name="Maximum False alarm rate for GW candidates with this strength or greater (Hz)", help_text="A Event must have less than or equal to this rate to be observed.", default=0.05)
-    # SOURCE_CHOICES = (
-    #     (GRB, 'Gamma-ray burst'),
-    #     (FS, 'Flare star'),
-    #     (NU, 'Neutrino'),
-    #     (GW, 'Gravitational wave'),
-    # )
-    # Instruments_used_for_event = 
+    maximum_terrestial_probability = models.FloatField(verbose_name="Maximum probability for event to be terrestial", help_text="Limit on the probability that the source is terrestrial (i.e., a background noise fluctuation or a glitch)", default=0.95)
+    minimum_neutron_star_probability = models.FloatField(verbose_name="Minimum neutron star probability for observation", help_text="Limit on the probability that at least one object in the binary has a mass that is less than 3 solar masses", default=0.01)
+    minimum_mass_gap_probability = models.FloatField(verbose_name="Minimum mass gap probability for observation", help_text="Limit on the probability that at least one object in the binary has a mass between 3 and 5 solar masses", default=0.01)
+    start_observation_at_high_sensitivity = models.BooleanField(verbose_name="Start observations at high sensitivity area using MWA sub array on early alerts", default=True, help_text="On early warnings there will not be positional data so start MWA in sub array mode at the high sensitivity area over the indian ocean")
+    update_observation_using_skymap = models.BooleanField(verbose_name="Update observations with MWA full or sub array on alerts containing positional data",default=True, help_text="On initial and update alerts there will be positional data so start MWA in full array mode at the best position for observation, or cancel if bad position for MWA")
+    cancel_observation_on_retraction = models.BooleanField(default=True, help_text="Cancel observations for this event if retraction notice sent by LVC")
 
     # MWA settings
     mwa_freqspecs = models.CharField(default="144,24", max_length=256, verbose_name="MWA frequency specifications", help_text="The frequency channels IDs for the MWA to observe at.")
@@ -240,10 +238,9 @@ class Event(models.Model):
     fermi_detection_prob = models.FloatField(blank=True, null=True)
     swift_rate_signif = models.FloatField(blank=True, null=True)
     antares_ranking = models.IntegerField(blank=True, null=True)
-    lvc_classification_BNS = models.FloatField(blank=True, null=True)
-    lvc_classification_NSBH = models.FloatField(blank=True, null=True)
-    lvc_classification_BBH = models.FloatField(blank=True, null=True)
-    lvc_classification_Terrestrial = models.FloatField(blank=True, null=True)
+    terrestial_probability = models.FloatField(blank=True, null=True)
+    neutron_star_probability = models.FloatField(blank=True, null=True)
+    mass_gap_probability = models.FloatField(blank=True, null=True)
     lvc_retraction_message = models.CharField(max_length=10000, blank=True, null=True)
     lvc_skymap_fits =  models.CharField(max_length=256, blank=True, null=True)
     lvc_prob_density_tile = models.FloatField(blank=True, null=True)

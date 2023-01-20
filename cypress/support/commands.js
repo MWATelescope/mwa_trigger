@@ -10,7 +10,36 @@
 //
 //
 // -- This is a parent command --
-// Cypress.Commands.add('login', (email, password) => { ... })
+Cypress.Commands.add('login', () => {
+    return cy.request({
+      url: '/accounts/login/',
+      // cookies are in the HTTP headers, so HEAD suffices
+    }).then(() => {
+  
+      cy.getCookie('sessionid').should('not.exist')
+      cy.getCookie('csrftoken').its('value').then((token) => {
+        let oldToken = token
+        console.log
+        cy.request({
+          url: '/accounts/login/',
+          method: 'POST',
+          form: true,
+          followRedirect: false, // no need to retrieve the page after login
+          body: {
+            username: Cypress.env('UPLOAD_USER'),
+            password: Cypress.env('UPLOAD_PASSWORD'),
+            csrfmiddlewaretoken: token
+          }
+        }).then(() => {
+  
+          cy.getCookie('sessionid').should('exist')
+          return cy.getCookie('csrftoken').its('value')
+  
+        })
+      })
+    })
+  
+  })
 //
 //
 // -- This is a child command --
