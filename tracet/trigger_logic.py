@@ -181,6 +181,7 @@ def worth_observing_gw(
         terrestial_probability=None,
         neutron_star_probability=None,
         mass_gap_probability=None,
+        start_observation_at_high_sensitivity=None,
         event_type=None,
         telescope=None,
         # Thresholds
@@ -240,6 +241,9 @@ def worth_observing_gw(
         elif mass_gap_probability < minimum_mass_gap_probability:
             debug_bool = True
             decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The mass gap probability ({mass_gap_probability}) is less than {minimum_mass_gap_probability} so not triggering. \n"
+        elif (event_type == 'EarlyWarning' or event_type == 'Preliminary') and not start_observation_at_high_sensitivity:
+            debug_bool = True
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: Observing early and preliminary events is ({start_observation_at_high_sensitivity}) so not triggering. \n"
         else:
             trigger_bool = True
             decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The probability looks good so triggering. \n"

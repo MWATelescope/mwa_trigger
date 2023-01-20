@@ -77,6 +77,7 @@ def group_trigger(sender, instance, **kwargs):
                     # Don't update pos_error if zero, assume it's a null
                     prop_dec.pos_error = instance.pos_error
                     prop_dec.decision_reason = f"{prop_dec.decision_reason}{datetime.datetime.utcnow()}: Event ID {instance.id}: Checking new Event. \n",
+              
                 proposal_worth_observing(
                     prop_dec,
                     instance,
@@ -116,7 +117,7 @@ def group_trigger(sender, instance, **kwargs):
                     # send off alert messages to users and admins
                     send_all_alerts(True, debug_bool, False, prop_dec)
 
-        if instance.pos_error < event_group.pos_error and instance.pos_error != 0.:
+        if instance.pos_error and instance.pos_error < event_group.pos_error and instance.pos_error != 0.:
             # Updated event group's best position
             event_group.ra = instance.ra
             event_group.dec = instance.dec
@@ -145,7 +146,7 @@ def group_trigger(sender, instance, **kwargs):
                 dec=instance.dec,
                 ra_hms=instance.ra_hms,
                 dec_dms=instance.dec_dms,
-                pos_error=instance.pos_error,
+                pos_error=instance.pos_error,                
             )
             # Check if it's worth triggering an obs
             proposal_worth_observing(prop_dec, instance)
@@ -154,57 +155,57 @@ def group_trigger(sender, instance, **kwargs):
         event_group.ignored = False
         event_group.save()
 
-    # ------------------------------------------------------------------------------
-    # Look for associated events (in time and space) which includes other telescopes
-    # ------------------------------------------------------------------------------
+    # # ------------------------------------------------------------------------------
+    # # Look for associated events (in time and space) which includes other telescopes
+    # # ------------------------------------------------------------------------------
 
-    # Time range to considered the same event (in seconds)
-    dt = 100
-    early_dt = instance.event_observed - datetime.timedelta(seconds=dt)
-    late_dt = instance.event_observed + datetime.timedelta(seconds=dt)
+    # # Time range to considered the same event (in seconds)
+    # dt = 100
+    # early_dt = instance.event_observed - datetime.timedelta(seconds=dt)
+    # late_dt = instance.event_observed + datetime.timedelta(seconds=dt)
 
-    # Check if the Event was observed after the earliest event observed - 100s
-    #                               and before the latest  event observed + 100s
-    association_exists = False
-    poss_events = PossibleEventAssociation.objects.filter(earliest_event_observed__lt=late_dt,
-                                                      latest_event_observed__gt=early_dt)
-    if poss_events.exists():
-        for trig_event in poss_events:
-            # Calculate 95% confidence interval seperation
-            combined_err = np.sqrt(instance.pos_error**2 + trig_event.pos_error**2)
-            c95_sep = norm.interval(0.95, scale=combined_err)[1]
+    # # Check if the Event was observed after the earliest event observed - 100s
+    # #                               and before the latest  event observed + 100s
+    # association_exists = False
+    # poss_events = PossibleEventAssociation.objects.filter(earliest_event_observed__lt=late_dt,
+    #                                                   latest_event_observed__gt=early_dt)
+    # if poss_events.exists():
+    #     for trig_event in poss_events:
+    #         # Calculate 95% confidence interval seperation
+    #         combined_err = np.sqrt(instance.pos_error**2 + trig_event.pos_error**2)
+    #         c95_sep = norm.interval(0.95, scale=combined_err)[1]
 
-            # Now make sure they're spacially similar
-            trigger_coord = SkyCoord(ra=trig_event.ra*u.degree, dec=trig_event.dec*u.degree)
-            if event_coord.separation(trigger_coord).deg < c95_sep:
-                # Event is within the 95% confidence interval so consider them the same source/event
-                association_exists = True
-                prev_trig = trig_event
+    #         # Now make sure they're spacially similar
+    #         trigger_coord = SkyCoord(ra=trig_event.ra*u.degree, dec=trig_event.dec*u.degree)
+    #         if event_coord.separation(trigger_coord).deg < c95_sep:
+    #             # Event is within the 95% confidence interval so consider them the same source/event
+    #             association_exists = True
+    #             prev_trig = trig_event
 
-    if association_exists:
-        # Trigger event already exists so link the Event (have to update this way to prevent save() triggering this function again)
-        Event.objects.filter(id=instance.id).update(associated_event_id=prev_trig)
+    # if association_exists:
+    #     # Trigger event already exists so link the Event (have to update this way to prevent save() triggering this function again)
+    #     Event.objects.filter(id=instance.id).update(associated_event_id=prev_trig)
 
-        # TODO update the PossibleEventAssociation ra and dec if the position is better.
-        # Update latest_event_observed
-        for trig_event in poss_events:
-            trig_event.latest_event_observed = instance.event_observed
-            trig_event.save()
+    #     # TODO update the PossibleEventAssociation ra and dec if the position is better.
+    #     # Update latest_event_observed
+    #     for trig_event in poss_events:
+    #         trig_event.latest_event_observed = instance.event_observed
+    #         trig_event.save()
 
-    else:
+    # else:
         # Make a new trigger event
-        new_trig = PossibleEventAssociation.objects.create(
-            ra=instance.ra,
-            dec=instance.dec,
-            ra_hms=instance.ra_hms,
-            dec_dms=instance.dec_dms,
-            pos_error=instance.pos_error,
-            source_type=instance.source_type,
-            earliest_event_observed=instance.event_observed,
-            latest_event_observed=instance.event_observed,
-        )
-        # Link the Event (have to update this way to prevent save() triggering this function again)
-        Event.objects.filter(id=instance.id).update(associated_event_id=new_trig)
+    new_trig = PossibleEventAssociation.objects.create(
+        ra=instance.ra,
+        dec=instance.dec,
+        ra_hms=instance.ra_hms,
+        dec_dms=instance.dec_dms,
+        pos_error=instance.pos_error,
+        source_type=instance.source_type,
+        earliest_event_observed=instance.event_observed,
+        latest_event_observed=instance.event_observed,
+    )
+    # Link the Event (have to update this way to prevent save() triggering this function again)
+    Event.objects.filter(id=instance.id).update(associated_event_id=new_trig)
 
 
 def proposal_worth_observing(
@@ -289,19 +290,19 @@ def proposal_worth_observing(
             elif prop_dec.proposal.source_type == "GW" and voevent.source_type == "GW":
                 # This proposal wants to observe GRBs so check if it is worth observing
                 trigger_bool, debug_bool, pending_bool, decision_reason_log = worth_observing_gw(
-                    # event values
-                    # terrestial_probability=voevent.lvc_classification_Terrestrial,
-                    # neutron_star_probability=voevent.lvc_classification_Terrestrial,
-                    # mass_gap_probability=
-                    # event_type=voevent.event_type
-                    # telescope=voevent.telescope,
-                    # Thresholds
-                    # maximum_terrestial_probability=prop_dec.proposal.antares_min_ranking,
-                    # minimum_neutron_star_probability=,
-                    # minimum_mass_gap_probability=,
-                    # # Other
-                    # decision_reason_log=decision_reason_log,
-                    # event_id=voevent.id,
+                    #event values
+                    terrestial_probability=voevent.terrestial_probability,
+                    neutron_star_probability=voevent.neutron_star_probability,
+                    mass_gap_probability=voevent.mass_gap_probability,
+                    event_type=voevent.event_type,
+                    telescope=voevent.telescope,
+                    #Thresholds
+                    maximum_terrestial_probability=prop_dec.proposal.maximum_terrestial_probability,
+                    minimum_neutron_star_probability=prop_dec.proposal.minimum_neutron_star_probability,
+                    minimum_mass_gap_probability=prop_dec.proposal.minimum_mass_gap_probability,
+                    # Other
+                    decision_reason_log=decision_reason_log,
+                    event_id=voevent.id,
                 )
                 proj_source_bool = True
             # TODO set up other source types here
@@ -357,24 +358,25 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
         lat=telescope.lat*u.deg,
         height=telescope.height*u.m
     )
-    obs_source = SkyCoord(
-        proposal_decision_model.ra,
-        proposal_decision_model.dec,
-        #equinox='J2000',
-        unit=(u.deg, u.deg)
-    )
-    # Convert from RA/Dec to Alt/Az
-    delta_24h = np.linspace(0, 1440, 288)*u.min # 24 hours in 5 min increments
-    next_24h = obstime=Time.now()+delta_24h
-    obs_source_altaz = obs_source.transform_to(AltAz(obstime=next_24h, location=location))
-    # capture circumpolar source case
-    set_time_utc = None
-    for altaz, time in zip(obs_source_altaz, next_24h):
-        if altaz.alt.deg <1.:
-            # source below horizon so record time
-            set_time_utc = time
-            break
-
+    if(proposal_decision_model.ra and proposal_decision_model.dec):
+        obs_source = SkyCoord(
+            proposal_decision_model.ra,
+            proposal_decision_model.dec,
+            #equinox='J2000',
+            unit=(u.deg, u.deg)
+        )
+        # Convert from RA/Dec to Alt/Az
+        delta_24h = np.linspace(0, 1440, 288)*u.min # 24 hours in 5 min increments
+        next_24h = obstime=Time.now()+delta_24h
+        obs_source_altaz = obs_source.transform_to(AltAz(obstime=next_24h, location=location))
+        # capture circumpolar source case
+        set_time_utc = None
+        for altaz, time in zip(obs_source_altaz, next_24h):
+            if altaz.alt.deg <1.:
+                # source below horizon so record time
+                set_time_utc = time
+                break
+  
     # Get all admin alert permissions for this project
     alert_permissions = AlertPermission.objects.filter(proposal=proposal_decision_model.proposal)
     for ap in alert_permissions:

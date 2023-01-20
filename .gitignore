@@ -13,3 +13,4 @@ webapp_tracet/uwsgi-emperor.log
 webapp_tracet/webapp_tracet.sock
 docs/html/*
 .env
+.vscode

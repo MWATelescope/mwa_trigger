@@ -49,6 +49,11 @@ def trigger_observation(
             lat=telescope.lat*u.deg,
             height=telescope.height*u.m
         )
+        if proposal_decision_model.proposal.start_observation_at_high_sensitivity and not (proposal_decision_model.ra or proposal_decision_model.dec):
+            #TODO: Replace with indian ocean high sensitivity area
+            proposal_decision_model.ra = 157.4319
+            proposal_decision_model.dec = -35.4392
+
         obs_source = SkyCoord(
             proposal_decision_model.ra,
             proposal_decision_model.dec,
