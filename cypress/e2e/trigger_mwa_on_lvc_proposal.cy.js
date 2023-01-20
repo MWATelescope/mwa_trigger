@@ -50,7 +50,7 @@ describe.skip(`LVC events are grouped by id with source type, event type, Classi
 })
 
 describe.skip('User can create proposal for MWA observations using LVC events', () => {
-  it('create and view proposal', () => { 
+  it('create and view proposal', () => {
 
     const proposalId = "testMWALVC"
     const proposalDescription = "This proposal tests MWA observation LVC triggers"
@@ -58,7 +58,7 @@ describe.skip('User can create proposal for MWA observations using LVC events', 
     cy.login()
     cy.visit('/')
     cy.wait(1000)
-    
+
     cy.get("[data-testid='nav-proposal-settings']").click()
     cy.get("[data-testid='drop-create-proposal']").click()
     cy.get("#id_proposal_id").type(proposalId)
@@ -78,31 +78,64 @@ describe.skip('User can create proposal for MWA observations using LVC events', 
   })
 })
 
-describe.skip('LVC events that don\'t trigger the proposal show as ignored', () => {
-  it('passes', () => {
-    it('upload lvc test event', () => { 
-      const graceDBId = "MS11111s"
+describe('LVC events that don\'t trigger the proposal show as ignored', () => {
+  it('upload lvc early warning real event and get ignored because terrestial is > 95', () => {
+    const graceDBId = "MS22111s"
 
-      cy.login()
-      cy.visit('/')
+    cy.login()
+    cy.visit('/')
+    cy.wait(1000)
+
+    //upload lvc "real" event that we don't want to trigger on because terrestial > 95
+    cy.fixture('LVC_example_early_warning_real_ignore.txt').then((event1) => {
+      cy.get('[data-testid="nav-testing"]').click({ force: true })
+      cy.get('[class="form-control"]').invoke('val', (event1.replaceAll("MS181101ab", graceDBId)))
       cy.wait(1000)
-  
-      //upload lvc test event
-      cy.fixture('LVC_example_early_warning_real.txt').then((event1) => {
-        cy.get('[data-testid="nav-testing"]').click({ force: true })
-        cy.get('[class="form-control"]').invoke('val', (event1.replaceAll("MS181101ab", graceDBId)))
-        cy.wait(1000)
-        cy.get("[type='submit']").click()
-        cy.wait(2000)
-      })
+      cy.get("[type='submit']").click()
+      cy.wait(2000)
     })
-    it('proposal result shows event ignored', () => { })
+    //proposal result shows event ignored
+    cy.contains(graceDBId).parent('tr').within(() => {
+      cy.get('td').eq(5).contains('GW')
+      cy.get('td').eq(7).contains('Ignored')
+
+    })
+    cy.get("[data-testid='nav-logs']").click()
+    cy.get("[data-testid='drop-logs-proposals']").click()
+    cy.contains("The terrestial probability (0.96) is greater than 0.95 so not triggering.")
+
+    cy.wait(5000)
+
+
   })
 })
 
-describe('LVC events that trigger the proposal show as observed', () => {
-  it('upload lvc test event', () => { })
-  it('proposal result triggers observation', () => { })
-  it('send observation request to MWA', () => { })
-  it('send alert data to Twilio', () => { })
+describe.only('LVC events that trigger the proposal show as observed', () => {
+  it('upload lvc early warning real event and trigger an MWA observation with twilio notifications', () => {
+    const graceDBId = "MS22111s"
+
+    cy.login()
+    cy.visit('/')
+    cy.wait(1000)
+
+    //upload lvc "real" event that we want to trigger on
+    cy.fixture('LVC_example_early_warning_real_promising.txt').then((event1) => {
+      cy.get('[data-testid="nav-testing"]').click({ force: true })
+      cy.get('[class="form-control"]').invoke('val', (event1.replaceAll("MS181101ab", graceDBId)))
+      cy.wait(1000)
+      cy.get("[type='submit']").click()
+      cy.wait(2000)
+    })
+    //proposal result shows event triggered
+    cy.contains(graceDBId).parent('tr').within(() => {
+      cy.get('td').eq(5).contains('GW')
+      // cy.get('td').eq(7).contains('Ignored')
+
+    })
+    cy.get("[data-testid='nav-logs']").click()
+    cy.get("[data-testid='drop-logs-proposals']").click()
+    // cy.contains("The terrestial probability (0.96) is greater than 0.95 so not triggering.")
+    cy.wait(5000)
+
+  })
 })
