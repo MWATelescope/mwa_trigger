@@ -309,6 +309,8 @@ class parsed_VOEvent:
         The contents of a sky map (shows GW probability) in a multi-order FITS format as a Base64-encoded string.
     lvc_prob_density_tile : `float`
         Shows GW probability of the hights prob tile in the skymap
+    lvc_skymap_file : `binary`
+        Skymap file from url
     """
     def __init__(self, xml, packet=None, trig_pairs=None):
         self.xml = xml
@@ -339,6 +341,7 @@ class parsed_VOEvent:
         self.lvc_retraction_message = None
         self.lvc_skymap_fits = None
         self.lvc_prob_density_tile = None
+        self.lvc_skymap_file = None
 
         if self.trig_pairs is None:
             # use defaults
@@ -507,9 +510,11 @@ class parsed_VOEvent:
                 with urllib.request.urlopen(url) as response:
                     body = response.read()
                 
+                self.lvc_skymap_file = body
+
                 with open("skymap.fits", mode="wb") as skymap_file:
                     skymap_file.write(body)
-                
+
                 skymap = Table.read("skymap.fits")
                 i = np.argmax(skymap['PROBDENSITY'])
                 self.lvc_prob_density_tile = float(skymap[i]['PROBDENSITY'] * (np.pi / 180)**2)

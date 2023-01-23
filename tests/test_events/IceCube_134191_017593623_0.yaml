@@ -19,6 +19,7 @@ lvc_classification_NSBH: null
 lvc_classification_Terrestrial: null
 lvc_prob_density_tile: null
 lvc_retraction_message: null
+lvc_skymap_file: null
 lvc_skymap_fits: null
 packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=\"\
   ivo://nasa.gsfc.gcn/AMON#ICECUBE_GOLD_Event2020-06-15T14:49:17.37_24_134191_017593623_0\"\

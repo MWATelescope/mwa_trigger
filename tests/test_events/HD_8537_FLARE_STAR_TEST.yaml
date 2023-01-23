@@ -19,6 +19,7 @@ lvc_classification_NSBH: null
 lvc_classification_Terrestrial: null
 lvc_prob_density_tile: null
 lvc_retraction_message: null
+lvc_skymap_file: null
 lvc_skymap_fits: null
 packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=\"\
   ivo://nasa.gsfc.gcn/SWIFT#BAT_GRB_Pos_809217-378\" role=\"observation\" version=\"\

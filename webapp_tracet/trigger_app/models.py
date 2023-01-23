@@ -190,6 +190,8 @@ class ProposalDecision(models.Model):
     duration = models.FloatField(blank=True, null=True)
     ra = models.FloatField(blank=True, null=True)
     dec = models.FloatField(blank=True, null=True)
+    alt = models.FloatField(blank=True, null=True)
+    az = models.FloatField(blank=True, null=True)
     ra_hms = models.CharField(max_length=32, blank=True, null=True)
     dec_dms = models.CharField(max_length=32, blank=True, null=True)
     pos_error = models.FloatField(blank=True, null=True)

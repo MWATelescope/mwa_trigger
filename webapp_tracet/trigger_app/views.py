@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, InvalidPage
 import django_filters
 from django.forms import DateTimeInput
+from django.core.files import File
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -591,7 +592,8 @@ def test_upload_xml(request):
                 antares_ranking=trig.antares_ranking,
                 terrestial_probability=trig.terrestial_probability,
                 neutron_star_probability=trig.neutron_star_probability,
-                mass_gap_probability=trig.mass_gap_probability
+                mass_gap_probability=trig.mass_gap_probability,
+                lvc_skymap_file = File(trig.lvc_skymap_file)
             )
             return HttpResponseRedirect('/')
     else:

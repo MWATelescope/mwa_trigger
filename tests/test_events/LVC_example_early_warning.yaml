@@ -19,6 +19,7 @@ lvc_classification_NSBH: null
 lvc_classification_Terrestrial: null
 lvc_prob_density_tile: null
 lvc_retraction_message: null
+lvc_skymap_file: null
 lvc_skymap_fits: null
 mass_gap_probability: 0.01
 neutron_star_probability: 0.95

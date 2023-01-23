@@ -19,6 +19,7 @@ lvc_classification_NSBH: null
 lvc_classification_Terrestrial: null
 lvc_prob_density_tile: null
 lvc_retraction_message: null
+lvc_skymap_file: null
 lvc_skymap_fits: null
 packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=\"\
   ivo://nasa.gsfc.gcn/Fermi#GBM_Flt_Pos_2017-11-26T05:38:43.71_533367528_46-276\"\

@@ -19,6 +19,7 @@ lvc_classification_NSBH: null
 lvc_classification_Terrestrial: null
 lvc_prob_density_tile: null
 lvc_retraction_message: Determined to not be a viable GW event candidate
+lvc_skymap_file: null
 lvc_skymap_fits: null
 packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"\
   http://www.ivoa.net/xml/VOEvent/v2.0 http://www.ivoa.net/xml/VOEvent/VOEvent-v2.0.xsd\"\
