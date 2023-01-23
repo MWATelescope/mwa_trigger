@@ -141,8 +141,8 @@
       <td>{% if object.source_name  is not None %} {{ object.source_name }}  {% endif %}</td>
       <td>{% if object.sequence_num is not None %} {{ object.sequence_num }} {% endif %}</td>
       <td>{% if object.duration     is not None %} {{ object.duration }}     {% endif %}</td>
-      <td>{% if object.ra_hms       is not None %} {{ object.ra_hms }}       {% endif %}</td>
-      <td>{% if object.dec_dms      is not None %} {{ object.dec_dms }}      {% endif %}</td>
+      <td>{% if object.ra_hms       is not None %} {{ object.ra_hms|truncatechars:12 }}       {% endif %}</td>
+      <td>{% if object.dec_dms      is not None %} {{ object.dec_dms|truncatechars:12 }}      {% endif %}</td>
       <td>
       {% if object.pos_error    is not None %}
         {% if poserr_unit == "deg" %}

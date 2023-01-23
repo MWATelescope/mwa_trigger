@@ -169,7 +169,7 @@ def group_trigger(sender, instance, **kwargs):
     association_exists = False
     poss_events = PossibleEventAssociation.objects.filter(earliest_event_observed__lt=late_dt,
                                                       latest_event_observed__gt=early_dt)
-    if poss_events.exists():
+    if poss_events.exists() and instance.pos_error:
         for trig_event in poss_events:
             # Calculate 95% confidence interval seperation
             combined_err = np.sqrt(instance.pos_error**2 + trig_event.pos_error**2)

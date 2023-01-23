@@ -11,6 +11,7 @@ webapp_tracet/twistd.pid
 webapp_tracet/static_host/
 webapp_tracet/uwsgi-emperor.log
 webapp_tracet/webapp_tracet.sock
+webapp_tracet/media
 docs/html/*
 .env
 .vscode

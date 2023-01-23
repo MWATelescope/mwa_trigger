@@ -1,8 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
+from django.conf import settings
 
-fs = FileSystemStorage(location='/media/skymaps')
+fs = FileSystemStorage(location=f'{settings.MEDIA_ROOT}/skymaps')
 
 GRB = 'GRB'
 FS = 'FS'
