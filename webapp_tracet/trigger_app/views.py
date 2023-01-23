@@ -8,7 +8,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, InvalidPage
 import django_filters
-from django.forms import DateTimeInput
+from django.forms import DateTimeInput, Select
 from django.core.files import File
 
 from rest_framework import status
@@ -63,6 +63,7 @@ class EventFilter(django_filters.FilterSet):
     swift_rate_signif__lte = django_filters.NumberFilter(field_name='swift_rate_signif', lookup_expr='lte')
     swift_rate_signif__gte = django_filters.NumberFilter(field_name='swift_rate_signif', lookup_expr='gte')
 
+    telescopes = django_filters.AllValuesMultipleFilter(field_name='telescope')
     class Meta:
         model = models.Event
 
@@ -70,7 +71,7 @@ class EventFilter(django_filters.FilterSet):
         fields = ('recieved_data_after', 'recieved_data_before', 'event_observed_after', 'event_observed_before', 'duration__lte'
         , 'duration__gte', 'ra__lte', 'ra__gte', 'dec__lte', 'dec__gte', 'pos_error__lte', 'pos_error__gte', 'fermi_detection_prob__lte'
         , 'fermi_detection_prob__gte', 'swift_rate_signif__lte', 'swift_rate_signif__gte', 'ignored', 'associated_event_id', 'source_type' 
-        , 'trig_id', 'telescope', 'source_name', 'sequence_num', 'event_type')
+        , 'trig_id', 'telescope', 'source_name', 'sequence_num', 'event_type', 'telescopes')
         filter_overrides = {
             dj_model.CharField: {
                 'filter_class': django_filters.CharFilter,
@@ -99,7 +100,8 @@ def EventList(request):
         # the page number is not an integer (PageNotAnInteger exception)
         # return the first page
         events = paginator.page(1)
-    return render(request, 'trigger_app/voevent_list.html', {'filter': f, "page_obj":events, "poserr_unit":poserr_unit})
+    has_filter = any(field in request.GET for field in set(f.get_fields()))
+    return render(request, 'trigger_app/voevent_list.html', {'filter': f, "page_obj":events, "poserr_unit":poserr_unit, 'has_filter': has_filter})
 
 
 class ProposalDecisionFilter(django_filters.FilterSet):

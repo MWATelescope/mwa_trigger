@@ -7,7 +7,7 @@
 <title>Event Log</title>
 <div class="container-fluid">
   <h1>Event Log</h1>
-  <div style="background-color:#f8f8f8; width:90%; margin: 0 auto; padding-bottom: 20px;">
+  <div style="background-color:#f8f8f8; width:90%; margin: 0 auto; padding: 16px;">
   <h3>Filter Events:</h3>
   <form action="" method="get">
     <table>
@@ -30,8 +30,8 @@
         <td>{{ filter.form.duration__lte }}</td>
       </tr>
       <tr>
-        <td>{{ filter.form.telescope.label_tag }}</td>
-        <td>{{ filter.form.telescope }}</td>
+        <td>Telescope:</td>
+        <td>{{ filter.form.telescopes }}</td>
         <td>{{ filter.form.source_name.label_tag }}</td>
         <td>{{ filter.form.source_name }}</td>
         <td>RA (deg):</td>
@@ -75,6 +75,10 @@
         <td>{{ filter.form.swift_rate_signif__lte }}</td>
       </tr>
     </table>
+    {% if has_filter %}
+      <a href="/event_log/">Clear all filters</a>
+    {% endif %}
+    <br/>
     <input class="btn btn-primary" type="submit" />
   </form>
   </div>
