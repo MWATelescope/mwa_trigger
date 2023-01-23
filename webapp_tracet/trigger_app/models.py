@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.files.storage import FileSystemStorage
 
+fs = FileSystemStorage(location='/media/skymaps')
 
 GRB = 'GRB'
 FS = 'FS'
@@ -234,6 +236,7 @@ class Event(models.Model):
     ignored = models.BooleanField(default=True)
     source_name = models.CharField(max_length=128, blank=True, null=True)
     source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, null=True)
+
     fermi_most_likely_index = models.FloatField(blank=True, null=True)
     fermi_detection_prob = models.FloatField(blank=True, null=True)
     swift_rate_signif = models.FloatField(blank=True, null=True)
@@ -244,6 +247,7 @@ class Event(models.Model):
     lvc_retraction_message = models.CharField(max_length=10000, blank=True, null=True)
     lvc_skymap_fits =  models.CharField(max_length=256, blank=True, null=True)
     lvc_prob_density_tile = models.FloatField(blank=True, null=True)
+    lvc_skymap_file = models.FileField(storage=fs, blank=True, null=True)
 
     class Meta:
         ordering = ['-id']

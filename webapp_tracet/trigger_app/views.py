@@ -8,6 +8,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, InvalidPage
 import django_filters
+from django.forms import DateTimeInput
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -36,8 +37,12 @@ if 'runserver' in sys.argv:
     startup_signal.send(sender=startup_signal)
 
 class EventFilter(django_filters.FilterSet):
-    recieved_data = django_filters.DateTimeFromToRangeFilter()
-    event_observed = django_filters.DateTimeFromToRangeFilter()
+    # DateTimeFromToRangeFilter raises exceptions in debugger for missing _before and _after keys
+    recieved_data_after = django_filters.DateTimeFilter(field_name='recieved_data', lookup_expr='gte', widget=DateTimeInput(attrs={'type': 'datetime-local'}))
+    recieved_data_before = django_filters.DateTimeFilter(field_name='recieved_data', lookup_expr='lte', widget=DateTimeInput(attrs={'type': 'datetime-local'}))
+
+    event_observed_after = django_filters.DateTimeFilter(field_name='event_observed', lookup_expr='gte', widget=DateTimeInput(attrs={'type': 'datetime-local'}))
+    event_observed_before = django_filters.DateTimeFilter(field_name='event_observed', lookup_expr='lte', widget=DateTimeInput(attrs={'type': 'datetime-local'}))
 
     duration__lte = django_filters.NumberFilter(field_name='duration', lookup_expr='lte')
     duration__gte = django_filters.NumberFilter(field_name='duration', lookup_expr='gte')
@@ -59,7 +64,12 @@ class EventFilter(django_filters.FilterSet):
 
     class Meta:
         model = models.Event
-        fields = '__all__'
+
+        # Django-filter cannot hanlde django FileField so exclude from filters
+        fields = ('recieved_data_after', 'recieved_data_before', 'event_observed_after', 'event_observed_before', 'duration__lte'
+        , 'duration__gte', 'ra__lte', 'ra__gte', 'dec__lte', 'dec__gte', 'pos_error__lte', 'pos_error__gte', 'fermi_detection_prob__lte'
+        , 'fermi_detection_prob__gte', 'swift_rate_signif__lte', 'swift_rate_signif__gte', 'ignored', 'associated_event_id', 'source_type' 
+        , 'trig_id', 'telescope', 'source_name', 'sequence_num', 'event_type')
         filter_overrides = {
             dj_model.CharField: {
                 'filter_class': django_filters.CharFilter,
@@ -92,7 +102,10 @@ def EventList(request):
 
 
 class ProposalDecisionFilter(django_filters.FilterSet):
-    recieved_data = django_filters.DateTimeFromToRangeFilter()
+    # DateTimeFromToRangeFilter raises exceptions in debugger for missing _before and _after keys
+
+    recieved_data_after = django_filters.DateTimeFilter(field_name='recieved_data', lookup_expr='gte', widget=DateTimeInput(attrs={'type': 'datetime-local'}))
+    recieved_data_before = django_filters.DateTimeFilter(field_name='recieved_data', lookup_expr='lte', widget=DateTimeInput(attrs={'type': 'datetime-local'}))
 
     class Meta:
         model = models.ProposalDecision

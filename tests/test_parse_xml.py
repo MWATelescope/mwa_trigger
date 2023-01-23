@@ -27,9 +27,9 @@ def parse_xml_test_warpper(xml_tests):
 
         # read in yaml of expected parsed_VOEvent dict
         # dump file for future tests
-        if xml_file is not None:
-           with open(yaml_loc, 'w') as stream:
-               dump(dict(trig.__dict__), stream)
+        # if xml_file is not None:
+        #    with open(yaml_loc, 'w') as stream:
+        #        dump(dict(trig.__dict__), stream)
         # Convert 'event_observed' to string as it's easier to compare than datetime
         trig.__dict__['event_observed'] = str(trig.__dict__['event_observed'])
         # Set xml to None to prevent path errors when testing in different locations

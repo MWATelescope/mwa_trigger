@@ -1,6 +1,7 @@
 {% extends 'trigger_app/header.html' %}
 
 {% block content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 <title>Proposal Decision Log</title>
 
 <div class="container-fluid">
@@ -12,10 +13,10 @@
       <tr>
         <td width="15%">{{ filter.form.decision.label_tag }}</td>
         <td width="15%">{{ filter.form.decision }}</td>
-        <td width="15%">Recieved date (start)</td>
-        <td width="15%"><input type="datetime-local" name="recieved_data_after" value="{{filter.form.recieved_data_after}}"></td>
-        <td width="15%">Recieved date (end)</td>
-        <td width="15%"><input type="datetime-local" name="recieved_data_before" value="{{filter.form.recieved_data_before}}"></td>
+        <td width="15%">Received date (start)</td>
+        <td width="15%">{{filter.form.recieved_data_after}}</td>
+        <td width="15%">Received date (end)</td>
+        <td width="15%">{{filter.form.recieved_data_before}}</td>
       </tr>
     </table>
     <input class="btn btn-primary" type="submit" />
@@ -61,4 +62,32 @@
 
   {% include "trigger_app/pagination.html" %}
 </div>
+
+<script>
+  $(document).ready(function(){
+
+    function datetimeLocal(datetime) {
+      const dt = new Date(datetime);
+      dt.setMinutes(dt.getMinutes() - dt.getTimezoneOffset());
+      return dt.toISOString().slice(0, 16);
+    }
+
+    const rda = document.getElementsByName("recieved_data_after")[0];
+    const rdb = document.getElementsByName("recieved_data_before")[0];
+
+    // Don't let users select dates in the future
+    rda.max = datetimeLocal(Date.now());
+    rdb.max = datetimeLocal(Date.now());
+
+    // If no date value for max range, set to current date (when we got the data)
+    if(!rdb.value) {
+      rdb.value = datetimeLocal(Date.now())
+    }
+    // Set starting date range to sometime in 2021, this is mainly for UX and does not reflect when we started collecting data
+    if(!rda.value) {
+      rda.value = datetimeLocal("2021-01-01 04:00:00")
+    }
+
+    })
+    </script>
 {% endblock %}

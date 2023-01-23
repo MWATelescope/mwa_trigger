@@ -429,22 +429,6 @@ class parsed_VOEvent:
         # Get observed time as UTC
         self.event_observed = v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Time.TimeInstant.ISOTime
 
-        # Check the voevent role (normally observation or test)
-        self.role = v.attrib["role"]
-        if self.role == "test":
-            # Just a test observation so ignore it
-            self.ignore = True
-            print('Just a test observation so ignore it')
-
-        # Antares has a flag for real alerts that is worth checking
-        elif v.find(".//Param[@name='isRealAlert']") is not None:
-            if not v.find(".//Param[@name='isRealAlert']").attrib["value"]:
-                # Not a real alert so ignore
-                self.ignore = True
-                print('Not a real alert so ignore')
-                return
-        logger.debug("this is a test action")
-
         # Check if this is the type of trigger we're looking for
         this_pair = f"{self.telescope}_{self.event_type}"
         if this_pair in self.trig_pairs:
@@ -520,8 +504,12 @@ class parsed_VOEvent:
                 self.lvc_skymap_fits = str(v.find(".//Param[@name='skymap_fits']").attrib["value"])
 
                 url =  self.lvc_skymap_fits
-                urllib.request.urlretrieve(url, "skymap.fits")
-
+                with urllib.request.urlopen(url) as response:
+                    body = response.read()
+                
+                with open("skymap.fits", mode="wb") as skymap_file:
+                    skymap_file.write(body)
+                
                 skymap = Table.read("skymap.fits")
                 i = np.argmax(skymap['PROBDENSITY'])
                 self.lvc_prob_density_tile = float(skymap[i]['PROBDENSITY'] * (np.pi / 180)**2)
@@ -544,7 +532,21 @@ class parsed_VOEvent:
             if self.event_type == 'Retraction':
                 # Capture message that comes with retraction
                 self.lvc_retraction_message = str(v.Citations.Description)
-                    
+        
+        # Check the voevent role (normally observation or test)
+        self.role = v.attrib["role"]
+        if self.role == "test":
+            # Just a test observation so ignore it
+            self.ignore = True
+            print('Just a test observation so ignore it')
+
+               # Antares has a flag for real alerts that is worth checking
+        if v.find(".//Param[@name='isRealAlert']") is not None:
+            if not v.find(".//Param[@name='isRealAlert']").attrib["value"]:
+                # Not a real alert so ignore
+                self.ignore = True
+                print('Not a real alert so ignore')
+          
         logger.debug("Trig details:")
         logger.debug(f"Dur:  {self.event_duration} s")
         logger.debug(f"ID:   {self.trig_id}")
