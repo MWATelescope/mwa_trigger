@@ -1,0 +1,52 @@
+name: Cypress Tests
+
+on: [push]
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-22.04
+      # Cypress Docker image with Chrome v78
+      # and Firefox v70 pre-installed
+      container: cypress/browsers:node12.13.0-chrome78-ff70
+    services:
+      db:
+        image: postgres:12.3-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: github_actions
+        ports:
+          - 5432:5432
+        options: --mount type=tmpfs,destination=/var/lib/postgresql/data --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install tracet dependencies
+        run: pip install -r requirements.txt
+      - name: Install tracet
+        run: pip install .
+      - name: Install web app dependencies
+        run: pip install -r webapp_tracet/requirements.txt
+      - name: Run migrations
+        run: |
+          cd webapp_tracet
+          python manage.py makemigrations trigger_app
+          python manage.py migrate trigger_app
+          python manage.py migrate
+          python manage.py migrate --run-syncdb
+        env:
+          SYSTEM_ENV: GITHUB_WORKFLOW
+      - name: start e2e tests
+        - uses: actions/checkout@v3
+        - uses: cypress-io/github-action@v5
+          with:
+            start: |
+              cd webapp_tracet
+              python manage.py runserver
+            wait-on: "http://127.0.0.1:8000/"
+            wait-on-timeout: 120
