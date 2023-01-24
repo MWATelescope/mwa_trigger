@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  cypress-run:
+  cypress_run:
     runs-on: ubuntu-22.04
       # Cypress Docker image with Chrome v78
       # and Firefox v70 pre-installed
