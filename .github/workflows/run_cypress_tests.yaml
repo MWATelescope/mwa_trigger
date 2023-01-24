@@ -43,6 +43,8 @@ jobs:
           SYSTEM_ENV: GITHUB_WORKFLOW
       - name: Seed test data
         run: ./webapp_tracet/manage.py loaddata ./webapp_tracet/trigger_app/test_yamls/mwa_fs_proposal_settings.yaml
+        env:
+          SYSTEM_ENV: GITHUB_WORKFLOW
       - name: Start cypress
         uses: actions/cache@v2
         with:
@@ -60,6 +62,3 @@ jobs:
         env:
           SYSTEM_ENV: GITHUB_WORKFLOW
           MWA_SECURE_KEY: TestingOnly
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: github_actions
