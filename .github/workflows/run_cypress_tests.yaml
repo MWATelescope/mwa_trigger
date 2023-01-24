@@ -25,7 +25,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Set up Python 3.8
         uses: actions/setup-python@v2
         with:
@@ -45,9 +45,7 @@ jobs:
           python manage.py migrate --run-syncdb
         env:
           SYSTEM_ENV: GITHUB_WORKFLOW
-      - name: start e2e tests
-        uses: actions/checkout@v3
-      - name: run cypress tests 
+      - name: Run cypress tests 
         uses: cypress-io/github-action@v5
         with:
           start: |
