@@ -9,9 +9,6 @@ on:
 jobs:
   cypress_run:
     runs-on: ubuntu-latest
-    # Cypress Docker image with Chrome v78
-    # and Firefox v70 pre-installed
-    container: cypress/browsers:node12.13.0-chrome78-ff70
     services:
       db:
         image: postgres:12.3-alpine
@@ -44,9 +41,12 @@ jobs:
           python manage.py migrate --run-syncdb
         env:
           SYSTEM_ENV: GITHUB_WORKFLOW
-      - name: Run cypress tests 
+      - name: Run cypress tests
         uses: cypress-io/github-action@v5
         with:
+          # Cypress Docker image with Chrome v78
+          # and Firefox v70 pre-installed
+          container: cypress/browsers:node12.13.0-chrome78-ff70   
           start: |
             cd webapp_tracet
             python manage.py runserver
