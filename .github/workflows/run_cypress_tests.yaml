@@ -9,9 +9,9 @@ on:
 jobs:
   cypress_run:
     runs-on: ubuntu-22.04
-      # Cypress Docker image with Chrome v78
-      # and Firefox v70 pre-installed
-      container: cypress/browsers:node12.13.0-chrome78-ff70
+    # Cypress Docker image with Chrome v78
+    # and Firefox v70 pre-installed
+    container: cypress/browsers:node12.13.0-chrome78-ff70
     services:
       db:
         image: postgres:12.3-alpine
@@ -46,11 +46,12 @@ jobs:
         env:
           SYSTEM_ENV: GITHUB_WORKFLOW
       - name: start e2e tests
-        - uses: actions/checkout@v3
-        - uses: cypress-io/github-action@v5
-          with:
-            start: |
-              cd webapp_tracet
-              python manage.py runserver
-            wait-on: "http://127.0.0.1:8000/"
-            wait-on-timeout: 120
+        uses: actions/checkout@v3
+      - name: run cypress tests 
+        uses: cypress-io/github-action@v5
+        with:
+          start: |
+            cd webapp_tracet
+            python manage.py runserver
+          wait-on: "http://127.0.0.1:8000/"
+          wait-on-timeout: 120
