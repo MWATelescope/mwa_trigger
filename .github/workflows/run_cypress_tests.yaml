@@ -45,29 +45,16 @@ jobs:
         run: |
             cd webapp_tracet
             python manage.py runserver
-
-  run_cypress_tests:
-    runs-on: ubuntu-22.04
-    # Cypress Docker image with Chrome v78
-    # and Firefox v70 pre-installed
-    container: cypress/browsers:node12.13.0-chrome78-ff70
-    steps:
-      - uses: actions/checkout@v3
-      - name: Cache Cypress
-        id: cache-cypress
-        uses: actions/cache@v1
+      - name: Start cypress
+        uses: actions/cache@v2
         with:
-          path: ~/.cache/Cypress
-          key: cypress-cache-v2-${{ runner.os }}-${{ hashFiles('**/package.json') }}
-        # now let's install Cypress binary
-      - run: npx cypress install
-      - run: npx cypress cache list
-        # and run Cypress tests
-      - run: npx cypress run
+          path: |
+            ~/.cache/Cypress
+            node_modules
+          key: my-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - run: npm i cypress
+      - uses: cypress-io/github-action@v5
         with:
-          browser: chrome
+          install: false
           wait-on: "http://127.0.0.1:8000/"
           wait-on-timeout: 120
-
-
-
