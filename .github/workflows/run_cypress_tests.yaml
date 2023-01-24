@@ -52,8 +52,6 @@ jobs:
       - uses: cypress-io/github-action@v5
         with:
           install: false
-          start: |
-            cd webapp_tracet &&
-            python manage.py runserver
+          start: python webapp_tracet/manage.py runserver
           wait-on: "http://127.0.0.1:8000/"
           wait-on-timeout: 120
