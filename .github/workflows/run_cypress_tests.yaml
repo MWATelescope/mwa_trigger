@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  start_webapp:
+  start_webapp_run_cypress:
     runs-on: ubuntu-latest
     services:
       db:
@@ -55,3 +55,9 @@ jobs:
           start: python webapp_tracet/manage.py runserver
           wait-on: "http://127.0.0.1:8000/"
           wait-on-timeout: 120
+        env:
+          SYSTEM_ENV: GITHUB_WORKFLOW
+          MWA_SECURE_KEY: TestingOnly
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: github_actions
