@@ -524,21 +524,65 @@ def voevent_view(request, id):
     return HttpResponse(xml_pretty_str, content_type='text/xml')
 
 
+
+def parse_and_save_xml(xml):
+    trig = parse_xml.parsed_VOEvent(None, packet=xml)
+
+    #LVC has a different date observed string format that has a Z in it
+    if('Z' in str(trig.event_observed)):
+        event_observed = datetime.datetime.strptime(str(trig.event_observed), "%Y-%m-%dT%H:%M:%S.%fZ")
+    else:
+        event_observed = datetime.datetime.strptime(str(trig.event_observed), "%Y-%m-%dT%H:%M:%S.%f")
+
+    print(event_observed)
+    data = {
+        'telescope' : trig.telescope,
+        'xml_packet' : xml,
+        'duration' : trig.event_duration,
+        'trig_id' : trig.trig_id,
+        'self_generated_trig_id' : trig.self_generated_trig_id,
+        'sequence_num' : trig.sequence_num,
+        'event_type' : trig.event_type,
+        'role' : trig.role,
+        'ra' : trig.ra,
+        'dec' : trig.dec,
+        'ra_hms' : trig.ra_hms,
+        'dec_dms' : trig.dec_dms,
+        'pos_error' : trig.err,
+        'ignored' : trig.ignore,
+        'source_name' : trig.source_name,
+        'source_type' : trig.source_type,
+        'event_observed' : event_observed,
+        'fermi_most_likely_index' : trig.fermi_most_likely_index,
+        'fermi_detection_prob' : trig.fermi_detection_prob,
+        'swift_rate_signif' : trig.swift_rate_signif,
+        'antares_ranking' : trig.antares_ranking,
+        'terrestial_probability':trig.terrestial_probability,
+        'neutron_star_probability':trig.neutron_star_probability,
+        'mass_gap_probability':trig.mass_gap_probability,
+        'lvc_skymap_fits' : trig.lvc_skymap_fits
+    }
+
+    if trig.lvc_skymap_file:
+        data['lvc_skymap_file'] = ContentFile(trig.lvc_skymap_file, f'{trig.trig_id}_skymap.fits')
+
+    new_event = serializers.EventSerializer(data=data)
+    if new_event.is_valid():
+        new_event.save()
+        return new_event
+
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def event_create(request):
-
-    trig = parse_xml.parsed_VOEvent(None, packet=request.data)
-    new_event = serializers.EventSerializer(trig)
-    if new_event.is_valid():
-        if new_event.lvc_skymap_file:
-            new_event.lvc_skymap_file = ContentFile(trig.lvc_skymap_file, f'{trig.trig_id}_skymap.fits')
-        new_event.save()
+    xml_string = request.data['xml_string']
+    new_event = parse_and_save_xml(xml_string)
+    if new_event:
         return Response(new_event.data, status=status.HTTP_201_CREATED)
-    logger.debug(request.data)
-    return Response(new_event.errors, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        logger.debug(request.data)
+        return Response(new_event.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @login_required
@@ -570,42 +614,7 @@ def test_upload_xml(request):
         if form.is_valid():
             # Parse and submit the Event
             xml_string = str(request.POST['xml_packet'])
-            trig = parse_xml.parsed_VOEvent(None, packet=xml_string)
-            logger.debug(trig.event_observed)
-            logger.debug(type(trig.event_observed))
-
-            if(str(trig.event_observed) in 'Z'):
-                event_observed = datetime.datetime.strptime(str(trig.event_observed), "%Y-%m-%dT%H:%M:%S.%fZ")
-            else:
-                event_observed = datetime.datetime.strptime(str(trig.event_observed), "%Y-%m-%dT%H:%M:%S.%fZ")
-
-            models.Event.objects.get_or_create(
-                telescope=trig.telescope,
-                xml_packet=xml_string,
-                duration=trig.event_duration,
-                trig_id=trig.trig_id,
-                sequence_num=trig.sequence_num,
-                event_type=trig.event_type,
-                role=trig.role,
-                ra=trig.ra,
-                dec=trig.dec,
-                ra_hms=trig.ra_hms,
-                dec_dms=trig.dec_dms,
-                pos_error=trig.err,
-                ignored=trig.ignore,
-                source_name=trig.source_name,
-                source_type=trig.source_type,
-                event_observed=event_observed,
-                fermi_most_likely_index=trig.fermi_most_likely_index,
-                fermi_detection_prob=trig.fermi_detection_prob,
-                swift_rate_signif=trig.swift_rate_signif,
-                antares_ranking=trig.antares_ranking,
-                terrestial_probability=trig.terrestial_probability,
-                neutron_star_probability=trig.neutron_star_probability,
-                mass_gap_probability=trig.mass_gap_probability,
-                lvc_skymap_fits = trig.lvc_skymap_fits,
-                lvc_skymap_file = ContentFile(trig.lvc_skymap_file, f'{trig.trig_id}_skymap.fits')
-            )
+            parse_and_save_xml(xml_string)
             return HttpResponseRedirect('/')
     else:
         form = forms.TestEvent()
