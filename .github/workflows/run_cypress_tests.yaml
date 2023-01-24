@@ -51,6 +51,7 @@ jobs:
           SYSTEM_ENV: GITHUB_WORKFLOW
           DJANGO_SUPERUSER_USERNAME: testuser
           DJANGO_SUPERUSER_PASSWORD: testpass
+          DJANGO_SUPERUSER_EMAIL: testemail@testemail.em
       - name: Start cypress
         uses: actions/cache@v2
         with:
