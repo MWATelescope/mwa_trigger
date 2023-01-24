@@ -45,6 +45,12 @@ jobs:
         run: ./webapp_tracet/manage.py loaddata ./webapp_tracet/default_data.yaml && ./webapp_tracet/manage.py loaddata ./webapp_tracet/trigger_app/test_yamls/mwa_fs_proposal_settings.yaml
         env:
           SYSTEM_ENV: GITHUB_WORKFLOW
+      - name: Create Admin User
+        run: ./webapp_tracet/manage.py createsuperuser --noinput
+        env:
+          SYSTEM_ENV: GITHUB_WORKFLOW
+          DJANGO_SUPERUSER_USERNAME: testuser
+          DJANGO_SUPERUSER_PASSWORD: testpass
       - name: Start cypress
         uses: actions/cache@v2
         with:
@@ -62,3 +68,5 @@ jobs:
         env:
           SYSTEM_ENV: GITHUB_WORKFLOW
           MWA_SECURE_KEY: TestingOnly
+          CYPRESS_UPLOAD_USER: testuser
+          CYPRESS_UPLOAD_PASSWORD: testpass
