@@ -42,7 +42,7 @@ jobs:
         env:
           SYSTEM_ENV: GITHUB_WORKFLOW
       - name: Seed test data
-        run: ./webapp_tracet/manage.py loaddata ./webapp_tracet/default_data && ./webapp_tracet/manage.py loaddata ./webapp_tracet/trigger_app/test_yamls/mwa_fs_proposal_settings.yaml
+        run: ./webapp_tracet/manage.py loaddata ./webapp_tracet/default_data.yaml && ./webapp_tracet/manage.py loaddata ./webapp_tracet/trigger_app/test_yamls/mwa_fs_proposal_settings.yaml
         env:
           SYSTEM_ENV: GITHUB_WORKFLOW
       - name: Start cypress
