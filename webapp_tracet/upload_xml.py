@@ -7,7 +7,6 @@ import requests
 from tracet.parse_xml import parsed_VOEvent
 import logging
 logger = logging.getLogger(__name__)
-from django.core.files import File
 
 
 def write_and_upload(xml_string):
@@ -21,12 +20,9 @@ def write_and_upload(xml_string):
     else:
         url = 'http://127.0.0.1:8000/event_create/'
 
-    # Parse
-    data = parsed_VOEvent(None, packet=xml_string)
-    data.xml_packet = xml_string
-    if(data.lvc_skymap_file):
-        data.lvc_skymap_file = File(data.lvc_skymap_file)
-
+    data = {
+        xml_string: xml_string
+    }
     session.post(url, data=data)
 
 if __name__ == '__main__':

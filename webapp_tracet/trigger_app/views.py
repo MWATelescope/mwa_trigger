@@ -13,7 +13,9 @@ from django.core.files.base import ContentFile
 
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 from . import models, serializers, forms, signals
 from .telescope_observe import trigger_observation
@@ -523,10 +525,16 @@ def voevent_view(request, id):
 
 
 @api_view(['POST'])
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
 @transaction.atomic
 def event_create(request):
-    new_event = serializers.EventSerializer(data=request.data)
+
+    trig = parse_xml.parsed_VOEvent(None, packet=request.data)
+    new_event = serializers.EventSerializer(trig)
     if new_event.is_valid():
+        if new_event.lvc_skymap_file:
+            new_event.lvc_skymap_file = ContentFile(trig.lvc_skymap_file, f'{trig.trig_id}_skymap.fits')
         new_event.save()
         return Response(new_event.data, status=status.HTTP_201_CREATED)
     logger.debug(request.data)
