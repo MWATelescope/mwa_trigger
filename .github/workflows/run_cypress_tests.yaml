@@ -1,6 +1,10 @@
-name: Cypress Tests
+name: run_cypress_tests
 
-on: [push]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
 
 jobs:
   cypress-run:
