@@ -41,6 +41,8 @@ jobs:
           python manage.py migrate --run-syncdb
         env:
           SYSTEM_ENV: GITHUB_WORKFLOW
+      - name: Seed test data
+        run: ./manage.py loaddata trigger_app/test_yamls/mwa_fs_proposal_settings.yaml
       - name: Start cypress
         uses: actions/cache@v2
         with:
