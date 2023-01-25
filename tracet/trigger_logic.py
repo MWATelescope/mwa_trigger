@@ -259,10 +259,10 @@ def worth_observing_gw(
             decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The PROB_NS probability ({lvc_includes_neutron_star_probability}) is less than {minimum_neutron_star_probability} so not triggering. \n"
         elif lvc_binary_neutron_star_probability > maximum_binary_neutron_star_probability:
             debug_bool = True
-            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The PROB_BNS probability ({lvc_binary_neutron_star_probability}) is greater than {maximum_neutron_star_probability} so not triggering. \n"
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The PROB_BNS probability ({lvc_binary_neutron_star_probability}) is greater than {maximum_binary_neutron_star_probability} so not triggering. \n"
         elif lvc_binary_neutron_star_probability < minimum_binary_neutron_star_probability:
             debug_bool = True
-            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The PROB_BNS probability ({lvc_binary_neutron_star_probability}) is less than {minimum_neutron_star_probability} so not triggering. \n"
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The PROB_BNS probability ({lvc_binary_neutron_star_probability}) is less than {minimum_binary_neutron_star_probability} so not triggering. \n"
         elif lvc_neutron_star_black_hole_probability > maximum_neutron_star_black_hole_probability:
             debug_bool = True
             decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The PROB_NSBH probability ({lvc_neutron_star_black_hole_probability}) is greater than {maximum_neutron_star_black_hole_probability} so not triggering. \n"

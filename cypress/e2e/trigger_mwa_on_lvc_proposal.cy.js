@@ -78,7 +78,7 @@ describe('User can create proposal for MWA observations using LVC events', () =>
 
 describe('Early warning LVC events that don\'t trigger the proposal show as ignored', () => {
   it('upload lvc early warning real event and get ignored because terrestial is > 95', () => {
-    const graceDBId = "MS22331s"
+    const graceDBId = "MS44555s"
 
     cy.login()
     cy.visit('/')

@@ -84,13 +84,13 @@ class ProposalSettings(models.Model):
 
     # GW settings
     # GW event property prob
-    minimum_neutron_star_probability = models.FloatField(verbose_name="Minimum on the probability that at least one object in the binary has a mass that is less than 3 solar masses", help_text="PROB_NS - probability that at least one object in the binary has a mass that is less than 3 solar masses", default=0.05)
+    minimum_neutron_star_probability = models.FloatField(verbose_name="Minimum on the probability that at least one object in the binary has a mass that is less than 3 solar masses", help_text="PROB_NS - probability that at least one object in the binary has a mass that is less than 3 solar masses", default=0.01)
     maximum_neutron_star_probability = models.FloatField(verbose_name="Maximum on the probability that at least one object in the binary has a mass that is less than 3 solar masses", help_text="PROB_NS - probability that at least one object in the binary has a mass that is less than 3 solar masses", default=1)
     
     # GW event probs
-    minimum_binary_neutron_star_probability = models.FloatField(verbose_name="Minimum probability for event to be BNS", help_text="", default=0.05)
+    minimum_binary_neutron_star_probability = models.FloatField(verbose_name="Minimum probability for event to be BNS", help_text="", default=0.01)
     maximum_binary_neutron_star_probability = models.FloatField(verbose_name="Maximum probability for event to be BNS", help_text="", default=1)
-    minimum_neutron_star_black_hole_probability = models.FloatField(verbose_name="Minimum probability for event to be NSBH", help_text="", default=0.05)
+    minimum_neutron_star_black_hole_probability = models.FloatField(verbose_name="Minimum probability for event to be NSBH", help_text="", default=0.01)
     maximum_neutron_star_black_hole_probability = models.FloatField(verbose_name="Maximum probability for event to be NSBH", help_text="", default=1)
     minimum_binary_black_hole_probability = models.FloatField(verbose_name="Minimum probability for event to be BBH", help_text="", default=0.00)
     maximum_binary_black_hole_probability = models.FloatField(verbose_name="Maximum probability for event to be BBH", help_text="", default=1)
