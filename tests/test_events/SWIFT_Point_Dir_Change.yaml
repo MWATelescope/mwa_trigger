@@ -13,14 +13,16 @@ fermi_detection_prob: null
 fermi_most_likely_index: null
 grb_ident: null
 ignore: true
-lvc_classification_BBH: null
-lvc_classification_BNS: null
-lvc_classification_NSBH: null
-lvc_classification_Terrestrial: null
+lvc_binary_black_hole_probability: null
+lvc_binary_neutron_star_probability: null
+lvc_false_alarm_rate: null
+lvc_includes_neutron_star_probability: null
+lvc_neutron_star_black_hole_probability: null
 lvc_prob_density_tile: null
 lvc_retraction_message: null
 lvc_skymap_file: null
 lvc_skymap_fits: null
+lvc_terrestial_probability: null
 packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=\"\
   ivo://nasa.gsfc.gcn/SWIFT#Point_Dir_2017-11-28T08:22:38.00_1023458943-887\" role=\"\
   utility\" version=\"2.0\" xsi:schemaLocation=\"http://www.ivoa.net/xml/VOEvent/v2.0\

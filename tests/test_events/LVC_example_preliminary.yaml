@@ -13,16 +13,16 @@ fermi_detection_prob: null
 fermi_most_likely_index: null
 grb_ident: null
 ignore: false
-lvc_classification_BBH: null
-lvc_classification_BNS: null
-lvc_classification_NSBH: null
-lvc_classification_Terrestrial: null
+lvc_binary_black_hole_probability: 0.03
+lvc_binary_neutron_star_probability: 0.95
+lvc_false_alarm_rate: 9.11069936486e-14
+lvc_includes_neutron_star_probability: 0.95
+lvc_neutron_star_black_hole_probability: 0.01
 lvc_prob_density_tile: null
 lvc_retraction_message: null
 lvc_skymap_file: null
 lvc_skymap_fits: null
-mass_gap_probability: 0.01
-neutron_star_probability: 0.95
+lvc_terrestial_probability: 0.01
 packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"\
   http://www.ivoa.net/xml/VOEvent/v2.0 http://www.ivoa.net/xml/VOEvent/VOEvent-v2.0.xsd\"\
   \ version=\"2.0\" role=\"observation\" ivorn=\"ivo://gwnet/LVC#MS181101ab-2-Preliminary\"\
@@ -110,7 +110,6 @@ source_name: null
 source_type: GW
 swift_rate_signif: null
 telescope: LVC
-terrestial_probability: 0.01
 trig_id: MS181101ab
 trig_pairs:
 - SWIFT_BAT_GRB_Pos

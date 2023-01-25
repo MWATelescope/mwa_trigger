@@ -290,16 +290,29 @@ def proposal_worth_observing(
             elif prop_dec.proposal.source_type == "GW" and voevent.source_type == "GW":
                 # This proposal wants to observe GRBs so check if it is worth observing
                 trigger_bool, debug_bool, pending_bool, decision_reason_log = worth_observing_gw(
-                    #event values
-                    terrestial_probability=voevent.terrestial_probability,
-                    neutron_star_probability=voevent.neutron_star_probability,
-                    mass_gap_probability=voevent.mass_gap_probability,
+                    # Event values
+                    lvc_binary_neutron_star_probability=voevent.lvc_binary_neutron_star_probability,
+                    lvc_neutron_star_black_hole_probability=voevent.lvc_neutron_star_black_hole_probability,
+                    lvc_binary_black_hole_probability=voevent.lvc_binary_black_hole_probability,
+                    lvc_terrestial_probability=voevent.lvc_terrestial_probability,
+                    lvc_includes_neutron_star_probability=voevent.lvc_includes_neutron_star_probability,
                     event_type=voevent.event_type,
                     telescope=voevent.telescope,
-                    #Thresholds
-                    maximum_terrestial_probability=prop_dec.proposal.maximum_terrestial_probability,
+                    # Thresholds
                     minimum_neutron_star_probability=prop_dec.proposal.minimum_neutron_star_probability,
-                    minimum_mass_gap_probability=prop_dec.proposal.minimum_mass_gap_probability,
+                    maximum_neutron_star_probability=prop_dec.proposal.maximum_neutron_star_probability,
+                    minimum_binary_neutron_star_probability=prop_dec.proposal.minimum_binary_neutron_star_probability,
+                    maximum_binary_neutron_star_probability=prop_dec.proposal.maximum_binary_neutron_star_probability,
+                    minimum_neutron_star_black_hole_probability=prop_dec.proposal.minimum_neutron_star_black_hole_probability,
+                    maximum_neutron_star_black_hole_probability=prop_dec.proposal.maximum_neutron_star_black_hole_probability,
+                    minimum_binary_black_hole_probability=prop_dec.proposal.minimum_binary_black_hole_probability,
+                    maximum_binary_black_hole_probability=prop_dec.proposal.maximum_binary_black_hole_probability,
+                    minimum_terrestial_probability=prop_dec.proposal.minimum_terrestial_probability,
+                    maximum_terrestial_probability=prop_dec.proposal.maximum_terrestial_probability,
+                   
+                    
+                    
+                    # Observation setting
                     start_observation_at_high_sensitivity=prop_dec.proposal.start_observation_at_high_sensitivity,
                     # Other
                     decision_reason_log=decision_reason_log,

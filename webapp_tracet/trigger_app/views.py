@@ -557,9 +557,12 @@ def parse_and_save_xml(xml):
         'fermi_detection_prob' : trig.fermi_detection_prob,
         'swift_rate_signif' : trig.swift_rate_signif,
         'antares_ranking' : trig.antares_ranking,
-        'terrestial_probability':trig.terrestial_probability,
-        'neutron_star_probability':trig.neutron_star_probability,
-        'mass_gap_probability':trig.mass_gap_probability,
+        'lvc_false_alarm_rate' : trig.lvc_false_alarm_rate,
+        'lvc_binary_neutron_star_probability': trig.lvc_binary_neutron_star_probability,
+        'lvc_neutron_star_black_hole_probability': trig.lvc_neutron_star_black_hole_probability,
+        'lvc_binary_black_hole_probability' : trig.lvc_binary_black_hole_probability,
+        'lvc_terrestial_probability' : trig.lvc_terrestial_probability,
+        'lvc_includes_neutron_star_probability' : trig.lvc_includes_neutron_star_probability,
         'lvc_skymap_fits' : trig.lvc_skymap_fits
     }
 

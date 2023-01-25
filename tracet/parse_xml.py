@@ -293,16 +293,18 @@ class parsed_VOEvent:
         An index that Fermi uses to describe what sort of source the Event is. GRBs are four, so this is what we check for.
     swift_rate_signif :  `float`
         The "RATE_SIGNIF" (appears to be a signal-to-noise ratio) to observe for SWIFT sources (in sigma).
-    false_alarm_rate_hz : `str`
+    lvc_false_alarm_rate : `str`
         False alarm rate, a statistic that is used to describe the significance of a gravitational-wave event.
-    lvc_classification_BNS : `float`
+    lvc_binary_neutron_star_probability : `float`
         Likelyhood of the event being a BNS (0-1 range)
-    lvc_classification_NSBH : `float`
+    lvc_neutron_star_black_hole_probability : `float`
         Likelyhood of the event being a NSBH (0-1 range)
-    lvc_classification_BBH : `float`
+    lvc_binary_black_hole_probability : `float`
         Likelyhood of the event being a BBH (0-1 range)
-    lvc_classification_Terrestrial : `float`
+    lvc_terrestial_probability : `float`
         Likelyhood of the event being terrestrial (noise) (0-1 range)
+    lvc_includes_neutron_star_probability : `float`
+        Likelyhood of the event including a neutron star (0-1 range)
     lvc_retraction_message : `string`
         Message for why observation has been retracted
     lvc_skymap_fits : `string`
@@ -334,10 +336,12 @@ class parsed_VOEvent:
         self.source_name = None
         self.source_type = None
         self.event_observed = None
-        self.lvc_classification_BNS = None
-        self.lvc_classification_NSBH = None
-        self.lvc_classification_BBH = None
-        self.lvc_classification_Terrestrial = None
+        self.lvc_false_alarm_rate = None
+        self.lvc_binary_neutron_star_probability = None
+        self.lvc_neutron_star_black_hole_probability = None
+        self.lvc_binary_black_hole_probability = None
+        self.lvc_terrestial_probability = None
+        self.lvc_includes_neutron_star_probability = None
         self.lvc_retraction_message = None
         self.lvc_skymap_fits = None
         self.lvc_prob_density_tile = None
@@ -497,9 +501,13 @@ class parsed_VOEvent:
 
             if self.event_type == 'EarlyWarning' or self.event_type == 'Preliminary' or self.event_type == 'Initial' or self.event_type == 'Update':
                 # Capture Probabilities of observations for proposals and analysis
-                self.mass_gap_probability = float(v.find(".//Param[@name='HasMassGap']").attrib["value"])
-                self.neutron_star_probability = float(v.find(".//Param[@name='HasNS']").attrib["value"])
-                self.terrestial_probability = float(v.find(".//Param[@name='Terrestrial']").attrib["value"])
+                self.lvc_includes_neutron_star_probability = float(v.find(".//Param[@name='HasNS']").attrib["value"])
+                self.lvc_false_alarm_rate = float(v.find(".//Param[@name='FAR']").attrib["value"])
+
+                self.lvc_binary_neutron_star_probability = float(v.find(".//Param[@name='BNS']").attrib["value"])
+                self.lvc_neutron_star_black_hole_probability = float(v.find(".//Param[@name='NSBH']").attrib["value"])
+                self.lvc_binary_black_hole_probability = float(v.find(".//Param[@name='BBH']").attrib["value"])
+                self.lvc_terrestial_probability = float(v.find(".//Param[@name='Terrestrial']").attrib["value"])
 
             if self.event_type == 'Initial' or self.event_type == 'Update':
                 logger.info("Parsing skymap")

@@ -83,10 +83,22 @@ class ProposalSettings(models.Model):
     source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, verbose_name="What type of source will you trigger on?")
 
     # GW settings
+    # GW event property prob
+    minimum_neutron_star_probability = models.FloatField(verbose_name="Minimum on the probability that at least one object in the binary has a mass that is less than 3 solar masses", help_text="PROB_NS - probability that at least one object in the binary has a mass that is less than 3 solar masses", default=0.05)
+    maximum_neutron_star_probability = models.FloatField(verbose_name="Maximum on the probability that at least one object in the binary has a mass that is less than 3 solar masses", help_text="PROB_NS - probability that at least one object in the binary has a mass that is less than 3 solar masses", default=1)
+    
+    # GW event probs
+    minimum_binary_neutron_star_probability = models.FloatField(verbose_name="Minimum probability for event to be BNS", help_text="", default=0.05)
+    maximum_binary_neutron_star_probability = models.FloatField(verbose_name="Maximum probability for event to be BNS", help_text="", default=1)
+    minimum_neutron_star_black_hole_probability = models.FloatField(verbose_name="Minimum probability for event to be NSBH", help_text="", default=0.05)
+    maximum_neutron_star_black_hole_probability = models.FloatField(verbose_name="Maximum probability for event to be NSBH", help_text="", default=1)
+    minimum_binary_black_hole_probability = models.FloatField(verbose_name="Minimum probability for event to be BBH", help_text="", default=0.00)
+    maximum_binary_black_hole_probability = models.FloatField(verbose_name="Maximum probability for event to be BBH", help_text="", default=1)
+    minimum_terrestial_probability = models.FloatField(verbose_name="Minimum probability for event to be terrestial", help_text="Limit on the probability that the source is terrestrial (i.e., a background noise fluctuation or a glitch)", default=0.00)
     maximum_terrestial_probability = models.FloatField(verbose_name="Maximum probability for event to be terrestial", help_text="Limit on the probability that the source is terrestrial (i.e., a background noise fluctuation or a glitch)", default=0.95)
-    minimum_neutron_star_probability = models.FloatField(verbose_name="Minimum neutron star probability for observation", help_text="Limit on the probability that at least one object in the binary has a mass that is less than 3 solar masses", default=0.01)
-    minimum_mass_gap_probability = models.FloatField(verbose_name="Minimum mass gap probability for observation", help_text="Limit on the probability that at least one object in the binary has a mass between 3 and 5 solar masses", default=0.01)
-    start_observation_at_high_sensitivity = models.BooleanField(verbose_name="Start observations at high sensitivity area using MWA sub array on early alerts", default=True, help_text="On early warnings there will not be positional data so start MWA in sub array mode at the high sensitivity area over the indian ocean")
+    
+    # GW custom logic
+    start_observation_at_high_sensitivity = models.BooleanField(verbose_name="On early or preliminary alerts without positional data, start observations with MWA sub array at high sensitivity area", default=True, help_text="On early warnings there will not be positional data so start MWA in sub array mode at the high sensitivity area over the indian ocean")
     update_observation_using_skymap = models.BooleanField(verbose_name="Update observations with MWA full or sub array on alerts containing positional data",default=True, help_text="On initial and update alerts there will be positional data so start MWA in full array mode at the best position for observation, or cancel if bad position for MWA")
     cancel_observation_on_retraction = models.BooleanField(default=True, help_text="Cancel observations for this event if retraction notice sent by LVC")
 
@@ -244,10 +256,15 @@ class Event(models.Model):
     fermi_detection_prob = models.FloatField(blank=True, null=True)
     swift_rate_signif = models.FloatField(blank=True, null=True)
     antares_ranking = models.IntegerField(blank=True, null=True)
-    terrestial_probability = models.FloatField(blank=True, null=True)
-    neutron_star_probability = models.FloatField(blank=True, null=True)
-    mass_gap_probability = models.FloatField(blank=True, null=True)
-    lvc_retraction_message = models.CharField(max_length=10000, blank=True, null=True)
+
+    # LVC
+    lvc_false_alarm_rate = models.CharField(max_length=64, blank=True, null=True)
+    lvc_binary_neutron_star_probability = models.FloatField(blank=True, null=True)
+    lvc_neutron_star_black_hole_probability = models.FloatField(blank=True, null=True)
+    lvc_binary_black_hole_probability = models.FloatField(blank=True, null=True)
+    lvc_terrestial_probability = models.FloatField(blank=True, null=True)
+    lvc_includes_neutron_star_probability = models.FloatField(blank=True, null=True)
+    lvc_retraction_message = models.CharField(max_length=1000, blank=True, null=True)
     lvc_skymap_fits =  models.CharField(max_length=256, blank=True, null=True)
     lvc_prob_density_tile = models.FloatField(blank=True, null=True)
     lvc_skymap_file = models.FileField(storage=fs, blank=True, null=True)
