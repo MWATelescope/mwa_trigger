@@ -251,7 +251,7 @@ def worth_observing_gw(
 
     if telescope == "LVC":
         # PROB_NS
-        if lvc_includes_neutron_star_probability > maximum_terrestial_probability:
+        if lvc_includes_neutron_star_probability > maximum_neutron_star_probability:
             debug_bool = True
             decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The PROB_NS probability ({lvc_includes_neutron_star_probability}) is greater than {maximum_neutron_star_probability} so not triggering. \n"
         elif lvc_includes_neutron_star_probability < minimum_neutron_star_probability:
