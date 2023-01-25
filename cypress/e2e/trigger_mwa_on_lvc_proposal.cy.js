@@ -64,7 +64,6 @@ describe('User can create proposal for MWA observations using LVC events', () =>
     cy.get("#proposal_description").type(proposalDescription)
     cy.get("#id_source_type").select('GW')
     cy.get("#event_telescope").select('LVC')
-    cy.get("#id_event_any_duration").check()
 
     cy.get("#id_telescope").select('MWA_VCS')
     cy.get("#id_project_id").select('T001')
@@ -79,7 +78,7 @@ describe('User can create proposal for MWA observations using LVC events', () =>
 
 describe('Early warning LVC events that don\'t trigger the proposal show as ignored', () => {
   it('upload lvc early warning real event and get ignored because terrestial is > 95', () => {
-    const graceDBId = "MS22111s"
+    const graceDBId = "MS22331s"
 
     cy.login()
     cy.visit('/')
@@ -104,14 +103,12 @@ describe('Early warning LVC events that don\'t trigger the proposal show as igno
     cy.contains("The terrestial probability (0.96) is greater than 0.95 so not triggering.")
 
     cy.wait(5000)
-
-
   })
 })
 
 describe('Early warning LVC events that trigger the proposal show decision outcome', () => {
   it('upload lvc early warning real event and trigger an MWA observation with twilio notifications', () => {
-    const graceDBId = "MS44441s"
+    const graceDBId = "MS33841s"
 
     cy.login()
     cy.visit('/')

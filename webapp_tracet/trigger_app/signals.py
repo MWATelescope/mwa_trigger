@@ -300,6 +300,7 @@ def proposal_worth_observing(
                     maximum_terrestial_probability=prop_dec.proposal.maximum_terrestial_probability,
                     minimum_neutron_star_probability=prop_dec.proposal.minimum_neutron_star_probability,
                     minimum_mass_gap_probability=prop_dec.proposal.minimum_mass_gap_probability,
+                    start_observation_at_high_sensitivity=prop_dec.proposal.start_observation_at_high_sensitivity,
                     # Other
                     decision_reason_log=decision_reason_log,
                     event_id=voevent.id,
