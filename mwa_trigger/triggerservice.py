@@ -280,7 +280,10 @@ def trigger(project_id=None, secure_key=None, group_id=None,
     if source is not None:
         postdict['source'] = source
     if subarray_list is not None:
-        postdict['subarrays'] = subarray_list
+        if type(subarray_list) == list:
+            postdict['subarrays'] = json.dumps(subarray_list)
+        else:
+            postdict['subarrays'] = subarray_list
     if freqspecs is not None:
         if type(freqspecs) == list:
             postdict['freqspecs'] = json.dumps(freqspecs)
