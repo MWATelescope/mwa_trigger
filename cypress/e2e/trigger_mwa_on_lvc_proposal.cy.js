@@ -100,7 +100,7 @@ describe('Early warning LVC events that don\'t trigger the proposal show as igno
     })
     cy.get("[data-testid='nav-logs']").click()
     cy.get("[data-testid='drop-logs-proposals']").click()
-    cy.contains("The terrestial probability (0.96) is greater than 0.95 so not triggering.")
+    cy.contains("The PROB_Terre probability (0.96) is greater than 0.95 so not triggering.")
 
     cy.wait(5000)
   })
