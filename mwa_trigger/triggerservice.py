@@ -23,7 +23,8 @@ else:  # Python2
 DEFAULTLOGGER = logging.getLogger()
 DEFAULTLOGGER.level = logging.DEBUG
 
-BASEURL = "http://mro.mwa128t.org/trigger/"
+# BASEURL = "http://mro.mwa128t.org/trigger/"
+BASEURL = "http://52.64.91.219/trigger/"    # Testing Django service - must be used in 'pretend' mode, as it's using a read-only database connection
 
 
 def web_api(url='', urldict=None, postdict=None, username=None, password=None, logger=DEFAULTLOGGER):
