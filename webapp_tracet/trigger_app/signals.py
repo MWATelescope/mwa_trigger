@@ -296,7 +296,6 @@ def proposal_worth_observing(
                     lvc_binary_black_hole_probability=voevent.lvc_binary_black_hole_probability,
                     lvc_terrestial_probability=voevent.lvc_terrestial_probability,
                     lvc_includes_neutron_star_probability=voevent.lvc_includes_neutron_star_probability,
-                    event_type=voevent.event_type,
                     telescope=voevent.telescope,
                     # Thresholds
                     minimum_neutron_star_probability=prop_dec.proposal.minimum_neutron_star_probability,

@@ -227,6 +227,10 @@ def worth_observing_gw(
         The minimum neutron star probability. Default: 0.01.
     minimum_mass_gap_probability : `float`, optional
         The minimum mass gap probability. Default: 0.01.
+    observe_low_significance : `bool`, optional
+        Observe events with low significance Default: True.
+    observe_significant : `bool`, optional
+        Observe significant events. Default: True.
     decision_reason_log : `str`
         A log of all the decisions made so far so a user can understand why the source was(n't) observed. Default: "".
     event_id : `int`, optional
