@@ -57,6 +57,8 @@ def web_api(url='', urldict=None, postdict=None, username=None, password=None, l
 
     if postdict is not None:
         postdata = urlencode(postdict)
+        if sys.version_info.major > 2:
+            postdata = postdata.encode('latin-1')
     else:
         postdata = None
 
