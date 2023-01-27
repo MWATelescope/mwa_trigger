@@ -87,7 +87,7 @@ def web_api(url='', urldict=None, postdict=None, username=None, password=None, l
         try:
             resobj = urlopen(req)
             data = resobj.read()
-            if sys.version_info.major > 2:
+            if (sys.version_info.major > 2) and (data is not None):
                 data = data.decode(resobj.headers.get_content_charset())
         except (ValueError, URLError):
             logger.error('urlopen failed, or there was an error reading from the opened request object')
