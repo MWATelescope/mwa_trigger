@@ -15,11 +15,13 @@ grb_ident: null
 ignore: false
 lvc_binary_black_hole_probability: null
 lvc_binary_neutron_star_probability: null
+lvc_event_url: null
 lvc_false_alarm_rate: null
 lvc_includes_neutron_star_probability: null
 lvc_neutron_star_black_hole_probability: null
 lvc_prob_density_tile: null
 lvc_retraction_message: Determined to not be a viable GW event candidate
+lvc_significance: null
 lvc_skymap_file: null
 lvc_skymap_fits: null
 lvc_terrestial_probability: null

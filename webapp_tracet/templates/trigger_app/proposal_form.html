@@ -78,18 +78,17 @@
             <h3>LVC thresholds</h3>
             <h4>Event properties</h4>
             <table>
-                <tr><td>Trigger on probability event includes a neutron star range (%)  {% help_wrap 'PROB_NS - probability that at least one object in the binary has a mass that is less than 3 solar masses' %}</td><td>{{ form.minimum_neutron_star_probability }}</td><td>{{ form.maximum_neutron_star_probability }}</td></tr>
+                <tr><td>Trigger on probability event includes a neutron star (% range)  {% help_wrap 'PROB_NS - probability that at least one object in the binary has a mass that is less than 3 solar masses' %}</td><td>{{ form.minimum_neutron_star_probability }}</td><td>{{ form.maximum_neutron_star_probability }}</td></tr>
+                <tr><td>Trigger on significance: low significance  {% help_wrap form.observe_low_significance.help_text %}</td><td>{{ form.observe_low_significance }}</td></tr>
+                <tr><td>Trigger on significance: significant  {% help_wrap form.observe_significant.help_text %}</td><td>{{ form.observe_significant }}</td></tr>
+
             </table>
             <h4>Event type</h4>
             <table>
-                <tr><td>Trigger on probability event source is a binary neutron star (range %)  {% help_wrap 'PROB_BNS - probability the source is BNS' %}</td><td>{{ form.minimum_binary_neutron_star_probability }}</td><td>{{ form.maximum_binary_neutron_star_probability }}</td></tr>
-                <tr><td>Trigger on probability event source is a neutron star black hole (range (%)  {% help_wrap 'PROB_NSBH - probability the source is NSBH' %}</td><td>{{ form.minimum_neutron_star_black_hole_probability }}</td><td>{{ form.maximum_neutron_star_black_hole_probability }}</td></tr>
-                <tr><td>Trigger on probability event source is a binary black hole (range %)  {% help_wrap 'PROB_BBH - probability the source is BBH' %}</td><td>{{ form.minimum_binary_black_hole_probability }}</td><td>{{ form.maximum_binary_black_hole_probability }}</td></tr>
-                <tr><td>Trigger on probability event source is terrerstrial etc  (range %)  {% help_wrap 'PROB_TERRES - probability the source is terrestrial (i.e., a background noise fluctuation or a glitch)' %}</td><td>{{ form.minimum_terrestial_probability }}</td><td>{{ form.maximum_terrestial_probability }}</td></tr>
-            </table>
-            <h4>Observation settings</h4>
-            <table>
-                <tr><td>{{ form.start_observation_at_high_sensitivity.label_tag }}{% help_wrap form.start_observation_at_high_sensitivity.help_text %}{{ form.start_observation_at_high_sensitivity }}</td></tr>
+                <tr><td>Trigger on probability event source is a binary neutron star (% range)  {% help_wrap 'PROB_BNS - probability the source is BNS' %}</td><td>{{ form.minimum_binary_neutron_star_probability }}</td><td>{{ form.maximum_binary_neutron_star_probability }}</td></tr>
+                <tr><td>Trigger on probability event source is a neutron star black hole (% range)  {% help_wrap 'PROB_NSBH - probability the source is NSBH' %}</td><td>{{ form.minimum_neutron_star_black_hole_probability }}</td><td>{{ form.maximum_neutron_star_black_hole_probability }}</td></tr>
+                <tr><td>Trigger on probability event source is a binary black hole (% range)  {% help_wrap 'PROB_BBH - probability the source is BBH' %}</td><td>{{ form.minimum_binary_black_hole_probability }}</td><td>{{ form.maximum_binary_black_hole_probability }}</td></tr>
+                <tr><td>Trigger on probability event source is terrerstrial etc  (% range)  {% help_wrap 'PROB_TERRES - probability the source is terrestrial (i.e., a background noise fluctuation or a glitch)' %}</td><td>{{ form.minimum_terrestial_probability }}</td><td>{{ form.maximum_terrestial_probability }}</td></tr>
             </table>
         </div> 
 
@@ -107,6 +106,9 @@
             {% for error in form.testing.errors %}<div class="alert alert-danger"><strong>{{ form.testing.label_tag }}{{ error|escape }}</strong></div>{% endfor %}
         </table>
         <div id="mwa">
+            <table id="mwa_gw">
+                <tr><td>{{ form.start_observation_at_high_sensitivity.label_tag }}{% help_wrap form.start_observation_at_high_sensitivity.help_text %}{{ form.start_observation_at_high_sensitivity }}</td></tr>
+            </table>
             <p>For an explanation of the MWA frequency specifications please see the <a href="https://tracet.readthedocs.io/en/latest/mwa_frequency_specifications.html">documentation</a></p>
             <table>
                 <tr><td>{{ form.mwa_freqspecs.label_tag }}  {% help_wrap form.mwa_freqspecs.help_text %}</td>  <td>{{ form.mwa_freqspecs }}</td></tr>
@@ -266,27 +268,33 @@
                 console.log($("#id_source_type").val());
                 if ( ($("#event_telescope").val() === "" || $("#event_telescope").val() === "Fermi") && $("#id_source_type").val() == "GRB" ) {
                     $('#fermi_thres').show();
+                    $('#mwa_gw').hide();
                 } else {
                     $('#fermi_thres').hide();
                 }
                 if ( ($("#event_telescope").val() === "" || $("#event_telescope").val() === "SWIFT") && $("#id_source_type").val() == "GRB" ) {
                     $('#swift_thres').show();
+                    $('#mwa_gw').hide();
                 } else {
                     $('#swift_thres').hide();
                 }
                 if ( ($("#event_telescope").val() === "" || $("#event_telescope").val() === "Antares") && $("#id_source_type").val() == "NU" ) {
                     $('#antares_thres').show();
+                    $('#mwa_gw').hide();
                 } else {
                     $('#antares_thres').hide();
                 }
                 if ($("#id_source_type").val() == "GW") {
                     $('#lvc_thres').show();
+                    $('#mwa_gw').show();
                     $('#source_duration').hide();
                     $('#durations').hide(); 
                 } else {
                     $('#lvc_thres').hide();
                     $('#source_duration').show();
                     $('#durations').show();
+                    $('#mwa_gw').hide();
+
                 }
             }
             threshold_display();

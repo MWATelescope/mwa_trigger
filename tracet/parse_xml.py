@@ -346,6 +346,8 @@ class parsed_VOEvent:
         self.lvc_skymap_fits = None
         self.lvc_prob_density_tile = None
         self.lvc_skymap_file = None
+        self.lvc_significance = None
+        self.lvc_event_url = None
 
         if self.trig_pairs is None:
             # use defaults
@@ -503,6 +505,9 @@ class parsed_VOEvent:
                 # Capture Probabilities of observations for proposals and analysis
                 self.lvc_includes_neutron_star_probability = float(v.find(".//Param[@name='HasNS']").attrib["value"])
                 self.lvc_false_alarm_rate = float(v.find(".//Param[@name='FAR']").attrib["value"])
+                # Not yet live
+                # self.lvc_significance = str(v.find(".//Param[@name='significance']").attrib["value"])
+                self.lvc_event_url = str(v.find(".//Param[@name='EventPage']").attrib["value"])
 
                 self.lvc_binary_neutron_star_probability = float(v.find(".//Param[@name='BNS']").attrib["value"])
                 self.lvc_neutron_star_black_hole_probability = float(v.find(".//Param[@name='NSBH']").attrib["value"])

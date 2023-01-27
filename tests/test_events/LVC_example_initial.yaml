@@ -15,11 +15,13 @@ grb_ident: null
 ignore: false
 lvc_binary_black_hole_probability: 0.03
 lvc_binary_neutron_star_probability: 0.95
+lvc_event_url: https://example.org/superevents/MS181101ab/view/
 lvc_false_alarm_rate: 9.11069936486e-14
 lvc_includes_neutron_star_probability: 0.95
 lvc_neutron_star_black_hole_probability: 0.01
 lvc_prob_density_tile: 0.0782516470191411
 lvc_retraction_message: null
+lvc_significance: null
 lvc_skymap_file: !!binary |
   U0lNUExFICA9ICAgICAgICAgICAgICAgICAgICBUIC8gY29uZm9ybXMgdG8gRklUUyBzdGFuZGFy
   ZCAgICAgICAgICAgICAgICAgICAgICBCSVRQSVggID0gICAgICAgICAgICAgICAgICAgIDggLyBh

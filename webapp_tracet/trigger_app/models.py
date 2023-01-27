@@ -98,11 +98,11 @@ class ProposalSettings(models.Model):
     maximum_terrestial_probability = models.FloatField(verbose_name="Maximum probability for event to be terrestial", help_text="Limit on the probability that the source is terrestrial (i.e., a background noise fluctuation or a glitch)", default=0.95)
     
     # GW custom logic
-    start_observation_at_high_sensitivity = models.BooleanField(verbose_name="On early or preliminary alerts without positional data, start observations with MWA sub array at high sensitivity area", default=True, help_text="On early warnings there will not be positional data so start MWA in sub array mode at the high sensitivity area over the indian ocean")
-    update_observation_using_skymap = models.BooleanField(verbose_name="Update observations with MWA full or sub array on alerts containing positional data",default=True, help_text="On initial and update alerts there will be positional data so start MWA in full array mode at the best position for observation, or cancel if bad position for MWA")
-    cancel_observation_on_retraction = models.BooleanField(default=True, help_text="Cancel observations for this event if retraction notice sent by LVC")
-
+    observe_low_significance = models.BooleanField(verbose_name="Observe events with low significance (high FAR)",default=True, help_text="2/day > FAR > (1/month CBC and 1/year BURST)")
+    observe_significant = models.BooleanField(verbose_name="Observe events with high significance (low FAR)",default=True, help_text="(1/month CBC and 1/year BURST) > FAR")
+    
     # MWA settings
+    start_observation_at_high_sensitivity = models.BooleanField(verbose_name="Without positional data, start observations with MWA sub array at high sensitivity area", default=True, help_text="On early warnings there will not be positional data so start MWA in sub array mode at the high sensitivity area over the indian ocean")
     mwa_freqspecs = models.CharField(default="144,24", max_length=256, verbose_name="MWA frequency specifications", help_text="The frequency channels IDs for the MWA to observe at.")
     mwa_nobs = models.IntegerField(default=1, verbose_name="Number of Observations", help_text="The number of observations to schedule.")
     mwa_exptime = models.IntegerField(default=896, verbose_name="Observation time (s)", help_text="Exposure time of each observation scheduled, in seconds (must be modulo-8 seconds).")
@@ -259,6 +259,8 @@ class Event(models.Model):
 
     # LVC
     lvc_false_alarm_rate = models.CharField(max_length=64, blank=True, null=True)
+    lvc_significance = models.CharField(max_length=64, blank=True, null=True)
+    lvc_event_url = models.CharField(max_length=256, blank=True, null=True)
     lvc_binary_neutron_star_probability = models.FloatField(blank=True, null=True)
     lvc_neutron_star_black_hole_probability = models.FloatField(blank=True, null=True)
     lvc_binary_black_hole_probability = models.FloatField(blank=True, null=True)

@@ -178,9 +178,8 @@ def worth_observing_nu(
 
 def worth_observing_gw(
         # event values
-        event_type=None,
         telescope=None,
-        lvc_false_alarm_rate=None,
+        lvc_significance=None,
         lvc_binary_neutron_star_probability=None,
         lvc_neutron_star_black_hole_probability=None,
         lvc_binary_black_hole_probability=None,
@@ -197,8 +196,8 @@ def worth_observing_gw(
         maximum_binary_black_hole_probability=None,
         minimum_terrestial_probability=None,
         maximum_terrestial_probability=None,
-        start_observation_at_high_sensitivity=None,
-
+        observe_low_significance=None,
+        observe_significant=None,
         # Other
         decision_reason_log="",
         event_id=None, 
@@ -282,10 +281,14 @@ def worth_observing_gw(
             debug_bool = True
             decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The PROB_Terre probability ({lvc_terrestial_probability}) is less than {minimum_terrestial_probability} so not triggering. \n"
         
-        
-        elif (event_type == 'EarlyWarning' or event_type == 'Preliminary') and not start_observation_at_high_sensitivity:
+        elif lvc_significance == "low significance" and not observe_low_significance:
             debug_bool = True
-            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: Observing early and preliminary events is ({start_observation_at_high_sensitivity}) so not triggering. \n"
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The GW signifcance ({lvc_significance}) is not observed because observe_low_significance is {observe_low_significance}. \n"
+        
+        elif lvc_significance == "significant" and not observe_significant:
+            debug_bool = True
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The GW signifcance ({lvc_significance}) is not observed because observe_significant is {observe_significant}. \n"
+            
         else:
             trigger_bool = True
             decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The probability looks good so triggering. \n"
