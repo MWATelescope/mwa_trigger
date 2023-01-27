@@ -141,6 +141,7 @@ class TriggerEvent(object):
             return None, None, None
         return self.ra[index], self.dec[index], self.err[index]
 
+    # TODO - add subarrays to this
     def trigger_observation(self,
                             ttype=None,
                             obsname='Trigger_test',

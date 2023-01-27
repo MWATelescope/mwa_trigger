@@ -171,7 +171,7 @@ def obslist(obstime=None, logger=DEFAULTLOGGER):
 
 
 def trigger(project_id=None, secure_key=None, group_id=None,
-            ra=None, dec=None, alt=None, az=None, source=None, freqspecs=None,
+            ra=None, dec=None, alt=None, az=None, source=None, subarray_list=None, freqspecs=None,
             creator=None, obsname=None, nobs=None, exptime=None,
             calexptime=None, calibrator=None,
             freqres=None, inttime=None,
@@ -225,6 +225,7 @@ def trigger(project_id=None, secure_key=None, group_id=None,
     :param alt: Either one Alt (float, in degrees), or a list of Alt floats. Eg 80.0, or [70.0, 90.0]
     :param az: Either one Az (float, in degrees), or a list of Az floats. Eg 250.3, or [90.0, 270.0]
     :param source: Either one source name string, or a list of source name strings. Eg 'Sun', or ['Sun', 'Moon']
+    :param subarray_list: An optional list of subarray names, the same length as the total number of points (ra/decs, alt/azs, etc)
     :param freqspecs: Either one frequency specifier string, or a list of frequency specifier strings. Eg '145,24', or ['121,24', '145,24']
     :param creator: Creator string, eg 'Andrew'
     :param obsname: Observation name string, eg 'Fermi Trigger 20180211.1234'
@@ -275,6 +276,8 @@ def trigger(project_id=None, secure_key=None, group_id=None,
         postdict['az'] = az
     if source is not None:
         postdict['source'] = source
+    if subarray_list is not None:
+        postdict['subarrays'] = subarray_list
     if freqspecs is not None:
         if type(freqspecs) == list:
             postdict['freqspecs'] = json.dumps(freqspecs)
