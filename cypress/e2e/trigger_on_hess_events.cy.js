@@ -1,8 +1,12 @@
 
-describe.only('Test HESS events will group with swift', () => {
-    it('create HESS trigger proposal', () => {
+describe('Test HESS events will group with swift', () => {
+    it('create HESS and swift events, check that they group', () => {
 
-        const swiftId = "112329"
+        cy.login()
+        cy.visit('/')
+        cy.wait(1000)
+
+        const swiftId = "144329"
         // //upload lvc test event
         cy.fixture('HESS_test_event_test_promising.txt').then((event1) => {
             cy.get('[data-testid="nav-testing"]').click({ force: true })
@@ -15,10 +19,10 @@ describe.only('Test HESS events will group with swift', () => {
             cy.get('[class="form-control"]').invoke('val', (event1.replaceAll("817564", swiftId)))
             cy.get("[type='submit']").click()
         })
-        //events are grouped
+        // events are grouped
         cy.get('.btn').click()
         cy.wait(1000)
-        cy.contains(graceDBId).parent('tr').within(() => {
+        cy.contains(swiftId).parent('tr').within(() => {
             cy.get('td > a').eq(0).click()
         })
         cy.get('[data-testid="eventgroup"]').find('tr').should('have.length', 3)

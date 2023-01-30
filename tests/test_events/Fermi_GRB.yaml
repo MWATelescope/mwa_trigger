@@ -12,7 +12,7 @@ event_type: GBM_Flt_Pos
 fermi_detection_prob: 94
 fermi_most_likely_index: 4
 grb_ident: null
-hess_signifigance: null
+hess_significance: null
 ignore: false
 lvc_binary_black_hole_probability: null
 lvc_binary_neutron_star_probability: null

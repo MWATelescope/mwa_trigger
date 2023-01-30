@@ -11,7 +11,7 @@ event_type: GRB_To
 fermi_detection_prob: null
 fermi_most_likely_index: null
 grb_ident: null
-hess_signifigance: 0.9674438609490041
+hess_significance: 0.9674438609490041
 ignore: false
 lvc_binary_black_hole_probability: null
 lvc_binary_neutron_star_probability: null
@@ -60,13 +60,13 @@ packet: "<VOEvent xmlns:xsi=\"https://www.w3.org/2001/XMLSchema-instance\" xsi:s
 ra: 320.7943
 ra_hms: '21:23:10.632'
 role: observe
-self_generated_trig_id: true
+self_generated_trig_id: false
 sequence_num: null
 source_name: null
 source_type: GRB
 swift_rate_signif: null
 telescope: HESS
-trig_id: '196262188186'
+trig_id: '1102329'
 trig_pairs:
 - SWIFT_BAT_GRB_Pos
 - SWIFT_XRT_Pos

@@ -12,7 +12,7 @@ event_type: Preliminary
 fermi_detection_prob: null
 fermi_most_likely_index: null
 grb_ident: null
-hess_signifigance: null
+hess_significance: null
 ignore: false
 lvc_binary_black_hole_probability: 0.03
 lvc_binary_neutron_star_probability: 0.95

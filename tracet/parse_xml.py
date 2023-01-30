@@ -336,7 +336,7 @@ class parsed_VOEvent:
         self.source_name = None
         self.source_type = None
         self.event_observed = None
-        self.hess_signifigance = None
+        self.hess_significance = None
         self.lvc_false_alarm_rate = None
         self.lvc_binary_neutron_star_probability = None
         self.lvc_neutron_star_black_hole_probability = None
@@ -422,10 +422,10 @@ class parsed_VOEvent:
         elif v.find(".//Param[@name='GraceID']") is not None:
             # The gracedb ID for GW
             self.trig_id = str(v.find(".//Param[@name='GraceID']").attrib["value"])
-        elif  v.find(".//Param[@cite='followup']") is not None:
+        elif v.find(".//EventIVORN[@cite='followup']") is not None:
             # Hess has no Trigger ID so get from swift followup ivorn, if doesnt exist use autogen
             # TODO replace this with something more reliable
-            swift_ivron = str(v.find(".//Param[@cite='followup']").attrib["value"])
+            swift_ivron = str(v.find(".//EventIVORN[@cite='followup']"))
             self.trig_id = swift_ivron.split('_').pop().split('-')[0]
         else:
             self.trig_id = str(uuid.uuid4().int)[:12]
@@ -503,7 +503,7 @@ class parsed_VOEvent:
 
         elif self.telescope == "HESS":
             self.event_duration = float(v.find(".//Param[@name='observation_duration']").attrib["value"])
-            self.hess_signifigance = float(v.find(".//Param[@name='significance']").attrib["value"])
+            self.hess_significance = float(v.find(".//Param[@name='significance']").attrib["value"])
 
         elif self.telescope == "LVC":
             self.event_duration = None
