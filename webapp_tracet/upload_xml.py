@@ -21,7 +21,7 @@ def write_and_upload(xml_string):
         url = 'http://127.0.0.1:8000/event_create/'
 
     data = {
-        'xml_string': xml_string
+        'xml_packet': xml_string
     }
     session.post(url, data=data)
 

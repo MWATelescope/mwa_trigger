@@ -348,6 +348,7 @@ class parsed_VOEvent:
         self.lvc_skymap_file = None
         self.lvc_significance = None
         self.lvc_event_url = None
+        self.role = None
 
         if self.trig_pairs is None:
             # use defaults
@@ -477,7 +478,6 @@ class parsed_VOEvent:
                 logger.warning("The SWIFT star tracker lost it's lock so ignoring event")
                 self.event_type += " SWIFT lost star tracker"
                 self.ignore = True
-                return
 
             # Get time and significance
             event_duration = v.find(".//Param[@name='Integ_Time']")

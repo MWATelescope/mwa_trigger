@@ -69,7 +69,7 @@ if __name__ == '__main__':
     scheduler = BackgroundScheduler(timezone=settings.TIME_ZONE)
     scheduler.add_job(
         output_popen_stdout,
-        trigger=CronTrigger(second="*/59"),  # Every 60 seconds
+        trigger=CronTrigger(second="*/5"),  # Every 60 seconds
         id="output_popen_stdout",
         max_instances=1,
         replace_existing=True,
