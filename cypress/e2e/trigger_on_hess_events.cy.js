@@ -1,5 +1,5 @@
 
-describe.skip('Test can do observations off HESS events', () => {
+describe('Test can do observations off HESS events', () => {
     it('create HESS trigger proposal', () => {
 
         const proposalId = "testMWAHESS"
@@ -29,7 +29,7 @@ describe.skip('Test can do observations off HESS events', () => {
     })
 })
 
-describe.skip('HESS events that trigger the proposal show decision outcome', () => {
+describe('HESS events that trigger the proposal show decision outcome', () => {
     it('upload HESS real event and trigger an MWA observation with twilio notifications', () => {
         cy.login()
         cy.visit('/')
@@ -44,7 +44,7 @@ describe.skip('HESS events that trigger the proposal show decision outcome', () 
             cy.wait(2000)
         })
         //proposal result shows event triggered
-        cy.contains("HESS").parent('tr').within(() => {
+        cy.contains("GRB220412").parent('tr').within(() => {
             cy.get('td').eq(5).contains('GRB')
             cy.get('td').eq(7).contains('Triggered')
         })
