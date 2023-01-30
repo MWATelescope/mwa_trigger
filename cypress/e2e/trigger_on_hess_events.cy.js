@@ -4,7 +4,6 @@ describe('Test HESS events will group with swift', () => {
 
         cy.login()
         cy.visit('/')
-        cy.wait(1000)
 
         const swiftId = "144329"
         // //upload lvc test event
@@ -21,7 +20,6 @@ describe('Test HESS events will group with swift', () => {
         })
         // events are grouped
         cy.get('.btn').click()
-        cy.wait(1000)
         cy.contains(swiftId).parent('tr').within(() => {
             cy.get('td > a').eq(0).click()
         })
@@ -45,7 +43,6 @@ describe('Test can create proposals to do observations off HESS events', () => {
 
         cy.login()
         cy.visit('/')
-        cy.wait(1000)
 
         cy.get("[data-testid='nav-proposal-settings']").click()
         cy.get("[data-testid='drop-create-proposal']").click()
@@ -61,17 +58,15 @@ describe('Test can create proposals to do observations off HESS events', () => {
         cy.get("#id_project_id").select('T001')
         cy.get("#id_testing").check()
         cy.get("[type='submit']").click()
-        cy.wait(1000)
 
         cy.contains(proposalDescription)
     })
 })
 
-describe.only('HESS events that trigger the proposal show decision outcome', () => {
+describe('HESS events that trigger the proposal show decision outcome', () => {
     it('upload HESS real event and trigger an MWA observation with twilio notifications', () => {
         cy.login()
         cy.visit('/')
-        cy.wait(1000)
 
         const hessId = '222222'
 
@@ -79,9 +74,7 @@ describe.only('HESS events that trigger the proposal show decision outcome', () 
         cy.fixture('HESS_test_event_real_promising.txt').then((event1) => {
             cy.get('[data-testid="nav-testing"]').click({ force: true })
             cy.get('[class="form-control"]').invoke('val', (event1.replaceAll("1102329", hessId)))
-            cy.wait(1000)
             cy.get("[type='submit']").click()
-            cy.wait(2000)
         })
         //proposal result shows event triggered
         cy.contains(hessId).parent('tr').within(() => {
