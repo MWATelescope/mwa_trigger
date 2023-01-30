@@ -263,8 +263,8 @@ def proposal_worth_observing(
                     pending_max_duration_2=prop_dec.proposal.pending_max_duration_2,
                     fermi_min_detection_prob=prop_dec.proposal.fermi_prob,
                     swift_min_rate_signif=prop_dec.proposal.swift_rate_signf,
-                    minimum_hess_significance=prop_dec.minimum_hess_significance,
-                    maximum_hess_significance=prop_dec.maximum_hess_significance,
+                    minimum_hess_significance=prop_dec.proposal.minimum_hess_significance,
+                    maximum_hess_significance=prop_dec.proposal.maximum_hess_significance,
                     # Other
                     decision_reason_log=decision_reason_log,
                     event_id=voevent.id,
