@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
 
     logger.info("Starting twistd command:")
-    twistd_commad = f"twistd --pidfile /tmp/twistd_comet.pid -n comet --local-ivo=ivo://hotwired.org/test {remote_command} --cmd=upload_xml.py"
+    twistd_commad = f"twistd --pidfile /tmp/twistd_comet.pid -n comet -v - v--local-ivo=ivo://tracet.duckdns.org/trigger {remote_command} --cmd=upload_xml.py"
     logger.info(twistd_commad)
     process = Popen(twistd_commad, shell=True, stdout=PIPE)
     # get initial output right away
@@ -69,7 +69,7 @@ if __name__ == '__main__':
     scheduler = BackgroundScheduler(timezone=settings.TIME_ZONE)
     scheduler.add_job(
         output_popen_stdout,
-        trigger=CronTrigger(second="*/5"),  # Every 60 seconds
+        trigger=CronTrigger(second="*/5"),  # Every 5 seconds
         id="output_popen_stdout",
         max_instances=1,
         replace_existing=True,
