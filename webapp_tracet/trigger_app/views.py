@@ -528,13 +528,14 @@ def voevent_view(request, id):
 def parse_and_save_xml(xml):
     trig = parse_xml.parsed_VOEvent(None, packet=xml)
 
-    #LVC has a different date observed string format that has a Z in it
-    if('Z' in str(trig.event_observed)):
-        event_observed = datetime.datetime.strptime(str(trig.event_observed), "%Y-%m-%dT%H:%M:%SZ")
-    else:
-        event_observed = datetime.datetime.strptime(str(trig.event_observed), "%Y-%m-%dT%H:%M:%S.%f")
-
-    print(event_observed)
+    def try_parsing_date(text):
+        for fmt in ("%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M:%S.%fZ"):
+            try:
+                return datetime.strptime(text, fmt)
+            except ValueError:
+                pass
+        raise ValueError('no valid date format found')
+ 
     data = {
         'telescope' : trig.telescope,
         'xml_packet' : xml,
@@ -552,7 +553,7 @@ def parse_and_save_xml(xml):
         'ignored' : trig.ignore,
         'source_name' : trig.source_name,
         'source_type' : trig.source_type,
-        'event_observed' : event_observed,
+        'event_observed' : try_parsing_date(trig.event_observed),
         'fermi_most_likely_index' : trig.fermi_most_likely_index,
         'fermi_detection_prob' : trig.fermi_detection_prob,
         'swift_rate_signif' : trig.swift_rate_signif,
