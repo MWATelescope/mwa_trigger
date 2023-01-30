@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
 
     logger.info("Starting twistd command:")
-    twistd_commad = f"twistd --pidfile /tmp/twistd_comet.pid -n comet -v - v--local-ivo=ivo://tracet.duckdns.org/trigger {remote_command} --cmd=upload_xml.py"
+    twistd_commad = f"twistd --pidfile /tmp/twistd_comet.pid -n comet -v -v --local-ivo=ivo://tracet.duckdns.org/trigger {remote_command} --cmd=upload_xml.py"
     logger.info(twistd_commad)
     process = Popen(twistd_commad, shell=True, stdout=PIPE)
     # get initial output right away
