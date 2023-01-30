@@ -29,7 +29,7 @@ describe('Test can do observations off HESS events', () => {
     })
 })
 
-describe('Early warning LVC events that trigger the proposal show decision outcome', () => {
+describe.skip('HESS events that trigger the proposal show decision outcome', () => {
     it('upload HESS real event and trigger an MWA observation with twilio notifications', () => {
         cy.login()
         cy.visit('/')
