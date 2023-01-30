@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<voe:VOEvent ivorn="ivo://nasa.gsfc.gcn/Antares_Alert#1438351269"
+      role="observation"
+      version="2.0"
+      xmlns:voe="https://www.ivoa.net/xml/VOEvent/v2.0"
+      xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+      xmlns:xlink="https://www.w3.org/1999/xlink"
+      xsi:schemaLocation="https://www.ivoa.net/xml/VOEvent/v1.1 https://www.ivoa.net/xml/VOEvent/VOEvent-v1.1.xsd" >
+    <Who>
+        <AuthorIVORN>ivo://nasa.gsfc.tan/gcn</AuthorIVORN>
+        <Author>
+            <shortName>Antares (via VO-GCN)</shortName>
+            <contactName>Damien Dornic</contactName>
+            <contactPhone>+1-33620882320</contactPhone>
+            <contactEmail>dornic@cppm.in2p3.fr</contactEmail>
+        </Author>
+        <Date>2019-11-26T21:55:48.081</Date>
+        <Description>This VOEvent message was created with GCN VOE version: 1.22 11nov15</Description>
+    </Who>
+    <What>
+        <Param name="TrigID" dataType='int' value="1438351269" ucd="meta.number" />
+        <Param name="N_Hits" dataType='int' value="110" unit="cts" />
+        <Param name="Diff_AA_BB" dataType='float' value="0.9171" unit="deg" />
+        <Param name="isRealAlert" dataType='bool' value="true" unit="" />
+        <Param name="pvalue" dataType='float' value="0.008109260" unit="" />
+        <Param name="ranking" dataType='int' value="1" unit="" />
+        <Description>Location of an HE neutrino.</Description>
+    </What>
+    <WhereWhen>
+        <ObsDataLocation>
+            <ObservatoryLocation>
+                <AstroCoordSystem id="UTC-GEOD-TOPO" />
+                <AstroCoords coord_system_id="UTC-GEOD-TOPO">
+                    <Position3D unit='deg-deg-m'>
+                        <Name1>longitude</Name1>
+                        <Name2>latitude</Name2>
+                        <Name3>elevation</Name3>
+                        <Value3>
+                            <C1>0.0</C1>
+                            <C2>0.0</C2>
+                            <C3>0.0</C3>
+                        </Value3>
+                    </Position3D>
+                </AstroCoords>
+            </ObservatoryLocation>
+            <ObservationLocation>
+                <AstroCoordSystem id="UTC-FK5-GEO" />
+                <AstroCoords coord_system_id="UTC-FK5-GEO">
+                    <Time unit="s">
+                        <TimeInstant>
+                            <ISOTime>2019-11-26T21:55:34.000</ISOTime>
+                        </TimeInstant>
+                    </Time>
+                    <Position2D unit="deg">
+                        <Name1>RA</Name1>
+                        <Name2>Dec</Name2>
+                        <Value2>
+                            <C1>156.9570</C1>
+                            <C2>-21.2740</C2>
+                        </Value2>
+                        <Error2Radius>0.3250</Error2Radius>
+                    </Position2D>
+                </AstroCoords>
+            </ObservationLocation>
+        </ObsDataLocation>
+        <Description>The RA,Dec coordinates are of the neutrino.</Description>
+    </WhereWhen>
+    <How>
+        <Description>Antares neutrino telescope</Description>
+        <Reference uri="http://antares.in2p3.fr" type="url" />
+    </How>
+    <Why importance="0.5">
+        <Inference probability="0.5">
+            <Concept>process.variation.burst;em.gamma</Concept>
+        </Inference>
+    </Why>
+    <Citations>
+        <EventIVORN cite="followup"></EventIVORN>
+        <Description>This is the position of the neutrino.</Description>
+    </Citations>
+    <Description>
+    </Description>
+</voe:VOEvent>

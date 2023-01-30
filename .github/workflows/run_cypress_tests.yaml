@@ -1,0 +1,73 @@
+name: run_cypress_tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  start_webapp_run_cypress:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:12.3-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: github_actions
+        ports:
+          - 5432:5432
+        options: --mount type=tmpfs,destination=/var/lib/postgresql/data --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+      - name: Install tracet dependencies
+        run: pip install -r requirements.txt
+      - name: Install tracet
+        run: pip install .
+      - name: Install web app dependencies
+        run: pip install -r webapp_tracet/requirements.txt
+      - name: Run migrations
+        run: |
+          cd webapp_tracet
+          python manage.py makemigrations trigger_app
+          python manage.py migrate trigger_app
+          python manage.py migrate
+          python manage.py migrate --run-syncdb
+        env:
+          SYSTEM_ENV: GITHUB_WORKFLOW
+      - name: Seed test data
+        run: ./webapp_tracet/manage.py loaddata ./webapp_tracet/default_data.yaml && ./webapp_tracet/manage.py loaddata ./webapp_tracet/trigger_app/test_yamls/mwa_fs_proposal_settings.yaml
+        env:
+          SYSTEM_ENV: GITHUB_WORKFLOW
+      - name: Create Admin User
+        run: ./webapp_tracet/manage.py createsuperuser --noinput
+        env:
+          SYSTEM_ENV: GITHUB_WORKFLOW
+          DJANGO_SUPERUSER_USERNAME: testuser
+          DJANGO_SUPERUSER_PASSWORD: testpass
+          DJANGO_SUPERUSER_EMAIL: testemail@testemail.em
+      - name: Start cypress
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/Cypress
+            node_modules
+          key: my-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - run: npm i cypress
+      - uses: cypress-io/github-action@v5
+        with:
+          install: false
+          start: python webapp_tracet/manage.py runserver
+          wait-on: "http://127.0.0.1:8000/"
+          wait-on-timeout: 120
+        env:
+          SYSTEM_ENV: GITHUB_WORKFLOW
+          MWA_SECURE_KEY: TestingOnly
+          CYPRESS_UPLOAD_USER: testuser
+          CYPRESS_UPLOAD_PASSWORD: testpass

@@ -1,0 +1,130 @@
+antares_ranking: null
+dec: null
+dec_dms: null
+err: null
+event_duration: null
+event_observed: !!python/object/apply:lxml.objectify.fromstring
+- !!binary |
+  PElTT1RpbWUgeG1sbnM6eHNpPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxL1hNTFNjaGVtYS1pbnN0
+  YW5jZSIgeG1sbnM6dm9lPSJodHRwOi8vd3d3Lml2b2EubmV0L3htbC9WT0V2ZW50L3YyLjAiPjIw
+  MTgtMTEtMDFUMjI6MjI6NDYuNjU0NDM3WjwvSVNPVGltZT4=
+event_type: EarlyWarning
+fermi_detection_prob: null
+fermi_most_likely_index: null
+grb_ident: null
+ignore: false
+lvc_binary_black_hole_probability: 0.03
+lvc_binary_neutron_star_probability: 0.95
+lvc_event_url: https://example.org/superevents/MS181101ab/view/
+lvc_false_alarm_rate: 9.11069936486e-14
+lvc_includes_neutron_star_probability: 0.95
+lvc_neutron_star_black_hole_probability: 0.01
+lvc_prob_density_tile: null
+lvc_retraction_message: null
+lvc_significance: null
+lvc_skymap_file: null
+lvc_skymap_fits: null
+lvc_terrestial_probability: 0.01
+packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"\
+  http://www.ivoa.net/xml/VOEvent/v2.0 http://www.ivoa.net/xml/VOEvent/VOEvent-v2.0.xsd\"\
+  \ version=\"2.0\" role=\"observation\" ivorn=\"ivo://gwnet/LVC#MS181101ab-1-EarlyWarning\"\
+  >\n  <Who>\n    <Date>2018-11-01T22:34:20Z</Date>\n    <Author>\n      <contactName>LIGO\
+  \ Scientific Collaboration, Virgo Collaboration, and KAGRA Collaboration</contactName>\n\
+  \    </Author>\n  </Who>\n  <What>\n    <Param dataType=\"int\" name=\"Packet_Type\"\
+  \ value=\"163\">\n      <Description>The Notice Type number is assigned/used within\
+  \ GCN, eg type=163 is an LVC_EARLY_WARNING notice</Description>\n    </Param>\n\
+  \    <Param dataType=\"int\" name=\"internal\" value=\"0\">\n      <Description>Indicates\
+  \ whether this event should be distributed to LSC/Virgo/KAGRA members only</Description>\n\
+  \    </Param>\n    <Param dataType=\"int\" name=\"Pkt_Ser_Num\" value=\"1\">\n \
+  \     <Description>A number that increments by 1 each time a new revision is issued\
+  \ for this event</Description>\n    </Param>\n    <Param dataType=\"string\" name=\"\
+  GraceID\" ucd=\"meta.id\" value=\"MS181101ab\">\n      <Description>Identifier in\
+  \ GraceDB</Description>\n    </Param>\n    <Param dataType=\"string\" name=\"AlertType\"\
+  \ ucd=\"meta.version\" value=\"EarlyWarning\">\n      <Description>VOEvent alert\
+  \ type</Description>\n    </Param>\n    <Param dataType=\"int\" name=\"HardwareInj\"\
+  \ ucd=\"meta.number\" value=\"0\">\n      <Description>Indicates that this event\
+  \ is a hardware injection if 1, no if 0</Description>\n    </Param>\n    <Param\
+  \ dataType=\"int\" name=\"OpenAlert\" ucd=\"meta.number\" value=\"1\">\n      <Description>Indicates\
+  \ that this event is an open alert if 1, no if 0</Description>\n    </Param>\n \
+  \   <Param dataType=\"string\" name=\"EventPage\" ucd=\"meta.ref.url\" value=\"\
+  https://example.org/superevents/MS181101ab/view/\">\n      <Description>Web page\
+  \ for evolving status of this GW candidate</Description>\n    </Param>\n    <Param\
+  \ dataType=\"string\" name=\"Instruments\" ucd=\"meta.code\" value=\"H1,L1,V1\"\
+  >\n      <Description>List of instruments used in analysis to identify this event</Description>\n\
+  \    </Param>\n    <Param dataType=\"float\" name=\"FAR\" ucd=\"arith.rate;stat.falsealarm\"\
+  \ unit=\"Hz\" value=\"9.11069936486e-14\">\n      <Description>False alarm rate\
+  \ for GW candidates with this strength or greater</Description>\n    </Param>\n\
+  \    <Param dataType=\"string\" name=\"Group\" ucd=\"meta.code\" value=\"CBC\">\n\
+  \      <Description>Data analysis working group</Description>\n    </Param>\n  \
+  \  <Param dataType=\"string\" name=\"Pipeline\" ucd=\"meta.code\" value=\"gstlal\"\
+  >\n      <Description>Low-latency data analysis pipeline</Description>\n    </Param>\n\
+  \    <Param dataType=\"string\" name=\"Search\" ucd=\"meta.code\" value=\"MDC\"\
+  >\n      <Description>Specific low-latency search</Description>\n    </Param>\n\
+  \    <Group name=\"GW_SKYMAP\" type=\"GW_SKYMAP\">\n      <Param dataType=\"string\"\
+  \ name=\"skymap_fits\" ucd=\"meta.ref.url\" value=\"https://emfollow.docs.ligo.org/userguide/_static/bayestar.multiorder.fits,0\"\
+  >\n        <Description>Sky Map FITS</Description>\n      </Param>\n    </Group>\n\
+  \    <Group name=\"Classification\" type=\"Classification\">\n      <Param dataType=\"\
+  float\" name=\"BNS\" ucd=\"stat.probability\" value=\"0.95\">\n        <Description>Probability\
+  \ that the source is a binary neutron star merger (both objects lighter than 3 solar\
+  \ masses)</Description>\n      </Param>\n      <Param dataType=\"float\" name=\"\
+  NSBH\" ucd=\"stat.probability\" value=\"0.01\">\n        <Description>Probability\
+  \ that the source is a neutron star-black hole merger (secondary lighter than 3\
+  \ solar masses)</Description>\n      </Param>\n      <Param dataType=\"float\" name=\"\
+  BBH\" ucd=\"stat.probability\" value=\"0.03\">\n        <Description>Probability\
+  \ that the source is a binary black hole merger (both objects heavier than 3 solar\
+  \ masses)</Description>\n      </Param>\n      <Param dataType=\"float\" name=\"\
+  Terrestrial\" ucd=\"stat.probability\" value=\"0.01\">\n        <Description>Probability\
+  \ that the source is terrestrial (i.e., a background noise fluctuation or a glitch)</Description>\n\
+  \      </Param>\n      <Description>Source classification: binary neutron star (BNS),\
+  \ neutron star-black hole (NSBH), binary black hole (BBH), or terrestrial (noise)</Description>\n\
+  \    </Group>\n    <Group name=\"Properties\" type=\"Properties\">\n      <Param\
+  \ dataType=\"float\" name=\"HasNS\" ucd=\"stat.probability\" value=\"0.95\">\n \
+  \       <Description>Probability that at least one object in the binary has a mass\
+  \ that is less than 3 solar masses</Description>\n      </Param>\n      <Param dataType=\"\
+  float\" name=\"HasRemnant\" ucd=\"stat.probability\" value=\"0.91\">\n        <Description>Probability\
+  \ that a nonzero mass was ejected outside the central remnant object</Description>\n\
+  \      </Param>\n      <Param dataType=\"float\" name=\"HasMassGap\" ucd=\"stat.probability\"\
+  \ value=\"0.01\">\n        <Description>Probability that at least one object in\
+  \ the binary has a mass between 3 and 5 solar masses</Description>\n      </Param>\n\
+  \      <Description>Qualitative properties of the source, conditioned on the assumption\
+  \ that the signal is an astrophysical compact binary merger</Description>\n    </Group>\n\
+  \  </What>\n  <WhereWhen>\n    <ObsDataLocation>\n      <ObservatoryLocation id=\"\
+  LIGO Virgo KAGRA\"/>\n      <ObservationLocation>\n        <AstroCoordSystem id=\"\
+  UTC-FK5-GEO\"/>\n        <AstroCoords coord_system_id=\"UTC-FK5-GEO\">\n       \
+  \   <Time unit=\"s\">\n            <TimeInstant>\n              <ISOTime>2018-11-01T22:22:46.654437Z</ISOTime>\n\
+  \            </TimeInstant>\n          </Time>\n        </AstroCoords>\n      </ObservationLocation>\n\
+  \    </ObsDataLocation>\n  </WhereWhen>\n  <Description>Early warning report of\
+  \ a candidate gravitational wave event</Description>\n  <How>\n    <Description>Candidate\
+  \ gravitational wave event identified by low-latency analysis</Description>\n  \
+  \  <Description>H1: LIGO Hanford 4 km gravitational wave detector</Description>\n\
+  \    <Description>L1: LIGO Livingston 4 km gravitational wave detector</Description>\n\
+  \    <Description>V1: Virgo 3 km gravitational wave detector</Description>\n   \
+  \ <Description>K1: KAGRA 3 km gravitational wave detector</Description>\n  </How>\n\
+  \  <original_prefix>voe</original_prefix>\n</VOEvent>\n"
+ra: null
+ra_hms: null
+role: observation
+self_generated_trig_id: false
+sequence_num: null
+source_name: null
+source_type: GW
+swift_rate_signif: null
+telescope: LVC
+trig_id: MS181101ab
+trig_pairs:
+- SWIFT_BAT_GRB_Pos
+- SWIFT_XRT_Pos
+- SWIFT_UVOT_Pos
+- Fermi_GBM_Flt_Pos
+- Fermi_GBM_Gnd_Pos
+- Fermi_GBM_Fin_Pos
+- HESS_GRB_To
+- LVC_EarlyWarning
+- LVC_Preliminary
+- LVC_Initial
+- LVC_Update
+- LVC_Retraction
+- AMON_ICECUBE_BRONZE_Event
+- AMON_ICECUBE_GOLD_Event
+- Antares_Alert
+xml: tests/test_events/LVC_example_early_warning.xml

@@ -121,7 +121,6 @@ def worth_observing_grb(
 
     return trigger_bool, debug_bool, pending_bool, decision_reason_log
 
-
 def worth_observing_nu(
         # event values
         antares_ranking=None,
@@ -174,5 +173,129 @@ def worth_observing_nu(
     else:
         trigger_bool = True
         decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: No thresholds for non Antares telescopes so triggering. \n"
+
+    return trigger_bool, debug_bool, pending_bool, decision_reason_log
+
+def worth_observing_gw(
+        # event values
+        telescope=None,
+        lvc_significance=None,
+        lvc_binary_neutron_star_probability=None,
+        lvc_neutron_star_black_hole_probability=None,
+        lvc_binary_black_hole_probability=None,
+        lvc_terrestial_probability=None,
+        lvc_includes_neutron_star_probability=None,
+        # Thresholds
+        minimum_neutron_star_probability=None,
+        maximum_neutron_star_probability=None,
+        minimum_binary_neutron_star_probability=None,
+        maximum_binary_neutron_star_probability=None,
+        minimum_neutron_star_black_hole_probability=None,
+        maximum_neutron_star_black_hole_probability=None,
+        minimum_binary_black_hole_probability=None,
+        maximum_binary_black_hole_probability=None,
+        minimum_terrestial_probability=None,
+        maximum_terrestial_probability=None,
+        observe_low_significance=None,
+        observe_significant=None,
+        # Other
+        decision_reason_log="",
+        event_id=None, 
+    ):
+    """Decide if a Gravity Wave Event is worth observing.
+
+    Parameters
+    ----------
+    lvc_binary_neutron_star_probability : `float`, optional
+        The terrestial probability of gw event. Default: None.
+    lvc_neutron_star_black_hole_probability : `float`, optional
+        The terrestial probability of gw event. Default: None.
+    lvc_binary_black_hole_probability : `float`, optional
+        The terrestial probability of gw event. Default: None.
+    lvc_terrestial_probability : `float`, optional
+        The terrestial probability of gw event. Default: None
+    lvc_includes_neutron_star_probability : `float`, optional
+        The terrestial probability of gw event. Default: None
+    
+    event_type : `str`, optional
+        Lvc alert type for gw event. Default: None.
+    minimum_terrestial_probability : `float`, optional
+        The minimum terrestial probability. Default: 0.95.
+    maximum_terrestial_probability : `float`, optional
+        The maximum terrestial probability. Default: 0.95.
+    minimum_neutron_star_probability : `float`, optional
+        The minimum neutron star probability. Default: 0.01.
+    minimum_mass_gap_probability : `float`, optional
+        The minimum mass gap probability. Default: 0.01.
+    observe_low_significance : `bool`, optional
+        Observe events with low significance Default: True.
+    observe_significant : `bool`, optional
+        Observe significant events. Default: True.
+    decision_reason_log : `str`
+        A log of all the decisions made so far so a user can understand why the source was(n't) observed. Default: "".
+    event_id : `int`, optional
+        An Event ID that will be recorded in the decision_reason_log. Default: None.
+
+    Returns
+    -------
+    trigger_bool : `boolean`
+        If True an observations should be triggered.
+    debug_bool : `boolean`
+        If True a debug alert should be sent out.
+    pending_bool : `boolean`
+        If True will create a pending observation and wait for human intervention.
+    decision_reason_log : `str`
+        A log of all the decisions made so far so a user can understand why the source was(n't) observed.
+    """
+    # Setup up defaults
+    trigger_bool = False
+    debug_bool = False
+    pending_bool = False
+
+    if telescope == "LVC":
+        # PROB_NS
+        if lvc_includes_neutron_star_probability > maximum_neutron_star_probability:
+            debug_bool = True
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The PROB_NS probability ({lvc_includes_neutron_star_probability}) is greater than {maximum_neutron_star_probability} so not triggering. \n"
+        elif lvc_includes_neutron_star_probability < minimum_neutron_star_probability:
+            debug_bool = True
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The PROB_NS probability ({lvc_includes_neutron_star_probability}) is less than {minimum_neutron_star_probability} so not triggering. \n"
+        elif lvc_binary_neutron_star_probability > maximum_binary_neutron_star_probability:
+            debug_bool = True
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The PROB_BNS probability ({lvc_binary_neutron_star_probability}) is greater than {maximum_binary_neutron_star_probability} so not triggering. \n"
+        elif lvc_binary_neutron_star_probability < minimum_binary_neutron_star_probability:
+            debug_bool = True
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The PROB_BNS probability ({lvc_binary_neutron_star_probability}) is less than {minimum_binary_neutron_star_probability} so not triggering. \n"
+        elif lvc_neutron_star_black_hole_probability > maximum_neutron_star_black_hole_probability:
+            debug_bool = True
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The PROB_NSBH probability ({lvc_neutron_star_black_hole_probability}) is greater than {maximum_neutron_star_black_hole_probability} so not triggering. \n"
+        elif lvc_neutron_star_black_hole_probability < minimum_neutron_star_black_hole_probability:
+            debug_bool = True
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The PROB_NSBH probability ({lvc_neutron_star_black_hole_probability}) is less than {maximum_neutron_star_black_hole_probability} so not triggering. \n"
+        elif lvc_binary_black_hole_probability > maximum_binary_black_hole_probability:
+            debug_bool = True
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The PROB_BBH probability ({lvc_binary_black_hole_probability}) is greater than {maximum_binary_black_hole_probability} so not triggering. \n"
+        elif lvc_binary_black_hole_probability < minimum_binary_black_hole_probability:
+            debug_bool = True
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The PROB_BBH probability ({lvc_binary_black_hole_probability}) is less than {minimum_binary_black_hole_probability} so not triggering. \n"
+        elif lvc_terrestial_probability > maximum_terrestial_probability:
+            debug_bool = True
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The PROB_Terre probability ({lvc_terrestial_probability}) is greater than {maximum_terrestial_probability} so not triggering. \n"
+        elif lvc_terrestial_probability < minimum_terrestial_probability:
+            debug_bool = True
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The PROB_Terre probability ({lvc_terrestial_probability}) is less than {minimum_terrestial_probability} so not triggering. \n"
+        
+        elif lvc_significance == "low significance" and not observe_low_significance:
+            debug_bool = True
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The GW signifcance ({lvc_significance}) is not observed because observe_low_significance is {observe_low_significance}. \n"
+        
+        elif lvc_significance == "significant" and not observe_significant:
+            debug_bool = True
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The GW signifcance ({lvc_significance}) is not observed because observe_significant is {observe_significant}. \n"
+            
+        else:
+            trigger_bool = True
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: The probability looks good so triggering. \n"
+
 
     return trigger_bool, debug_bool, pending_bool, decision_reason_log

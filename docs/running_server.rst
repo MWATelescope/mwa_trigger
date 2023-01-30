@@ -85,7 +85,7 @@ Larger updates may need a combination of the following commands
    # Check for new dependent software
    pip install -r requirements.txt
    # install updates to the tracet python module
-   pip instal ..
+   pip install ..
    # Check for new static files
    python manage.py collectstatic
    # Make any required changes to the backend database

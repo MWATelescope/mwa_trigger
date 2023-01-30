@@ -3,11 +3,11 @@
 {% load utils %}
 
 {% block content %}
-
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 <title>Event Log</title>
 <div class="container-fluid">
   <h1>Event Log</h1>
-  <div style="background-color:#f8f8f8; width:90%; margin: 0 auto; padding-bottom: 20px;">
+  <div style="background-color:#f8f8f8; width:90%; margin: 0 auto; padding: 16px;">
   <h3>Filter Events:</h3>
   <form action="" method="get">
     <table>
@@ -30,8 +30,8 @@
         <td>{{ filter.form.duration__lte }}</td>
       </tr>
       <tr>
-        <td>{{ filter.form.telescope.label_tag }}</td>
-        <td>{{ filter.form.telescope }}</td>
+        <td>Telescope:</td>
+        <td>{{ filter.form.telescopes }}</td>
         <td>{{ filter.form.source_name.label_tag }}</td>
         <td>{{ filter.form.source_name }}</td>
         <td>RA (deg):</td>
@@ -48,19 +48,19 @@
         <td>{{ filter.form.dec__lte }}</td>
       </tr>
       <tr>
-        <td>Recieved date (start)</td>
-        <td><input type="datetime-local" name="recieved_data_after" value="{{filter.form.recieved_data_after}}"></td>
-        <td>Recieved date (end)</td>
-        <td><input type="datetime-local" name="recieved_data_before" value="{{filter.form.recieved_data_before}}"></td>
+        <td>Received date (start)</td>
+        <td>{{filter.form.recieved_data_after}}</td>
+        <td>Observed date (start)</td>
+        <td>{{filter.form.event_observed_after}}</td>  
         <td>Position error (deg):</td>
         <td>{{ filter.form.pos_error__gte }}</td>
         <td>{{ filter.form.pos_error__lte }}</td>
       </tr>
       <tr>
-        <td>Observed date (start)</td>
-        <td><input type="datetime-local" name="event_observed_after" value="{{filter.form.event_observed_after}}"></td>
+        <td>Received date (end)</td>
+        <td>{{filter.form.recieved_data_before}}</td>
         <td>Observed date (end)</td>
-        <td><input type="datetime-local" name="event_observed_before" value="{{filter.form.event_observed_before}}"></td>
+        <td>{{filter.form.event_observed_before}}</td>
         <td>Fermi Detection Probability (%):</td>
         <td>{{ filter.form.fermi_detection_prob__gte }}</td>
         <td>{{ filter.form.fermi_detection_prob__lte }}</td>
@@ -75,6 +75,10 @@
         <td>{{ filter.form.swift_rate_signif__lte }}</td>
       </tr>
     </table>
+    {% if has_filter %}
+      <a href="/event_log/">Clear all filters</a>
+    {% endif %}
+    <br/>
     <input class="btn btn-primary" type="submit" />
   </form>
   </div>
@@ -86,7 +90,7 @@
         <th>Telescope</th>
         <th>Event Type</th>
         <th>Alert Time (UTC)</th>
-        <th>Recieved (UTC)</th>
+        <th>Received (UTC)</th>
         <th>Trig ID</th>
         <th>Group ID</th>
         <th>Source Name</th>
@@ -137,8 +141,8 @@
       <td>{% if object.source_name  is not None %} {{ object.source_name }}  {% endif %}</td>
       <td>{% if object.sequence_num is not None %} {{ object.sequence_num }} {% endif %}</td>
       <td>{% if object.duration     is not None %} {{ object.duration }}     {% endif %}</td>
-      <td>{% if object.ra_hms       is not None %} {{ object.ra_hms }}       {% endif %}</td>
-      <td>{% if object.dec_dms      is not None %} {{ object.dec_dms }}      {% endif %}</td>
+      <td>{% if object.ra_hms       is not None %} {{ object.ra_hms|truncatechars:12 }}       {% endif %}</td>
+      <td>{% if object.dec_dms      is not None %} {{ object.dec_dms|truncatechars:12 }}      {% endif %}</td>
       <td>
       {% if object.pos_error    is not None %}
         {% if poserr_unit == "deg" %}
@@ -160,4 +164,45 @@
 
   {% include "trigger_app/pagination.html" %}
 </div>
+<script>
+  $(document).ready(function(){
+
+    function datetimeLocal(datetime) {
+      const dt = new Date(datetime);
+      dt.setMinutes(dt.getMinutes() - dt.getTimezoneOffset());
+      return dt.toISOString().slice(0, 16);
+    }
+
+    const rda = document.getElementsByName("recieved_data_after")[0];
+    const rdb = document.getElementsByName("recieved_data_before")[0];
+    const eoa = document.getElementsByName("event_observed_after")[0];
+    const eob = document.getElementsByName("event_observed_before")[0];
+
+    // Don't let users select dates in the future
+    rda.max = datetimeLocal(Date.now());
+    rdb.max = datetimeLocal(Date.now());
+    eoa.max = datetimeLocal(Date.now());
+    eob.max = datetimeLocal(Date.now());
+
+
+    // If no date value for max range, set to current date (when we got the data)
+    if(!rdb.value) {
+      rdb.value = datetimeLocal(Date.now())
+    }
+
+    if(!eob.value) {
+      eob.value = datetimeLocal(Date.now())
+    }
+
+    // Set starting date range to something in 2021, this is mainly for UX and is not real
+    if(!rda.value) {
+      rda.value = datetimeLocal("2021-01-01 04:00:00")
+    }
+    // Set starting date range to sometime in 2021, this is mainly for UX and does not reflect when we started collecting data
+    if(!eoa.value) {
+      eoa.value = datetimeLocal("2021-01-01 04:00:00")
+    }
+
+    })
+    </script>
 {% endblock %}

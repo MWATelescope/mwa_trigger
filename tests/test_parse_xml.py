@@ -1,7 +1,7 @@
 """Tests the parse_xml.py script
 """
 import os
-from yaml import load, Loader
+from yaml import load, Loader, dump
 from numpy.testing import assert_equal
 
 from tracet.parse_xml import parsed_VOEvent
@@ -20,7 +20,6 @@ def parse_xml_test_warpper(xml_tests):
             xml_loc = None
             yaml_loc = os.path.join(os.path.dirname(__file__), 'test_events/Fermi_GRB.yaml')
         else:
-            #xml_loc = os.path.join(os.path.dirname(__file__), 'test_events', xml_file)
             xml_loc = os.path.join('tests/test_events', xml_file)
             yaml_loc = xml_loc[:-4] + ".yaml"
 
@@ -31,7 +30,6 @@ def parse_xml_test_warpper(xml_tests):
         # if xml_file is not None:
         #    with open(yaml_loc, 'w') as stream:
         #        dump(dict(trig.__dict__), stream)
-
         # Convert 'event_observed' to string as it's easier to compare than datetime
         trig.__dict__['event_observed'] = str(trig.__dict__['event_observed'])
         # Set xml to None to prevent path errors when testing in different locations
@@ -81,6 +79,17 @@ def test_parse_fs_event():
     ]
     parse_xml_test_warpper(xml_tests)
 
+# Process LVK BNS/NSBH/BBH early warning, preliminary, initial, update and retracted
+# GCN alerts that we want to trigger MWA. Include skymap for initial, update. Include retracted information.
+def test_parse_lvk_early_event():
+    xml_tests = [
+        ('LVC_example_early_warning.xml', None, ),
+        ('LVC_example_preliminary.xml', None, ),
+        ('LVC_example_initial.xml', None, ),
+        ('LVC_example_update.xml', None, ),
+        ('LVC_example_retraction.xml', None, ),
+    ]
+    parse_xml_test_warpper(xml_tests)
 
 if __name__ == "__main__":
     """

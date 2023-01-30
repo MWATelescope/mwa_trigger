@@ -8,10 +8,14 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, InvalidPage
 import django_filters
+from django.forms import DateTimeInput, Select
+from django.core.files.base import ContentFile
 
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 from . import models, serializers, forms, signals
 from .telescope_observe import trigger_observation
@@ -36,8 +40,12 @@ if 'runserver' in sys.argv:
     startup_signal.send(sender=startup_signal)
 
 class EventFilter(django_filters.FilterSet):
-    recieved_data = django_filters.DateTimeFromToRangeFilter()
-    event_observed = django_filters.DateTimeFromToRangeFilter()
+    # DateTimeFromToRangeFilter raises exceptions in debugger for missing _before and _after keys
+    recieved_data_after = django_filters.DateTimeFilter(field_name='recieved_data', lookup_expr='gte', widget=DateTimeInput(attrs={'type': 'datetime-local'}))
+    recieved_data_before = django_filters.DateTimeFilter(field_name='recieved_data', lookup_expr='lte', widget=DateTimeInput(attrs={'type': 'datetime-local'}))
+
+    event_observed_after = django_filters.DateTimeFilter(field_name='event_observed', lookup_expr='gte', widget=DateTimeInput(attrs={'type': 'datetime-local'}))
+    event_observed_before = django_filters.DateTimeFilter(field_name='event_observed', lookup_expr='lte', widget=DateTimeInput(attrs={'type': 'datetime-local'}))
 
     duration__lte = django_filters.NumberFilter(field_name='duration', lookup_expr='lte')
     duration__gte = django_filters.NumberFilter(field_name='duration', lookup_expr='gte')
@@ -57,9 +65,15 @@ class EventFilter(django_filters.FilterSet):
     swift_rate_signif__lte = django_filters.NumberFilter(field_name='swift_rate_signif', lookup_expr='lte')
     swift_rate_signif__gte = django_filters.NumberFilter(field_name='swift_rate_signif', lookup_expr='gte')
 
+    telescopes = django_filters.AllValuesMultipleFilter(field_name='telescope')
     class Meta:
         model = models.Event
-        fields = '__all__'
+
+        # Django-filter cannot hanlde django FileField so exclude from filters
+        fields = ('recieved_data_after', 'recieved_data_before', 'event_observed_after', 'event_observed_before', 'duration__lte'
+        , 'duration__gte', 'ra__lte', 'ra__gte', 'dec__lte', 'dec__gte', 'pos_error__lte', 'pos_error__gte', 'fermi_detection_prob__lte'
+        , 'fermi_detection_prob__gte', 'swift_rate_signif__lte', 'swift_rate_signif__gte', 'ignored', 'associated_event_id', 'source_type' 
+        , 'trig_id', 'telescope', 'source_name', 'sequence_num', 'event_type', 'telescopes')
         filter_overrides = {
             dj_model.CharField: {
                 'filter_class': django_filters.CharFilter,
@@ -88,11 +102,15 @@ def EventList(request):
         # the page number is not an integer (PageNotAnInteger exception)
         # return the first page
         events = paginator.page(1)
-    return render(request, 'trigger_app/voevent_list.html', {'filter': f, "page_obj":events, "poserr_unit":poserr_unit})
+    has_filter = any(field in request.GET for field in set(f.get_fields()))
+    return render(request, 'trigger_app/voevent_list.html', {'filter': f, "page_obj":events, "poserr_unit":poserr_unit, 'has_filter': has_filter})
 
 
 class ProposalDecisionFilter(django_filters.FilterSet):
-    recieved_data = django_filters.DateTimeFromToRangeFilter()
+    # DateTimeFromToRangeFilter raises exceptions in debugger for missing _before and _after keys
+
+    recieved_data_after = django_filters.DateTimeFilter(field_name='recieved_data', lookup_expr='gte', widget=DateTimeInput(attrs={'type': 'datetime-local'}))
+    recieved_data_before = django_filters.DateTimeFilter(field_name='recieved_data', lookup_expr='lte', widget=DateTimeInput(attrs={'type': 'datetime-local'}))
 
     class Meta:
         model = models.ProposalDecision
@@ -436,9 +454,14 @@ subgraph NU
 end'''
     else:
         mermaid_script += '''
-  E --> I[Neutrino] --> END'''
+    E --> I[Neutrino] --> END'''
+    if prop_set.source_type == "GW":
+        mermaid_script += f'''
+    E --> H[GW] --> L[Trigger Observation]''' 
+    else:
+        mermaid_script += f'''
+    E --> H[GW] --> END'''
     mermaid_script += '''
-  E --> H[GW] --> END
   style A fill:blue,color:white
   style END fill:red,color:white
   style L fill:green,color:white
@@ -501,15 +524,69 @@ def voevent_view(request, id):
     return HttpResponse(xml_pretty_str, content_type='text/xml')
 
 
-@api_view(['POST'])
-@transaction.atomic
-def event_create(request):
-    new_event = serializers.EventSerializer(data=request.data)
+
+def parse_and_save_xml(xml):
+    trig = parse_xml.parsed_VOEvent(None, packet=xml)
+
+    def try_parsing_date(text):
+        for fmt in ("%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M:%S.%fZ"):
+            try:
+                return datetime.datetime.strptime(text, fmt)
+            except ValueError:
+                pass
+        raise ValueError('no valid date format found')
+ 
+    data = {
+        'telescope' : trig.telescope,
+        'xml_packet' : xml,
+        'duration' : trig.event_duration,
+        'trig_id' : trig.trig_id,
+        'self_generated_trig_id' : trig.self_generated_trig_id,
+        'sequence_num' : trig.sequence_num,
+        'event_type' : trig.event_type,
+        'role' : trig.role,
+        'ra' : trig.ra,
+        'dec' : trig.dec,
+        'ra_hms' : trig.ra_hms,
+        'dec_dms' : trig.dec_dms,
+        'pos_error' : trig.err,
+        'ignored' : trig.ignore,
+        'source_name' : trig.source_name,
+        'source_type' : trig.source_type,
+        'event_observed' : try_parsing_date(str(trig.event_observed)),
+        'fermi_most_likely_index' : trig.fermi_most_likely_index,
+        'fermi_detection_prob' : trig.fermi_detection_prob,
+        'swift_rate_signif' : trig.swift_rate_signif,
+        'antares_ranking' : trig.antares_ranking,
+        'lvc_false_alarm_rate' : trig.lvc_false_alarm_rate,
+        'lvc_binary_neutron_star_probability': trig.lvc_binary_neutron_star_probability,
+        'lvc_neutron_star_black_hole_probability': trig.lvc_neutron_star_black_hole_probability,
+        'lvc_binary_black_hole_probability' : trig.lvc_binary_black_hole_probability,
+        'lvc_terrestial_probability' : trig.lvc_terrestial_probability,
+        'lvc_includes_neutron_star_probability' : trig.lvc_includes_neutron_star_probability,
+        'lvc_skymap_fits' : trig.lvc_skymap_fits
+    }
+
+    if trig.lvc_skymap_file:
+        data['lvc_skymap_file'] = ContentFile(trig.lvc_skymap_file, f'{trig.trig_id}_skymap.fits')
+
+    new_event = serializers.EventSerializer(data=data)
     if new_event.is_valid():
         new_event.save()
+        return new_event
+
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
+@transaction.atomic
+def event_create(request):
+    xml_string = request.data['xml_packet']
+    new_event = parse_and_save_xml(xml_string)
+    if new_event:
         return Response(new_event.data, status=status.HTTP_201_CREATED)
-    logger.debug(request.data)
-    return Response(new_event.errors, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        logger.debug(request.data)
+        return Response(new_event.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @login_required
@@ -541,31 +618,7 @@ def test_upload_xml(request):
         if form.is_valid():
             # Parse and submit the Event
             xml_string = str(request.POST['xml_packet'])
-            trig = parse_xml.parsed_VOEvent(None, packet=xml_string)
-            logger.debug(trig.event_observed)
-            logger.debug(type(trig.event_observed))
-            models.Event.objects.get_or_create(
-                telescope=trig.telescope,
-                xml_packet=xml_string,
-                duration=trig.event_duration,
-                trig_id=trig.trig_id,
-                sequence_num=trig.sequence_num,
-                event_type=trig.event_type,
-                role=trig.role,
-                ra=trig.ra,
-                dec=trig.dec,
-                ra_hms=trig.ra_hms,
-                dec_dms=trig.dec_dms,
-                pos_error=trig.err,
-                ignored=trig.ignore,
-                source_name=trig.source_name,
-                source_type=trig.source_type,
-                event_observed=datetime.datetime.strptime(str(trig.event_observed), "%Y-%m-%dT%H:%M:%S.%f"),
-                fermi_most_likely_index=trig.fermi_most_likely_index,
-                fermi_detection_prob=trig.fermi_detection_prob,
-                swift_rate_signif=trig.swift_rate_signif,
-                antares_ranking=trig.antares_ranking,
-            )
+            parse_and_save_xml(xml_string)
             return HttpResponseRedirect('/')
     else:
         form = forms.TestEvent()

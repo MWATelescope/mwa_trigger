@@ -3,12 +3,28 @@ dec: -72.6159
 dec_dms: '-72:36:57.24'
 err: 0.0
 event_duration: null
-event_observed: null
+event_observed: !!python/object/apply:lxml.objectify.fromstring
+- !!binary |
+  PElTT1RpbWUgeG1sbnM6dm9lPSJodHRwOi8vd3d3Lml2b2EubmV0L3htbC9WT0V2ZW50L3YyLjAi
+  IHhtbG5zOnhzaT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS9YTUxTY2hlbWEtaW5zdGFuY2UiPjIw
+  MTctMTEtMjhUMDg6MjI6MzguMDA8L0lTT1RpbWU+
 event_type: Point_Dir
 fermi_detection_prob: null
 fermi_most_likely_index: null
 grb_ident: null
 ignore: true
+lvc_binary_black_hole_probability: null
+lvc_binary_neutron_star_probability: null
+lvc_event_url: null
+lvc_false_alarm_rate: null
+lvc_includes_neutron_star_probability: null
+lvc_neutron_star_black_hole_probability: null
+lvc_prob_density_tile: null
+lvc_retraction_message: null
+lvc_significance: null
+lvc_skymap_file: null
+lvc_skymap_fits: null
+lvc_terrestial_probability: null
 packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=\"\
   ivo://nasa.gsfc.gcn/SWIFT#Point_Dir_2017-11-28T08:22:38.00_1023458943-887\" role=\"\
   utility\" version=\"2.0\" xsi:schemaLocation=\"http://www.ivoa.net/xml/VOEvent/v2.0\
@@ -66,14 +82,14 @@ packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=
   </VOEvent>\n"
 ra: 11.5836
 ra_hms: '0:46:20.064'
-role: utility
+role: null
 self_generated_trig_id: false
 sequence_num: null
 source_name: null
 source_type: null
 swift_rate_signif: null
 telescope: SWIFT
-trig_id: 48767
+trig_id: '48767'
 trig_pairs:
 - SWIFT_BAT_GRB_Pos
 - SWIFT_XRT_Pos
@@ -82,6 +98,11 @@ trig_pairs:
 - Fermi_GBM_Gnd_Pos
 - Fermi_GBM_Fin_Pos
 - HESS_GRB_To
+- LVC_EarlyWarning
+- LVC_Preliminary
+- LVC_Initial
+- LVC_Update
+- LVC_Retraction
 - AMON_ICECUBE_BRONZE_Event
 - AMON_ICECUBE_GOLD_Event
 - Antares_Alert

@@ -1,0 +1,97 @@
+<VOEvent ivorn="ivo://nasa.gsfc.gcn/SWIFT#BAT_QuickLook_Pos_1149250-635" role="observation" version="2.0" xsi:schemaLocation="http://www.ivoa.net/xml/VOEvent/v2.0 http://www.ivoa.net/xml/VOEvent/VOEvent-v2.0.xsd">
+<Who>
+<AuthorIVORN>ivo://nasa.gsfc.tan/gcn</AuthorIVORN>
+<Author>
+<shortName>VO-GCN</shortName>
+<contactName>Scott Barthelmy</contactName>
+<contactPhone>+1-301-286-3106</contactPhone>
+<contactEmail>scott.barthelmy@nasa.gov</contactEmail>
+</Author>
+<Date>2023-01-16T15:34:35</Date>
+<Description>
+This VOEvent message was created with GCN VOE version: 15.08 17jun22
+</Description>
+</Who>
+<What>
+<Param name="Packet_Type" value="97"/>
+<Param name="Pkt_Ser_Num" value="1"/>
+<Param name="TrigID" value="1149250" ucd="meta.id"/>
+<Param name="Segment_Num" value="0" ucd="meta.id.part"/>
+<Param name="Burst_TJD" value="19960" unit="days" ucd="time"/>
+<Param name="Burst_SOD" value="56001.43" unit="sec" ucd="time"/>
+<Param name="AT_Slew_Flags" value="0x1"/>
+<Param name="Misc_flags" value="0x0"/>
+<Param name="Rate_Signif" value="0.00" unit="sigma" ucd="stat.snr"/>
+<Param name="SC_Long" value="0.00" unit="deg" ucd="pos.earth.lon"/>
+<Param name="SC_Lat" value="0.00" unit="deg" ucd="pos.earth.lat"/>
+<Group name="Misc_Flags">
+<Param name="Values_Out_of_Range" value="false"/>
+<Param name="Near_Bright_Star" value="false"/>
+<Param name="Err_Circle_in_Galaxy" value="false"/>
+<Param name="Galaxy_in_Err_Circle" value="false"/>
+<Param name="TOO_Generated" value="false"/>
+<Param name="CRC_Error" value="false"/>
+</Group>
+<Param name="Coords_Type" value="1" unit="dn"/>
+<Param name="Coords_String" value="source_object"/>
+<Group name="Obs_Support_Info">
+<Description>
+The Sun and Moon values are valid at the time the VOEvent XML message was created.
+</Description>
+<Param name="Sun_RA" value="298.24" unit="deg" ucd="pos.eq.ra"/>
+<Param name="Sun_Dec" value="-20.90" unit="deg" ucd="pos.eq.dec"/>
+<Param name="Sun_Distance" value="69.91" unit="deg" ucd="pos.angDistance"/>
+<Param name="Sun_Hr_Angle" value="4.96" unit="hr"/>
+<Param name="Moon_RA" value="222.51" unit="deg" ucd="pos.eq.ra"/>
+<Param name="Moon_Dec" value="-16.94" unit="deg" ucd="pos.eq.dec"/>
+<Param name="MOON_Distance" value="1.22" unit="deg" ucd="pos.angDistance"/>
+<Param name="Moon_Illum" value="33.83" unit="%" ucd="arith.ratio"/>
+<Param name="Galactic_Long" value="340.48" unit="deg" ucd="pos.galactic.lon"/>
+<Param name="Galactic_Lat" value="36.92" unit="deg" ucd="pos.galactic.lat"/>
+<Param name="Ecliptic_Long" value="226.01" unit="deg" ucd="pos.ecliptic.lon"/>
+<Param name="Ecliptic_Lat" value="-0.25" unit="deg" ucd="pos.ecliptic.lat"/>
+</Group>
+<Description>
+Type=97: The Swift-BAT instrument quick-look position notice.
+</Description>
+</What>
+<WhereWhen>
+<ObsDataLocation>
+<ObservatoryLocation id="GEOLUN"/>
+<ObservationLocation>
+<AstroCoordSystem id="UTC-FK5-GEO"/>
+<AstroCoords coord_system_id="UTC-FK5-GEO">
+<Time unit="s">
+<TimeInstant>
+<ISOTime>2023-01-16T15:33:21.43</ISOTime>
+</TimeInstant>
+</Time>
+<Position2D unit="deg">
+<Name1>RA</Name1>
+<Name2>Dec</Name2>
+<Value2>
+<C1>223.4630</C1>
+<C2>-16.8714</C2>
+</Value2>
+<Error2Radius>0.0500</Error2Radius>
+</Position2D>
+</AstroCoords>
+</ObservationLocation>
+</ObsDataLocation>
+<Description>
+The RA,Dec coordinates are of the type: source_object.
+</Description>
+</WhereWhen>
+<How>
+<Description>Swift Satellite, BAT Instrument</Description>
+<Reference uri="http://gcn.gsfc.nasa.gov/swift.html" type="url"/>
+</How>
+<Why importance="0.90">
+<Inference probability="0.90">
+<Name>GRB 230116</Name>
+<Concept>process.variation.burst;em.gamma</Concept>
+</Inference>
+</Why>
+<Description> </Description>
+<original_prefix>voe</original_prefix>
+</VOEvent>

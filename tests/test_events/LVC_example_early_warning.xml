@@ -1,25 +1,25 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<voe:VOEvent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:voe="http://www.ivoa.net/xml/VOEvent/v2.0" xsi:schemaLocation="http://www.ivoa.net/xml/VOEvent/v2.0 http://www.ivoa.net/xml/VOEvent/VOEvent-v2.0.xsd" version="2.0" role="observation" ivorn="ivo://gwnet/LVC#MS181101ab-4-Update">
+<voe:VOEvent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:voe="http://www.ivoa.net/xml/VOEvent/v2.0" xsi:schemaLocation="http://www.ivoa.net/xml/VOEvent/v2.0 http://www.ivoa.net/xml/VOEvent/VOEvent-v2.0.xsd" version="2.0" role="observation" ivorn="ivo://gwnet/LVC#MS181101ab-1-EarlyWarning">
   <Who>
-    <Date>2018-11-01T22:36:25Z</Date>
+    <Date>2018-11-01T22:34:20Z</Date>
     <Author>
       <contactName>LIGO Scientific Collaboration, Virgo Collaboration, and KAGRA Collaboration</contactName>
     </Author>
   </Who>
   <What>
-    <Param dataType="int" name="Packet_Type" value="152">
-      <Description>The Notice Type number is assigned/used within GCN, eg type=152 is an LVC_UPDATE notice</Description>
+    <Param dataType="int" name="Packet_Type" value="163">
+      <Description>The Notice Type number is assigned/used within GCN, eg type=163 is an LVC_EARLY_WARNING notice</Description>
     </Param>
     <Param dataType="int" name="internal" value="0">
       <Description>Indicates whether this event should be distributed to LSC/Virgo/KAGRA members only</Description>
     </Param>
-    <Param dataType="int" name="Pkt_Ser_Num" value="4">
+    <Param dataType="int" name="Pkt_Ser_Num" value="1">
       <Description>A number that increments by 1 each time a new revision is issued for this event</Description>
     </Param>
     <Param dataType="string" name="GraceID" ucd="meta.id" value="MS181101ab">
       <Description>Identifier in GraceDB</Description>
     </Param>
-    <Param dataType="string" name="AlertType" ucd="meta.version" value="Update">
+    <Param dataType="string" name="AlertType" ucd="meta.version" value="EarlyWarning">
       <Description>VOEvent alert type</Description>
     </Param>
     <Param dataType="int" name="HardwareInj" ucd="meta.number" value="0">
@@ -94,7 +94,7 @@
       </ObservationLocation>
     </ObsDataLocation>
   </WhereWhen>
-  <Description>Report of a candidate gravitational wave event</Description>
+  <Description>Early warning report of a candidate gravitational wave event</Description>
   <How>
     <Description>Candidate gravitational wave event identified by low-latency analysis</Description>
     <Description>H1: LIGO Hanford 4 km gravitational wave detector</Description>
@@ -102,10 +102,4 @@
     <Description>V1: Virgo 3 km gravitational wave detector</Description>
     <Description>K1: KAGRA 3 km gravitational wave detector</Description>
   </How>
-  <Citations>
-    <EventIVORN cite="supersedes">ivo://gwnet/LVC#MS181101ab-3-Initial</EventIVORN>
-    <EventIVORN cite="supersedes">ivo://gwnet/LVC#MS181101ab-2-Preliminary</EventIVORN>
-    <EventIVORN cite="supersedes">ivo://gwnet/LVC#MS181101ab-1-EarlyWarning</EventIVORN>
-    <Description>Updated localization is now available</Description>
-  </Citations>
 </voe:VOEvent>

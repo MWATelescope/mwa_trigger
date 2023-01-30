@@ -7,7 +7,7 @@ from django.conf import settings
 from .models import UserAlerts, AlertPermission, Event, PossibleEventAssociation, Status, ProposalSettings, ProposalDecision, Observations, EventGroup
 from .telescope_observe import trigger_observation
 
-from tracet.trigger_logic import worth_observing_grb, worth_observing_nu
+from tracet.trigger_logic import worth_observing_grb, worth_observing_nu, worth_observing_gw
 
 import os
 from twilio.rest import Client
@@ -55,8 +55,8 @@ def group_trigger(sender, instance, **kwargs):
     if instance.ignored:
         # Event ignored so do nothing
         return
-
-    event_coord = SkyCoord(ra=instance.ra*u.degree, dec=instance.dec*u.degree)
+    if(instance.ra and instance.dec):
+        event_coord = SkyCoord(ra=instance.ra*u.degree, dec=instance.dec*u.degree)
 
     proposal_decisions = ProposalDecision.objects.filter(event_group_id=event_group)
     if proposal_decisions.exists():
@@ -77,6 +77,7 @@ def group_trigger(sender, instance, **kwargs):
                     # Don't update pos_error if zero, assume it's a null
                     prop_dec.pos_error = instance.pos_error
                     prop_dec.decision_reason = f"{prop_dec.decision_reason}{datetime.datetime.utcnow()}: Event ID {instance.id}: Checking new Event. \n",
+              
                 proposal_worth_observing(
                     prop_dec,
                     instance,
@@ -116,7 +117,7 @@ def group_trigger(sender, instance, **kwargs):
                     # send off alert messages to users and admins
                     send_all_alerts(True, debug_bool, False, prop_dec)
 
-        if instance.pos_error < event_group.pos_error and instance.pos_error != 0.:
+        if instance.pos_error and instance.pos_error < event_group.pos_error and instance.pos_error != 0.:
             # Updated event group's best position
             event_group.ra = instance.ra
             event_group.dec = instance.dec
@@ -145,7 +146,7 @@ def group_trigger(sender, instance, **kwargs):
                 dec=instance.dec,
                 ra_hms=instance.ra_hms,
                 dec_dms=instance.dec_dms,
-                pos_error=instance.pos_error,
+                pos_error=instance.pos_error,                
             )
             # Check if it's worth triggering an obs
             proposal_worth_observing(prop_dec, instance)
@@ -168,7 +169,7 @@ def group_trigger(sender, instance, **kwargs):
     association_exists = False
     poss_events = PossibleEventAssociation.objects.filter(earliest_event_observed__lt=late_dt,
                                                       latest_event_observed__gt=early_dt)
-    if poss_events.exists():
+    if poss_events.exists() and instance.pos_error:
         for trig_event in poss_events:
             # Calculate 95% confidence interval seperation
             combined_err = np.sqrt(instance.pos_error**2 + trig_event.pos_error**2)
@@ -232,7 +233,7 @@ def proposal_worth_observing(
     if prop_dec.pos_error == 0.0:
         # Ignore the inaccurate event
         decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {voevent.id}: The Events positions uncertainty is 0.0 which is likely an error so not observing. \n"
-    elif voevent.pos_error > prop_dec.proposal.maximum_position_uncertainty:
+    elif voevent.pos_error and (voevent.pos_error > prop_dec.proposal.maximum_position_uncertainty):
         # Ignore the inaccurate event
         decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {voevent.id}: The Events positions uncertainty ({voevent.pos_error:.4f} deg) is greater than {prop_dec.proposal.maximum_position_uncertainty:.4f} so not observing. \n"
     else:
@@ -286,6 +287,34 @@ def proposal_worth_observing(
                 )
                 proj_source_bool = True
 
+            elif prop_dec.proposal.source_type == "GW" and voevent.source_type == "GW":
+                # This proposal wants to observe GRBs so check if it is worth observing
+                trigger_bool, debug_bool, pending_bool, decision_reason_log = worth_observing_gw(
+                    # Event values
+                    lvc_binary_neutron_star_probability=voevent.lvc_binary_neutron_star_probability,
+                    lvc_neutron_star_black_hole_probability=voevent.lvc_neutron_star_black_hole_probability,
+                    lvc_binary_black_hole_probability=voevent.lvc_binary_black_hole_probability,
+                    lvc_terrestial_probability=voevent.lvc_terrestial_probability,
+                    lvc_includes_neutron_star_probability=voevent.lvc_includes_neutron_star_probability,
+                    telescope=voevent.telescope,
+                    # Thresholds
+                    minimum_neutron_star_probability=prop_dec.proposal.minimum_neutron_star_probability,
+                    maximum_neutron_star_probability=prop_dec.proposal.maximum_neutron_star_probability,
+                    minimum_binary_neutron_star_probability=prop_dec.proposal.minimum_binary_neutron_star_probability,
+                    maximum_binary_neutron_star_probability=prop_dec.proposal.maximum_binary_neutron_star_probability,
+                    minimum_neutron_star_black_hole_probability=prop_dec.proposal.minimum_neutron_star_black_hole_probability,
+                    maximum_neutron_star_black_hole_probability=prop_dec.proposal.maximum_neutron_star_black_hole_probability,
+                    minimum_binary_black_hole_probability=prop_dec.proposal.minimum_binary_black_hole_probability,
+                    maximum_binary_black_hole_probability=prop_dec.proposal.maximum_binary_black_hole_probability,
+                    minimum_terrestial_probability=prop_dec.proposal.minimum_terrestial_probability,
+                    maximum_terrestial_probability=prop_dec.proposal.maximum_terrestial_probability,
+                    observe_low_significance=prop_dec.proposal.observe_low_significance,
+                    observe_significant=prop_dec.proposal.observe_significant,
+                    # Other
+                    decision_reason_log=decision_reason_log,
+                    event_id=voevent.id,
+                )
+                proj_source_bool = True
             # TODO set up other source types here
 
             if not proj_source_bool:
@@ -339,24 +368,25 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
         lat=telescope.lat*u.deg,
         height=telescope.height*u.m
     )
-    obs_source = SkyCoord(
-        proposal_decision_model.ra,
-        proposal_decision_model.dec,
-        #equinox='J2000',
-        unit=(u.deg, u.deg)
-    )
-    # Convert from RA/Dec to Alt/Az
-    delta_24h = np.linspace(0, 1440, 288)*u.min # 24 hours in 5 min increments
-    next_24h = obstime=Time.now()+delta_24h
-    obs_source_altaz = obs_source.transform_to(AltAz(obstime=next_24h, location=location))
-    # capture circumpolar source case
-    set_time_utc = None
-    for altaz, time in zip(obs_source_altaz, next_24h):
-        if altaz.alt.deg <1.:
-            # source below horizon so record time
-            set_time_utc = time
-            break
-
+    if(proposal_decision_model.ra and proposal_decision_model.dec):
+        obs_source = SkyCoord(
+            proposal_decision_model.ra,
+            proposal_decision_model.dec,
+            #equinox='J2000',
+            unit=(u.deg, u.deg)
+        )
+        # Convert from RA/Dec to Alt/Az
+        delta_24h = np.linspace(0, 1440, 288)*u.min # 24 hours in 5 min increments
+        next_24h = obstime=Time.now()+delta_24h
+        obs_source_altaz = obs_source.transform_to(AltAz(obstime=next_24h, location=location))
+        # capture circumpolar source case
+        set_time_utc = None
+        for altaz, time in zip(obs_source_altaz, next_24h):
+            if altaz.alt.deg <1.:
+                # source below horizon so record time
+                set_time_utc = time
+                break
+  
     # Get all admin alert permissions for this project
     alert_permissions = AlertPermission.objects.filter(proposal=proposal_decision_model.proposal)
     for ap in alert_permissions:

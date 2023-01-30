@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.files.storage import FileSystemStorage
+from django.conf import settings
 
+fs = FileSystemStorage(location=f'{settings.MEDIA_ROOT}/skymaps')
 
 GRB = 'GRB'
 FS = 'FS'
@@ -77,9 +80,29 @@ class ProposalSettings(models.Model):
     antares_min_ranking = models.IntegerField(help_text="The minimum rating (1 is best) to observe for Antares sources.", default=2)
     repointing_limit = models.FloatField(verbose_name="Repointing Limit (deg)", help_text="An updated position must be at least this far away from a current observation before repointing (in degrees).", default=10.)
     testing = models.BooleanField(default=False, help_text="If testing, will not schedule any observations.")
-    source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, verbose_name="What type of source to will you trigger on?")
+    source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, verbose_name="What type of source will you trigger on?")
 
+    # GW settings
+    # GW event property prob
+    minimum_neutron_star_probability = models.FloatField(verbose_name="Minimum on the probability that at least one object in the binary has a mass that is less than 3 solar masses", help_text="PROB_NS - probability that at least one object in the binary has a mass that is less than 3 solar masses", default=0.01)
+    maximum_neutron_star_probability = models.FloatField(verbose_name="Maximum on the probability that at least one object in the binary has a mass that is less than 3 solar masses", help_text="PROB_NS - probability that at least one object in the binary has a mass that is less than 3 solar masses", default=1)
+    
+    # GW event probs
+    minimum_binary_neutron_star_probability = models.FloatField(verbose_name="Minimum probability for event to be BNS", help_text="", default=0.01)
+    maximum_binary_neutron_star_probability = models.FloatField(verbose_name="Maximum probability for event to be BNS", help_text="", default=1)
+    minimum_neutron_star_black_hole_probability = models.FloatField(verbose_name="Minimum probability for event to be NSBH", help_text="", default=0.01)
+    maximum_neutron_star_black_hole_probability = models.FloatField(verbose_name="Maximum probability for event to be NSBH", help_text="", default=1)
+    minimum_binary_black_hole_probability = models.FloatField(verbose_name="Minimum probability for event to be BBH", help_text="", default=0.00)
+    maximum_binary_black_hole_probability = models.FloatField(verbose_name="Maximum probability for event to be BBH", help_text="", default=1)
+    minimum_terrestial_probability = models.FloatField(verbose_name="Minimum probability for event to be terrestial", help_text="Limit on the probability that the source is terrestrial (i.e., a background noise fluctuation or a glitch)", default=0.00)
+    maximum_terrestial_probability = models.FloatField(verbose_name="Maximum probability for event to be terrestial", help_text="Limit on the probability that the source is terrestrial (i.e., a background noise fluctuation or a glitch)", default=0.95)
+    
+    # GW custom logic
+    observe_low_significance = models.BooleanField(verbose_name="Observe events with low significance (high FAR)",default=True, help_text="2/day > FAR > (1/month CBC and 1/year BURST)")
+    observe_significant = models.BooleanField(verbose_name="Observe events with high significance (low FAR)",default=True, help_text="(1/month CBC and 1/year BURST) > FAR")
+    
     # MWA settings
+    start_observation_at_high_sensitivity = models.BooleanField(verbose_name="Without positional data, start observations with MWA sub array at high sensitivity area", default=True, help_text="On early warnings there will not be positional data so start MWA in sub array mode at the high sensitivity area over the indian ocean")
     mwa_freqspecs = models.CharField(default="144,24", max_length=256, verbose_name="MWA frequency specifications", help_text="The frequency channels IDs for the MWA to observe at.")
     mwa_nobs = models.IntegerField(default=1, verbose_name="Number of Observations", help_text="The number of observations to schedule.")
     mwa_exptime = models.IntegerField(default=896, verbose_name="Observation time (s)", help_text="Exposure time of each observation scheduled, in seconds (must be modulo-8 seconds).")
@@ -127,6 +150,7 @@ class PossibleEventAssociation(models.Model):
     pos_error = models.FloatField(blank=True, null=True)
     recieved_data = models.DateTimeField(auto_now_add=True, blank=True)
     source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, null=True)
+    event_observed = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return str(self.id)
@@ -137,7 +161,7 @@ class PossibleEventAssociation(models.Model):
 
 class EventGroup(models.Model):
     id = models.AutoField(primary_key=True)
-    trig_id = models.BigIntegerField(unique=True)
+    trig_id = models.CharField(max_length=64, unique=True)
     earliest_event_observed = models.DateTimeField(blank=True, null=True)
     latest_event_observed = models.DateTimeField(blank=True, null=True)
     ra = models.FloatField(blank=True, null=True)
@@ -148,6 +172,7 @@ class EventGroup(models.Model):
     recieved_data = models.DateTimeField(auto_now_add=True, blank=True)
     source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, null=True)
     ignored = models.BooleanField(default=True)
+    event_observed = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return str(self.id)
@@ -174,10 +199,12 @@ class ProposalDecision(models.Model):
     proposal = models.ForeignKey(ProposalSettings, on_delete=models.SET_NULL, blank=True, null=True)
     #associated_event_id = models.ForeignKey(PossibleEventAssociation, on_delete=models.SET_NULL, blank=True, null=True)
     event_group_id = models.ForeignKey(EventGroup, on_delete=models.SET_NULL, blank=True, null=True)
-    trig_id = models.BigIntegerField(blank=True, null=True)
+    trig_id = models.CharField(max_length=64, blank=True, null=True)
     duration = models.FloatField(blank=True, null=True)
     ra = models.FloatField(blank=True, null=True)
     dec = models.FloatField(blank=True, null=True)
+    alt = models.FloatField(blank=True, null=True)
+    az = models.FloatField(blank=True, null=True)
     ra_hms = models.CharField(max_length=32, blank=True, null=True)
     dec_dms = models.CharField(max_length=32, blank=True, null=True)
     pos_error = models.FloatField(blank=True, null=True)
@@ -206,7 +233,7 @@ class Event(models.Model):
         blank=True,
         null=True,
     )
-    trig_id = models.BigIntegerField(blank=True, null=True)
+    trig_id = models.CharField(max_length=64, blank=True, null=True)
     self_generated_trig_id = models.BooleanField(default=True)
     telescope = models.CharField(max_length=64, blank=True, null=True)
     sequence_num = models.IntegerField(blank=True, null=True)
@@ -224,10 +251,25 @@ class Event(models.Model):
     ignored = models.BooleanField(default=True)
     source_name = models.CharField(max_length=128, blank=True, null=True)
     source_type = models.CharField(max_length=3, choices=SOURCE_CHOICES, null=True)
+
     fermi_most_likely_index = models.FloatField(blank=True, null=True)
     fermi_detection_prob = models.FloatField(blank=True, null=True)
     swift_rate_signif = models.FloatField(blank=True, null=True)
     antares_ranking = models.IntegerField(blank=True, null=True)
+
+    # LVC
+    lvc_false_alarm_rate = models.CharField(max_length=64, blank=True, null=True)
+    lvc_significance = models.CharField(max_length=64, blank=True, null=True)
+    lvc_event_url = models.CharField(max_length=256, blank=True, null=True)
+    lvc_binary_neutron_star_probability = models.FloatField(blank=True, null=True)
+    lvc_neutron_star_black_hole_probability = models.FloatField(blank=True, null=True)
+    lvc_binary_black_hole_probability = models.FloatField(blank=True, null=True)
+    lvc_terrestial_probability = models.FloatField(blank=True, null=True)
+    lvc_includes_neutron_star_probability = models.FloatField(blank=True, null=True)
+    lvc_retraction_message = models.CharField(max_length=1000, blank=True, null=True)
+    lvc_skymap_fits =  models.CharField(max_length=256, blank=True, null=True)
+    lvc_prob_density_tile = models.FloatField(blank=True, null=True)
+    lvc_skymap_file = models.FileField(storage=fs, blank=True, null=True)
 
     class Meta:
         ordering = ['-id']

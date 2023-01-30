@@ -4,7 +4,7 @@ astropy==5.0.4
 atca-rapid-response-api @ git+https://github.com/ste616/atca-rapid-response-api.git#subdirectory=python
 attrs==21.4.0
 Automat==20.2.0
-backports.zoneinfo==0.2.1
+backports.zoneinfo==0.2.1;python_version<"3.9"
 certifi==2021.10.8
 charset-normalizer==2.0.12
 Comet==3.1.0

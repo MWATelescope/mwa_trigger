@@ -49,30 +49,35 @@ def trigger_observation(
             lat=telescope.lat*u.deg,
             height=telescope.height*u.m
         )
-        obs_source = SkyCoord(
-            proposal_decision_model.ra,
-            proposal_decision_model.dec,
-            #equinox='J2000',
-            unit=(u.deg, u.deg)
-        )
-        # Convert from RA/Dec to Alt/Az
-        obs_source_altaz_beg = obs_source.transform_to(AltAz(obstime=Time.now(), location=location))
-        alt_beg = obs_source_altaz_beg.alt.deg
-        # Calculate alt at end of obs
-        end_time = Time.now() + timedelta(seconds=proposal_decision_model.proposal.mwa_exptime)
-        obs_source_altaz_end = obs_source.transform_to(AltAz(obstime=end_time, location=location))
-        alt_end = obs_source_altaz_end.alt.deg
-        logger.debug(f"Triggered observation at an elevation of {alt_beg} to elevation of {alt_end}")
-        if alt_beg < proposal_decision_model.proposal.mwa_horizon_limit and alt_end < proposal_decision_model.proposal.mwa_horizon_limit:
-            horizon_message = f"{datetime.utcnow()}: Event ID {event_id}: Not triggering due to horizon limit: alt_beg {alt_beg:.4f} < {proposal_decision_model.proposal.mwa_horizon_limit:.4f} and alt_end {alt_end:.4f} < {proposal_decision_model.proposal.mwa_horizon_limit:.4f}. "
-            logger.debug(horizon_message)
-            return 'I', decision_reason_log + horizon_message
-        elif alt_beg < proposal_decision_model.proposal.mwa_horizon_limit:
-            # Warn them in the log
-            decision_reason_log += f"{datetime.utcnow()}: Event ID {event_id}: Warning: The source is below the horizion limit at the start of the observation alt_beg {alt_beg:.4f}. \n"
-        elif alt_end < proposal_decision_model.proposal.mwa_horizon_limit:
-            # Warn them in the log
-            decision_reason_log += f"{datetime.utcnow()}: Event ID {event_id}: Warning: The source will set below the horizion limit by the end of the observation alt_end {alt_end:.4f}. \n"
+        if proposal_decision_model.proposal.start_observation_at_high_sensitivity and not (proposal_decision_model.ra or proposal_decision_model.dec):
+            #TODO: Replace with indian ocean high sensitivity area
+            proposal_decision_model.alt = 20
+            proposal_decision_model.az = 280
+        else:
+            obs_source = SkyCoord(
+                proposal_decision_model.ra,
+                proposal_decision_model.dec,
+                #equinox='J2000',
+                unit=(u.deg, u.deg)
+            )
+            # Convert from RA/Dec to Alt/Az
+            obs_source_altaz_beg = obs_source.transform_to(AltAz(obstime=Time.now(), location=location))
+            alt_beg = obs_source_altaz_beg.alt.deg
+            # Calculate alt at end of obs
+            end_time = Time.now() + timedelta(seconds=proposal_decision_model.proposal.mwa_exptime)
+            obs_source_altaz_end = obs_source.transform_to(AltAz(obstime=end_time, location=location))
+            alt_end = obs_source_altaz_end.alt.deg
+            logger.debug(f"Triggered observation at an elevation of {alt_beg} to elevation of {alt_end}")
+            if alt_beg < proposal_decision_model.proposal.mwa_horizon_limit and alt_end < proposal_decision_model.proposal.mwa_horizon_limit:
+                horizon_message = f"{datetime.utcnow()}: Event ID {event_id}: Not triggering due to horizon limit: alt_beg {alt_beg:.4f} < {proposal_decision_model.proposal.mwa_horizon_limit:.4f} and alt_end {alt_end:.4f} < {proposal_decision_model.proposal.mwa_horizon_limit:.4f}. "
+                logger.debug(horizon_message)
+                return 'I', decision_reason_log + horizon_message
+            elif alt_beg < proposal_decision_model.proposal.mwa_horizon_limit:
+                # Warn them in the log
+                decision_reason_log += f"{datetime.utcnow()}: Event ID {event_id}: Warning: The source is below the horizion limit at the start of the observation alt_beg {alt_beg:.4f}. \n"
+            elif alt_end < proposal_decision_model.proposal.mwa_horizon_limit:
+                # Warn them in the log
+                decision_reason_log += f"{datetime.utcnow()}: Event ID {event_id}: Warning: The source will set below the horizion limit by the end of the observation alt_end {alt_end:.4f}. \n"
 
     # above the horizon so send off telescope specific set ups
     decision_reason_log += f"{datetime.utcnow()}: Event ID {event_id}: Above horizon so attempting to observer with {proposal_decision_model.proposal.telescope.name}. \n"
@@ -90,7 +95,7 @@ def trigger_observation(
         telescopes = "_".join(list(set(telescopes)))
         obsname=f'{telescopes}_{proposal_decision_model.trig_id}'
 
-        # Check if you can observe and if so send off ATCA observation
+        # Check if you can observe and if so send off MWA observation
         decision, decision_reason_log, obsids = trigger_mwa_observation(
             proposal_decision_model,
             decision_reason_log,
@@ -167,7 +172,10 @@ def trigger_mwa_observation(
         project_id=prop_settings.project_id.id,
         secure_key=prop_settings.project_id.password,
         pretend=prop_settings.testing,
-        ra=proposal_decision_model.ra, dec=proposal_decision_model.dec,
+        ra=proposal_decision_model.ra, 
+        dec=proposal_decision_model.dec,
+        alt=proposal_decision_model.alt,
+        az=proposal_decision_model.az,
         creator='VOEvent_Auto_Trigger', #TODO grab version
         obsname=obsname,
         nobs=prop_settings.mwa_nobs,

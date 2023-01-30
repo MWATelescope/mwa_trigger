@@ -26,3 +26,6 @@ jobs:
       - name: Test with pytest
         run: |
           python setup.py pytest
+        env:
+          UPLOAD_USER: NOTUSED
+          UPLOAD_PASSWORD: NOTUSED

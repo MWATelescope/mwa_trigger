@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'www.mwa-trigger.duckdns.org', 'mwa-trigger.duckdns.org', 'www.tracet.duckdns.org', 'tracet.duckdns.org', '146.118.70.58']
 
 # Remote broadcasters we subscribe to for VOEvents
-VOEVENT_REMOTES = ["voevent.4pisky.org","voevent.dc3.com"]
+VOEVENT_REMOTES = ["voevent.4pisky.org","voevent.dc3.com", "chimefrb.physics.mcgill.ca"]
 # TCP connectiong we are whitelisting with to recieve VOEvents
 VOEVENT_TCP = ["196.44.140.214/32","68.169.57.253","50.116.49.68"]
 
@@ -190,3 +190,11 @@ APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
 # that supports multiple background worker processes instead (e.g. Dramatiq, Celery, Django-RQ,
 # etc. See: https://djangopackages.org/grids/g/workers-queues-tasks/ for popular options).
 APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Seconds
+
+# Django rest framework authentication
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ]
+}
