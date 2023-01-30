@@ -252,6 +252,7 @@ def proposal_worth_observing(
                     fermi_most_likely_index=voevent.fermi_most_likely_index,
                     fermi_detection_prob=voevent.fermi_detection_prob,
                     swift_rate_signif=voevent.swift_rate_signif,
+                    hess_significance=voevent.hess_significance,
                     # Thresholds
                     event_any_duration=prop_dec.proposal.event_any_duration,
                     event_min_duration=prop_dec.proposal.event_min_duration,
@@ -262,6 +263,8 @@ def proposal_worth_observing(
                     pending_max_duration_2=prop_dec.proposal.pending_max_duration_2,
                     fermi_min_detection_prob=prop_dec.proposal.fermi_prob,
                     swift_min_rate_signif=prop_dec.proposal.swift_rate_signf,
+                    minimum_hess_significance=prop_dec.minimum_hess_significance,
+                    maximum_hess_significance=prop_dec.maximum_hess_significance,
                     # Other
                     decision_reason_log=decision_reason_log,
                     event_id=voevent.id,

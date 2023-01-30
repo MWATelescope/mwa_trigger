@@ -10,6 +10,7 @@ def worth_observing_grb(
         fermi_most_likely_index=None,
         fermi_detection_prob=None,
         swift_rate_signif=None,
+        hess_significance=None,
         # Thresholds
         event_any_duration=False,
         event_min_duration=0.256,
@@ -20,6 +21,8 @@ def worth_observing_grb(
         pending_max_duration_2=2.048,
         fermi_min_detection_prob=50,
         swift_min_rate_signif=0.,
+        minimum_hess_significance=0.,
+        maximum_hess_significance=1.,
         # Other
         decision_reason_log="",
         event_id=None,
@@ -94,6 +97,15 @@ def worth_observing_grb(
         else:
             debug_bool = True
             decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: SWIFT rate significance <= {swift_min_rate_signif:.3f} sigma so not triggering. \n"
+
+    elif hess_significance is not None:
+        # Swift has a rate signif in sigmas
+        if hess_significance < maximum_hess_significance and hess_significance > minimum_hess_significance:
+            likely_bool = True
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: HESS rate significance is {minimum_hess_significance} < ({hess_significance:.3f}) < {maximum_hess_significance} sigma. \n"
+        else:
+            debug_bool = True
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: Event ID {event_id}: HESS rate significance is not {minimum_hess_significance} < ({hess_significance:.3f}) < {maximum_hess_significance} so not triggering. \n"
     else:
         likely_bool = True
         decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: No probability metric given so assume it is a GRB. \n"

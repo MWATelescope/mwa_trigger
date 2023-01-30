@@ -12,6 +12,7 @@ event_type: Update
 fermi_detection_prob: null
 fermi_most_likely_index: null
 grb_ident: null
+hess_signifigance: null
 ignore: false
 lvc_binary_black_hole_probability: 0.03
 lvc_binary_neutron_star_probability: 0.95

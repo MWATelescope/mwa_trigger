@@ -57,7 +57,9 @@ def test_parse_grb_event():
         # A SWIFT trigger that is too long to trigger on
         ('SWIFT00.xml', None),
         # A trigger type that we choose to ignore
+        ('HESS_test_event.xml', None),
         ('SWIFT_Point_Dir_Change.xml', None),
+
     ]
     parse_xml_test_warpper(xml_tests)
 

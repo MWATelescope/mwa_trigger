@@ -44,7 +44,6 @@ describe(`LVC events are grouped by id with source type, event type, Classificat
         cy.get('td').eq(4).contains('2018-11-01 22:22:46')
         cy.get('td').eq(6).contains(graceDBId)
       })
-    cy.wait(10000)
   })
 })
 

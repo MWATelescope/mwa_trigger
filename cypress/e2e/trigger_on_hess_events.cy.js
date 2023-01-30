@@ -1,5 +1,39 @@
 
-describe('Test can do observations off HESS events', () => {
+describe.only('Test HESS events will group with swift', () => {
+    it('create HESS trigger proposal', () => {
+
+        const swiftId = "112329"
+        // //upload lvc test event
+        cy.fixture('HESS_test_event_test_promising.txt').then((event1) => {
+            cy.get('[data-testid="nav-testing"]').click({ force: true })
+            cy.get('[class="form-control"]').invoke('val', (event1.replaceAll("1102329", swiftId)))
+            cy.get("[type='submit']").click()
+        })
+        //upload lvc test event
+        cy.fixture('SWIFT_2018_03_25.txt').then((event1) => {
+            cy.get('[data-testid="nav-testing"]').click({ force: true })
+            cy.get('[class="form-control"]').invoke('val', (event1.replaceAll("817564", swiftId)))
+            cy.get("[type='submit']").click()
+        })
+        //events are grouped
+        cy.get('.btn').click()
+        cy.wait(1000)
+        cy.contains(graceDBId).parent('tr').within(() => {
+            cy.get('td > a').eq(0).click()
+        })
+        cy.get('[data-testid="eventgroup"]').find('tr').should('have.length', 3)
+        cy.get('[data-testid="eventgroup"]').find('tr').eq(1)
+            .within(() => {
+                // all searches are automatically rooted to the found tr element
+                cy.get('td').eq(1).contains('GRB')
+                cy.get('td').eq(6).contains(swiftId)
+            })
+    })
+
+})
+
+
+describe('Test can create proposals to do observations off HESS events', () => {
     it('create HESS trigger proposal', () => {
 
         const proposalId = "testMWAHESS"
