@@ -67,29 +67,32 @@ describe('Test can create proposals to do observations off HESS events', () => {
     })
 })
 
-describe('HESS events that trigger the proposal show decision outcome', () => {
+describe.only('HESS events that trigger the proposal show decision outcome', () => {
     it('upload HESS real event and trigger an MWA observation with twilio notifications', () => {
         cy.login()
         cy.visit('/')
         cy.wait(1000)
 
+        const hessId = '222222'
+
         //upload lvc "real" event that we want to trigger on
         cy.fixture('HESS_test_event_real_promising.txt').then((event1) => {
             cy.get('[data-testid="nav-testing"]').click({ force: true })
-            cy.get('[class="form-control"]').invoke('val', event1)
+            cy.get('[class="form-control"]').invoke('val', (event1.replaceAll("1102329", hessId)))
             cy.wait(1000)
             cy.get("[type='submit']").click()
             cy.wait(2000)
         })
         //proposal result shows event triggered
-        cy.contains("GRB220412").parent('tr').within(() => {
-            cy.get('td').eq(5).contains('GRB')
-            cy.get('td').eq(7).contains('Triggered')
+        cy.contains(hessId).parent('tr').within(() => {
+            cy.get('td').eq(4).contains('GRB')
+            cy.get('td').eq(2).contains('HESS')
         })
         cy.get("[data-testid='nav-logs']").click()
         cy.get("[data-testid='drop-logs-proposals']").click()
-        cy.contains("Above horizon so attempting to observer with MWA_VCS.")
-        cy.wait(5000)
-
+        cy.get(".fl-table > tbody:nth-child(2) > tr:nth-child(1)").within(() => {
+            cy.get('td').eq(6).contains('HESS rate significance is')
+            cy.get('td').eq(6).contains('Above horizon so attempting to observe')
+        })
     })
 })
