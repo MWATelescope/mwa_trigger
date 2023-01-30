@@ -82,6 +82,7 @@ packet: "<VOEvent xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ivorn=
   </VOEvent>\n"
 ra: 11.5836
 ra_hms: '0:46:20.064'
+role: null
 self_generated_trig_id: false
 sequence_num: null
 source_name: null
