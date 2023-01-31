@@ -8,7 +8,6 @@ from tracet.parse_xml import parsed_VOEvent
 import astropy.units as u
 from astropy.coordinates import Angle, SkyCoord, EarthLocation
 from astropy.time import Time
-import datetime
 
 
 def create_voevent_wrapper(trig, ra_dec, dec_alter=True):
@@ -22,7 +21,7 @@ def create_voevent_wrapper(trig, ra_dec, dec_alter=True):
     if trig.event_observed is None:
         event_observed = None
     else:
-        event_observed = datetime.datetime.strptime(str(trig.event_observed), "%Y-%m-%dT%H:%M:%S.%f")
+        event_observed = trig.event_observed
     Event.objects.create(
         telescope=trig.telescope,
         xml_packet=trig.packet,
