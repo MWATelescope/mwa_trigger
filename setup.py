@@ -18,6 +18,7 @@ setup(name="tracet",
             'voevent-parse',
             # The below is only required with GW_LIGO.py which we will likely remove soon
             'healpy',
+            'astropy_healpix',
             'mwa_pb'
       ],
       scripts=['webapp_tracet/upload_xml.py'],
