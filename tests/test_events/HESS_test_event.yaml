@@ -3,10 +3,7 @@ dec: -0.2232
 dec_dms: '-0:13:23.52'
 err: 0.05
 event_duration: 2803.0
-event_observed: !!python/object/apply:lxml.objectify.fromstring
-- !!binary |
-  PElTT1RpbWUgeG1sbnM6eHNpPSJodHRwczovL3d3dy53My5vcmcvMjAwMS9YTUxTY2hlbWEtaW5z
-  dGFuY2UiPjIwMjItMDQtMTJUMTc6MDY6NDguODAwMDAwPC9JU09UaW1lPg==
+event_observed: 2022-04-12 17:06:48.800000+00:00
 event_type: GRB_To
 fermi_detection_prob: null
 fermi_most_likely_index: null

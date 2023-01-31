@@ -442,7 +442,7 @@ class parsed_VOEvent:
         logger.debug(f"Trig position: {self.ra} {self.dec} {self.err}")
 
         # Get observed time as UTC
-        self.event_observed = v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Time.TimeInstant.ISOTime
+        self.event_observed = voeventparse.convenience.get_event_time_as_utc(v)
 
         # Check if this is the type of trigger we're looking for
         this_pair = f"{self.telescope}_{self.event_type}"

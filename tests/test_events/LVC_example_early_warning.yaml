@@ -3,11 +3,7 @@ dec: null
 dec_dms: null
 err: null
 event_duration: null
-event_observed: !!python/object/apply:lxml.objectify.fromstring
-- !!binary |
-  PElTT1RpbWUgeG1sbnM6eHNpPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxL1hNTFNjaGVtYS1pbnN0
-  YW5jZSIgeG1sbnM6dm9lPSJodHRwOi8vd3d3Lml2b2EubmV0L3htbC9WT0V2ZW50L3YyLjAiPjIw
-  MTgtMTEtMDFUMjI6MjI6NDYuNjU0NDM3WjwvSVNPVGltZT4=
+event_observed: 2018-11-01 22:22:46.654437+00:00
 event_type: EarlyWarning
 fermi_detection_prob: null
 fermi_most_likely_index: null
