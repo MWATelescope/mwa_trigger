@@ -204,7 +204,8 @@ LOGGING = {
     'disable_existing_loggers': False,
       'formatters': {
         'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            # 'format': '{thread:d} {asctime} {url} {message}',
+            'format': '{thread:d} {asctime} {message}',
             'style': '{',
         },
     },
@@ -222,8 +223,9 @@ LOGGING = {
         'event_create-file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs/requests.log'),
-            'formatter': 'verbose'
+            'filename': os.path.join(BASE_DIR, 'logs/event_create.log'),
+            'formatter': 'verbose',
+            'filters': ['event_create']
         },
     },
     'loggers': {
@@ -232,7 +234,7 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
-        'tracet.event_create': {
+        'root': {
             'handlers': ['event_create-file'],
             'level': 'INFO',
             'filters': ['event_create']

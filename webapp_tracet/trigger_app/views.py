@@ -35,6 +35,7 @@ logger = logging.getLogger(__name__)
 # Create a startup signal
 from trigger_app.signals import startup_signal
 
+
 if 'runserver' in sys.argv:
     # Send off start up signal because server is launching in development
     startup_signal.send(sender=startup_signal)
@@ -526,8 +527,9 @@ def voevent_view(request, id):
 
 
 def parse_and_save_xml(xml):
+    logger.info(f'Attempting to parse xml {xml}')
     trig = parse_xml.parsed_VOEvent(None, packet=xml)
-
+    logger.info(f'Successfully parsed xml {trig}')
     data = {
         'telescope' : trig.telescope,
         'xml_packet' : xml,
@@ -563,9 +565,14 @@ def parse_and_save_xml(xml):
     if trig.lvc_skymap_file:
         data['lvc_skymap_file'] = ContentFile(trig.lvc_skymap_file, f'{trig.trig_id}_skymap.fits')
 
+    logger.info(f'New event data {data}')
+
     new_event = serializers.EventSerializer(data=data)
+    logger.info('Successfully serialized event')
     if new_event.is_valid():
+        logger.info('Successfully validated event')
         new_event.save()
+        logger.info('Successfully saved event')
         return new_event
 
 @api_view(['POST'])
@@ -573,10 +580,13 @@ def parse_and_save_xml(xml):
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def event_create(request):
-    logger.info(request)
+    logger.info('Request to create an event received')
+    logger.info(f'request.data:{request.data}')
     xml_string = request.data['xml_packet']
     new_event = parse_and_save_xml(xml_string)
+
     if new_event:
+        logger.info('Event created response given to user')
         return Response(new_event.data, status=status.HTTP_201_CREATED)
     else:
         logger.debug(request.data)
@@ -611,8 +621,10 @@ def test_upload_xml(request):
         form = forms.TestEvent(request.POST)
         if form.is_valid():
             # Parse and submit the Event
+            logger.info(f'Test_upload_xml request.data:{request.data}')
             xml_string = str(request.POST['xml_packet'])
             parse_and_save_xml(xml_string)
+            logger.info(f'Test_upload_xml request.data:{request.data}')
             return HttpResponseRedirect('/')
     else:
         form = forms.TestEvent()
