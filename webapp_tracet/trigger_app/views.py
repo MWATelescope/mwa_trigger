@@ -573,6 +573,7 @@ def parse_and_save_xml(xml):
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def event_create(request):
+    logger.info(request)
     xml_string = request.data['xml_packet']
     new_event = parse_and_save_xml(xml_string)
     if new_event:

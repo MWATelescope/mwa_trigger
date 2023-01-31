@@ -198,3 +198,44 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
     ]
 }
+# Logging config for webapp requests etc
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+      'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+    },
+    'filters': {
+        'event_create': {
+            '()': 'log_filters.EventCreateFilter',
+        }
+    },
+    'handlers': {
+        'debug-file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/debug.log'),
+        },
+        'event_create-file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/requests.log'),
+            'formatter': 'verbose'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['debug-file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'tracet.event_create': {
+            'handlers': ['event_create-file'],
+            'level': 'INFO',
+            'filters': ['event_create']
+        }
+    },
+}
