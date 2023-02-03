@@ -202,17 +202,16 @@ REST_FRAMEWORK = {
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-      'formatters': {
+    'formatters': {
         'verbose': {
-            # 'format': '{thread:d} {asctime} {url} {message}',
-            'format': '{thread:d} {asctime} {message}',
+            'format': '{thread:d} {asctime} {url} {message}',
             'style': '{',
         },
     },
     'filters': {
         'event_create': {
             '()': 'log_filters.EventCreateFilter',
-        }
+        },
     },
     'handlers': {
         'debug-file': {
@@ -237,7 +236,8 @@ LOGGING = {
         'root': {
             'handlers': ['event_create-file'],
             'level': 'INFO',
-            'filters': ['event_create']
+            'filters': ['event_create'],
+            'propagate': True,
         }
     },
 }

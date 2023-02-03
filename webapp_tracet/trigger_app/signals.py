@@ -49,7 +49,7 @@ def group_trigger(sender, instance, **kwargs):
         },
     )[0]
     # Link the Event (have to update this way to prevent save() triggering this function again)
-    logger.info('Linking event to group')
+    logger.info(f'Linking event ({instance.id}) to group {event_group}')
     Event.objects.filter(id=instance.id).update(event_group_id=event_group)
 
 
@@ -58,14 +58,17 @@ def group_trigger(sender, instance, **kwargs):
         logger.info('Event ignored so do nothing')
         return
     if(instance.ra and instance.dec):
-        logger.info('Getting sky coordinates')
+        logger.info(f'Getting sky coordinates {instance.ra} {instance.dec}')
         event_coord = SkyCoord(ra=instance.ra*u.degree, dec=instance.dec*u.degree)
     
     logger.info('Getting proposal decisions')
     proposal_decisions = ProposalDecision.objects.filter(event_group_id=event_group)
     if proposal_decisions.exists():
         # Loop over all proposals settings and see if it's worth reobserving
+        logger.info('Loop over all proposals settings and see if it\'s worth reobserving')
+
         for prop_dec in proposal_decisions:
+            logger.info(f'Proposal decision (prop_dec.id, prop_dec.decision): {prop_dec.id, prop_dec.decision}')
             if prop_dec.decision == "C":
                 # Previous observation canceled so assume no new observations should be triggered
                 prop_dec.decision_reason += f"{datetime.datetime.utcnow()}: Event ID {instance.id}: Previous observation canceled so not observing . \n"
@@ -103,7 +106,7 @@ def group_trigger(sender, instance, **kwargs):
                         prop_dec.pos_error = instance.pos_error
                     repoint_message = f"{datetime.datetime.utcnow()}: Event ID {instance.id}: Repointing because seperation ({event_sep:.4f} deg) is greater than the repointing limit ({prop_dec.proposal.repointing_limit:.4f} deg)."
                     # Trigger observation
-                    logger.info('Trigger observation (prop_dec.decision == "T")')
+                    logger.info(f'Trigger observation ({prop_dec.decision} == "T")')
                     decision, decision_reason_log = trigger_observation(
                         prop_dec,
                         f"{prop_dec.decision_reason}{repoint_message} \n",
@@ -193,7 +196,7 @@ def group_trigger(sender, instance, **kwargs):
 
     if association_exists:
         # Trigger event already exists so link the Event (have to update this way to prevent save() triggering this function again)
-        logger.info('Trigger event already exists so link the Event')
+        logger.info(f'Trigger event already exists so link the Event id ({instance.id}) prev event id ({prev_trig})')
         Event.objects.filter(id=instance.id).update(associated_event_id=prev_trig)
 
         # TODO update the PossibleEventAssociation ra and dec if the position is better.
@@ -215,8 +218,9 @@ def group_trigger(sender, instance, **kwargs):
             earliest_event_observed=instance.event_observed,
             latest_event_observed=instance.event_observed,
         )
+        logger.info(f'Created trigger event {new_trig}')
         # Link the Event (have to update this way to prevent save() triggering this function again)
-        logger.info('Link the Event (have to update this way to prevent save() triggering this function again)')
+        logger.info('Link the Event id={instance.id}(have to update this way to prevent save() triggering this function again)')
         Event.objects.filter(id=instance.id).update(associated_event_id=new_trig)
 
 
@@ -236,7 +240,7 @@ def proposal_worth_observing(
     observation_reason : `str`, optional
         The reason for this observation. The default is "First Observation" but other potential reasons are "Repointing".
     """
-
+    logger.info(f'Checking that proposal {prop_dec.name} is worth observing.')
     # Defaults if not worth observing
     trigger_bool = debug_bool = pending_bool = False
     decision_reason_log = str(prop_dec.decision_reason)
@@ -371,7 +375,7 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
     """
     """
     # Work out all the telescopes that observed the event
-    logger.info('Work out all the telescopes that observed the event')
+    logger.info(f'Work out all the telescopes that observed the event {trigger_bool, debug_bool, pending_bool, proposal_decision_model}')
     voevents = Event.objects.filter(event_group_id=proposal_decision_model.event_group_id)
     telescopes = []
     for voevent in voevents:

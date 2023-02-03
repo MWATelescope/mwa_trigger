@@ -568,11 +568,11 @@ def parse_and_save_xml(xml):
     logger.info(f'New event data {data}')
 
     new_event = serializers.EventSerializer(data=data)
-    logger.info('Successfully serialized event')
+    logger.info(f'Successfully serialized event {new_event.trig_id}')
     if new_event.is_valid():
-        logger.info('Successfully validated event')
+        logger.info(f'Successfully serialized event {new_event.trig_id}')
         new_event.save()
-        logger.info('Successfully saved event')
+        logger.info(f'Successfully saved event {new_event}')
         return new_event
 
 @api_view(['POST'])
@@ -580,16 +580,18 @@ def parse_and_save_xml(xml):
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def event_create(request):
-    logger.info('Request to create an event received')
+    logger.info('Request to create an event received', extra={'event_create': True})
     logger.info(f'request.data:{request.data}')
     xml_string = request.data['xml_packet']
     new_event = parse_and_save_xml(xml_string)
 
     if new_event:
         logger.info('Event created response given to user')
+        logger.info('Request to create an event received', extra={'event_create_finished': True})
         return Response(new_event.data, status=status.HTTP_201_CREATED)
     else:
         logger.debug(request.data)
+        logger.info('Request to create an event received', extra={'event_create_finished': True})
         return Response(new_event.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
