@@ -103,8 +103,12 @@ def EventList(request):
         # the page number is not an integer (PageNotAnInteger exception)
         # return the first page
         events = paginator.page(1)
+    
+    min_rec = models.Event.objects.filter().order_by('recieved_data').first().recieved_data
+    min_obs = models.Event.objects.filter().order_by('event_observed').first().event_observed
+
     has_filter = any(field in request.GET for field in set(f.get_fields()))
-    return render(request, 'trigger_app/voevent_list.html', {'filter': f, "page_obj":events, "poserr_unit":poserr_unit, 'has_filter': has_filter})
+    return render(request, 'trigger_app/voevent_list.html', {'filter': f, "page_obj":events, "poserr_unit":poserr_unit, 'has_filter': has_filter, 'min_rec': str(min_rec), 'min_obs': str(min_obs)})
 
 
 class ProposalDecisionFilter(django_filters.FilterSet):
@@ -138,8 +142,9 @@ def ProposalDecisionList(request):
         ProposalDecision = paginator.page(1)
 
     strip_time_stamp(ProposalDecision)
+    min_dec = models.ProposalDecision.objects.filter().order_by('recieved_data').first().recieved_data
 
-    return render(request, 'trigger_app/proposal_decision_list.html', {'filter': f, "page_obj":ProposalDecision, "poserr_unit":poserr_unit})
+    return render(request, 'trigger_app/proposal_decision_list.html', {'filter': f, "page_obj":ProposalDecision, "poserr_unit":poserr_unit, "min_dec": min_dec})
 
 
 def grab_decisions_for_event_groups(event_groups):

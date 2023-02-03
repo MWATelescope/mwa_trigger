@@ -62,7 +62,7 @@
 
   {% include "trigger_app/pagination.html" %}
 </div>
-
+{{ min_dec|json_script:"min-dec" }}
 <script>
   $(document).ready(function(){
 
@@ -83,11 +83,12 @@
     if(!rdb.value) {
       rdb.value = datetimeLocal(Date.now())
     }
-    // Set starting date range to sometime in 2021, this is mainly for UX and does not reflect when we started collecting data
-    if(!rda.value) {
-      rda.value = datetimeLocal("2021-01-01 04:00:00")
-    }
 
+    const minDec = JSON.parse(document.getElementById('min-dec').textContent);
+    // Set starting date range to earliest event in db
+    if(!rda.value) {
+        rda.value = datetimeLocal(minDec)
+      }
     })
     </script>
 {% endblock %}
