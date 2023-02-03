@@ -240,7 +240,7 @@ def proposal_worth_observing(
     observation_reason : `str`, optional
         The reason for this observation. The default is "First Observation" but other potential reasons are "Repointing".
     """
-    logger.info(f'Checking that proposal {prop_dec.name} is worth observing.')
+    logger.info(f'Checking that proposal {prop_dec.proposal} is worth observing.')
     # Defaults if not worth observing
     trigger_bool = debug_bool = pending_bool = False
     decision_reason_log = str(prop_dec.decision_reason)
