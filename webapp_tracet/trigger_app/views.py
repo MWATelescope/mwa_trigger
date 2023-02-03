@@ -568,9 +568,9 @@ def parse_and_save_xml(xml):
     logger.info(f'New event data {data}')
 
     new_event = serializers.EventSerializer(data=data)
-    logger.info(f'Successfully serialized event {new_event.trig_id}')
+    logger.info(f'Successfully serialized event {new_event}')
     if new_event.is_valid():
-        logger.info(f'Successfully serialized event {new_event.trig_id}')
+        logger.info(f'Successfully serialized event {new_event}')
         new_event.save()
         logger.info(f'Successfully saved event {new_event}')
         return new_event
@@ -623,10 +623,10 @@ def test_upload_xml(request):
         form = forms.TestEvent(request.POST)
         if form.is_valid():
             # Parse and submit the Event
-            logger.info(f'Test_upload_xml request.data:{request.data}')
             xml_string = str(request.POST['xml_packet'])
+            logger.info(f'Test_upload_xml xml_string:{xml_string}')
             parse_and_save_xml(xml_string)
-            logger.info(f'Test_upload_xml request.data:{request.data}')
+            logger.info(f'Test_upload_xml xml_string:{xml_string}')
             return HttpResponseRedirect('/')
     else:
         form = forms.TestEvent()
