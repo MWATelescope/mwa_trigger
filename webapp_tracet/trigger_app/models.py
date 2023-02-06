@@ -3,8 +3,6 @@ from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 
-fs = FileSystemStorage(location=f'{settings.MEDIA_ROOT}/skymaps')
-
 GRB = 'GRB'
 FS = 'FS'
 NU = 'NU'
@@ -274,7 +272,7 @@ class Event(models.Model):
     lvc_retraction_message = models.CharField(max_length=1000, blank=True, null=True)
     lvc_skymap_fits =  models.CharField(max_length=256, blank=True, null=True)
     lvc_prob_density_tile = models.FloatField(blank=True, null=True)
-    lvc_skymap_file = models.FileField(storage=fs, blank=True, null=True)
+    lvc_skymap_file = models.FileField(upload_to='skymaps/', blank=True, null=True)
 
     class Meta:
         ordering = ['-id']
