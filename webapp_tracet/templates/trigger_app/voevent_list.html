@@ -164,6 +164,8 @@
 
   {% include "trigger_app/pagination.html" %}
 </div>
+{{ min_obs|json_script:"min-obs" }}
+{{ min_rec|json_script:"min-rec" }}
 <script>
   $(document).ready(function(){
 
@@ -194,13 +196,14 @@
       eob.value = datetimeLocal(Date.now())
     }
 
-    // Set starting date range to something in 2021, this is mainly for UX and is not real
+    // Set starting date range to earliest event in db
+    const minObs = JSON.parse(document.getElementById('min-obs').textContent);
+    const minRec = JSON.parse(document.getElementById('min-rec').textContent);
     if(!rda.value) {
-      rda.value = datetimeLocal("2021-01-01 04:00:00")
+      rda.value = datetimeLocal(minRec)
     }
-    // Set starting date range to sometime in 2021, this is mainly for UX and does not reflect when we started collecting data
     if(!eoa.value) {
-      eoa.value = datetimeLocal("2021-01-01 04:00:00")
+      eoa.value = datetimeLocal(minObs)
     }
 
     })

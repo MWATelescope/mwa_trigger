@@ -35,6 +35,7 @@ logger = logging.getLogger(__name__)
 # Create a startup signal
 from trigger_app.signals import startup_signal
 
+
 if 'runserver' in sys.argv:
     # Send off start up signal because server is launching in development
     startup_signal.send(sender=startup_signal)
@@ -102,8 +103,12 @@ def EventList(request):
         # the page number is not an integer (PageNotAnInteger exception)
         # return the first page
         events = paginator.page(1)
+    
+    min_rec = models.Event.objects.filter().order_by('recieved_data').first().recieved_data
+    min_obs = models.Event.objects.filter().order_by('event_observed').first().event_observed
+
     has_filter = any(field in request.GET for field in set(f.get_fields()))
-    return render(request, 'trigger_app/voevent_list.html', {'filter': f, "page_obj":events, "poserr_unit":poserr_unit, 'has_filter': has_filter})
+    return render(request, 'trigger_app/voevent_list.html', {'filter': f, "page_obj":events, "poserr_unit":poserr_unit, 'has_filter': has_filter, 'min_rec': str(min_rec), 'min_obs': str(min_obs)})
 
 
 class ProposalDecisionFilter(django_filters.FilterSet):
@@ -137,8 +142,9 @@ def ProposalDecisionList(request):
         ProposalDecision = paginator.page(1)
 
     strip_time_stamp(ProposalDecision)
+    min_dec = models.ProposalDecision.objects.filter().order_by('recieved_data').first().recieved_data
 
-    return render(request, 'trigger_app/proposal_decision_list.html', {'filter': f, "page_obj":ProposalDecision, "poserr_unit":poserr_unit})
+    return render(request, 'trigger_app/proposal_decision_list.html', {'filter': f, "page_obj":ProposalDecision, "poserr_unit":poserr_unit, "min_dec": min_dec})
 
 
 def grab_decisions_for_event_groups(event_groups):
@@ -526,8 +532,9 @@ def voevent_view(request, id):
 
 
 def parse_and_save_xml(xml):
+    logger.info(f'Attempting to parse xml {xml}')
     trig = parse_xml.parsed_VOEvent(None, packet=xml)
-
+    logger.info(f'Successfully parsed xml {trig}')
     data = {
         'telescope' : trig.telescope,
         'xml_packet' : xml,
@@ -563,9 +570,14 @@ def parse_and_save_xml(xml):
     if trig.lvc_skymap_file:
         data['lvc_skymap_file'] = ContentFile(trig.lvc_skymap_file, f'{trig.trig_id}_skymap.fits')
 
+    logger.info(f'New event data {data}')
+
     new_event = serializers.EventSerializer(data=data)
+    logger.info(f'Successfully serialized event {new_event}')
     if new_event.is_valid():
+        logger.info(f'Successfully serialized event {new_event}')
         new_event.save()
+        logger.info(f'Successfully saved event {new_event}')
         return new_event
 
 @api_view(['POST'])
@@ -573,12 +585,18 @@ def parse_and_save_xml(xml):
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def event_create(request):
+    logger.info('Request to create an event received', extra={'event_create': True})
+    logger.info(f'request.data:{request.data}')
     xml_string = request.data['xml_packet']
     new_event = parse_and_save_xml(xml_string)
+
     if new_event:
+        logger.info('Event created response given to user')
+        logger.info('Request to create an event received', extra={'event_create_finished': True})
         return Response(new_event.data, status=status.HTTP_201_CREATED)
     else:
         logger.debug(request.data)
+        logger.info('Request to create an event received', extra={'event_create_finished': True})
         return Response(new_event.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -611,7 +629,9 @@ def test_upload_xml(request):
         if form.is_valid():
             # Parse and submit the Event
             xml_string = str(request.POST['xml_packet'])
+            logger.info(f'Test_upload_xml xml_string:{xml_string}')
             parse_and_save_xml(xml_string)
+            logger.info(f'Test_upload_xml xml_string:{xml_string}')
             return HttpResponseRedirect('/')
     else:
         form = forms.TestEvent()

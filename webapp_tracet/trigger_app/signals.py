@@ -31,7 +31,7 @@ def group_trigger(sender, instance, **kwargs):
     """Check if the latest Event has already been observered or if it is new and update the models accordingly
     """
     # instance is the new Event
-
+    logger.info('Trying to group with similar events')
     # ------------------------------------------------------------------------------
     # Look for other events with the same Trig ID
     # ------------------------------------------------------------------------------
@@ -49,22 +49,30 @@ def group_trigger(sender, instance, **kwargs):
         },
     )[0]
     # Link the Event (have to update this way to prevent save() triggering this function again)
+    logger.info(f'Linking event ({instance.id}) to group {event_group}')
     Event.objects.filter(id=instance.id).update(event_group_id=event_group)
 
 
     if instance.ignored:
         # Event ignored so do nothing
+        logger.info('Event ignored so do nothing')
         return
     if(instance.ra and instance.dec):
+        logger.info(f'Getting sky coordinates {instance.ra} {instance.dec}')
         event_coord = SkyCoord(ra=instance.ra*u.degree, dec=instance.dec*u.degree)
-
+    
+    logger.info('Getting proposal decisions')
     proposal_decisions = ProposalDecision.objects.filter(event_group_id=event_group)
     if proposal_decisions.exists():
         # Loop over all proposals settings and see if it's worth reobserving
+        logger.info('Loop over all proposals settings and see if it\'s worth reobserving')
+
         for prop_dec in proposal_decisions:
+            logger.info(f'Proposal decision (prop_dec.id, prop_dec.decision): {prop_dec.id, prop_dec.decision}')
             if prop_dec.decision == "C":
                 # Previous observation canceled so assume no new observations should be triggered
                 prop_dec.decision_reason += f"{datetime.datetime.utcnow()}: Event ID {instance.id}: Previous observation canceled so not observing . \n"
+                logger.info('Save proposal decision (prop_dec.decision == "C")')
                 prop_dec.save()
             elif prop_dec.decision == "I" or prop_dec.decision == "E":
                 # Previous events were ignored, check if this new one is up to our standards
@@ -98,6 +106,7 @@ def group_trigger(sender, instance, **kwargs):
                         prop_dec.pos_error = instance.pos_error
                     repoint_message = f"{datetime.datetime.utcnow()}: Event ID {instance.id}: Repointing because seperation ({event_sep:.4f} deg) is greater than the repointing limit ({prop_dec.proposal.repointing_limit:.4f} deg)."
                     # Trigger observation
+                    logger.info(f'Trigger observation ({prop_dec.decision} == "T")')
                     decision, decision_reason_log = trigger_observation(
                         prop_dec,
                         f"{prop_dec.decision_reason}{repoint_message} \n",
@@ -112,6 +121,7 @@ def group_trigger(sender, instance, **kwargs):
                     # Update proposal decision and log
                     prop_dec.decision = decision
                     prop_dec.decision_reason = decision_reason_log
+                    logger.info('Update proposal decision and log')
                     prop_dec.save()
 
                     # send off alert messages to users and admins
@@ -127,11 +137,12 @@ def group_trigger(sender, instance, **kwargs):
 
         # Update latest_event_observed
         event_group.latest_event_observed = instance.event_observed
+        logger.info('saving event group')
         event_group.save()
 
     else:
         # First unignored event so create proposal decisions objects
-
+        logger.info('First unignored event so create proposal decisions objects')
         # Loop over settings
         proposal_settings = ProposalSettings.objects.all()
         for prop_set in proposal_settings:
@@ -153,6 +164,7 @@ def group_trigger(sender, instance, **kwargs):
 
         # Mark as unignored event
         event_group.ignored = False
+        logger.info('Mark as unignored event')
         event_group.save()
 
     # ------------------------------------------------------------------------------
@@ -184,6 +196,7 @@ def group_trigger(sender, instance, **kwargs):
 
     if association_exists:
         # Trigger event already exists so link the Event (have to update this way to prevent save() triggering this function again)
+        logger.info(f'Trigger event already exists so link the Event id ({instance.id}) prev event id ({prev_trig})')
         Event.objects.filter(id=instance.id).update(associated_event_id=prev_trig)
 
         # TODO update the PossibleEventAssociation ra and dec if the position is better.
@@ -194,6 +207,7 @@ def group_trigger(sender, instance, **kwargs):
 
     else:
         # Make a new trigger event
+        logger.info('Make a new trigger event')
         new_trig = PossibleEventAssociation.objects.create(
             ra=instance.ra,
             dec=instance.dec,
@@ -204,7 +218,9 @@ def group_trigger(sender, instance, **kwargs):
             earliest_event_observed=instance.event_observed,
             latest_event_observed=instance.event_observed,
         )
+        logger.info(f'Created trigger event {new_trig}')
         # Link the Event (have to update this way to prevent save() triggering this function again)
+        logger.info('Link the Event id={instance.id}(have to update this way to prevent save() triggering this function again)')
         Event.objects.filter(id=instance.id).update(associated_event_id=new_trig)
 
 
@@ -224,7 +240,7 @@ def proposal_worth_observing(
     observation_reason : `str`, optional
         The reason for this observation. The default is "First Observation" but other potential reasons are "Repointing".
     """
-
+    logger.info(f'Checking that proposal {prop_dec.proposal} is worth observing.')
     # Defaults if not worth observing
     trigger_bool = debug_bool = pending_bool = False
     decision_reason_log = str(prop_dec.decision_reason)
@@ -329,6 +345,7 @@ def proposal_worth_observing(
 
     if trigger_bool:
         # Check if you can observe and if so send off the observation
+        logger.info('Check if you can observe and if so send off the observation')
         decision, decision_reason_log = trigger_observation(
             prop_dec,
             decision_reason_log,
@@ -350,6 +367,7 @@ def proposal_worth_observing(
     prop_dec.save()
 
     # send off alert messages to users and admins
+    logger.info('Sending alerts to users and admins')
     send_all_alerts(trigger_bool, debug_bool, pending_bool, prop_dec)
 
 
@@ -357,6 +375,7 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
     """
     """
     # Work out all the telescopes that observed the event
+    logger.info(f'Work out all the telescopes that observed the event {trigger_bool, debug_bool, pending_bool, proposal_decision_model}')
     voevents = Event.objects.filter(event_group_id=proposal_decision_model.event_group_id)
     telescopes = []
     for voevent in voevents:
@@ -391,6 +410,7 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
                 break
   
     # Get all admin alert permissions for this project
+    logger.info('Get all admin alert permissions for this project')
     alert_permissions = AlertPermission.objects.filter(proposal=proposal_decision_model.proposal)
     for ap in alert_permissions:
         # Grab user
@@ -449,6 +469,7 @@ https://mwa-trigger.duckdns.org/proposal_decision_details/{proposal_decision_mod
 
     if alert_type == 0:
         # Send an email
+        logger.info('Send an email')
         send_mail(
             subject,
             message_text,
@@ -458,6 +479,7 @@ https://mwa-trigger.duckdns.org/proposal_decision_details/{proposal_decision_mod
         )
     elif alert_type == 1:
         # Send an SMS
+        logger.info('Send an SMS')
         message = client.messages.create(
                     to=address,
                     from_=my_number,
@@ -465,6 +487,7 @@ https://mwa-trigger.duckdns.org/proposal_decision_details/{proposal_decision_mod
         )
     elif alert_type == 2:
         # Make a call
+        logger.info('Make a call')
         call = client.calls.create(
                     url='http://demo.twilio.com/docs/voice.xml',
                     to=address,

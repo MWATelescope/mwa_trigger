@@ -16,3 +16,4 @@ docs/html/*
 .env
 .vscode
 build
+webapp_tracet/logs
