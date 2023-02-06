@@ -31,7 +31,7 @@
                         <Name2>Dec</Name2>
                         <Value2>
                             <C1>320.7943</C1>
-                            <C2>-0.2232</C2>
+                            <C2>-65</C2>
                         </Value2>
                         <Error2Radius>0.05</Error2Radius>
                     </Position2D>
