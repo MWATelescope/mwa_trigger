@@ -79,7 +79,7 @@ def worth_observing_grb(
         if fermi_most_likely_index == 4:
             logger.debug("MOST_LIKELY = GRB")
             # ignore things that don't reach our probability threshold
-            if fermi_detection_prob > fermi_min_detection_prob:
+            if fermi_detection_prob >= fermi_min_detection_prob:
                 likely_bool = True
                 decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: Fermi GRB probability greater than {fermi_min_detection_prob}. \n"
             else:
@@ -91,21 +91,20 @@ def worth_observing_grb(
             decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: Fermi GRB likely index not 4. \n"
     elif swift_rate_signif is not None:
         # Swift has a rate signif in sigmas
-        if swift_rate_signif > swift_min_rate_signif:
+        if swift_rate_signif >= swift_min_rate_signif:
             likely_bool = True
-            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: SWIFT rate significance > {swift_min_rate_signif:.3f} sigma. \n"
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: SWIFT rate significance ({swift_rate_signif}) >= swift_min_rate ({swift_min_rate_signif:.3f}) sigma. \n"
         else:
             debug_bool = True
-            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: SWIFT rate significance <= {swift_min_rate_signif:.3f} sigma so not triggering. \n"
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: SWIFT rate significance ({swift_rate_signif}) < swift_min_rate ({swift_min_rate_signif:.3f}) sigma so not triggering. \n"
 
     elif hess_significance is not None:
-        # Swift has a rate signif in sigmas
-        if hess_significance < maximum_hess_significance and hess_significance > minimum_hess_significance:
+        if hess_significance <= maximum_hess_significance and hess_significance >= minimum_hess_significance:
             likely_bool = True
-            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: HESS rate significance is {minimum_hess_significance} < ({hess_significance:.3f}) < {maximum_hess_significance} sigma. \n"
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: HESS rate significance is {minimum_hess_significance} <= ({hess_significance:.3f}) <= {maximum_hess_significance} sigma. \n"
         else:
             debug_bool = True
-            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: Event ID {event_id}: HESS rate significance is not {minimum_hess_significance} < ({hess_significance:.3f}) < {maximum_hess_significance} so not triggering. \n"
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: Event ID {event_id}: HESS rate significance is not {minimum_hess_significance} <= ({hess_significance:.3f}) <= {maximum_hess_significance} so not triggering. \n"
     else:
         likely_bool = True
         decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: No probability metric given so assume it is a GRB. \n"
@@ -218,6 +217,10 @@ def worth_observing_gw(
 
     Parameters
     ----------
+    telescope : `str`, optional
+        The telescope used for the event. Default: None.
+    lvc_significance : `str`, optional
+        The calculated significance of the event. Default: None.
     lvc_binary_neutron_star_probability : `float`, optional
         The terrestial probability of gw event. Default: None.
     lvc_neutron_star_black_hole_probability : `float`, optional
@@ -229,16 +232,18 @@ def worth_observing_gw(
     lvc_includes_neutron_star_probability : `float`, optional
         The terrestial probability of gw event. Default: None
     
-    event_type : `str`, optional
-        Lvc alert type for gw event. Default: None.
+    minimum_neutron_star_probability : `float`, optional
+        The minimum neutron star probability. Default: 0.01.
+    maximum_neutron_star_probability : `float`, optional
+        The maximum neutron star probability. Default: 1.00.
+    minimum_binary_neutron_star_probability : `float`, optional
+        The minimum binary neutron star probability. Default: 0.01.
+    maximum_binary_neutron_star_probability : `float`, optional
+        The maximum binary neutron star probability. Default: 1.00.
     minimum_terrestial_probability : `float`, optional
         The minimum terrestial probability. Default: 0.95.
     maximum_terrestial_probability : `float`, optional
         The maximum terrestial probability. Default: 0.95.
-    minimum_neutron_star_probability : `float`, optional
-        The minimum neutron star probability. Default: 0.01.
-    minimum_mass_gap_probability : `float`, optional
-        The minimum mass gap probability. Default: 0.01.
     observe_low_significance : `bool`, optional
         Observe events with low significance Default: True.
     observe_significant : `bool`, optional
