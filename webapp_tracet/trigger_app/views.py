@@ -528,14 +528,6 @@ def voevent_view(request, id):
 def parse_and_save_xml(xml):
     trig = parse_xml.parsed_VOEvent(None, packet=xml)
 
-    def try_parsing_date(text):
-        for fmt in ("%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M:%S.%fZ"):
-            try:
-                return datetime.datetime.strptime(text, fmt)
-            except ValueError:
-                pass
-        raise ValueError('no valid date format found')
- 
     data = {
         'telescope' : trig.telescope,
         'xml_packet' : xml,
@@ -553,10 +545,11 @@ def parse_and_save_xml(xml):
         'ignored' : trig.ignore,
         'source_name' : trig.source_name,
         'source_type' : trig.source_type,
-        'event_observed' : try_parsing_date(str(trig.event_observed)),
+        'event_observed' : trig.event_observed,
         'fermi_most_likely_index' : trig.fermi_most_likely_index,
         'fermi_detection_prob' : trig.fermi_detection_prob,
         'swift_rate_signif' : trig.swift_rate_signif,
+        'hess_significance' : trig.hess_significance,
         'antares_ranking' : trig.antares_ranking,
         'lvc_false_alarm_rate' : trig.lvc_false_alarm_rate,
         'lvc_binary_neutron_star_probability': trig.lvc_binary_neutron_star_probability,

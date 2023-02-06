@@ -101,6 +101,10 @@ class ProposalSettings(models.Model):
     observe_low_significance = models.BooleanField(verbose_name="Observe events with low significance (high FAR)",default=True, help_text="2/day > FAR > (1/month CBC and 1/year BURST)")
     observe_significant = models.BooleanField(verbose_name="Observe events with high significance (low FAR)",default=True, help_text="(1/month CBC and 1/year BURST) > FAR")
     
+    # HESS settings
+    minimum_hess_significance = models.FloatField(verbose_name="Minimum significance from HESS to trigger an observation", help_text="", default=0.2)
+    maximum_hess_significance = models.FloatField(verbose_name="Maximum significance from HESS to trigger an observation", help_text="", default=1)
+
     # MWA settings
     start_observation_at_high_sensitivity = models.BooleanField(verbose_name="Without positional data, start observations with MWA sub array at high sensitivity area", default=True, help_text="On early warnings there will not be positional data so start MWA in sub array mode at the high sensitivity area over the indian ocean")
     mwa_freqspecs = models.CharField(default="144,24", max_length=256, verbose_name="MWA frequency specifications", help_text="The frequency channels IDs for the MWA to observe at.")
@@ -256,6 +260,7 @@ class Event(models.Model):
     fermi_detection_prob = models.FloatField(blank=True, null=True)
     swift_rate_signif = models.FloatField(blank=True, null=True)
     antares_ranking = models.IntegerField(blank=True, null=True)
+    hess_significance = models.FloatField(blank=True, null=True)
 
     # LVC
     lvc_false_alarm_rate = models.CharField(max_length=64, blank=True, null=True)

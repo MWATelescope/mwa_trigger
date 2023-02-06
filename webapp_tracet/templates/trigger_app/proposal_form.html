@@ -69,6 +69,12 @@
             {{ form.maximum_position_uncertainty.label_tag }}{% help_wrap form.maximum_position_uncertainty.help_text %}{{ form.maximum_position_uncertainty }}
             {{ form.swift_rate_signf.label_tag }}{% help_wrap form.swift_rate_signf.help_text %}{{ form.swift_rate_signf }}
         </div>
+        <div id="hess_thres">
+            <h3>HESS thresholds</h3>
+            <table>
+                <tr><td>Trigger on significance of HESS event (% range)  {% help_wrap 'HESS event significance' %}</td><td>{{ form.minimum_hess_significance }}</td><td>{{ form.maximum_hess_significance }}</td></tr>
+            </table>
+        </div>
         <div id="antares_thres">
             <h3>Antares thresholds</h3>
             {{ form.maximum_position_uncertainty.label_tag }}{% help_wrap form.maximum_position_uncertainty.help_text %}{{ form.maximum_position_uncertainty }}
@@ -283,6 +289,14 @@
                     $('#mwa_gw').hide();
                 } else {
                     $('#antares_thres').hide();
+                }
+                if ($("#id_source_type").val() == "GRB" && ($("#event_telescope").val() === "" || $("#event_telescope").val() === "HESS") ) {
+                    $('#hess_thres').show();
+                    $('#mwa_gw').hide();
+                    $('#source_duration').hide();
+                    $('#durations').show(); 
+                } else {
+                    $('#hess_thres').hide();
                 }
                 if ($("#id_source_type").val() == "GW") {
                     $('#lvc_thres').show();

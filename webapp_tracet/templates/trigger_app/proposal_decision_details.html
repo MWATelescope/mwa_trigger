@@ -74,6 +74,7 @@
         {% endif %}
         <th>Fermi Detection Probability (%)</th>
         <th>SWIFT Rate Significance (sigma)</th>
+        <th>HESS Significance (%)</th>
       </tr>
     </thead>
     <!-- Iterate over object_list -->
@@ -112,6 +113,8 @@
       </td>
       <td>{% if event.fermi_detection_prob is not None %} {{ event.fermi_detection_prob }}  {% endif %}</td>
       <td>{% if event.swift_rate_signif    is not None %} {{ event.swift_rate_signif    }}  {% endif %}</td>
+      <td>{% if event.hess_significance    is not None %} {{ event.hess_significance    }}  {% endif %}</td>
+
     </tr>
     <!-- If object_list is empty  -->
     {% empty %}
