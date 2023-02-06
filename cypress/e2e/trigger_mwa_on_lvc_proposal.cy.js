@@ -16,13 +16,13 @@ describe(`LVC events are grouped by id with source type, event type, Classificat
     cy.visit('/')
 
     // //upload lvc test event
-    cy.fixture('LVC_example_early_warning_test.txt').then((event1) => {
+    cy.fixture('LVC_early_warning_test_event.txt').then((event1) => {
       cy.get('[data-testid="nav-testing"]').click({ force: true })
       cy.get('[class="form-control"]').invoke('val', (event1.replaceAll("MS181101ab", graceDBId)))
       cy.get("[type='submit']").click()
     })
     //upload lvc test event
-    cy.fixture('LVC_example_initial_test.txt').then((event1) => {
+    cy.fixture('LVC_initial_test_event.txt').then((event1) => {
       cy.get('[data-testid="nav-testing"]').click({ force: true })
       cy.get('[class="form-control"]').invoke('val', (event1.replaceAll("MS181101ab", graceDBId)))
       cy.get("[type='submit']").click()
@@ -79,7 +79,7 @@ describe('Early warning LVC events that don\'t trigger the proposal show as igno
     cy.visit('/')
 
     //upload lvc "real" event that we don't want to trigger on because terrestial > 95
-    cy.fixture('LVC_example_early_warning_real_ignore.txt').then((event1) => {
+    cy.fixture('LVC_early_warning_ignore_observation_event.txt').then((event1) => {
       cy.get('[data-testid="nav-testing"]').click({ force: true })
       cy.get('[class="form-control"]').invoke('val', (event1.replaceAll("MS181101ab", graceDBId)))
       cy.get("[type='submit']").click()
@@ -104,7 +104,7 @@ describe('Early warning LVC events that trigger the proposal show decision outco
     cy.visit('/')
 
     //upload lvc "real" event that we want to trigger on
-    cy.fixture('LVC_example_early_warning_real_promising.txt').then((event1) => {
+    cy.fixture('LVC_early_warning_promising_observation_event.txt').then((event1) => {
       cy.get('[data-testid="nav-testing"]').click({ force: true })
       cy.get('[class="form-control"]').invoke('val', (event1.replaceAll("MS181101ab", graceDBId)))
       cy.get("[type='submit']").click()
