@@ -6,14 +6,14 @@ describe('Test HESS events will group with swift', () => {
         cy.visit('/')
 
         const swiftId = "144329"
-        // //upload lvc test event
-        cy.fixture('HESS_test_event_test_promising.txt').then((event1) => {
+        // upload HESS test event
+        cy.fixture('HESS_promising_test_event.txt').then((event1) => {
             cy.get('[data-testid="nav-testing"]').click({ force: true })
             cy.get('[class="form-control"]').invoke('val', (event1.replaceAll("1102329", swiftId)))
             cy.get("[type='submit']").click()
         })
-        //upload lvc test event
-        cy.fixture('SWIFT_2018_03_25.txt').then((event1) => {
+        // upload SWIFT test event
+        cy.fixture('SWIFT_promising_test_event.txt').then((event1) => {
             cy.get('[data-testid="nav-testing"]').click({ force: true })
             cy.get('[class="form-control"]').invoke('val', (event1.replaceAll("817564", swiftId)))
             cy.get("[type='submit']").click()
@@ -71,7 +71,7 @@ describe('HESS events that trigger the proposal show decision outcome', () => {
         const hessId = '222222'
 
         //upload lvc "real" event that we want to trigger on
-        cy.fixture('HESS_test_event_real_promising.txt').then((event1) => {
+        cy.fixture('HESS_promising_observation_event.txt').then((event1) => {
             cy.get('[data-testid="nav-testing"]').click({ force: true })
             cy.get('[class="form-control"]').invoke('val', (event1.replaceAll("1102329", hessId)))
             cy.get("[type='submit']").click()
