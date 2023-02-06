@@ -93,13 +93,12 @@ def worth_observing_grb(
         # Swift has a rate signif in sigmas
         if swift_rate_signif >= swift_min_rate_signif:
             likely_bool = True
-            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: SWIFT rate significance >= {swift_min_rate_signif:.3f} sigma. \n"
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: SWIFT rate significance ({swift_rate_signif}) >= swift_min_rate ({swift_min_rate_signif:.3f}) sigma. \n"
         else:
             debug_bool = True
-            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: SWIFT rate significance < {swift_min_rate_signif:.3f} sigma so not triggering. \n"
+            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: SWIFT rate significance ({swift_rate_signif}) < swift_min_rate ({swift_min_rate_signif:.3f}) sigma so not triggering. \n"
 
     elif hess_significance is not None:
-        # Swift has a rate signif in sigmas
         if hess_significance <= maximum_hess_significance and hess_significance >= minimum_hess_significance:
             likely_bool = True
             decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {event_id}: HESS rate significance is {minimum_hess_significance} <= ({hess_significance:.3f}) <= {maximum_hess_significance} sigma. \n"
