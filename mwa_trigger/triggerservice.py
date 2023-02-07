@@ -23,8 +23,8 @@ else:  # Python2
 DEFAULTLOGGER = logging.getLogger()
 DEFAULTLOGGER.level = logging.DEBUG
 
-# BASEURL = "http://mro.mwa128t.org/trigger/"
-BASEURL = "http://52.64.91.219/trigger/"    # Testing Django service - must be used in 'pretend' mode, as it's using a read-only database connection
+BASEURL = "http://mro.mwa128t.org/trigger/"
+# BASEURL = "http://52.64.91.219/trigger/"    # Testing Django service - must be used in 'pretend' mode, as it's using a read-only database connection
 
 
 def web_api(url='', urldict=None, postdict=None, username=None, password=None, logger=DEFAULTLOGGER):
@@ -192,7 +192,9 @@ def trigger(project_id=None, secure_key=None, group_id=None,
       -one or more alt/az pairs
       -one of more source names
 
-    Observations will be generated for each position given, in turn (all RA/Dec first, then all Alt/Az, then all sourcenames).
+    Observations will be generated for each position given, in turn (all RA/Dec first, then all Alt/Az, then all
+    sourcenames) unless the 'subarrays' list of subarray names is provided, in which case each position will be
+    allocated to one subarray, and observed simultaneously.
 
     You can also pass, for example, one Alt value and a list of Az values, in which case the one Alt value will be
     propagated to the other Az's. For example, alt=70.0, az=[0,90,180] will give [(70,0), (70,90), (70,180)]. The same
@@ -203,6 +205,10 @@ def trigger(project_id=None, secure_key=None, group_id=None,
 
     If the 'avoidsum' parameter is True, then the coordinates of the target and calibrator are shifted slightly to
     put the Sun in a beam null. For this to work, the target coordinates must be RA/Dec values, not Alt/Az.
+
+    If 'buffered' is specified, and True, then instead of scheduling new observations, a voltage buffer dump of all
+    available past data will be triggered, and voltage capture will continue from 'now' until (nobs * exptime) seconds
+    into the future. Existing observations in the schedule, from 'now' until that time, will be truncated or deleted.
 
     The structure returned is a dictionary, containing the following:
       result['success'] - a boolean, True if the observations were scheduled successfully, False if there was an error.
@@ -219,6 +225,11 @@ def trigger(project_id=None, secure_key=None, group_id=None,
                            'retcode':The integer return code from the shell spawned to run those commands
                            'stderr': The output to STDERR from those commands
                            'stdout': The output to STDOUT from those commands
+
+    (and only if buffered is True)
+      result['obsid_list'] - The observation IDs of all MWA observations covered by the buffer dump and subsequent
+                             voltage capture. Use these observation IDs to download the voltage capture files, and to
+                             determine the telescope setting/s during the time span including the captured data.
 
     :param project_id: eg 'C001' - project ID for the triggered observations
     :param secure_key: password associated with that project_id
@@ -329,13 +340,16 @@ def trigger(project_id=None, secure_key=None, group_id=None,
 def triggerbuffer(project_id=None,
                   secure_key=None,
                   pretend=None,
+                  start_time=None,
+                  end_time=None,
                   obstime=None,
                   logger=DEFAULTLOGGER):
     """
-    If the correlator is in VOLTAGE_BUFFER mode, trigger an immediate dump of the memory buffers to
-    disk, and start capturing voltage data for obstime seconds (after which a 16 second VOLTAGE_STOP observation is
-    inserted into the schedule), or until the next scheduled VOLTAGE_STOP observation, whichever comes
-    first.
+    Trigger an immediate dump of the memory buffers to disk, using 'start_time' as the earliest time to capture (zero,
+    or any time earlier than the oldest time in the buffer, means 'save as much as possible'. If 'end_time' is
+    specified, save data only up to (but not necessarily including) that time, or if 'obs_time' is specified, then
+    keep capturing voltages until that many seconds from 'now'. Existing observations in the schedule, from 'now'
+    until that time, will be truncated or deleted.
 
     The structure returned is a dictionary, containing the following:
       result['success'] - a boolean, True if the observations were scheduled successfully, False if there was an error.
@@ -353,12 +367,18 @@ def triggerbuffer(project_id=None,
                                'retcode':The integer return code from the shell spawned to run those commands
                                'stderr': The output to STDERR from those commands
                                'stdout': The output to STDOUT from those commands
+      result['obsid_list'] - The observation IDs of all MWA observations covered by the buffer dump and subsequent
+                             voltage capture. Use these observation IDs to download the voltage capture files, and to
+                             determine the telescope setting/s during the time span including the captured data.
 
     :param project_id: eg 'C001' - project ID for the triggered observations
     :param secure_key: password associated with that project_id
     :param pretend: boolean or integer. If True, the triggervcs command will NOT be run.
     :param logger: optional logging.logger object
-    :param obstime: Duration of data capture, in seconds.
+    :param start_time: Optional earliest time to capture - defaults to zero, for 'as early as possible'.
+    :param end_time: Optional end time, in GPS seconds, to capture (can also be in the past).
+    :param obstime: Duration of data capture, in seconds, if end_time is not specified. Counts from 'now', not the time
+                    in the past when data capture started.
     :return: dictionary structure describing the processing (see above for more information).
     """
     urldict = {}
@@ -378,8 +398,16 @@ def triggerbuffer(project_id=None,
     if pretend is not None:
         postdict['pretend'] = pretend
 
+    if start_time is not None:
+        postdict['start_time'] = start_time
+    else:
+        postdict['start_time'] = 0
+
     if obstime is not None:
         postdict['obstime'] = obstime
+
+    if end_time is not None:
+        postdict['end_time'] = end_time
 
     result = web_api(url=BASEURL + 'triggerbuffer', urldict=urldict, postdict=postdict, logger=logger)
     return result
