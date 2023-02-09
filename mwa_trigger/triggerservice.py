@@ -351,6 +351,15 @@ def triggerbuffer(project_id=None,
     keep capturing voltages until that many seconds from 'now'. Existing observations in the schedule, from 'now'
     until that time, will be truncated or deleted.
 
+    For triggers requiring continued capturing after the trigger, you would normally pass zero to start_time, and a
+    duration to obstime as a capture duration, counted from the time that the trigger takes place.
+
+    For captures requiring only one or two subfiles at a specific time in the past, you would pass specific GPS times
+    to start_time and stop_time, and not use obstime.
+
+    Note that if start_time and end_time are both specified, and both zero, no subfiles are captured, but otherwise
+    the full end-to-end process takes place as a null operation, including calls to all 24 MWAX servers.
+
     The structure returned is a dictionary, containing the following:
       result['success'] - a boolean, True if the observations were scheduled successfully, False if there was an error.
       result['errors'] - a dictionary, containing integer keys from 0-N, where each value is an error message. Normally empty.
