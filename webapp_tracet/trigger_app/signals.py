@@ -422,7 +422,7 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
             # Check if user can recieve each type of alert
             # Trigger alert
             if ap.alert and ua.alert and trigger_bool:
-                subject = f"TraceT Triggered Observation {proposal_decision_model.id}"
+                subject = f"TraceT {proposal_decision_model.proposal.proposal_id}: {proposal_decision_model.proposal.telescope_id} TRIGGERING on {telescopes} {proposal_decision_model.event_group_id.source_type}"
                 message_type_text = f"Tracet scheduled the following {proposal_decision_model.proposal.telescope} observations:\n"
                 # Send links for each observation
                 obs = Observations.objects.filter(proposal_decision_id=proposal_decision_model)
@@ -432,13 +432,13 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
 
             # Debug Alert
             if ap.debug and ua.debug and debug_bool:
-                subject = f"TraceT Debug {proposal_decision_model.id}"
+                subject = f"TraceT {proposal_decision_model.proposal.proposal_id}: {proposal_decision_model.proposal.telescope_id} INFO on {telescopes} {proposal_decision_model.event_group_id.source_type}"
                 message_type_text = f"This is a debug notification from TraceT."
                 send_alert_type(ua.type, ua.address, subject, message_type_text, proposal_decision_model, telescopes, set_time_utc)
 
             # Pending Alert
             if ap.approval and ua.approval and pending_bool:
-                subject = f"PENDING TraceT Trigger {proposal_decision_model.id}"
+                subject = f"TraceT {proposal_decision_model.proposal.proposal_id}: {proposal_decision_model.proposal.telescope_id} PENDING on {telescopes} {proposal_decision_model.event_group_id.source_type}"
                 message_type_text = f"HUMAN INTERVENTION REQUIRED! TraceT is unsure about the following event."
                 send_alert_type(ua.type, ua.address, subject, message_type_text, proposal_decision_model, telescopes, set_time_utc)
 
