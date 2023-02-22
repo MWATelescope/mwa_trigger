@@ -266,10 +266,10 @@ def proposal_worth_observing(
     # Check if event has an accurate enough position
     if prop_dec.pos_error == 0.0:
         # Ignore the inaccurate event
-        decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {voevent.id}: The Events positions uncertainty is 0.0 which is likely an error so not observing. \n"
+        decision_reason_log = f"{decision_reason_log}{datetime.datetime.utcnow()}: Event ID {voevent.id}: The Events positions uncertainty is 0.0 which is likely an error so not observing. \n"
     elif voevent.pos_error and (voevent.pos_error > prop_dec.proposal.maximum_position_uncertainty):
         # Ignore the inaccurate event
-        decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {voevent.id}: The Events positions uncertainty ({voevent.pos_error:.4f} deg) is greater than {prop_dec.proposal.maximum_position_uncertainty:.4f} so not observing. \n"
+        decision_reason_log = f"{decision_reason_log}{datetime.datetime.utcnow()}: Event ID {voevent.id}: The Events positions uncertainty ({voevent.pos_error:.4f} deg) is greater than {prop_dec.proposal.maximum_position_uncertainty:.4f} so not observing. \n"
     else:
         # Continue to next test
 
@@ -308,7 +308,7 @@ def proposal_worth_observing(
             elif prop_dec.proposal.source_type == "FS" and voevent.source_type == "FS":
                 # This proposal wants to observe FSs and there is no FS logic so observe
                 trigger_bool = True
-                decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {voevent.id}: Triggering on Flare Star {voevent.source_name}. \n"
+                decision_reason_log = f"{decision_reason_log}{datetime.datetime.utcnow()}: Event ID {voevent.id}: Triggering on Flare Star {voevent.source_name}. \n"
                 proj_source_bool = True
             elif prop_dec.proposal.source_type == "NU" and voevent.source_type == "NU":
                 # This proposal wants to observe GRBs so check if it is worth observing
@@ -356,10 +356,10 @@ def proposal_worth_observing(
 
             if not proj_source_bool:
                 # Proposal does not observe this type of source so update message
-                decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {voevent.id}: This proposal does not observe {voevent.get_source_type_display()}s. \n"
+                decision_reason_log = f"{decision_reason_log}{datetime.datetime.utcnow()}: Event ID {voevent.id}: This proposal does not observe {str(voevent.get_source_type_display())}s. \n"
         else:
             # Proposal does not observe event from this telescope so update message
-            decision_reason_log += f"{datetime.datetime.utcnow()}: Event ID {voevent.id}: This proposal does not trigger on events from {voevent.telescope}. \n"
+            decision_reason_log = f"{decision_reason_log}{datetime.datetime.utcnow()}: Event ID {voevent.id}: This proposal does not trigger on events from {voevent.telescope}. \n"
 
     if trigger_bool:
         # Check if you can observe and if so send off the observation
