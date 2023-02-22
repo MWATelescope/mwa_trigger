@@ -52,27 +52,32 @@ def group_trigger(sender, instance, **kwargs):
     logger.info(f'Linking event ({instance.id}) to group {event_group}')
     Event.objects.filter(id=instance.id).update(event_group_id=event_group)
 
-
     if instance.ignored:
         # Event ignored so do nothing
         logger.info('Event ignored so do nothing')
         return
-    if(instance.ra and instance.dec):
+    if (instance.ra and instance.dec):
         logger.info(f'Getting sky coordinates {instance.ra} {instance.dec}')
-        event_coord = SkyCoord(ra=instance.ra*u.degree, dec=instance.dec*u.degree)
-    
+        event_coord = SkyCoord(ra=instance.ra*u.degree,
+                               dec=instance.dec*u.degree)
+
     logger.info('Getting proposal decisions')
-    proposal_decisions = ProposalDecision.objects.filter(event_group_id=event_group)
+    proposal_decisions = ProposalDecision.objects.filter(
+        event_group_id=event_group).order_by("proposal__priority")
+
     if proposal_decisions.exists():
         # Loop over all proposals settings and see if it's worth reobserving
-        logger.info('Loop over all proposals settings and see if it\'s worth reobserving')
+        logger.info(
+            'Loop over all proposals settings and see if it\'s worth reobserving')
 
         for prop_dec in proposal_decisions:
-            logger.info(f'Proposal decision (prop_dec.id, prop_dec.decision): {prop_dec.id, prop_dec.decision}')
+            logger.info(
+                f'Proposal decision (prop_dec.id, prop_dec.decision): {prop_dec.id, prop_dec.decision}')
             if prop_dec.decision == "C":
                 # Previous observation canceled so assume no new observations should be triggered
                 prop_dec.decision_reason += f"{datetime.datetime.utcnow()}: Event ID {instance.id}: Previous observation canceled so not observing . \n"
-                logger.info('Save proposal decision (prop_dec.decision == "C")')
+                logger.info(
+                    'Save proposal decision (prop_dec.decision == "C")')
                 prop_dec.save()
             elif prop_dec.decision == "I" or prop_dec.decision == "E":
                 # Previous events were ignored, check if this new one is up to our standards
@@ -85,47 +90,51 @@ def group_trigger(sender, instance, **kwargs):
                     # Don't update pos_error if zero, assume it's a null
                     prop_dec.pos_error = instance.pos_error
                     prop_dec.decision_reason = f"{prop_dec.decision_reason}{datetime.datetime.utcnow()}: Event ID {instance.id}: Checking new Event. \n",
-              
+
                 proposal_worth_observing(
                     prop_dec,
                     instance,
                 )
             elif prop_dec.decision == "T":
                 # Check new event position is further away than the repointing limit
-                old_event_coord = SkyCoord(ra=prop_dec.ra*u.degree, dec=prop_dec.dec*u.degree)
-                event_sep = event_coord.separation(old_event_coord ).deg
-                if event_sep > prop_dec.proposal.repointing_limit:
-                    # worth repointing
-                    # Update pos
-                    prop_dec.ra = instance.ra
-                    prop_dec.dec = instance.dec
-                    prop_dec.ra_hms = instance.ra_hms
-                    prop_dec.dec_dms = instance.dec_dms
-                    if instance.pos_error != 0.:
-                        # Don't update pos_error if zero, assume it's a null
-                        prop_dec.pos_error = instance.pos_error
-                    repoint_message = f"{datetime.datetime.utcnow()}: Event ID {instance.id}: Repointing because seperation ({event_sep:.4f} deg) is greater than the repointing limit ({prop_dec.proposal.repointing_limit:.4f} deg)."
-                    # Trigger observation
-                    logger.info(f'Trigger observation ({prop_dec.decision} == "T")')
-                    decision, decision_reason_log = trigger_observation(
-                        prop_dec,
-                        f"{prop_dec.decision_reason}{repoint_message} \n",
-                        reason=repoint_message,
-                        event_id=instance.id,
-                    )
-                    if decision == 'E':
-                        # Error observing so send off debug
-                        debug_bool = True
-                    else:
-                        debug_bool = False
-                    # Update proposal decision and log
-                    prop_dec.decision = decision
-                    prop_dec.decision_reason = decision_reason_log
-                    logger.info('Update proposal decision and log')
-                    prop_dec.save()
 
-                    # send off alert messages to users and admins
-                    send_all_alerts(True, debug_bool, False, prop_dec)
+                if (prop_dec.ra and prop_dec.dec):
+                    old_event_coord = SkyCoord(
+                        ra=prop_dec.ra*u.degree, dec=prop_dec.dec*u.degree)
+                    event_sep = event_coord.separation(old_event_coord).deg
+                    if event_sep > prop_dec.proposal.repointing_limit:
+                        # worth repointing
+                        # Update pos
+                        prop_dec.ra = instance.ra
+                        prop_dec.dec = instance.dec
+                        prop_dec.ra_hms = instance.ra_hms
+                        prop_dec.dec_dms = instance.dec_dms
+                        if instance.pos_error != 0.:
+                            # Don't update pos_error if zero, assume it's a null
+                            prop_dec.pos_error = instance.pos_error
+                        repoint_message = f"{datetime.datetime.utcnow()}: Event ID {instance.id}: Repointing because seperation ({event_sep:.4f} deg) is greater than the repointing limit ({prop_dec.proposal.repointing_limit:.4f} deg)."
+                        # Trigger observation
+                        logger.info(
+                            f'Trigger observation ({prop_dec.decision} == "T")')
+                        decision, decision_reason_log = trigger_observation(
+                            prop_dec,
+                            f"{prop_dec.decision_reason}{repoint_message} \n",
+                            reason=repoint_message,
+                            event_id=instance.id,
+                        )
+                        if decision == 'E':
+                            # Error observing so send off debug
+                            debug_bool = True
+                        else:
+                            debug_bool = False
+                        # Update proposal decision and log
+                        prop_dec.decision = decision
+                        prop_dec.decision_reason = decision_reason_log
+                        logger.info('Update proposal decision and log')
+                        prop_dec.save()
+
+                        # send off alert messages to users and admins
+                        send_all_alerts(True, debug_bool, False, prop_dec)
 
         if instance.pos_error and instance.pos_error < event_group.pos_error and instance.pos_error != 0.:
             # Updated event group's best position
@@ -142,9 +151,11 @@ def group_trigger(sender, instance, **kwargs):
 
     else:
         # First unignored event so create proposal decisions objects
-        logger.info('First unignored event so create proposal decisions objects')
+        logger.info(
+            'First unignored event so create proposal decisions objects')
         # Loop over settings
-        proposal_settings = ProposalSettings.objects.all()
+        proposal_settings = ProposalSettings.objects.all().order_by("priority")
+
         for prop_set in proposal_settings:
             # Create a ProposalDecision object to record what each proposal does
             prop_dec = ProposalDecision.objects.create(
@@ -157,7 +168,7 @@ def group_trigger(sender, instance, **kwargs):
                 dec=instance.dec,
                 ra_hms=instance.ra_hms,
                 dec_dms=instance.dec_dms,
-                pos_error=instance.pos_error,                
+                pos_error=instance.pos_error,
             )
             # Check if it's worth triggering an obs
             proposal_worth_observing(prop_dec, instance)
@@ -180,15 +191,17 @@ def group_trigger(sender, instance, **kwargs):
     #                               and before the latest  event observed + 100s
     association_exists = False
     poss_events = PossibleEventAssociation.objects.filter(earliest_event_observed__lt=late_dt,
-                                                      latest_event_observed__gt=early_dt)
+                                                          latest_event_observed__gt=early_dt)
     if poss_events.exists() and instance.pos_error:
         for trig_event in poss_events:
             # Calculate 95% confidence interval seperation
-            combined_err = np.sqrt(instance.pos_error**2 + trig_event.pos_error**2)
+            combined_err = np.sqrt(instance.pos_error **
+                                   2 + trig_event.pos_error**2)
             c95_sep = norm.interval(0.95, scale=combined_err)[1]
 
             # Now make sure they're spacially similar
-            trigger_coord = SkyCoord(ra=trig_event.ra*u.degree, dec=trig_event.dec*u.degree)
+            trigger_coord = SkyCoord(
+                ra=trig_event.ra*u.degree, dec=trig_event.dec*u.degree)
             if event_coord.separation(trigger_coord).deg < c95_sep:
                 # Event is within the 95% confidence interval so consider them the same source/event
                 association_exists = True
@@ -196,8 +209,10 @@ def group_trigger(sender, instance, **kwargs):
 
     if association_exists:
         # Trigger event already exists so link the Event (have to update this way to prevent save() triggering this function again)
-        logger.info(f'Trigger event already exists so link the Event id ({instance.id}) prev event id ({prev_trig})')
-        Event.objects.filter(id=instance.id).update(associated_event_id=prev_trig)
+        logger.info(
+            f'Trigger event already exists so link the Event id ({instance.id}) prev event id ({prev_trig})')
+        Event.objects.filter(id=instance.id).update(
+            associated_event_id=prev_trig)
 
         # TODO update the PossibleEventAssociation ra and dec if the position is better.
         # Update latest_event_observed
@@ -220,15 +235,17 @@ def group_trigger(sender, instance, **kwargs):
         )
         logger.info(f'Created trigger event {new_trig}')
         # Link the Event (have to update this way to prevent save() triggering this function again)
-        logger.info('Link the Event id={instance.id}(have to update this way to prevent save() triggering this function again)')
-        Event.objects.filter(id=instance.id).update(associated_event_id=new_trig)
+        logger.info(
+            'Link the Event id={instance.id}(have to update this way to prevent save() triggering this function again)')
+        Event.objects.filter(id=instance.id).update(
+            associated_event_id=new_trig)
 
 
 def proposal_worth_observing(
-        prop_dec,
-        voevent,
-        observation_reason="First observation."
-    ):
+    prop_dec,
+    voevent,
+    observation_reason="First observation."
+):
     """For a proposal sees is this voevent is worth observing. If it is will trigger an observation and send off the relevant alerts.
 
     Parameters
@@ -240,7 +257,8 @@ def proposal_worth_observing(
     observation_reason : `str`, optional
         The reason for this observation. The default is "First Observation" but other potential reasons are "Repointing".
     """
-    logger.info(f'Checking that proposal {prop_dec.proposal} is worth observing.')
+    logger.info(
+        f'Checking that proposal {prop_dec.proposal} is worth observing.')
     # Defaults if not worth observing
     trigger_bool = debug_bool = pending_bool = False
     decision_reason_log = str(prop_dec.decision_reason)
@@ -345,7 +363,8 @@ def proposal_worth_observing(
 
     if trigger_bool:
         # Check if you can observe and if so send off the observation
-        logger.info('Check if you can observe and if so send off the observation')
+        logger.info(
+            'Check if you can observe and if so send off the observation')
         decision, decision_reason_log = trigger_observation(
             prop_dec,
             decision_reason_log,
@@ -375,8 +394,10 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
     """
     """
     # Work out all the telescopes that observed the event
-    logger.info(f'Work out all the telescopes that observed the event {trigger_bool, debug_bool, pending_bool, proposal_decision_model}')
-    voevents = Event.objects.filter(event_group_id=proposal_decision_model.event_group_id)
+    logger.info(
+        f'Work out all the telescopes that observed the event {trigger_bool, debug_bool, pending_bool, proposal_decision_model}')
+    voevents = Event.objects.filter(
+        event_group_id=proposal_decision_model.event_group_id)
     telescopes = []
     for voevent in voevents:
         telescopes.append(voevent.telescope)
@@ -390,32 +411,36 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
         lat=telescope.lat*u.deg,
         height=telescope.height*u.m
     )
-    if(proposal_decision_model.ra and proposal_decision_model.dec):
+    if (proposal_decision_model.ra and proposal_decision_model.dec):
         obs_source = SkyCoord(
             proposal_decision_model.ra,
             proposal_decision_model.dec,
-            #equinox='J2000',
+            # equinox='J2000',
             unit=(u.deg, u.deg)
         )
         # Convert from RA/Dec to Alt/Az
-        delta_24h = np.linspace(0, 1440, 288)*u.min # 24 hours in 5 min increments
-        next_24h = obstime=Time.now()+delta_24h
-        obs_source_altaz = obs_source.transform_to(AltAz(obstime=next_24h, location=location))
+        # 24 hours in 5 min increments
+        delta_24h = np.linspace(0, 1440, 288)*u.min
+        next_24h = obstime = Time.now()+delta_24h
+        obs_source_altaz = obs_source.transform_to(
+            AltAz(obstime=next_24h, location=location))
         # capture circumpolar source case
         set_time_utc = None
         for altaz, time in zip(obs_source_altaz, next_24h):
-            if altaz.alt.deg <1.:
+            if altaz.alt.deg < 1.:
                 # source below horizon so record time
                 set_time_utc = time
                 break
-  
+
     # Get all admin alert permissions for this project
     logger.info('Get all admin alert permissions for this project')
-    alert_permissions = AlertPermission.objects.filter(proposal=proposal_decision_model.proposal)
+    alert_permissions = AlertPermission.objects.filter(
+        proposal=proposal_decision_model.proposal)
     for ap in alert_permissions:
         # Grab user
         user = ap.user
-        user_alerts = UserAlerts.objects.filter(user=user, proposal=proposal_decision_model.proposal)
+        user_alerts = UserAlerts.objects.filter(
+            user=user, proposal=proposal_decision_model.proposal)
 
         # Send off the alerts of types user defined
         for ua in user_alerts:
@@ -425,22 +450,27 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
                 subject = f"TraceT {proposal_decision_model.proposal.proposal_id}: {proposal_decision_model.proposal.telescope_id} TRIGGERING on {telescopes} {proposal_decision_model.event_group_id.source_type}"
                 message_type_text = f"Tracet scheduled the following {proposal_decision_model.proposal.telescope} observations:\n"
                 # Send links for each observation
-                obs = Observations.objects.filter(proposal_decision_id=proposal_decision_model)
+                obs = Observations.objects.filter(
+                    proposal_decision_id=proposal_decision_model)
                 for ob in obs:
                     message_type_text += f"{ob.website_link}\n"
-                send_alert_type(ua.type, ua.address, subject, message_type_text, proposal_decision_model, telescopes, set_time_utc)
+                send_alert_type(ua.type, ua.address, subject, message_type_text,
+                                proposal_decision_model, telescopes, set_time_utc)
 
             # Debug Alert
             if ap.debug and ua.debug and debug_bool:
                 subject = f"TraceT {proposal_decision_model.proposal.proposal_id}: {proposal_decision_model.proposal.telescope_id} INFO on {telescopes} {proposal_decision_model.event_group_id.source_type}"
                 message_type_text = f"This is a debug notification from TraceT."
-                send_alert_type(ua.type, ua.address, subject, message_type_text, proposal_decision_model, telescopes, set_time_utc)
+                send_alert_type(ua.type, ua.address, subject, message_type_text,
+                                proposal_decision_model, telescopes, set_time_utc)
 
             # Pending Alert
             if ap.approval and ua.approval and pending_bool:
                 subject = f"TraceT {proposal_decision_model.proposal.proposal_id}: {proposal_decision_model.proposal.telescope_id} PENDING on {telescopes} {proposal_decision_model.event_group_id.source_type}"
                 message_type_text = f"HUMAN INTERVENTION REQUIRED! TraceT is unsure about the following event."
-                send_alert_type(ua.type, ua.address, subject, message_type_text, proposal_decision_model, telescopes, set_time_utc)
+                send_alert_type(ua.type, ua.address, subject, message_type_text,
+                                proposal_decision_model, telescopes, set_time_utc)
+
 
 def send_alert_type(alert_type, address, subject, message_type_text, proposal_decision_model, telescopes, set_time_utc):
     # Set up twillo client for SMS and calls
@@ -475,23 +505,23 @@ https://mwa-trigger.duckdns.org/proposal_decision_details/{proposal_decision_mod
             message_text,
             settings.EMAIL_HOST_USER,
             [address],
-            #fail_silently=False,
+            # fail_silently=False,
         )
     elif alert_type == 1:
         # Send an SMS
         logger.info('Send an SMS')
         message = client.messages.create(
-                    to=address,
-                    from_=my_number,
-                    body=message_text,
+            to=address,
+            from_=my_number,
+            body=message_text,
         )
     elif alert_type == 2:
         # Make a call
         logger.info('Make a call')
         call = client.calls.create(
-                    url='http://demo.twilio.com/docs/voice.xml',
-                    to=address,
-                    from_=my_number,
+            url='http://demo.twilio.com/docs/voice.xml',
+            to=address,
+            from_=my_number,
         )
 
 

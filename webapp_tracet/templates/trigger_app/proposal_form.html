@@ -33,6 +33,8 @@
         {% for error in form.proposal_description.errors %}<div class="alert alert-danger"><strong>{{ error|escape }}</strong></div>{% endfor %}
 
         <hr>
+        <p>{{ form.priority.label_tag }} {% help_wrap form.priority.help_text %}{{ form.priority }}</p>
+
         {{ form.source_type.label_tag }}{{ form.source_type }}
         <div id="none">
             <p>Select a source type before choosing an event telescope</p>

@@ -27,7 +27,9 @@
       <th>Decision ID</th>
       <th>Group ID</th>
       <th>Date (UTC)</th>
-      <th>Proposal Telsecope</th>
+      <th>Proposal ID</th>
+      <th>Proposal Priority</th>
+      <th>Proposal Telescope</th>
       <th>Project ID</th>
       <th>Decision</th>
       <th>Decision Reason</th>
@@ -46,6 +48,8 @@
       <td><a href="/proposal_decision_details/{{ object.id }}/" style="text-decoration:None">{{ object.id }}</a></td>
       <td><a href="/event_group_details/{{ object.event_group_id }}/" style="text-decoration:None">{{ object.event_group_id }}</a></td>
       <td>{{ object.recieved_data|date:"Y-m-d H:i:s" }}</td>
+      <td>{{ object.proposal.proposal_id }}</td>
+      <td>{{ object.proposal.priority }}</td>
       <td>{{ object.proposal.telescope }}</td>
       <td>{{ object.proposal.project_id }}</td>
       <td>{{ object.get_decision_display }}</td>

@@ -11,12 +11,13 @@ from .models import Observations, Event
 import logging
 logger = logging.getLogger(__name__)
 
+
 def trigger_observation(
-        proposal_decision_model,
-        decision_reason_log,
-        reason="First Observation",
-        event_id=None,
-    ):
+    proposal_decision_model,
+    decision_reason_log,
+    reason="First Observation",
+    event_id=None,
+):
     """Perform any comon observation checks, send off observations with the telescope's function then record observations in the Observations model.
 
     Parameters
@@ -50,24 +51,27 @@ def trigger_observation(
             height=telescope.height*u.m
         )
         if proposal_decision_model.proposal.start_observation_at_high_sensitivity and not (proposal_decision_model.ra or proposal_decision_model.dec):
-            #TODO: Replace with indian ocean high sensitivity area
+            # TODO: Replace with indian ocean high sensitivity area
             proposal_decision_model.alt = 20
             proposal_decision_model.az = 280
         else:
             obs_source = SkyCoord(
                 proposal_decision_model.ra,
                 proposal_decision_model.dec,
-                #equinox='J2000',
+                # equinox='J2000',
                 unit=(u.deg, u.deg)
             )
             # Convert from RA/Dec to Alt/Az
-            obs_source_altaz_beg = obs_source.transform_to(AltAz(obstime=Time.now(), location=location))
+            obs_source_altaz_beg = obs_source.transform_to(
+                AltAz(obstime=Time.now(), location=location))
             alt_beg = obs_source_altaz_beg.alt.deg
             # Calculate alt at end of obs
             end_time = Time.now() + timedelta(seconds=proposal_decision_model.proposal.mwa_exptime)
-            obs_source_altaz_end = obs_source.transform_to(AltAz(obstime=end_time, location=location))
+            obs_source_altaz_end = obs_source.transform_to(
+                AltAz(obstime=end_time, location=location))
             alt_end = obs_source_altaz_end.alt.deg
-            logger.debug(f"Triggered observation at an elevation of {alt_beg} to elevation of {alt_end}")
+            logger.debug(
+                f"Triggered observation at an elevation of {alt_beg} to elevation of {alt_end}")
             if alt_beg < proposal_decision_model.proposal.mwa_horizon_limit and alt_end < proposal_decision_model.proposal.mwa_horizon_limit:
                 horizon_message = f"{datetime.utcnow()}: Event ID {event_id}: Not triggering due to horizon limit: alt_beg {alt_beg:.4f} < {proposal_decision_model.proposal.mwa_horizon_limit:.4f} and alt_end {alt_end:.4f} < {proposal_decision_model.proposal.mwa_horizon_limit:.4f}. "
                 logger.debug(horizon_message)
@@ -80,20 +84,22 @@ def trigger_observation(
                 decision_reason_log += f"{datetime.utcnow()}: Event ID {event_id}: Warning: The source will set below the horizion limit by the end of the observation alt_end {alt_end:.4f}. \n"
 
     # above the horizon so send off telescope specific set ups
-    decision_reason_log += f"{datetime.utcnow()}: Event ID {event_id}: Above horizon so attempting to observer with {proposal_decision_model.proposal.telescope.name}. \n"
+    decision_reason_log += f"{datetime.utcnow()}: Event ID {event_id}: Above horizon so attempting to observe with {proposal_decision_model.proposal.telescope.name}. \n"
     if proposal_decision_model.proposal.telescope.name.startswith("MWA"):
         # If telescope ends in VCS then this proposal is for observing in VCS mode
-        vcsmode = proposal_decision_model.proposal.telescope.name.endswith("VCS")
+        vcsmode = proposal_decision_model.proposal.telescope.name.endswith(
+            "VCS")
 
         # Create an observation name
         # Collect event telescopes
-        voevents = Event.objects.filter(event_group_id=proposal_decision_model.event_group_id)
+        voevents = Event.objects.filter(
+            event_group_id=proposal_decision_model.event_group_id)
         telescopes = []
         for voevent in voevents:
             telescopes.append(voevent.telescope)
         # Make sure they are unique and seperate with a _
         telescopes = "_".join(list(set(telescopes)))
-        obsname=f'{telescopes}_{proposal_decision_model.trig_id}'
+        obsname = f'{telescopes}_{proposal_decision_model.trig_id}'
 
         # Check if you can observe and if so send off MWA observation
         decision, decision_reason_log, obsids = trigger_mwa_observation(
@@ -114,7 +120,7 @@ def trigger_observation(
             )
     elif proposal_decision_model.proposal.telescope.name == "ATCA":
         # Check if you can observe and if so send off mwa observation
-        obsname=f'{proposal_decision_model.trig_id}'
+        obsname = f'{proposal_decision_model.trig_id}'
         decision, decision_reason_log, obsids = trigger_atca_observation(
             proposal_decision_model,
             decision_reason_log,
@@ -129,17 +135,18 @@ def trigger_observation(
                 proposal_decision_id=proposal_decision_model,
                 reason=reason,
                 # TODO see if atca has a nice observation details webpage
-                #website_link=f"http://ws.mwatelescope.org/observation/obs/?obsid={obsid}",
+                # website_link=f"http://ws.mwatelescope.org/observation/obs/?obsid={obsid}",
             )
     return decision, decision_reason_log
 
+
 def trigger_mwa_observation(
-        proposal_decision_model,
-        decision_reason_log,
-        obsname,
-        vcsmode=False,
-        event_id=None,
-    ):
+    proposal_decision_model,
+    decision_reason_log,
+    obsname,
+    vcsmode=False,
+    event_id=None,
+):
     """Check if the MWA can observe then send it off the observation.
 
     Parameters
@@ -172,14 +179,15 @@ def trigger_mwa_observation(
         project_id=prop_settings.project_id.id,
         secure_key=prop_settings.project_id.password,
         pretend=prop_settings.testing,
-        ra=proposal_decision_model.ra, 
+        ra=proposal_decision_model.ra,
         dec=proposal_decision_model.dec,
         alt=proposal_decision_model.alt,
         az=proposal_decision_model.az,
-        creator='VOEvent_Auto_Trigger', #TODO grab version
+        creator='VOEvent_Auto_Trigger',  # TODO grab version
         obsname=obsname,
         nobs=prop_settings.mwa_nobs,
-        freqspecs=prop_settings.mwa_freqspecs, #Assume always using 24 contiguous coarse frequency channels
+        # Assume always using 24 contiguous coarse frequency channels
+        freqspecs=prop_settings.mwa_freqspecs,
         avoidsun=True,
         inttime=prop_settings.mwa_inttime,
         freqres=prop_settings.mwa_freqres,
@@ -220,11 +228,11 @@ def trigger_mwa_observation(
 
 
 def trigger_atca_observation(
-        proposal_decision_model,
-        decision_reason_log,
-        obsname,
-        event_id=None,
-    ):
+    proposal_decision_model,
+    decision_reason_log,
+    obsname,
+    event_id=None,
+):
     """Check if the ATCA telescope can observe, send it off the observation and return any errors.
 
     Parameters
@@ -303,7 +311,7 @@ def trigger_atca_observation(
 
     # We have our request now, so we need to craft the service request to submit it to
     # the rapid response service.
-    rapidObj = { 'requestDict': rq }
+    rapidObj = {'requestDict': rq}
     rapidObj["authenticationToken"] = prop_obj.project_id.password
     rapidObj["email"] = prop_obj.project_id.atca_email
 

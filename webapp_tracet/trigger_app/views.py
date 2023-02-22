@@ -1,4 +1,5 @@
 
+from trigger_app.signals import startup_signal
 from django.views.generic.list import ListView
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect
@@ -33,23 +34,29 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Create a startup signal
-from trigger_app.signals import startup_signal
 
 
 if 'runserver' in sys.argv:
     # Send off start up signal because server is launching in development
     startup_signal.send(sender=startup_signal)
 
+
 class EventFilter(django_filters.FilterSet):
     # DateTimeFromToRangeFilter raises exceptions in debugger for missing _before and _after keys
-    recieved_data_after = django_filters.DateTimeFilter(field_name='recieved_data', lookup_expr='gte', widget=DateTimeInput(attrs={'type': 'datetime-local'}))
-    recieved_data_before = django_filters.DateTimeFilter(field_name='recieved_data', lookup_expr='lte', widget=DateTimeInput(attrs={'type': 'datetime-local'}))
+    recieved_data_after = django_filters.DateTimeFilter(
+        field_name='recieved_data', lookup_expr='gte', widget=DateTimeInput(attrs={'type': 'datetime-local'}))
+    recieved_data_before = django_filters.DateTimeFilter(
+        field_name='recieved_data', lookup_expr='lte', widget=DateTimeInput(attrs={'type': 'datetime-local'}))
 
-    event_observed_after = django_filters.DateTimeFilter(field_name='event_observed', lookup_expr='gte', widget=DateTimeInput(attrs={'type': 'datetime-local'}))
-    event_observed_before = django_filters.DateTimeFilter(field_name='event_observed', lookup_expr='lte', widget=DateTimeInput(attrs={'type': 'datetime-local'}))
+    event_observed_after = django_filters.DateTimeFilter(
+        field_name='event_observed', lookup_expr='gte', widget=DateTimeInput(attrs={'type': 'datetime-local'}))
+    event_observed_before = django_filters.DateTimeFilter(
+        field_name='event_observed', lookup_expr='lte', widget=DateTimeInput(attrs={'type': 'datetime-local'}))
 
-    duration__lte = django_filters.NumberFilter(field_name='duration', lookup_expr='lte')
-    duration__gte = django_filters.NumberFilter(field_name='duration', lookup_expr='gte')
+    duration__lte = django_filters.NumberFilter(
+        field_name='duration', lookup_expr='lte')
+    duration__gte = django_filters.NumberFilter(
+        field_name='duration', lookup_expr='gte')
 
     ra__lte = django_filters.NumberFilter(field_name='ra', lookup_expr='lte')
     ra__gte = django_filters.NumberFilter(field_name='ra', lookup_expr='gte')
@@ -57,24 +64,29 @@ class EventFilter(django_filters.FilterSet):
     dec__lte = django_filters.NumberFilter(field_name='dec', lookup_expr='lte')
     dec__gte = django_filters.NumberFilter(field_name='dec', lookup_expr='gte')
 
-    pos_error__lte = django_filters.NumberFilter(field_name='pos_error', lookup_expr='lte')
-    pos_error__gte = django_filters.NumberFilter(field_name='pos_error', lookup_expr='gte')
+    pos_error__lte = django_filters.NumberFilter(
+        field_name='pos_error', lookup_expr='lte')
+    pos_error__gte = django_filters.NumberFilter(
+        field_name='pos_error', lookup_expr='gte')
 
-    fermi_detection_prob__lte = django_filters.NumberFilter(field_name='fermi_detection_prob', lookup_expr='lte')
-    fermi_detection_prob__gte = django_filters.NumberFilter(field_name='fermi_detection_prob', lookup_expr='gte')
+    fermi_detection_prob__lte = django_filters.NumberFilter(
+        field_name='fermi_detection_prob', lookup_expr='lte')
+    fermi_detection_prob__gte = django_filters.NumberFilter(
+        field_name='fermi_detection_prob', lookup_expr='gte')
 
-    swift_rate_signif__lte = django_filters.NumberFilter(field_name='swift_rate_signif', lookup_expr='lte')
-    swift_rate_signif__gte = django_filters.NumberFilter(field_name='swift_rate_signif', lookup_expr='gte')
+    swift_rate_signif__lte = django_filters.NumberFilter(
+        field_name='swift_rate_signif', lookup_expr='lte')
+    swift_rate_signif__gte = django_filters.NumberFilter(
+        field_name='swift_rate_signif', lookup_expr='gte')
 
     telescopes = django_filters.AllValuesMultipleFilter(field_name='telescope')
+
     class Meta:
         model = models.Event
 
         # Django-filter cannot hanlde django FileField so exclude from filters
-        fields = ('recieved_data_after', 'recieved_data_before', 'event_observed_after', 'event_observed_before', 'duration__lte'
-        , 'duration__gte', 'ra__lte', 'ra__gte', 'dec__lte', 'dec__gte', 'pos_error__lte', 'pos_error__gte', 'fermi_detection_prob__lte'
-        , 'fermi_detection_prob__gte', 'swift_rate_signif__lte', 'swift_rate_signif__gte', 'ignored', 'associated_event_id', 'source_type' 
-        , 'trig_id', 'telescope', 'source_name', 'sequence_num', 'event_type', 'telescopes')
+        fields = ('recieved_data_after', 'recieved_data_before', 'event_observed_after', 'event_observed_before', 'duration__lte', 'duration__gte', 'ra__lte', 'ra__gte', 'dec__lte', 'dec__gte', 'pos_error__lte', 'pos_error__gte',
+                  'fermi_detection_prob__lte', 'fermi_detection_prob__gte', 'swift_rate_signif__lte', 'swift_rate_signif__gte', 'ignored', 'associated_event_id', 'source_type', 'trig_id', 'telescope', 'source_name', 'sequence_num', 'event_type', 'telescopes')
         filter_overrides = {
             dj_model.CharField: {
                 'filter_class': django_filters.CharFilter,
@@ -103,19 +115,23 @@ def EventList(request):
         # the page number is not an integer (PageNotAnInteger exception)
         # return the first page
         events = paginator.page(1)
-    
-    min_rec = models.Event.objects.filter().order_by('recieved_data').first().recieved_data
-    min_obs = models.Event.objects.filter().order_by('event_observed').first().event_observed
+
+    min_rec = models.Event.objects.filter().order_by(
+        'recieved_data').first().recieved_data
+    min_obs = models.Event.objects.filter().order_by(
+        'event_observed').first().event_observed
 
     has_filter = any(field in request.GET for field in set(f.get_fields()))
-    return render(request, 'trigger_app/voevent_list.html', {'filter': f, "page_obj":events, "poserr_unit":poserr_unit, 'has_filter': has_filter, 'min_rec': str(min_rec), 'min_obs': str(min_obs)})
+    return render(request, 'trigger_app/voevent_list.html', {'filter': f, "page_obj": events, "poserr_unit": poserr_unit, 'has_filter': has_filter, 'min_rec': str(min_rec), 'min_obs': str(min_obs)})
 
 
 class ProposalDecisionFilter(django_filters.FilterSet):
     # DateTimeFromToRangeFilter raises exceptions in debugger for missing _before and _after keys
 
-    recieved_data_after = django_filters.DateTimeFilter(field_name='recieved_data', lookup_expr='gte', widget=DateTimeInput(attrs={'type': 'datetime-local'}))
-    recieved_data_before = django_filters.DateTimeFilter(field_name='recieved_data', lookup_expr='lte', widget=DateTimeInput(attrs={'type': 'datetime-local'}))
+    recieved_data_after = django_filters.DateTimeFilter(
+        field_name='recieved_data', lookup_expr='gte', widget=DateTimeInput(attrs={'type': 'datetime-local'}))
+    recieved_data_before = django_filters.DateTimeFilter(
+        field_name='recieved_data', lookup_expr='lte', widget=DateTimeInput(attrs={'type': 'datetime-local'}))
 
     class Meta:
         model = models.ProposalDecision
@@ -124,7 +140,8 @@ class ProposalDecisionFilter(django_filters.FilterSet):
 
 def ProposalDecisionList(request):
     # Apply filters
-    f = ProposalDecisionFilter(request.GET, queryset=models.ProposalDecision.objects.all())
+    f = ProposalDecisionFilter(
+        request.GET, queryset=models.ProposalDecision.objects.all())
     ProposalDecision = f.qs
 
     # Get position error units
@@ -142,9 +159,10 @@ def ProposalDecisionList(request):
         ProposalDecision = paginator.page(1)
 
     strip_time_stamp(ProposalDecision)
-    min_dec = models.ProposalDecision.objects.filter().order_by('recieved_data').first().recieved_data
+    min_dec = models.ProposalDecision.objects.filter().order_by(
+        'recieved_data').first().recieved_data
 
-    return render(request, 'trigger_app/proposal_decision_list.html', {'filter': f, "page_obj":ProposalDecision, "poserr_unit":poserr_unit, "min_dec": min_dec})
+    return render(request, 'trigger_app/proposal_decision_list.html', {'filter': f, "page_obj": ProposalDecision, "poserr_unit": poserr_unit, "min_dec": min_dec})
 
 
 def grab_decisions_for_event_groups(event_groups):
@@ -156,7 +174,8 @@ def grab_decisions_for_event_groups(event_groups):
     proposal_decision_list = []
     proposal_decision_id_list = []
     for event_group in event_groups:
-        event_group_events = models.Event.objects.filter(event_group_id=event_group)
+        event_group_events = models.Event.objects.filter(
+            event_group_id=event_group)
         telescope_list.append(
             ' '.join(set(event_group_events.values_list('telescope', flat=True)))
         )
@@ -165,9 +184,11 @@ def grab_decisions_for_event_groups(event_groups):
         decision_list = []
         decision_id_list = []
         for prop in prop_settings:
-            this_decision = models.ProposalDecision.objects.filter(event_group_id=event_group, proposal=prop)
+            this_decision = models.ProposalDecision.objects.filter(
+                event_group_id=event_group, proposal=prop)
             if this_decision.exists():
-                decision_list.append(this_decision.first().get_decision_display())
+                decision_list.append(
+                    this_decision.first().get_decision_display())
                 decision_id_list.append(this_decision.first().id)
             else:
                 decision_list.append("")
@@ -178,10 +199,12 @@ def grab_decisions_for_event_groups(event_groups):
     # zip into something that you can iterate over in the html
     return list(zip(event_groups, telescope_list, source_name_list, proposal_decision_list, proposal_decision_id_list)), event_groups
 
+
 class EventGroupFilter(django_filters.FilterSet):
     class Meta:
         model = models.EventGroup
         fields = '__all__'
+
 
 def EventGroupList(request):
     # Apply filters
@@ -199,9 +222,10 @@ def EventGroupList(request):
     except InvalidPage:
         event_group_ids_paged = paginator.page(1)
 
-    recent_triggers_info, page_obj = grab_decisions_for_event_groups(event_group_ids_paged)
+    recent_triggers_info, page_obj = grab_decisions_for_event_groups(
+        event_group_ids_paged)
 
-    return render(request, 'trigger_app/event_group_list.html', {'filter': f, 'page_obj': page_obj, "trigger_info":recent_triggers_info, 'settings':prop_settings})
+    return render(request, 'trigger_app/event_group_list.html', {'filter': f, 'page_obj': page_obj, "trigger_info": recent_triggers_info, 'settings': prop_settings})
 
 
 class CometLogList(ListView):
@@ -211,6 +235,7 @@ class CometLogList(ListView):
 
 class ProposalSettingsList(ListView):
     model = models.ProposalSettings
+    ordering = ['priority']
 
 
 def home_page(request):
@@ -219,14 +244,15 @@ def home_page(request):
 
     # Filter out ignored event groups and show only the 5 most recent
     recent_event_groups = models.EventGroup.objects.filter(ignored=False)[:5]
-    recent_event_group_info, _ = grab_decisions_for_event_groups(recent_event_groups)
+    recent_event_group_info, _ = grab_decisions_for_event_groups(
+        recent_event_groups)
 
     context = {
         'twistd_comet_status': comet_status,
-        'settings':prop_settings,
-        'remotes':", ".join(settings.VOEVENT_REMOTES),
-        'tcps':", ".join(settings.VOEVENT_TCP),
-        "recent_event_groups":recent_event_group_info
+        'settings': prop_settings,
+        'remotes': ", ".join(settings.VOEVENT_REMOTES),
+        'tcps': ", ".join(settings.VOEVENT_TCP),
+        "recent_event_groups": recent_event_group_info
     }
     return render(request, 'trigger_app/home_page.html', context)
 
@@ -241,26 +267,29 @@ def PossibleEventAssociationList(request):
     for aevent in event_associations:
         aevent_telescope_list.append(
             ' '.join(
-                set(events.filter(associated_event_id=aevent).values_list('telescope', flat=True))
+                set(events.filter(associated_event_id=aevent).values_list(
+                    'telescope', flat=True))
             )
         )
 
     # Paginate
     page = request.GET.get('page', 1)
     # zip the trigger event and the tevent_telescope_list together so I can loop over both in the html
-    paginator = Paginator(list(zip(event_associations, aevent_telescope_list)), 100)
+    paginator = Paginator(
+        list(zip(event_associations, aevent_telescope_list)), 100)
     try:
         object_list = paginator.page(page)
     except InvalidPage:
         object_list = paginator.page(1)
-    return render(request, 'trigger_app/possible_event_association_list.html', {'object_list':object_list})
+    return render(request, 'trigger_app/possible_event_association_list.html', {'object_list': object_list})
 
 
 def PossibleEventAssociation_details(request, tid):
     event_association = models.PossibleEventAssociation.objects.get(id=tid)
 
     # covert ra and dec to HH:MM:SS.SS format
-    c = SkyCoord( event_association.ra, event_association.dec, frame='icrs', unit=(u.deg,u.deg))
+    c = SkyCoord(event_association.ra, event_association.dec,
+                 frame='icrs', unit=(u.deg, u.deg))
     event_association.ra = c.ra.to_string(unit=u.hour, sep=':')
     event_association.dec = c.dec.to_string(unit=u.degree, sep=':')
 
@@ -281,12 +310,12 @@ def PossibleEventAssociation_details(request, tid):
     poserr_unit = request.GET.get('poserr_unit', 'deg')
 
     context = {
-        'event_association':event_association,
-        'events':events,
-        'telescopes':telescopes,
-        'trig_event_id':trig_event_id,
-        'event_id_events':event_id_events,
-        'poserr_unit':poserr_unit,
+        'event_association': event_association,
+        'events': events,
+        'telescopes': telescopes,
+        'trig_event_id': trig_event_id,
+        'event_id_events': event_id_events,
+        'poserr_unit': poserr_unit,
     }
 
     return render(request, 'trigger_app/possible_event_association_details.html', context)
@@ -309,24 +338,26 @@ def EventGroup_details(request, tid):
     telescopes = ' '.join(set(events.values_list('telescope', flat=True)))
 
     # list all prop decisions
-    prop_decs = models.ProposalDecision.objects.filter(event_group_id=event_group)
+    prop_decs = models.ProposalDecision.objects.filter(
+        event_group_id=event_group)
 
     # Grab obs if the exist
     obs = []
     for prop_dec in prop_decs:
-        obs += models.Observations.objects.filter(proposal_decision_id=prop_dec)
+        obs += models.Observations.objects.filter(
+            proposal_decision_id=prop_dec)
     strip_time_stamp(prop_decs)
 
     # Get position error units
     poserr_unit = request.GET.get('poserr_unit', 'deg')
 
     context = {
-        'event_group':event_group,
-        'events':events,
-        'obs':obs,
-        'prop_decs':prop_decs,
-        'telescopes':telescopes,
-        'poserr_unit':poserr_unit,
+        'event_group': event_group,
+        'events': events,
+        'obs': obs,
+        'prop_decs': prop_decs,
+        'telescopes': telescopes,
+        'poserr_unit': poserr_unit,
     }
 
     return render(request, 'trigger_app/event_group_details.html', context)
@@ -336,7 +367,8 @@ def ProposalDecision_details(request, id):
     prop_dec = models.ProposalDecision.objects.get(id=id)
 
     # Work out all the telescopes that observed the event
-    events = models.Event.objects.filter(event_group_id=prop_dec.event_group_id)
+    events = models.Event.objects.filter(
+        event_group_id=prop_dec.event_group_id)
     telescopes = []
     event_types = []
     for event in events:
@@ -349,8 +381,8 @@ def ProposalDecision_details(request, id):
     observations = models.Observations.objects.filter(proposal_decision_id=id)
 
     content = {
-        'prop_dec':prop_dec,
-        'telescopes':telescopes,
+        'prop_dec': prop_dec,
+        'telescopes': telescopes,
         'events': events,
         'event_types': event_types,
         'obs': observations,
@@ -463,7 +495,7 @@ end'''
     E --> I[Neutrino] --> END'''
     if prop_set.source_type == "GW":
         mermaid_script += f'''
-    E --> H[GW] --> L[Trigger Observation]''' 
+    E --> H[GW] --> L[Trigger Observation]'''
     else:
         mermaid_script += f'''
     E --> H[GW] --> END'''
@@ -473,8 +505,8 @@ end'''
   style L fill:green,color:white
   style R fill:#21B6A8,color:white'''
 
-    return render(request, 'trigger_app/proposal_decision_path.html', {'proposal':prop_set,
-                                                                       'mermaid_script':mermaid_script})
+    return render(request, 'trigger_app/proposal_decision_path.html', {'proposal': prop_set,
+                                                                       'mermaid_script': mermaid_script})
 
 
 @login_required
@@ -485,12 +517,13 @@ def user_alert_status(request):
         # For each proposals find the user and admin alerts
         u = request.user
         user_alerts = models.UserAlerts.objects.filter(user=u, proposal=prop)
-        alert_permissions = models.AlertPermission.objects.get(user=u, proposal=prop)
+        alert_permissions = models.AlertPermission.objects.get(
+            user=u, proposal=prop)
         # Put them into a dict that can be looped over in the html
         prop_alert_list.append({
-            "proposal":prop,
-            "user":user_alerts,
-            "permission":alert_permissions,
+            "proposal": prop,
+            "user": user_alerts,
+            "permission": alert_permissions,
         })
     return render(request, 'trigger_app/user_alert_status.html', {'prop_alert_list': prop_alert_list})
 
@@ -517,10 +550,10 @@ def user_alert_create(request):
                 # on success, the request is redirected as a GET
                 return HttpResponseRedirect('/user_alert_status/')
             except:
-                pass # handling can go here
+                pass  # handling can go here
     else:
         form = forms.UserAlertForm()
-    return render(request, 'trigger_app/form.html', {'form':form})
+    return render(request, 'trigger_app/form.html', {'form': form})
 
 
 def voevent_view(request, id):
@@ -530,45 +563,45 @@ def voevent_view(request, id):
     return HttpResponse(xml_pretty_str, content_type='text/xml')
 
 
-
 def parse_and_save_xml(xml):
     logger.info(f'Attempting to parse xml {xml}')
     trig = parse_xml.parsed_VOEvent(None, packet=xml)
     logger.info(f'Successfully parsed xml {trig}')
     data = {
-        'telescope' : trig.telescope,
-        'xml_packet' : xml,
-        'duration' : trig.event_duration,
-        'trig_id' : trig.trig_id,
-        'self_generated_trig_id' : trig.self_generated_trig_id,
-        'sequence_num' : trig.sequence_num,
-        'event_type' : trig.event_type,
-        'role' : trig.role,
-        'ra' : trig.ra,
-        'dec' : trig.dec,
-        'ra_hms' : trig.ra_hms,
-        'dec_dms' : trig.dec_dms,
-        'pos_error' : trig.err,
-        'ignored' : trig.ignore,
-        'source_name' : trig.source_name,
-        'source_type' : trig.source_type,
-        'event_observed' : trig.event_observed,
-        'fermi_most_likely_index' : trig.fermi_most_likely_index,
-        'fermi_detection_prob' : trig.fermi_detection_prob,
-        'swift_rate_signif' : trig.swift_rate_signif,
-        'hess_significance' : trig.hess_significance,
-        'antares_ranking' : trig.antares_ranking,
-        'lvc_false_alarm_rate' : trig.lvc_false_alarm_rate,
+        'telescope': trig.telescope,
+        'xml_packet': xml,
+        'duration': trig.event_duration,
+        'trig_id': trig.trig_id,
+        'self_generated_trig_id': trig.self_generated_trig_id,
+        'sequence_num': trig.sequence_num,
+        'event_type': trig.event_type,
+        'role': trig.role,
+        'ra': trig.ra,
+        'dec': trig.dec,
+        'ra_hms': trig.ra_hms,
+        'dec_dms': trig.dec_dms,
+        'pos_error': trig.err,
+        'ignored': trig.ignore,
+        'source_name': trig.source_name,
+        'source_type': trig.source_type,
+        'event_observed': trig.event_observed,
+        'fermi_most_likely_index': trig.fermi_most_likely_index,
+        'fermi_detection_prob': trig.fermi_detection_prob,
+        'swift_rate_signif': trig.swift_rate_signif,
+        'hess_significance': trig.hess_significance,
+        'antares_ranking': trig.antares_ranking,
+        'lvc_false_alarm_rate': trig.lvc_false_alarm_rate,
         'lvc_binary_neutron_star_probability': trig.lvc_binary_neutron_star_probability,
         'lvc_neutron_star_black_hole_probability': trig.lvc_neutron_star_black_hole_probability,
-        'lvc_binary_black_hole_probability' : trig.lvc_binary_black_hole_probability,
-        'lvc_terrestial_probability' : trig.lvc_terrestial_probability,
-        'lvc_includes_neutron_star_probability' : trig.lvc_includes_neutron_star_probability,
-        'lvc_skymap_fits' : trig.lvc_skymap_fits
+        'lvc_binary_black_hole_probability': trig.lvc_binary_black_hole_probability,
+        'lvc_terrestial_probability': trig.lvc_terrestial_probability,
+        'lvc_includes_neutron_star_probability': trig.lvc_includes_neutron_star_probability,
+        'lvc_skymap_fits': trig.lvc_skymap_fits
     }
 
     if trig.lvc_skymap_file:
-        data['lvc_skymap_file'] = ContentFile(trig.lvc_skymap_file, f'{trig.trig_id}_skymap.fits')
+        data['lvc_skymap_file'] = ContentFile(
+            trig.lvc_skymap_file, f'{trig.trig_id}_skymap.fits')
 
     logger.info(f'New event data {data}')
 
@@ -580,23 +613,27 @@ def parse_and_save_xml(xml):
         logger.info(f'Successfully saved event {new_event}')
         return new_event
 
+
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def event_create(request):
-    logger.info('Request to create an event received', extra={'event_create': True})
+    logger.info('Request to create an event received',
+                extra={'event_create': True})
     logger.info(f'request.data:{request.data}')
     xml_string = request.data['xml_packet']
     new_event = parse_and_save_xml(xml_string)
 
     if new_event:
         logger.info('Event created response given to user')
-        logger.info('Request to create an event received', extra={'event_create_finished': True})
+        logger.info('Request to create an event received',
+                    extra={'event_create_finished': True})
         return Response(new_event.data, status=status.HTTP_201_CREATED)
     else:
         logger.debug(request.data)
-        logger.info('Request to create an event received', extra={'event_create_finished': True})
+        logger.info('Request to create an event received',
+                    extra={'event_create_finished': True})
         return Response(new_event.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -618,7 +655,7 @@ def proposal_form(request, id=None):
             return redirect(proposal_decision_path, id=saved.id)
     else:
         form = forms.ProjectSettingsForm(instance=proposal)
-    return render(request, 'trigger_app/proposal_form.html', {'form':form, "src_tele": src_tele, "title":title})
+    return render(request, 'trigger_app/proposal_form.html', {'form': form, "src_tele": src_tele, "title": title})
 
 
 @login_required
@@ -645,7 +682,8 @@ def cancel_atca_observation(request, id=None):
     decision_reason_log = obs.proposal_decision_id.decision_reason
 
     # Create the cancel request
-    rapidObj = { 'requestDict': { 'cancel': obs.obsid, 'project': proposal_settings.project_id.id } }
+    rapidObj = {'requestDict': {'cancel': obs.obsid,
+                                'project': proposal_settings.project_id.id}}
     rapidObj["authenticationToken"] = proposal_settings.project_id.password
     rapidObj["email"] = proposal_settings.project_id.atca_email
 

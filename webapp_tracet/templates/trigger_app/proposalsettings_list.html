@@ -9,6 +9,7 @@
     <tr>
       <th>ID</th>
       <th>Proposal ID</th>
+      <th>Priority</th>
       <th>Source Type</th>
       <th>Event Telescope</th>
       <th>Project ID</th>
@@ -34,6 +35,7 @@
     <tr>
       <td><a href='/proposal_edit/{{ object.id }}/' style="text-decoration:None">{{ object.id }}</a></td>
       <td>{{ object.proposal_id }}</td>
+      <td>{{ object.priority }}</td>
       <td>{{ object.source_type }}</td>
       <td>{% if object.event_telescope is None %} All {% else %} {{ object.event_telescope }} {% endif %}</td>
       <td>{{ object.project_id }}</td>
@@ -64,6 +66,7 @@
     <tr>
       <th>ID</th>
       <th>Proposal ID</th>
+      <th>Priority</th>
       <th>Source Type</th>
       <th>Event Telescope</th>
       <th>Project ID</th>
@@ -91,6 +94,7 @@
     <tr>
       <td><a href='/proposal_edit/{{ object.id }}/' style="text-decoration:None">{{ object.id }}</a></td>
       <td>{{ object.proposal_id }}</td>
+      <td>{{ object.priority }}</td>
       <td>{{ object.source_type }}</td>
       <td>{% if object.event_telescope is None %} All {% else %} {{ object.event_telescope }} {% endif %}</td>
       <td>{{ object.project_id }}</td>
@@ -123,6 +127,7 @@
     <tr>
       <th>ID</th>
       <th>Proposal ID</th>
+      <th>Priority</th>
       <th>Source Type</th>
       <th>Event Telescope</th>
       <th>Project ID</th>
@@ -134,7 +139,7 @@
       <th>Pending Duration range 2 (s)</th>
       <th>Minimum Fermi Probability</th>
       <th>Minimum SWIFT Rate Significance</th>
-      <th>Repointing Limit</th
+      <th>Repointing Limit</th>
       <th>Horizon Limit</th>
     </tr>
     </thead>
@@ -145,6 +150,7 @@
     <tr>
       <td><a href='/proposal_edit/{{ object.id }}/' style="text-decoration:None">{{ object.id }}</a></td>
       <td>{{ object.proposal_id }}</td>
+      <td>{{ object.priority }}</td>
       <td>{{ object.source_type }}</td>
       <td>{% if object.event_telescope is None %} All {% else %} {{ object.event_telescope }} {% endif %}</td>
       <td>{{ object.project_id }}</td>
