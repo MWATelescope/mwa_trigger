@@ -1,0 +1,130 @@
+<VOEvent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    ivorn="ivo://nasa.gsfc.gcn/SWIFT#BAT_Lightcurve_1156572-752" role="observation" version="2.0"
+    xsi:schemaLocation="http://www.ivoa.net/xml/VOEvent/v2.0 http://www.ivoa.net/xml/VOEvent/VOEvent-v2.0.xsd">
+    <Who>
+        <AuthorIVORN>ivo://nasa.gsfc.tan/gcn</AuthorIVORN>
+        <Author>
+            <shortName>VO-GCN</shortName>
+            <contactName>Scott Barthelmy</contactName>
+            <contactPhone>+1-301-286-3106</contactPhone>
+            <contactEmail>scott.barthelmy@nasa.gov</contactEmail>
+        </Author>
+        <Date>2023-02-28T05:54:36</Date>
+        <Description>This VOEvent message was created with GCN VOE version: 15.08 17jun22</Description>
+    </Who>
+    <What>
+        <Param name="Packet_Type" value="63" />
+        <Param name="Pkt_Ser_Num" value="7" />
+        <Param name="TrigID" value="1156572" ucd="meta.id" />
+        <Param name="Segment_Num" value="0" ucd="meta.id.part" />
+        <Param name="Burst_TJD" value="20003" unit="days" ucd="time" />
+        <Param name="Burst_SOD" value="21050.25" unit="sec" ucd="time" />
+        <Param name="Delta_Time" value="51.000" unit="sec" ucd="time.interval" />
+        <Param name="Integ_Time" value="1.024" unit="sec" ucd="time.interval" />
+        <Param name="Phi" value="177.68" unit="deg" ucd="pos.az.azi" />
+        <Param name="Theta" value="30.83" unit="deg" ucd="pos.az.zd" />
+        <Param name="Trig_Index" value="146" />
+        <Param name="Soln_Status" value="0x3" />
+        <Param name="Misc_flags" value="0x1800000" />
+        <Param name="SC_Long" value="91.38" unit="deg" ucd="pos.earth.lon" />
+        <Param name="SC_Lat" value="8.91" unit="deg" ucd="pos.earth.lat" />
+        <Group name="Solution_Status">
+            <Param name="Point_Source" value="true" />
+            <Param name="GRB_Identified" value="true" />
+            <Param name="Target_of_Interest" value="false" />
+            <Param name="Target_Imag_Trig" value="false" />
+            <Param name="Target_Rate_Trig" value="true" />
+            <Param name="Def_NOT_a_GRB" value="false" />
+            <Param name="Hi_Bkg_Level" value="false" />
+            <Param name="Neg_Bkg_Slope" value="false" />
+            <Param name="Lo_Image_Signif" value="false" />
+            <Param name="VERY_Lo_Image_Signif" value="false" />
+            <Param name="Target_in_Flt_Catalog" value="false" />
+            <Param name="Target_in_Gnd_Catalog" value="false" />
+            <Param name="Target_in_Blk_Catalog" value="false" />
+            <Param name="StarTrack_Lost_Lock" value="false" />
+            <Param name="Near_Bright_Star" value="false" />
+            <Param name="Src_Removed_from_OnBoard" value="false" />
+        </Group>
+        <Group name="Misc_Flags">
+            <Param name="Values_Out_of_Range" value="false" />
+            <Param name="Near_Bright_Star" value="false" />
+            <Param name="Err_Circle_in_Galaxy" value="false" />
+            <Param name="Galaxy_in_Err_Circle" value="false" />
+            <Param name="TOO_Generated" value="false" />
+            <Param name="Contains_Extended_Pkts" value="true" />
+            <Param name="Soln_Status_fr_BAT_POS" value="true" />
+            <Param name="Missing_3rd_of_3_pkts" value="false" />
+            <Param name="Missing_2nd_of_3_pkts" value="false" />
+            <Param name="Missing_1st_of_3_pkts" value="false" />
+            <Param name="Flt_Generated" value="true" />
+            <Param name="Gnd_Generated" value="false" />
+            <Param name="WatchDog_Forced_Out" value="false" />
+            <Param name="CRC_Error" value="false" />
+        </Group>
+        <Param name="Lightcurve_Link"
+            value="http://gcn.gsfc.nasa.gov/gcn/notices_s/sw001156572000msb.fits" ucd="meta.ref.url" />
+        <Param name="Lightcurve_Link_Jpeg"
+            value="http://gcn.gsfc.nasa.gov/gcn/notices_s/sw001156572000msb.jpeg" ucd="meta.ref.url" />
+        <Param name="Coords_Type" value="1" unit="dn" />
+        <Param name="Coords_String" value="source_object" />
+        <Group name="Obs_Support_Info">
+            <Description>The Sun and Moon values are valid at the time the VOEvent XML message was created.</Description>
+            <Param name="Sun_RA" value="340.95" unit="deg" ucd="pos.eq.ra" />
+            <Param name="Sun_Dec" value="-8.05" unit="deg" ucd="pos.eq.dec" />
+            <Param name="Sun_Distance" value="62.70" unit="deg" ucd="pos.angDistance" />
+            <Param name="Sun_Hr_Angle" value="-2.52" unit="hr" />
+            <Param name="Moon_RA" value="78.36" unit="deg" ucd="pos.eq.ra" />
+            <Param name="Moon_Dec" value="26.53" unit="deg" ucd="pos.eq.dec" />
+            <Param name="MOON_Distance" value="50.52" unit="deg" ucd="pos.angDistance" />
+            <Param name="Moon_Illum" value="59.05" unit="%" ucd="arith.ratio" />
+            <Param name="Galactic_Long" value="127.09" unit="deg" ucd="pos.galactic.lon" />
+            <Param name="Galactic_Lat" value="-18.20" unit="deg" ucd="pos.galactic.lat" />
+            <Param name="Ecliptic_Long" value="35.64" unit="deg" ucd="pos.ecliptic.lon" />
+            <Param name="Ecliptic_Lat" value="33.60" unit="deg" ucd="pos.ecliptic.lat" />
+        </Group>
+        <Description>The gamma-ray lightcurve from a Swift-BAT transient. In the url, the jpeg can be replaced with gif,pdf,ps.</Description>
+    </What>
+    <WhereWhen>
+        <ObsDataLocation>
+            <ObservatoryLocation id="GEOLUN" />
+            <ObservationLocation>
+                <AstroCoordSystem id="UTC-FK5-GEO" />
+                <AstroCoords coord_system_id="UTC-FK5-GEO">
+                    <Time unit="s">
+                        <TimeInstant>
+                            <ISOTime>2023-02-28T05:50:50.25</ISOTime>
+                        </TimeInstant>
+                    </Time>
+                    <Position2D unit="deg">
+                        <Name1>RA</Name1>
+                        <Name2>Dec</Name2>
+                        <Value2>
+                            <C1>18.4033</C1>
+                            <C2>44.4885</C2>
+                        </Value2>
+                        <Error2Radius>0.0000</Error2Radius>
+                    </Position2D>
+                </AstroCoords>
+            </ObservationLocation>
+        </ObsDataLocation>
+        <Description>The RA,Dec coordinates are of the type: source_object.</Description>
+    </WhereWhen>
+    <How>
+        <Description>Swift Satellite, BAT Instrument</Description>
+        <Reference uri="http://gcn.gsfc.nasa.gov/swift.html" type="url" />
+    </How>
+    <Why importance="0.90">
+        <Inference probability="0.90">
+            <Name>GRB 230228</Name>
+            <Concept>process.variation.burst;em.gamma</Concept>
+        </Inference>
+    </Why>
+    <Citations>
+        <EventIVORN cite="followup">ivo://nasa.gsfc.gcn/SWIFT#BAT_GRB_Pos_1156572-727</EventIVORN>
+        <Description>This is the BAT lightcurve for the original trigger.</Description>
+    </Citations>
+    <Description>
+  </Description>
+    <original_prefix>voe</original_prefix>
+</VOEvent>
