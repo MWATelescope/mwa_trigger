@@ -356,7 +356,7 @@ def proposal_worth_observing(
 
             if not proj_source_bool:
                 # Proposal does not observe this type of source so update message
-                decision_reason_log = f"{decision_reason_log}{datetime.datetime.utcnow()}: Event ID {voevent.id}: This proposal does not observe {str(voevent.get_source_type_display())}s. \n"
+                decision_reason_log = f"{decision_reason_log}{datetime.datetime.utcnow()}: Event ID {voevent.id}: This proposal does not observe {voevent.get_source_type_display}s. \n"
         else:
             # Proposal does not observe event from this telescope so update message
             decision_reason_log = f"{decision_reason_log}{datetime.datetime.utcnow()}: Event ID {voevent.id}: This proposal does not trigger on events from {voevent.telescope}. \n"

@@ -11,6 +11,7 @@ from django.core.paginator import Paginator, InvalidPage
 import django_filters
 from django.forms import DateTimeInput, Select
 from django.core.files.base import ContentFile
+from itertools import chain
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -201,31 +202,43 @@ def grab_decisions_for_event_groups(event_groups):
 
 
 class EventGroupFilter(django_filters.FilterSet):
+    telescope = django_filters.ChoiceFilter(
+        field_name='telescope',
+        choices=(
+            ('SWIFT', 'SWIFT'),
+            ('Fermi', 'Fermi'),
+            ('LVC', 'LVC')
+        ),
+        method='filter_telescope')
+
+    def filter_telescope(self, queryset, name, value):
+        # construct the full lookup expression.
+        return queryset.filter(voevent__telescope=value)
+
     class Meta:
         model = models.EventGroup
-        fields = '__all__'
+        fields = ['ignored', 'source_type', 'telescope']
 
 
 def EventGroupList(request):
     # Apply filters
     f = EventGroupFilter(request.GET, queryset=models.EventGroup.objects.all())
-    event_group_ids = f.qs
+    eventgroups = f.qs
 
     prop_settings = models.ProposalSettings.objects.all()
-
     # Paginate
     page = request.GET.get('page', 1)
     # zip the trigger event and the tevent_telescope_list together so I can loop over both in the html
-    paginator = Paginator(event_group_ids, 100)
+    paginator = Paginator(eventgroups, 100)
     try:
         event_group_ids_paged = paginator.page(page)
     except InvalidPage:
         event_group_ids_paged = paginator.page(1)
 
-    recent_triggers_info, page_obj = grab_decisions_for_event_groups(
+    recent_triggers_info, _ = grab_decisions_for_event_groups(
         event_group_ids_paged)
 
-    return render(request, 'trigger_app/event_group_list.html', {'filter': f, 'page_obj': page_obj, "trigger_info": recent_triggers_info, 'settings': prop_settings})
+    return render(request, 'trigger_app/event_group_list.html', {'filter': f, "trigger_info": recent_triggers_info, 'settings': prop_settings})
 
 
 class CometLogList(ListView):
@@ -379,6 +392,7 @@ def ProposalDecision_details(request, id):
     event_types = " \n".join(list(set(event_types)))
 
     observations = models.Observations.objects.filter(proposal_decision_id=id)
+    poserr_unit = request.GET.get('poserr_unit', 'deg')
 
     content = {
         'prop_dec': prop_dec,
@@ -386,6 +400,7 @@ def ProposalDecision_details(request, id):
         'events': events,
         'event_types': event_types,
         'obs': observations,
+        'poserr_unit': poserr_unit,
     }
     return render(request, 'trigger_app/proposal_decision_details.html', content)
 
