@@ -21,12 +21,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'www.mwa-trigger.duckdns.org', 'mwa-trigger.duckdns.org', 'www.tracet.duckdns.org', 'tracet.duckdns.org', '146.118.70.58']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'www.mwa-trigger.duckdns.org',
+                 'mwa-trigger.duckdns.org', 'www.tracet.duckdns.org', 'tracet.duckdns.org', '146.118.70.58']
 
 # Remote broadcasters we subscribe to for VOEvents
-VOEVENT_REMOTES = ["voevent.4pisky.org","voevent.dc3.com"]#, "chimefrb.physics.mcgill.ca"]
+# , "chimefrb.physics.mcgill.ca"]
+VOEVENT_REMOTES = ["voevent.4pisky.org", "voevent.dc3.com"]
 # TCP connectiong we are whitelisting with to recieve VOEvents
-VOEVENT_TCP = ["196.44.140.214/32","68.169.57.253","50.116.49.68"]
+VOEVENT_TCP = ["196.44.140.214/32", "68.169.57.253", "50.116.49.68"]
 
 
 # Application definition
@@ -204,7 +206,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '{thread:d} {asctime} {url} {message}',
+            'format': '{thread:d} {asctime} \n{message}\n',
             'style': '{',
         },
     },
@@ -217,6 +219,7 @@ LOGGING = {
         'debug-file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
+            'formatter': 'verbose',
             'filename': os.path.join(BASE_DIR, 'logs/debug.log'),
         },
         'event_create-file': {

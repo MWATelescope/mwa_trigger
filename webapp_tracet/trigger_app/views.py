@@ -235,10 +235,10 @@ def EventGroupList(request):
     except InvalidPage:
         event_group_ids_paged = paginator.page(1)
 
-    recent_triggers_info, _ = grab_decisions_for_event_groups(
+    recent_triggers_info, page_obj = grab_decisions_for_event_groups(
         event_group_ids_paged)
 
-    return render(request, 'trigger_app/event_group_list.html', {'filter': f, "trigger_info": recent_triggers_info, 'settings': prop_settings})
+    return render(request, 'trigger_app/event_group_list.html', {'filter': f, "trigger_info": recent_triggers_info, "settings": prop_settings, "page_obj": page_obj})
 
 
 class CometLogList(ListView):
