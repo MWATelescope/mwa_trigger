@@ -1,5 +1,8 @@
 from django.test import TestCase
 from unittest.mock import patch
+import pytest
+
+import requests
 
 from .models import EventGroup, Event, PossibleEventAssociation, ProposalDecision, Observations
 from yaml import load, Loader, safe_load
@@ -220,6 +223,56 @@ class test_grb_group_03(TestCase):
             f"\n\ntest_grb_group_02 ATCA proposal decison:\n{ProposalDecision.objects.filter(proposal__telescope__name='ATCA').first().decision_reason}\n\n")
         self.assertEqual(ProposalDecision.objects.filter(
             proposal__telescope__name='ATCA').first().decision, 'T')
+
+
+class test_grb_observation_fail(TestCase):
+    """Tests ignored observations during an event
+    """
+    # Load default fixtures
+    fixtures = [
+        "default_data.yaml",
+        "trigger_app/test_yamls/atca_grb_proposal_settings.yaml",
+        "trigger_app/test_yamls/mwa_grb_proposal_settings.yaml",
+        "trigger_app/test_yamls/mwa_short_grb_proposal_settings.yaml",
+    ]
+
+    with open('trigger_app/test_yamls/trigger_mwa_test.yaml', 'r') as file:
+        trigger_mwa_test = safe_load(file)
+
+    with open('trigger_app/test_yamls/atca_test_api_response.yaml', 'r') as file:
+        atca_test_api_response = safe_load(file)
+
+    @patch('trigger_app.telescope_observe.trigger_mwa', return_value=trigger_mwa_test)
+    @patch('atca_rapid_response_api.api.send', return_value=atca_test_api_response)
+    def setUp(self, fake_atca_api, fake_mwa_api):
+        fake_atca_api.side_effect = requests.exceptions.ConnectionError()
+        fake_mwa_api.side_effect = requests.exceptions.ConnectionError()
+        xml_paths = [
+            "../tests/test_events/SWIFT_BAT_Lightcurve.xml",
+            "../tests/test_events/SWIFT_BAT_POS.xml"
+        ]
+
+        # Setup current RA and Dec at zenith for the MWA
+        MWA = EarthLocation(lat='-26:42:11.95',
+                            lon='116:40:14.93', height=377.8 * u.m)
+        mwa_coord = coord = SkyCoord(az=0., alt=90., unit=(
+            u.deg, u.deg), frame='altaz', obstime=Time.now(), location=MWA)
+        ra_dec = mwa_coord.icrs
+
+        # Parse and upload the xml file group
+        for xml in xml_paths:
+            trig = parsed_VOEvent(xml)
+            try:
+                create_voevent_wrapper(trig, ra_dec)
+            except ConnectionError as err:
+                self.assertTrue(err.__contains__("ConnectionError"))
+            except:
+                print("Request error")
+
+    def test_trigger_groups(self):
+        # Check there are three Events that were grouped as one by the trigger ID
+        self.assertEqual(len(Event.objects.all()), 2)
+        self.assertEqual(len(EventGroup.objects.all()), 1)
 
 
 class test_nu(TestCase):
