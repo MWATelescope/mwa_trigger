@@ -2,4 +2,5 @@ astropy
 astropy_healpix
 numpy
 Comet
+pytest
 git+https://github.com/ste616/atca-rapid-response-api.git#subdirectory=python

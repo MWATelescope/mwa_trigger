@@ -57,7 +57,7 @@
       <td scope="row">
         {% if event_group.source_type == "FS" %}
           {{ source_name }}
-        {% else %}
+        {% elif event_group.source_type %}
           {{ event_group.source_type }}{{ event_group.earliest_event_observed|date:"ymd" }}
         {% endif %}
       </td>
