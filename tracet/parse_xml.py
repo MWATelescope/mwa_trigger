@@ -17,23 +17,24 @@ logger = logging.getLogger(__name__)
 
 # A dictionary of the telescopes each source type can be detected by
 SOURCE_TELESCOPES = {
-    "GRB":[
+    "GRB": [
         "SWIFT",
         "Fermi",
         "HESS",
     ],
-    "FS":[
+    "FS": [
         "SWIFT",
         "MAXI",
     ],
-    "GW":[
+    "GW": [
         "LVC",
     ],
-    "NU":[
+    "NU": [
         "Antares",
         "AMON",
     ],
 }
+
 
 def get_telescope(ivorn):
     """Check ivorn for the telescope name
@@ -117,7 +118,8 @@ def get_event_type(ivorn):
 def load_swift_source_database():
     """Load the SWIFT source database file within the repo into a pandas dataframe.
     """
-    df = pd.read_table(data_load.SWIFT_FLARE_STAR_NAMES, sep='|', header=0, comment="+", skiprows=41, usecols=list(range(1,15)), skipinitialspace=True)
+    df = pd.read_table(data_load.SWIFT_FLARE_STAR_NAMES, sep='|', header=0,
+                       comment="+", skiprows=41, usecols=list(range(1, 15)), skipinitialspace=True)
     df = df[df['ROW'] != 'ROW']
     return df
 
@@ -141,17 +143,18 @@ def get_source_types(telescope, event_type, source_name, v):
     source_type : `str`
         Source typre of the event (GRB, FS, NU or GW).
     """
-    #Check for Gravitational Waves
+    # Check for Gravitational Waves
     if telescope in SOURCE_TELESCOPES["GW"]:
         return "GW"
 
     # Check for neutrinos
-    if telescope == "Antares" or ( telescope == "AMON" and "ICECUBE" in event_type ):
+    if telescope == "Antares" or (telescope == "AMON" and "ICECUBE" in event_type):
         return "NU"
 
     # Check for Flare Stars
     maxi_data_file = data_load.MAXI_FLARE_STAR_NAMES
-    maxi_flare_stars = [a.strip().lower() for a in open(maxi_data_file, 'r').readlines() if not a.startswith("#")]
+    maxi_flare_stars = [a.strip().lower() for a in open(
+        maxi_data_file, 'r').readlines() if not a.startswith("#")]
     swift_df = load_swift_source_database()
     swift_flare_stars = list(swift_df[swift_df['SRC_TYPE'] == '11']["NAME"])
     flare_stars = maxi_flare_stars + swift_flare_stars
@@ -163,7 +166,7 @@ def get_source_types(telescope, event_type, source_name, v):
         for f in flare_stars:
             # Check if the name is within the "name" string since MAXI does stupid things sometimes
             if f in str(source_name).lower():
-                flare_star =True
+                flare_star = True
     if flare_star:
         return "FS"
 
@@ -182,10 +185,11 @@ def get_source_types(telescope, event_type, source_name, v):
             elif 'false' in grb.lower().strip():
                 grb = False
             else:
-                logger.error(f"Unrecognised value of Param[@name='GRB_Identified']: {grb}")
+                logger.error(
+                    f"Unrecognised value of Param[@name='GRB_Identified']: {grb}")
                 grb = False
     elif telescope == "Fermi":
-        #grb = False   # Ignore all Fermi triggers
+        # grb = False   # Ignore all Fermi triggers
         grb = True
         # I could put the most likely index here but it's easier to log in the trigger logic
     elif telescope == "HESS":
@@ -217,9 +221,12 @@ def get_position_info(v):
         A tuple of (ra, dec, err) where ra,dec are the coordinates in J2000 and err is the error radius in deg.
     """
     try:
-        ra  = float(v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Position2D.Value2.C1)
-        dec = float(v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Position2D.Value2.C2)
-        err = float(v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Position2D.Error2Radius)
+        ra = float(
+            v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Position2D.Value2.C1)
+        dec = float(
+            v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Position2D.Value2.C2)
+        err = float(
+            v.WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Position2D.Error2Radius)
     except:
         # Try old method if new one doesn't work
         try:
@@ -314,6 +321,7 @@ class parsed_VOEvent:
     lvc_skymap_file : `binary`
         Skymap file from url
     """
+
     def __init__(self, xml, packet=None, trig_pairs=None):
         self.xml = xml
         self.packet = packet
@@ -410,18 +418,22 @@ class parsed_VOEvent:
                 self.source_name = str(src.attrib['value']).strip()
 
         # Work out what type of source it is
-        self.source_type = get_source_types(self.telescope, self.event_type, self.source_name, v)
+        self.source_type = get_source_types(
+            self.telescope, self.event_type, self.source_name, v)
         logger.debug(f"source types: {self.source_type}")
 
         # Attempt to get a Trigger ID (for Fermi, SWIFT, Antares and LVC)
         if v.find(".//Param[@name='TrigID']") is not None:
-            self.trig_id = str(v.find(".//Param[@name='TrigID']").attrib["value"])
+            self.trig_id = str(
+                v.find(".//Param[@name='TrigID']").attrib["value"])
         elif v.find(".//Param[@name='AMON_ID']") is not None:
             # ICECUBE's ID
-            self.trig_id = str(v.find(".//Param[@name='AMON_ID']").attrib["value"])
+            self.trig_id = str(
+                v.find(".//Param[@name='AMON_ID']").attrib["value"])
         elif v.find(".//Param[@name='GraceID']") is not None:
             # The gracedb ID for GW
-            self.trig_id = str(v.find(".//Param[@name='GraceID']").attrib["value"])
+            self.trig_id = str(
+                v.find(".//Param[@name='GraceID']").attrib["value"])
         elif v.find(".//EventIVORN[@cite='followup']") is not None:
             # Hess has no Trigger ID so get from swift followup ivorn, if doesnt exist use autogen
             # TODO replace this with something more reliable
@@ -437,8 +449,10 @@ class parsed_VOEvent:
             self.ra_hms = None
             self.dec_dms = None
         else:
-            self.ra_hms  = str(Angle(self.ra,  unit=u.deg).to_string(unit=u.hour, sep=':'))
-            self.dec_dms = str(Angle(self.dec, unit=u.deg).to_string(unit=u.deg,  sep=':'))
+            self.ra_hms = str(
+                Angle(self.ra,  unit=u.deg).to_string(unit=u.hour, sep=':'))
+            self.dec_dms = str(
+                Angle(self.dec, unit=u.deg).to_string(unit=u.deg,  sep=':'))
         logger.debug(f"Trig position: {self.ra} {self.dec} {self.err}")
 
         # Get observed time as UTC
@@ -450,7 +464,7 @@ class parsed_VOEvent:
             self.ignore = False
         else:
             # Unknown telescope so ignoring
-            print('Unknown telescope so ignoring')
+            print(f"Unknown telescope so ignoring {this_pair}")
             self.ignore = True
             return
         # Parse trigger info (telescope dependent)
@@ -470,7 +484,8 @@ class parsed_VOEvent:
             )
         elif self.telescope == "SWIFT":
             # Check if SWIFT tracking fails
-            startrack_lost_lock = v.find(".//Param[@name='StarTrack_Lost_Lock']")
+            startrack_lost_lock = v.find(
+                ".//Param[@name='StarTrack_Lost_Lock']")
             if startrack_lost_lock is None:
                 # No 'StarTrack_Lost_Lock' in xml so assume false
                 startrack_lost_lock = False
@@ -480,7 +495,8 @@ class parsed_VOEvent:
                 startrack_lost_lock = (startrack_lost_lock.lower() == "true")
             logger.debug("StarLock OK? {0}".format(not startrack_lost_lock))
             if startrack_lost_lock:
-                logger.warning("The SWIFT star tracker lost it's lock so ignoring event")
+                logger.warning(
+                    "The SWIFT star tracker lost it's lock so ignoring event")
                 self.event_type += " SWIFT lost star tracker"
                 self.ignore = True
 
@@ -491,7 +507,8 @@ class parsed_VOEvent:
             self.sequence_num = None
             swift_rate_signif = v.find(".//Param[@name='Rate_Signif']")
             if swift_rate_signif is not None:
-                self.swift_rate_signif = float(swift_rate_signif.attrib["value"])
+                self.swift_rate_signif = float(
+                    swift_rate_signif.attrib["value"])
             grb_ident = v.find(".//Param[@name='GRB_Identified']")
             if grb_ident is not None:
                 self.grb_ident = grb_ident.attrib["value"]
@@ -499,11 +516,14 @@ class parsed_VOEvent:
         elif self.telescope == "Antares":
             self.event_duration = None
             self.sequence_num = None
-            self.antares_ranking = int(v.find(".//Param[@name='ranking']").attrib["value"])
+            self.antares_ranking = int(
+                v.find(".//Param[@name='ranking']").attrib["value"])
 
         elif self.telescope == "HESS":
-            self.event_duration = float(v.find(".//Param[@name='observation_duration']").attrib["value"])
-            self.hess_significance = float(v.find(".//Param[@name='significance']").attrib["value"])
+            self.event_duration = float(
+                v.find(".//Param[@name='observation_duration']").attrib["value"])
+            self.hess_significance = float(
+                v.find(".//Param[@name='significance']").attrib["value"])
 
         elif self.telescope == "LVC":
             self.event_duration = None
@@ -512,26 +532,34 @@ class parsed_VOEvent:
 
             if self.event_type == 'EarlyWarning' or self.event_type == 'Preliminary' or self.event_type == 'Initial' or self.event_type == 'Update':
                 # Capture Probabilities of observations for proposals and analysis
-                self.lvc_includes_neutron_star_probability = float(v.find(".//Param[@name='HasNS']").attrib["value"])
-                self.lvc_false_alarm_rate = float(v.find(".//Param[@name='FAR']").attrib["value"])
+                self.lvc_includes_neutron_star_probability = float(
+                    v.find(".//Param[@name='HasNS']").attrib["value"])
+                self.lvc_false_alarm_rate = float(
+                    v.find(".//Param[@name='FAR']").attrib["value"])
                 # Not yet live
                 # self.lvc_significance = str(v.find(".//Param[@name='significance']").attrib["value"])
-                self.lvc_event_url = str(v.find(".//Param[@name='EventPage']").attrib["value"])
+                self.lvc_event_url = str(
+                    v.find(".//Param[@name='EventPage']").attrib["value"])
 
-                self.lvc_binary_neutron_star_probability = float(v.find(".//Param[@name='BNS']").attrib["value"])
-                self.lvc_neutron_star_black_hole_probability = float(v.find(".//Param[@name='NSBH']").attrib["value"])
-                self.lvc_binary_black_hole_probability = float(v.find(".//Param[@name='BBH']").attrib["value"])
-                self.lvc_terrestial_probability = float(v.find(".//Param[@name='Terrestrial']").attrib["value"])
+                self.lvc_binary_neutron_star_probability = float(
+                    v.find(".//Param[@name='BNS']").attrib["value"])
+                self.lvc_neutron_star_black_hole_probability = float(
+                    v.find(".//Param[@name='NSBH']").attrib["value"])
+                self.lvc_binary_black_hole_probability = float(
+                    v.find(".//Param[@name='BBH']").attrib["value"])
+                self.lvc_terrestial_probability = float(
+                    v.find(".//Param[@name='Terrestrial']").attrib["value"])
 
             if self.event_type == 'Initial' or self.event_type == 'Update':
                 logger.info("Parsing skymap")
                 # Initial and Update alerts should contain skymap data as URL
-                self.lvc_skymap_fits = str(v.find(".//Param[@name='skymap_fits']").attrib["value"])
+                self.lvc_skymap_fits = str(
+                    v.find(".//Param[@name='skymap_fits']").attrib["value"])
 
-                url =  self.lvc_skymap_fits
+                url = self.lvc_skymap_fits
                 with urllib.request.urlopen(url) as response:
                     body = response.read()
-                
+
                 self.lvc_skymap_file = body
 
                 with open("skymap.fits", mode="wb") as skymap_file:
@@ -539,8 +567,9 @@ class parsed_VOEvent:
 
                 skymap = Table.read("skymap.fits")
                 i = np.argmax(skymap['PROBDENSITY'])
-                self.lvc_prob_density_tile = float(skymap[i]['PROBDENSITY'] * (np.pi / 180)**2)
-                
+                self.lvc_prob_density_tile = float(
+                    skymap[i]['PROBDENSITY'] * (np.pi / 180)**2)
+
                 uniq = skymap[i]['UNIQ']
                 level, ipix = ah.uniq_to_level_ipix(uniq)
                 nside = ah.level_to_nside(level)
@@ -551,15 +580,17 @@ class parsed_VOEvent:
                 self.ra = float(ra.deg)
                 self.dec = float(dec.deg)
 
-                self.ra_hms  = str(Angle(self.ra,  unit=u.deg).to_string(unit=u.hour, sep=':'))
-                self.dec_dms = str(Angle(self.dec,  unit=u.deg).to_string(unit=u.deg, sep=':'))
+                self.ra_hms = str(
+                    Angle(self.ra,  unit=u.deg).to_string(unit=u.hour, sep=':'))
+                self.dec_dms = str(
+                    Angle(self.dec,  unit=u.deg).to_string(unit=u.deg, sep=':'))
 
                 os.remove("skymap.fits")
 
             if self.event_type == 'Retraction':
                 # Capture message that comes with retraction
                 self.lvc_retraction_message = str(v.Citations.Description)
-        
+
         # Check the voevent role (normally observation or test)
         self.role = v.attrib["role"]
         if self.role == "test":
@@ -567,16 +598,15 @@ class parsed_VOEvent:
             self.ignore = True
             print('Just a test observation so ignore it')
 
-               # Antares has a flag for real alerts that is worth checking
+            # Antares has a flag for real alerts that is worth checking
         if v.find(".//Param[@name='isRealAlert']") is not None:
             if not v.find(".//Param[@name='isRealAlert']").attrib["value"]:
                 # Not a real alert so ignore
                 self.ignore = True
                 print('Not a real alert so ignore')
-          
+
         logger.debug("Trig details:")
         logger.debug(f"Dur:  {self.event_duration} s")
         logger.debug(f"ID:   {self.trig_id}")
         logger.debug(f"Seq#: {self.sequence_num}")
         logger.debug(f"Type: {self.event_type}")
-

@@ -12,11 +12,11 @@ from astropy.time import Time
 
 def create_voevent_wrapper(trig, ra_dec, dec_alter=True):
     if dec_alter:
-        dec=ra_dec.dec.deg
-        dec_dms=ra_dec.dec.to_string(unit=u.deg, sep=':')
+        dec = ra_dec.dec.deg
+        dec_dms = ra_dec.dec.to_string(unit=u.deg, sep=':')
     else:
-        dec=trig.dec
-        dec_dms=trig.dec_dms
+        dec = trig.dec
+        dec_dms = trig.dec_dms
     # Checks for no event observed
     if trig.event_observed is None:
         event_observed = None
@@ -66,7 +66,7 @@ class test_grb_group_01(TestCase):
     @patch('trigger_app.telescope_observe.trigger_mwa', return_value=trigger_mwa_test)
     @patch('atca_rapid_response_api.api.send', return_value=atca_test_api_response)
     def setUp(self, fake_atca_api, fake_mwa_api):
-        
+
         xml_paths = [
             "../tests/test_events/group_01_01_Fermi.xml",
             "../tests/test_events/group_01_02_Fermi.xml",
@@ -74,8 +74,10 @@ class test_grb_group_01(TestCase):
         ]
 
         # Setup current RA and Dec at zenith for the MWA
-        MWA = EarthLocation(lat='-26:42:11.95', lon='116:40:14.93', height=377.8 * u.m)
-        mwa_coord = coord = SkyCoord(az=0., alt=90., unit=(u.deg, u.deg), frame='altaz', obstime=Time.now(), location=MWA)
+        MWA = EarthLocation(lat='-26:42:11.95',
+                            lon='116:40:14.93', height=377.8 * u.m)
+        mwa_coord = coord = SkyCoord(az=0., alt=90., unit=(
+            u.deg, u.deg), frame='altaz', obstime=Time.now(), location=MWA)
         ra_dec = mwa_coord.icrs
 
         # Parse and upload the xml file group
@@ -83,19 +85,22 @@ class test_grb_group_01(TestCase):
             trig = parsed_VOEvent(xml)
             create_voevent_wrapper(trig, ra_dec)
 
-
     def test_possible_event_association(self):
         # Check there are three Events that were grouped as one PossibleEventAssociation
         self.assertEqual(len(Event.objects.all()), 3)
         self.assertEqual(len(PossibleEventAssociation.objects.all()), 1)
 
     def test_mwa_proposal_decision(self):
-        print(f"\n\ntest_grb_group_01 MWA proposal decison:\n{ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision_reason}\n\n")
-        self.assertEqual(ProposalDecision.objects.all().filter(proposal__telescope__name='MWA_VCS').first().decision, 'T')
-    
+        print(
+            f"\n\ntest_grb_group_01 MWA proposal decison:\n{ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision_reason}\n\n")
+        self.assertEqual(ProposalDecision.objects.all().filter(
+            proposal__telescope__name='MWA_VCS').first().decision, 'T')
+
     def test_atca_proposal_decision(self):
-        print(f"\n\ntest_grb_group_01 ATCA proposal decison:\n{ProposalDecision.objects.all().filter(proposal__telescope__name='ATCA').first().decision_reason}\n\n")
-        self.assertEqual(ProposalDecision.objects.all().filter(proposal__telescope__name='ATCA').first().decision, 'T')
+        print(
+            f"\n\ntest_grb_group_01 ATCA proposal decison:\n{ProposalDecision.objects.all().filter(proposal__telescope__name='ATCA').first().decision_reason}\n\n")
+        self.assertEqual(ProposalDecision.objects.all().filter(
+            proposal__telescope__name='ATCA').first().decision, 'T')
 
 
 class test_grb_group_02(TestCase):
@@ -107,7 +112,7 @@ class test_grb_group_02(TestCase):
         "trigger_app/test_yamls/mwa_grb_proposal_settings.yaml",
         "trigger_app/test_yamls/atca_grb_proposal_settings.yaml",
     ]
-    
+
     with open('trigger_app/test_yamls/trigger_mwa_test.yaml', 'r') as file:
         trigger_mwa_test = safe_load(file)
 
@@ -120,19 +125,20 @@ class test_grb_group_02(TestCase):
         xml_paths = [
             "../tests/test_events/group_02_SWIFT_01_BAT_GRB_Pos.xml",
             "../tests/test_events/group_02_SWIFT_02_XRT_Pos.xml",
-            "../tests/test_events/group_02_SWIFT_03_UVOT_Pos.xml"
+            "../tests/test_events/group_02_SWIFT_03_UVOT_Pos.xml",
         ]
 
         # Setup current RA and Dec at zenith for the MWA
-        MWA = EarthLocation(lat='-26:42:11.95', lon='116:40:14.93', height=377.8 * u.m)
-        mwa_coord = coord = SkyCoord(az=0., alt=90., unit=(u.deg, u.deg), frame='altaz', obstime=Time.now(), location=MWA)
+        MWA = EarthLocation(lat='-26:42:11.95',
+                            lon='116:40:14.93', height=377.8 * u.m)
+        mwa_coord = coord = SkyCoord(az=0., alt=90., unit=(
+            u.deg, u.deg), frame='altaz', obstime=Time.now(), location=MWA)
         ra_dec = mwa_coord.icrs
 
         # Parse and upload the xml file group
         for xml in xml_paths:
             trig = parsed_VOEvent(xml)
             create_voevent_wrapper(trig, ra_dec)
-
 
     def test_trigger_groups(self):
         # Check there are three Events that were grouped as one by the trigger ID
@@ -141,12 +147,79 @@ class test_grb_group_02(TestCase):
 
     def test_mwa_proposal_decision(self):
         print(ProposalDecision.objects.all())
-        print(f"\n\ntest_grb_group_02 MWA proposal decison:\n{ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision_reason}\n\n")
-        self.assertEqual(ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision, 'T')
+        print(
+            f"\n\ntest_grb_group_02 MWA proposal decison:\n{ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision_reason}\n\n")
+        self.assertEqual(ProposalDecision.objects.filter(
+            proposal__telescope__name='MWA_VCS').first().decision, 'T')
 
     def test_atca_proposal_decision(self):
-        print(f"\n\ntest_grb_group_02 ATCA proposal decison:\n{ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision_reason}\n\n")
-        self.assertEqual(ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision, 'T')
+        print(
+            f"\n\ntest_grb_group_02 ATCA proposal decison:\n{ProposalDecision.objects.filter(proposal__telescope__name='ATCA').first().decision_reason}\n\n")
+        self.assertEqual(ProposalDecision.objects.filter(
+            proposal__telescope__name='ATCA').first().decision, 'T')
+
+
+class test_grb_group_03(TestCase):
+    """Tests ignored observations during an event
+    """
+    # Load default fixtures
+    fixtures = [
+        "default_data.yaml",
+        "trigger_app/test_yamls/atca_grb_proposal_settings.yaml",
+        "trigger_app/test_yamls/mwa_grb_proposal_settings.yaml",
+        "trigger_app/test_yamls/mwa_short_grb_proposal_settings.yaml",
+    ]
+
+    with open('trigger_app/test_yamls/trigger_mwa_test.yaml', 'r') as file:
+        trigger_mwa_test = safe_load(file)
+
+    with open('trigger_app/test_yamls/atca_test_api_response.yaml', 'r') as file:
+        atca_test_api_response = safe_load(file)
+
+    @patch('trigger_app.telescope_observe.trigger_mwa', return_value=trigger_mwa_test)
+    @patch('atca_rapid_response_api.api.send', return_value=atca_test_api_response)
+    def setUp(self, fake_atca_api, fake_mwa_api):
+        xml_paths = [
+            "../tests/test_events/SWIFT_BAT_Lightcurve.xml",
+            "../tests/test_events/SWIFT_BAT_POS.xml"
+        ]
+
+        # Setup current RA and Dec at zenith for the MWA
+        MWA = EarthLocation(lat='-26:42:11.95',
+                            lon='116:40:14.93', height=377.8 * u.m)
+        mwa_coord = coord = SkyCoord(az=0., alt=90., unit=(
+            u.deg, u.deg), frame='altaz', obstime=Time.now(), location=MWA)
+        ra_dec = mwa_coord.icrs
+
+        # Parse and upload the xml file group
+        for xml in xml_paths:
+            trig = parsed_VOEvent(xml)
+            create_voevent_wrapper(trig, ra_dec)
+
+    def test_trigger_groups(self):
+        # Check there are three Events that were grouped as one by the trigger ID
+        self.assertEqual(len(Event.objects.all()), 2)
+        self.assertEqual(len(EventGroup.objects.all()), 1)
+
+    def test_mwa_proposal_decision(self):
+        print(ProposalDecision.objects.all())
+        print(
+            f"\n\ntest_grb_group_03 MWA proposal decison:\n{ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision_reason}\n\n")
+        self.assertEqual(ProposalDecision.objects.filter(
+            proposal__telescope__name='MWA_VCS').first().decision, 'T')
+
+    def test_mwa_proposal_decision(self):
+        print(ProposalDecision.objects.all())
+        print(
+            f"\n\ntest_grb_group_03 MWA proposal short GRB decison:\n{ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision_reason}\n\n")
+        self.assertEqual(ProposalDecision.objects.filter(
+            proposal__telescope__name='MWA_VCS').first().decision, 'I')
+
+    def test_atca_proposal_decision(self):
+        print(
+            f"\n\ntest_grb_group_02 ATCA proposal decison:\n{ProposalDecision.objects.filter(proposal__telescope__name='ATCA').first().decision_reason}\n\n")
+        self.assertEqual(ProposalDecision.objects.filter(
+            proposal__telescope__name='ATCA').first().decision, 'T')
 
 
 class test_nu(TestCase):
@@ -174,15 +247,16 @@ class test_nu(TestCase):
         ]
 
         # Setup current RA and Dec at zenith for the MWA
-        MWA = EarthLocation(lat='-26:42:11.95', lon='116:40:14.93', height=377.8 * u.m)
-        mwa_coord = coord = SkyCoord(az=0., alt=90., unit=(u.deg, u.deg), frame='altaz', obstime=Time.now(), location=MWA)
+        MWA = EarthLocation(lat='-26:42:11.95',
+                            lon='116:40:14.93', height=377.8 * u.m)
+        mwa_coord = coord = SkyCoord(az=0., alt=90., unit=(
+            u.deg, u.deg), frame='altaz', obstime=Time.now(), location=MWA)
         ra_dec = mwa_coord.icrs
 
         # Parse and upload the xml file group
         for xml in xml_paths:
             trig = parsed_VOEvent(xml)
             create_voevent_wrapper(trig, ra_dec)
-
 
     def test_trigger_groups(self):
         # Check there are three Events that were grouped as one by the trigger ID
@@ -191,7 +265,8 @@ class test_nu(TestCase):
 
     def test_proposal_decision(self):
         # Two proposals decisions made
-        print(f"\n\ntest_nu proposal decison:\n{ProposalDecision.objects.all().first().decision_reason}\n\n")
+        print(
+            f"\n\ntest_nu proposal decison:\n{ProposalDecision.objects.all().first().decision_reason}\n\n")
         self.assertEqual(len(ProposalDecision.objects.all()), 2)
         # Both triggered
         for prop_dec in ProposalDecision.objects.all():
@@ -221,15 +296,16 @@ class test_fs(TestCase):
         ]
 
         # Setup current RA and Dec at zenith for the MWA
-        MWA = EarthLocation(lat='-26:42:11.95', lon='116:40:14.93', height=377.8 * u.m)
-        mwa_coord = coord = SkyCoord(az=0., alt=90., unit=(u.deg, u.deg), frame='altaz', obstime=Time.now(), location=MWA)
+        MWA = EarthLocation(lat='-26:42:11.95',
+                            lon='116:40:14.93', height=377.8 * u.m)
+        mwa_coord = coord = SkyCoord(az=0., alt=90., unit=(
+            u.deg, u.deg), frame='altaz', obstime=Time.now(), location=MWA)
         ra_dec = mwa_coord.icrs
 
         # Parse and upload the xml file group
         for xml in xml_paths:
             trig = parsed_VOEvent(xml)
             create_voevent_wrapper(trig, ra_dec)
-
 
     def test_trigger_groups(self):
         # Check there are three Events that were grouped as one by the trigger ID
@@ -238,7 +314,8 @@ class test_fs(TestCase):
 
     def test_proposal_decision(self):
         print(ProposalDecision.objects.all())
-        print(f"\n\ntest_fs proposal decison:\n{ProposalDecision.objects.all().first().decision_reason}\n\n")
+        print(
+            f"\n\ntest_fs proposal decison:\n{ProposalDecision.objects.all().first().decision_reason}\n\n")
         self.assertEqual(ProposalDecision.objects.all().first().decision, 'T')
 
 
@@ -253,7 +330,7 @@ class test_hess_any_dur(TestCase):
         # Hess proposal with the any duration flag that should trigger
         "trigger_app/test_yamls/mwa_hess_proposal_settings.yaml",
     ]
-    
+
     with open('trigger_app/test_yamls/trigger_mwa_test.yaml', 'r') as file:
         trigger_mwa_test = safe_load(file)
 
@@ -268,15 +345,16 @@ class test_hess_any_dur(TestCase):
         ]
 
         # Setup current RA and Dec at zenith for the MWA
-        MWA = EarthLocation(lat='-26:42:11.95', lon='116:40:14.93', height=377.8 * u.m)
-        mwa_coord = coord = SkyCoord(az=0., alt=90., unit=(u.deg, u.deg), frame='altaz', obstime=Time.now(), location=MWA)
+        MWA = EarthLocation(lat='-26:42:11.95',
+                            lon='116:40:14.93', height=377.8 * u.m)
+        mwa_coord = coord = SkyCoord(az=0., alt=90., unit=(
+            u.deg, u.deg), frame='altaz', obstime=Time.now(), location=MWA)
         ra_dec = mwa_coord.icrs
 
         # Parse and upload the xml file group
         for xml in xml_paths:
             trig = parsed_VOEvent(xml)
             create_voevent_wrapper(trig, ra_dec)
-
 
     def test_trigger_groups(self):
         # Check event was made
@@ -285,5 +363,7 @@ class test_hess_any_dur(TestCase):
 
     def test_proposal_decision(self):
         # Test only one proposal triggered
-        self.assertEqual(ProposalDecision.objects.filter(proposal__event_any_duration=True).first().decision, 'T')
-        self.assertEqual(ProposalDecision.objects.filter(proposal__event_any_duration=False).first().decision, 'I')
+        self.assertEqual(ProposalDecision.objects.filter(
+            proposal__event_any_duration=True).first().decision, 'T')
+        self.assertEqual(ProposalDecision.objects.filter(
+            proposal__event_any_duration=False).first().decision, 'I')

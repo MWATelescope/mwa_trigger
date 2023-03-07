@@ -24,7 +24,7 @@ jobs:
           pip install .
       - name: Test with pytest
         run: |
-          python setup.py pytest
+          python -m pytest
         env:
           UPLOAD_USER: NOTUSED
           UPLOAD_PASSWORD: NOTUSED

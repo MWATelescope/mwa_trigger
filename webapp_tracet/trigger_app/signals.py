@@ -89,7 +89,7 @@ def group_trigger(sender, instance, **kwargs):
                 if instance.pos_error != 0.:
                     # Don't update pos_error if zero, assume it's a null
                     prop_dec.pos_error = instance.pos_error
-                    prop_dec.decision_reason = f"{prop_dec.decision_reason}{datetime.datetime.utcnow()}: Event ID {instance.id}: Checking new Event. \n",
+                    prop_dec.decision_reason = f"{prop_dec.decision_reason}{datetime.datetime.utcnow()}: Event ID {instance.id}: Checking new Event. \n"
 
                 proposal_worth_observing(
                     prop_dec,
@@ -261,7 +261,7 @@ def proposal_worth_observing(
         f'Checking that proposal {prop_dec.proposal} is worth observing.')
     # Defaults if not worth observing
     trigger_bool = debug_bool = pending_bool = False
-    decision_reason_log = str(prop_dec.decision_reason)
+    decision_reason_log = prop_dec.decision_reason
 
     # Check if event has an accurate enough position
     if prop_dec.pos_error == 0.0:
@@ -356,7 +356,7 @@ def proposal_worth_observing(
 
             if not proj_source_bool:
                 # Proposal does not observe this type of source so update message
-                decision_reason_log = f"{decision_reason_log}{datetime.datetime.utcnow()}: Event ID {voevent.id}: This proposal does not observe {voevent.get_source_type_display}s. \n"
+                decision_reason_log = f"{decision_reason_log}{datetime.datetime.utcnow()}: Event ID {voevent.id}: This proposal does not observe {voevent.get_source_type_display()}s. \n"
         else:
             # Proposal does not observe event from this telescope so update message
             decision_reason_log = f"{decision_reason_log}{datetime.datetime.utcnow()}: Event ID {voevent.id}: This proposal does not trigger on events from {voevent.telescope}. \n"
