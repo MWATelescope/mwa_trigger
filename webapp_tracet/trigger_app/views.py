@@ -32,7 +32,10 @@ from tracet import parse_xml
 import atca_rapid_response_api as arrApi
 
 import logging
+
+logging.basicConfig()
 logger = logging.getLogger(__name__)
+logger.level = logging.Info
 
 # Create a startup signal
 

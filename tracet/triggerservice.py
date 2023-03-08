@@ -2,6 +2,9 @@
    interrupt current MWA observations as a result of an incoming trigger.
 """
 
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
+from urllib.parse import urlencode
 import base64
 import json
 import traceback
@@ -9,10 +12,6 @@ import traceback
 import logging
 
 logging.basicConfig()
-
-from urllib.parse import urlencode
-from urllib.request import Request, urlopen
-from urllib.error import HTTPError, URLError
 
 
 DEFAULTLOGGER = logging.getLogger()
@@ -79,7 +78,7 @@ def web_api(
     # Set up request
     header = {"Content-Type": "application/json",
               "Accept": "application/json",
-    }
+              }
     if (username is not None) and (password is not None):
         # Add authenticatin
         base64string = base64.b64encode(
@@ -151,7 +150,8 @@ def busy(project_id=None, obstime=None, logger=DEFAULTLOGGER):
     if project_id is not None:
         urldict["project_id"] = project_id
     else:
-        logger.error("triggering.trigger_mwa() must be passed a valid project_id")
+        logger.error(
+            "triggering.trigger_mwa() must be passed a valid project_id")
         return None
 
     if obstime is not None:
@@ -352,13 +352,15 @@ def trigger_mwa(
     if project_id is not None:
         urldict["project_id"] = project_id
     else:
-        logger.error("triggering.trigger_mwa() must be passed a valid project_id")
+        logger.error(
+            "triggering.trigger_mwa() must be passed a valid project_id")
         return None
 
     if secure_key is not None:
         postdict["secure_key"] = secure_key
     else:
-        logger.error("triggering.trigger_mwa() must be passed a valid secure_key")
+        logger.error(
+            "triggering.trigger_mwa() must be passed a valid secure_key")
         return None
 
     if group_id is not None:
@@ -488,13 +490,15 @@ def triggerbuffer(
     if project_id is not None:
         urldict["project_id"] = project_id
     else:
-        logger.error("triggering.trigger_mwa() must be passed a valid project_id")
+        logger.error(
+            "triggering.trigger_mwa() must be passed a valid project_id")
         return None
 
     if secure_key is not None:
         postdict["secure_key"] = secure_key
     else:
-        logger.error("triggering.trigger_mwa() must be passed a valid secure_key")
+        logger.error(
+            "triggering.trigger_mwa() must be passed a valid secure_key")
         return None
 
     if pretend is not None:
