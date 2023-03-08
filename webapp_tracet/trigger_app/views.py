@@ -35,7 +35,7 @@ import logging
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.level = logging.Info
+logger.level = logging.info
 
 # Create a startup signal
 
