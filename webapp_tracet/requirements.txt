@@ -52,3 +52,4 @@ tzlocal==4.2
 urllib3==1.26.9
 voevent-parse==1.0.3
 zope.interface==5.4.0
+gcn-kafka==0.3.0

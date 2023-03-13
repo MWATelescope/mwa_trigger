@@ -202,7 +202,7 @@ class ProposalSettings(models.Model):
         default=60, verbose_name="Band Exposure Time (mins)", help_text="Total exposure time of the observation cycle at this frequency band.")
     atca_max_exptime = models.IntegerField(
         default=720, verbose_name="Maximum Exposure Time (mins)", help_text="Total exposure time of all the observations combined.")
-    atca_min_exptime = models.IntegerField(default=30,  verbose_name="Minimum Exposure Time (mins)",
+    atca_min_exptime = models.IntegerField(default=30, verbose_name="Minimum Exposure Time (mins)",
                                            help_text="Minimum total exposure time of all the observations combined for the observation to be viable. If this amount of time is not available, the observation will not be scheduled.")
     atca_prioritise_source = models.BooleanField(
         default=False, verbose_name="Prioritise Source?", help_text="Prioritise time on source rather than time on calibrator.")
@@ -364,6 +364,7 @@ class Event(models.Model):
 class CometLog(models.Model):
     id = models.AutoField(primary_key=True)
     log = models.CharField(max_length=256, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
     class Meta:
         ordering = ['-id']

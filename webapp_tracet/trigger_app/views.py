@@ -9,10 +9,11 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, InvalidPage
 import django_filters
+from django_filters.views import FilterView
+
 from django.forms import DateTimeInput, Select
 from django.core.files.base import ContentFile
 from itertools import chain
-
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -35,7 +36,7 @@ import logging
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.level = logging.info
+logger.level = logging.INFO
 
 # Create a startup signal
 
@@ -244,9 +245,33 @@ def EventGroupList(request):
     return render(request, 'trigger_app/event_group_list.html', {'filter': f, "trigger_info": recent_triggers_info, "settings": prop_settings, "page_obj": page_obj})
 
 
-class CometLogList(ListView):
-    model = models.CometLog
-    paginate_by = 100
+class CometLogFilter(django_filters.FilterSet):
+    created_filter = django_filters.DateTimeFilter(
+        field_name='created_at', lookup_expr='lte', widget=DateTimeInput(attrs={'type': 'datetime-local'}))
+
+    class Meta:
+        model = models.CometLog
+        fields = {
+            'created_at',
+        }
+
+
+def comet_log(request):
+    f = CometLogFilter(request.GET, queryset=models.CometLog.objects.all())
+    logs = f.qs
+
+    # Paginate
+    page = request.GET.get('page', 1)
+    paginator = Paginator(logs, 100)
+    try:
+        logs = paginator.page(page)
+    except InvalidPage:
+        # if the page contains no results (EmptyPage exception) or
+        # the page number is not an integer (PageNotAnInteger exception)
+        # return the first page
+        logs = paginator.page(1)
+
+    return render(request, 'trigger_app/cometlog_filter.html', {'filter': f, "page_obj": logs})
 
 
 class ProposalSettingsList(ListView):
@@ -256,6 +281,8 @@ class ProposalSettingsList(ListView):
 
 def home_page(request):
     comet_status = models.Status.objects.get(name='twistd_comet')
+    kafka_status = models.Status.objects.get(name='kafka')
+
     prop_settings = models.ProposalSettings.objects.all()
 
     # Filter out ignored event groups and show only the 5 most recent
@@ -265,6 +292,7 @@ def home_page(request):
 
     context = {
         'twistd_comet_status': comet_status,
+        'kafka_status': kafka_status,
         'settings': prop_settings,
         'remotes': ", ".join(settings.VOEVENT_REMOTES),
         'tcps': ", ".join(settings.VOEVENT_TCP),
@@ -624,11 +652,11 @@ def parse_and_save_xml(xml):
     logger.info(f'New event data {data}')
 
     new_event = serializers.EventSerializer(data=data)
-    logger.info(f'Successfully serialized event {new_event}')
     if new_event.is_valid():
-        logger.info(f'Successfully serialized event {new_event}')
+        logger.info(
+            f'Successfully serialized event {new_event.validated_data}')
         new_event.save()
-        logger.info(f'Successfully saved event {new_event}')
+        logger.info(f'Successfully saved event {new_event.validated_data}')
         return new_event
 
 

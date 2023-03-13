@@ -30,7 +30,19 @@
       <td>VOEvent</td>
       <td>{{ remotes }}</td>
       <td>{{ tcps }}</td>
-      <td><a href="/comet_log/" style="text-decoration:None">Comet Log</a></td>
+      <td><a href="/comet_log/" style="text-decoration:None">Comet & Kafka Log</a></td>
+    </tr>
+    <tr>
+      {% if kafka_status.status > 0 %}
+        <td class="NegativeTransaction">
+      {% else %}
+        <td class="PositiveTransaction">
+      {% endif %}
+        {{ kafka_status.get_status_display }}</td>
+      <td>Kafka VOEvents</td>
+      <td>GCN</td>
+      <td>nasa.gcn</td>
+      <td><a href="/comet_log/" style="text-decoration:None">Comet & Kafka Log</a></td>
     </tr>
   </table>
   <p></p>

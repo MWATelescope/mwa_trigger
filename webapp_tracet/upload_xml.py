@@ -10,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 def write_and_upload(xml_string):
-
     # Upload
     session = requests.session()
     session.auth = (os.environ['UPLOAD_USER'], os.environ['UPLOAD_PASSWORD'])
@@ -23,7 +22,9 @@ def write_and_upload(xml_string):
     data = {
         'xml_packet': xml_string
     }
-    session.post(url, data=data)
+    print(url)
+    return session.post(url, data=data)
+
 
 if __name__ == '__main__':
     xml_string = sys.stdin.read()

@@ -18,6 +18,7 @@ from apscheduler.triggers.cron import CronTrigger
 from django_apscheduler.jobstores import DjangoJobStore
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -56,12 +57,18 @@ if __name__ == '__main__':
         remote_command += f"--receive "
     for tc_id, remote in enumerate(settings.VOEVENT_TCP):
         remote_command += f"--author-whitelist={remote} "
-
+    # Set Filters for comet only events CAN BE IGNORED BY REMOTE
+    # if len(settings.VOEVENT_COMET_FILTER) > 0:
+    #     for id, fil in enumerate(settings.VOEVENT_COMET_FILTER):
+    #         remote_command += f"--filter=//Param[@name=\"SC_Lat\" and @value>600] "
 
     logger.info("Starting twistd command:")
-    twistd_commad = f"twistd --pidfile /tmp/twistd_comet.pid -n comet -v -v --local-ivo=ivo://tracet.duckdns.org/trigger {remote_command} --cmd=upload_xml.py"
-    logger.info(twistd_commad)
-    process = Popen(twistd_commad, shell=True, stdout=PIPE)
+    twistd_command = f"twistd --pidfile /tmp/twistd_comet.pid --nodaemon comet -v -v --local-ivo=ivo://tracet.duckdns.org/trigger {remote_command} --cmd=upload_xml.py"
+
+    logger.info(twistd_command)
+    print(twistd_command)
+
+    process = Popen(twistd_command, shell=True, stdout=PIPE)
     # get initial output right away
     output_popen_stdout(process)
 
@@ -74,7 +81,7 @@ if __name__ == '__main__':
         max_instances=1,
         replace_existing=True,
         kwargs={
-            'process':process,
+            'process': process,
         },
     )
     logger.info("Added job 'output_popen_stdout'.")
@@ -82,7 +89,8 @@ if __name__ == '__main__':
     logger.info("Starting scheduler...")
     scheduler.start()
     logger.info("I moved on")
-    logger.info('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
+    logger.info(
+        'Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
 
     try:
         # This is here to simulate application activity (which keeps the main thread alive).

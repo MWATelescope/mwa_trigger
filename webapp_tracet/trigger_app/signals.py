@@ -58,8 +58,8 @@ def group_trigger(sender, instance, **kwargs):
         return
     if (instance.ra and instance.dec):
         logger.info(f'Getting sky coordinates {instance.ra} {instance.dec}')
-        event_coord = SkyCoord(ra=instance.ra*u.degree,
-                               dec=instance.dec*u.degree)
+        event_coord = SkyCoord(ra=instance.ra * u.degree,
+                               dec=instance.dec * u.degree)
 
     logger.info('Getting proposal decisions')
     proposal_decisions = ProposalDecision.objects.filter(
@@ -100,7 +100,7 @@ def group_trigger(sender, instance, **kwargs):
 
                 if (prop_dec.ra and prop_dec.dec):
                     old_event_coord = SkyCoord(
-                        ra=prop_dec.ra*u.degree, dec=prop_dec.dec*u.degree)
+                        ra=prop_dec.ra * u.degree, dec=prop_dec.dec * u.degree)
                     event_sep = event_coord.separation(old_event_coord).deg
                     if event_sep > prop_dec.proposal.repointing_limit:
                         # worth repointing
@@ -201,7 +201,7 @@ def group_trigger(sender, instance, **kwargs):
 
             # Now make sure they're spacially similar
             trigger_coord = SkyCoord(
-                ra=trig_event.ra*u.degree, dec=trig_event.dec*u.degree)
+                ra=trig_event.ra * u.degree, dec=trig_event.dec * u.degree)
             if event_coord.separation(trigger_coord).deg < c95_sep:
                 # Event is within the 95% confidence interval so consider them the same source/event
                 association_exists = True
@@ -407,9 +407,9 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
     # Work out when the source will go below the horizon
     telescope = proposal_decision_model.proposal.telescope
     location = EarthLocation(
-        lon=telescope.lon*u.deg,
-        lat=telescope.lat*u.deg,
-        height=telescope.height*u.m
+        lon=telescope.lon * u.deg,
+        lat=telescope.lat * u.deg,
+        height=telescope.height * u.m
     )
     if (proposal_decision_model.ra and proposal_decision_model.dec):
         obs_source = SkyCoord(
@@ -420,8 +420,8 @@ def send_all_alerts(trigger_bool, debug_bool, pending_bool, proposal_decision_mo
         )
         # Convert from RA/Dec to Alt/Az
         # 24 hours in 5 min increments
-        delta_24h = np.linspace(0, 1440, 288)*u.min
-        next_24h = obstime = Time.now()+delta_24h
+        delta_24h = np.linspace(0, 1440, 288) * u.min
+        next_24h = obstime = Time.now() + delta_24h
         obs_source_altaz = obs_source.transform_to(
             AltAz(obstime=next_24h, location=location))
         # capture circumpolar source case
@@ -551,6 +551,11 @@ def on_startup(sender, **kwargs):
         Status.objects.filter(name='twistd_comet').update(status=2)
     else:
         Status.objects.create(name='twistd_comet', status=2)
+
+    if Status.objects.filter(name='kafka').exists():
+        Status.objects.filter(name='kafka').update(status=2)
+    else:
+        Status.objects.create(name='kafka', status=2)
 
 
 # Getting a signal from views.py which indicates that the server has started

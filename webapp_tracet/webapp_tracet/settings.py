@@ -25,14 +25,19 @@ ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'www.mwa-trigger.duckdns.org',
                  'mwa-trigger.duckdns.org', 'www.tracet.duckdns.org', 'tracet.duckdns.org', '146.118.70.58']
 
 # Remote broadcasters we subscribe to for VOEvents
-# , "chimefrb.physics.mcgill.ca"]
-VOEVENT_REMOTES = ["voevent.4pisky.org", "voevent.dc3.com"]
+# ["voevent.dc3.com", "chimefrb.physics.mcgill.ca"]
+VOEVENT_REMOTES = []
 # TCP connectiong we are whitelisting with to recieve VOEvents
-VOEVENT_TCP = ["196.44.140.214/32", "68.169.57.253", "50.116.49.68"]
+# 196.44.140.214/32 - HESS
+# 68.169.57.253 - GCN
+# 50.116.49.68 - GCN
+VOEVENT_TCP = ["196.44.140.214/32"]
 
+# VOEvent comet filter (XPath 1.0)
+# VOEVENT_COMET_FILTER = ['//*[contains(@ivorn, "HESS")]',
+#                         '//*[contains(@ivorn, "Antares")]']
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

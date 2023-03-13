@@ -1,0 +1,40 @@
+{% extends 'trigger_app/header.html' %}
+
+{% block content %}
+  <title>Comet and Kafka Log</title>
+  <!-- Iterate over object_list -->
+  <div class="container-fluid">
+    <div style="background-color:#f8f8f8; width:480px; margin: 0 auto; padding: 20px; margin-bottom: 20px; margin-top: 20px">
+      <h3>Log Filter</h3>
+      <form action="">
+        <p>{{ filter.form.created_filter }}</p>
+        <td></td>
+        <input class="btn btn-primary" type="submit" />
+      </form>
+      </div>
+    <table class="fl-table">
+
+    <col>
+    <colgroup span="2"></colgroup>
+    <thead>
+
+    <tr>
+      <th scope="row">Date</th>
+      <th scope="row">Log</th>
+    </tr>
+    </thead>
+  
+  {% for object in page_obj %}
+    <tr>
+  <!-- Display Objects -->
+  <td>{{ object.created_at }}</td>
+  <td style="white-space: nowrap;">{{ object.log }}</td>
+</tr>
+
+  {% endfor %}
+</table>
+
+</div>
+
+  {% include "trigger_app/pagination.html" %}
+{% endblock %}
