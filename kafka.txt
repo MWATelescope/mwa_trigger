@@ -1,0 +1,7 @@
+Possible error:
+KafkaError{code=_INVALID_ARG,val=-186,str="Failed to create consumer: No provider for SASL mechanism GSSAPI: recompile
+librdkafka with libsasl2 or openssl support. Current build options: PLAIN SASL_SCRAM OAUTHBEARER"}
+
+Follow the guide to install from source as GCN requires GSSAPI
+Note: replace $(lsb_release -cs) with "focal" if on ubuntu 22+
+https://github.com/confluentinc/confluent-kafka-python/blob/master/INSTALL.md
