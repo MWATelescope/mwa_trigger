@@ -296,7 +296,7 @@ def home_page(request):
         recent_event_groups)
 
     recent_event_group_info = filter(
-        lambda x: x[1] == "SWIFT", recent_event_group_info)
+        lambda x: x[1] == "SWIFT", recent_event_group_info)[:10]
 
     context = {
         'twistd_comet_status': comet_status,
