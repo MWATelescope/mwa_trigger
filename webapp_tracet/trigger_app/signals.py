@@ -232,7 +232,7 @@ def proposal_worth_observing(
 
             # Check if this proposal thinks this event is worth observing
             proj_source_bool = False
-            if prop_dec.proposal.source_type == "GRB" and voevent.source_type == "GRB":
+            if prop_dec.proposal.source_type == "GRB" and voevent.event_group_id.source_type == "GRB":
                 # This proposal wants to observe GRBs so check if it is worth observing
                 trigger_bool, debug_bool, pending_bool, decision_reason_log = worth_observing_grb(
                     # event values
@@ -259,12 +259,12 @@ def proposal_worth_observing(
                 )
                 proj_source_bool = True
 
-            elif prop_dec.proposal.source_type == "FS" and voevent.source_type == "FS":
+            elif prop_dec.proposal.source_type == "FS" and voevent.event_group_id.source_type == "FS":
                 # This proposal wants to observe FSs and there is no FS logic so observe
                 trigger_bool = True
                 decision_reason_log = f"{decision_reason_log}{datetime.datetime.utcnow()}: Event ID {voevent.id}: Triggering on Flare Star {voevent.source_name}. \n"
                 proj_source_bool = True
-            elif prop_dec.proposal.source_type == "NU" and voevent.source_type == "NU":
+            elif prop_dec.proposal.source_type == "NU" and voevent.event_group_id.source_type == "NU":
                 # This proposal wants to observe GRBs so check if it is worth observing
                 trigger_bool, debug_bool, pending_bool, decision_reason_log = worth_observing_nu(
                     # event values
@@ -278,7 +278,7 @@ def proposal_worth_observing(
                 )
                 proj_source_bool = True
 
-            elif prop_dec.proposal.source_type == "GW" and voevent.source_type == "GW":
+            elif prop_dec.proposal.source_type == "GW" and voevent.event_group_id.source_type == "GW":
                 # This proposal wants to observe GRBs so check if it is worth observing
                 trigger_bool, debug_bool, pending_bool, decision_reason_log = worth_observing_gw(
                     # Event values
@@ -310,7 +310,7 @@ def proposal_worth_observing(
 
             if not proj_source_bool:
                 # Proposal does not observe this type of source so update message
-                decision_reason_log = f"{decision_reason_log}{datetime.datetime.utcnow()}: Event ID {voevent.id}: This proposal does not observe {voevent.get_source_type_display()}s. \n"
+                decision_reason_log = f"{decision_reason_log}{datetime.datetime.utcnow()}: Event ID {voevent.id}: This proposal does not observe {voevent.event_group_id.source_type}s. \n"
         else:
             # Proposal does not observe event from this telescope so update message
             decision_reason_log = f"{decision_reason_log}{datetime.datetime.utcnow()}: Event ID {voevent.id}: This proposal does not trigger on events from {voevent.telescope}. \n"

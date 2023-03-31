@@ -115,7 +115,7 @@
       <tr>
     {% endif %}
       <td><a href="/voevent_view/{{ object.id }}" style="text-decoration:None">{{ object.id }}</a></td>
-      <td>{% if object.source_type is not None %} {{ object.source_type }}  {% endif %}</td>
+      <td>{% if object.event_group_id.source_type is not None %} {{ object.event_group_id.source_type }}  {% endif %}</td>
       <td>{{ object.telescope }}</td>
       <td>{{ object.event_type }}</td>
       <td>{{ object.event_observed|date:"Y-m-d H:i:s" }}</td>
@@ -136,7 +136,7 @@
       {% else %}
         <td><a href="/event_group_details/{{ object.event_group_id }}/" style="text-decoration:None">{{ object.event_group_id}}</a></td>
       {% endif %}
-      <td>{% if object.source_name  is not None %} {{ object.source_name }}  {% endif %}</td>
+      <td>{% if object.event_group_id.source_name  is not None %} {{ object.event_group_id.source_name }}  {% endif %}</td>
       <td>{% if object.sequence_num is not None %} {{ object.sequence_num }} {% endif %}</td>
       <td>{% if object.duration     is not None %} {{ object.duration }}     {% endif %}</td>
       <td>{% if object.ra_hms       is not None %} {{ object.ra_hms|truncatechars:12 }}       {% endif %}</td>

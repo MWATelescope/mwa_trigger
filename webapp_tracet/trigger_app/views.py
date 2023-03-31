@@ -91,7 +91,7 @@ class EventFilter(django_filters.FilterSet):
 
         # Django-filter cannot hanlde django FileField so exclude from filters
         fields = ('recieved_data_after', 'recieved_data_before', 'event_observed_after', 'event_observed_before', 'duration__lte', 'duration__gte', 'ra__lte', 'ra__gte', 'dec__lte', 'dec__gte', 'pos_error__lte', 'pos_error__gte',
-                  'fermi_detection_prob__lte', 'fermi_detection_prob__gte', 'swift_rate_signif__lte', 'swift_rate_signif__gte', 'ignored', 'source_type', 'trig_id', 'telescope', 'source_name', 'sequence_num', 'event_type', 'telescopes')
+                  'fermi_detection_prob__lte', 'fermi_detection_prob__gte', 'swift_rate_signif__lte', 'swift_rate_signif__gte', 'ignored', 'event_group_id__source_type', 'trig_id', 'telescope', 'event_group_id__source_name', 'sequence_num', 'event_type', 'telescopes')
         filter_overrides = {
             dj_model.CharField: {
                 'filter_class': django_filters.CharFilter,

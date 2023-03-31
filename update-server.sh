@@ -11,13 +11,18 @@ pip install .
 pip install -r webapp_tracet/requirements.txt
 
 cd webapp_tracet
+
 # Check for new static files
 python manage.py collectstatic --noinput
+
 # Make any required changes to the backend database
 python manage.py makemigrations
 python manage.py migrate
+
 # Start server
 uwsgi --ini webapp_tracet_uwsgi.ini
-# Reset comet event handler
-tmux send-keys C-c
-tmux send-keys "python twistd_comet_wrapper.py" Enter
+
+# Reset comet and kafka event handlers
+tmux kill-server
+tmux new -s kafka -d 'python kafka_client.py'
+tmux new -s comet -d 'python twistd_comet_wrapper.py'

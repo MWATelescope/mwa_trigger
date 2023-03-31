@@ -178,9 +178,9 @@
         <tr>
       {% endif %}
         <td><a href="/voevent_view/{{ event.id }}" style="text-decoration:None">{{ event.id }}</a></td>
-        <td>{% if event.source_type  is not None %} {{ event.source_type }}  {% endif %}</td>
+        <td>{% if event_group.source_type  is not None %} {{ event_group.source_type }}  {% endif %}</td>
         <td>{{ event.telescope }}</td>
-        <td>{{ event_group.source_type }}</td>
+        <td>{{ event.event_type }}</td>
         <td>{{ event.event_observed|date:"Y-m-d H:i:s" }}</td>
         <td>{{ event.recieved_data|date:"Y-m-d H:i:s" }}</td>
         <td>{% if event.trig_id is not None %}
