@@ -23,7 +23,7 @@ describe("Test HESS events will group with swift", () => {
 			cy.get("[type='submit']").click()
 		})
 		// events are grouped
-		cy.get(".btn").click()
+		cy.visit("/event_group_log/?ignored=unknown&source_type=&telescope=")
 		cy.contains(swiftId)
 			.parent("tr")
 			.within(() => {
@@ -86,6 +86,7 @@ describe("HESS events that trigger the proposal show decision outcome", () => {
 			cy.get("[type='submit']").click()
 		})
 		//proposal result shows event triggered
+		cy.visit("/event_group_log/?ignored=unknown&source_type=&telescope=")
 		cy.contains(hessId)
 			.parent("tr")
 			.within(() => {

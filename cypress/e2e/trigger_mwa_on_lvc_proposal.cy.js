@@ -34,7 +34,7 @@ describe(`LVC events are grouped by id with source type, event type, Classificat
 			cy.get("[type='submit']").click()
 		})
 		//events are grouped
-		cy.get(".btn").click()
+		cy.visit("/event_group_log/?ignored=unknown&source_type=&telescope=")
 		cy.contains(graceDBId)
 			.parent("tr")
 			.within(() => {
@@ -99,12 +99,13 @@ describe("Early warning LVC events that don't trigger the proposal show as ignor
 			}
 		)
 		//proposal result shows event ignored
+		cy.visit("/event_group_log/?ignored=unknown&source_type=&telescope=")
 		cy.contains(graceDBId)
 			.parent("tr")
 			.within(() => {
-				cy.get("td").eq(5).contains("GW")
-				cy.get("td").eq(7).contains("Ignored")
+				cy.get("td").eq(8).contains("Ignored")
 			})
+
 		cy.get("[data-testid='nav-logs']").click()
 		cy.get("[data-testid='drop-logs-proposals']").click()
 		cy.contains(
@@ -132,11 +133,11 @@ describe("Early warning LVC events that trigger the proposal show decision outco
 			}
 		)
 		//proposal result shows event triggered
+		cy.visit("/event_group_log/?ignored=unknown&source_type=&telescope=")
 		cy.contains(graceDBId)
 			.parent("tr")
 			.within(() => {
-				cy.get("td").eq(5).contains("GW")
-				cy.get("td").eq(7).contains("Triggered")
+				cy.get("td").eq(8).contains("Triggered")
 			})
 		cy.get("[data-testid='nav-logs']").click()
 		cy.get("[data-testid='drop-logs-proposals']").click()
