@@ -321,12 +321,19 @@ class test_nu(TestCase):
 
     def test_proposal_decision(self):
         # Two proposals decisions made
-        print(
-            f"\n\ntest_nu proposal decison:\n{ProposalDecision.objects.all().first().decision_reason}\n\n")
+
         self.assertEqual(len(ProposalDecision.objects.all()), 2)
         # Both triggered
-        for prop_dec in ProposalDecision.objects.all():
-            self.assertEqual(prop_dec.decision, 'T')
+
+        prop_dec1 = ProposalDecision.objects.all()[0]
+        print(
+            f"\n\ntest_nu proposal decison 1:\n{prop_dec1.decision_reason}\n\n")
+        self.assertEqual(prop_dec1.decision, 'T')
+
+        prop_dec2 = ProposalDecision.objects.all()[1]
+        print(
+            f"\n\ntest_nu proposal decison 1:\n{prop_dec2.decision_reason}\n\n")
+        self.assertEqual(prop_dec2.decision, 'T')
 
 
 class test_fs(TestCase):
