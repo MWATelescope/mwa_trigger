@@ -46,9 +46,9 @@ def trigger_observation(
         # Create Earth location for the telescope
         telescope = proposal_decision_model.proposal.telescope
         location = EarthLocation(
-            lon=telescope.lon*u.deg,
-            lat=telescope.lat*u.deg,
-            height=telescope.height*u.m
+            lon=telescope.lon * u.deg,
+            lat=telescope.lat * u.deg,
+            height=telescope.height * u.m
         )
         if proposal_decision_model.proposal.start_observation_at_high_sensitivity and not (proposal_decision_model.ra or proposal_decision_model.dec):
             # TODO: Replace with indian ocean high sensitivity area
@@ -258,12 +258,6 @@ def trigger_atca_observation(
     prop_obj = proposal_decision_model.proposal
 
     # TODO add any schedule checks or observation parsing here
-
-    # Check if source is in dec ranges the ATCA can not observe
-    if proposal_decision_model.dec > 15.:
-        return 'I', f"{decision_reason_log}{datetime.utcnow()}: Event ID {event_id}: Source is above a declination of 15 degrees so ATCA can not observe it.\n ", []
-    elif -5. < proposal_decision_model.dec < 5.:
-        return 'I', f"{decision_reason_log}{datetime.utcnow()}: Event ID {event_id}: Source is within 5 degrees of the equator (which is riddled with satelite RFI) so ATCA will not observe.\n ", []
 
     # Not below horizon limit so observer
     logger.info(f"Triggering  ATCA at UTC time {Time.now()} ...")

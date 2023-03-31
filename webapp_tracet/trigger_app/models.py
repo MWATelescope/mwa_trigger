@@ -207,6 +207,18 @@ class ProposalSettings(models.Model):
     atca_prioritise_source = models.BooleanField(
         default=False, verbose_name="Prioritise Source?", help_text="Prioritise time on source rather than time on calibrator.")
 
+    atca_dec_min_1 = models.IntegerField(verbose_name="Declination min limit 1 (deg)",
+                                         help_text="Only observe within this range", default=-90)
+
+    atca_dec_max_1 = models.IntegerField(verbose_name="Declination max limit 1 (deg)",
+                                         help_text="Only observe within this range", default=-10)
+
+    atca_dec_min_2 = models.IntegerField(verbose_name="Declination min limit 2 (deg)",
+                                         help_text="Only observe within this range", default=-90)
+
+    atca_dec_max_2 = models.IntegerField(verbose_name="Declination max limit 2 (deg)",
+                                         help_text="Only observe within this range", default=90)
+
     def __str__(self):
         return f"{self.proposal_id}"
 

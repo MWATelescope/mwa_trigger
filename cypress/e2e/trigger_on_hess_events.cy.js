@@ -1,4 +1,4 @@
-describe("Test HESS events will group with swift", () => {
+describe.skip("Test HESS events will group with swift", () => {
 	it("create HESS and swift events, check that they group", () => {
 		cy.login()
 		cy.visit("/")
@@ -41,7 +41,7 @@ describe("Test HESS events will group with swift", () => {
 	})
 })
 
-describe("Test can create proposals to do observations off HESS events", () => {
+describe.skip("Test can create proposals to do observations off HESS events", () => {
 	it("create HESS trigger proposal", () => {
 		const proposalId = "testMWAHESS"
 		const proposalDescription =

@@ -38,6 +38,7 @@ consumer.subscribe(['gcn.classic.voevent.AMON_NU_EM_COINC',
                     'gcn.classic.voevent.LVC_PRELIMINARY',
                     'gcn.classic.voevent.LVC_RETRACTION',
                     'gcn.classic.voevent.SWIFT_ACTUAL_POINTDIR',
+                    # 'gcn.classic.voevent.SWIFT_BAT_GRB_ALERT',
                     'gcn.classic.voevent.SWIFT_BAT_GRB_LC',
                     'gcn.classic.voevent.SWIFT_BAT_GRB_POS_ACK',
                     'gcn.classic.voevent.SWIFT_BAT_GRB_POS_TEST',
@@ -69,7 +70,6 @@ consumer.subscribe(['gcn.classic.voevent.AMON_NU_EM_COINC',
                     'gcn.classic.voevent.SWIFT_XRT_THRESHPIX_PROC'])
 
 date = datetime.today()
-
 # 2023-03-09T02:43:10+0000
 print(f'{date.strftime("%Y-%m-%dT%H:%M:%S+0000")} KAFKA Started')
 CometLog.objects.create(

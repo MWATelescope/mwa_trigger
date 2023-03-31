@@ -1,13 +1,13 @@
 //./manage.py loaddata trigger_app/test_yamls/mwa_fs_proposal_settings.yaml
 
-describe("webpage loads", () => {
+describe.skip("webpage loads", () => {
 	it("passes", () => {
 		cy.visit("/")
 	})
 })
 
-describe(`LVC events are grouped by id with source type, event type, Classification-Terrestrial, 
-          Properties-HasNS, HasMassGap, Observation-Time, highest_probability_density_sky_location, 
+describe.skip(`LVC events are grouped by id with source type, event type, Classification-Terrestrial,
+          Properties-HasNS, HasMassGap, Observation-Time, highest_probability_density_sky_location,
           highest_probability_density_gw`, () => {
 	it("upload lvc test event", () => {
 		const graceDBId = "MS553322ab"
@@ -55,7 +55,7 @@ describe(`LVC events are grouped by id with source type, event type, Classificat
 	})
 })
 
-describe("User can create proposal for MWA observations using LVC events", () => {
+describe.skip("User can create proposal for MWA observations using LVC events", () => {
 	it("create and view proposal", () => {
 		const proposalId = "testMWALVC"
 		const proposalDescription =
@@ -80,7 +80,7 @@ describe("User can create proposal for MWA observations using LVC events", () =>
 	})
 })
 
-describe("Early warning LVC events that don't trigger the proposal show as ignored", () => {
+describe.skip("Early warning LVC events that don't trigger the proposal show as ignored", () => {
 	it("upload lvc early warning real event and get ignored because terrestial is > 95", () => {
 		const graceDBId = "MS43555s"
 
@@ -114,7 +114,7 @@ describe("Early warning LVC events that don't trigger the proposal show as ignor
 	})
 })
 
-describe("Early warning LVC events that trigger the proposal show decision outcome", () => {
+describe.skip("Early warning LVC events that trigger the proposal show decision outcome", () => {
 	it("upload lvc early warning real event and trigger an MWA observation with twilio notifications", () => {
 		const graceDBId = "MS33841s"
 

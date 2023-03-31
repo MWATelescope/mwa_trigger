@@ -108,7 +108,7 @@ def get_event_type(ivorn):
             # find first integer
             if trig_type_str[i].isdigit():
                 break
-        if trig_type_str[i-1] == "_":
+        if trig_type_str[i - 1] == "_":
             # skip the _
             return str(trig_type_str[: i - 1])
         else:
@@ -363,21 +363,30 @@ class parsed_VOEvent:
             # use defaults
             self.trig_pairs = [
                 "SWIFT_BAT_GRB_Pos",
+                "SWIFT_BAT_GRB_POS_ACK",
                 "SWIFT_XRT_Pos",
+                "SWIFT_XRT_POSITION",
                 "SWIFT_UVOT_Pos",
+                "SWIFT_UVOT_POS",
                 # Ignoring the below as they don't give additional information
                 # "SWIFT_BAT_QuickLook_Pos",
                 # "SWIFT_SC_Slew",
                 # "SWIFT_FOM_Obs",
                 "Fermi_GBM_Flt_Pos",
+                "FERMI_GBM_FLT_POS",
                 "Fermi_GBM_Gnd_Pos",
+                "FERMI_GBM_GND_POS",
                 "Fermi_GBM_Fin_Pos",
+                "FERMI_GBM_FIN_POS",
                 "HESS_GRB_To",
                 "LVC_EarlyWarning",
                 "LVC_Preliminary",
+                "LVC_PRELIMINARY",
                 "LVC_Initial",
+                "LVC_INITIAL",
                 "LVC_Update",
                 "LVC_Retraction",
+                "LVC_RETRACTION",
                 "AMON_ICECUBE_BRONZE_Event",
                 "AMON_ICECUBE_GOLD_Event",
                 "Antares_Alert",
@@ -450,9 +459,9 @@ class parsed_VOEvent:
             self.dec_dms = None
         else:
             self.ra_hms = str(
-                Angle(self.ra,  unit=u.deg).to_string(unit=u.hour, sep=':'))
+                Angle(self.ra, unit=u.deg).to_string(unit=u.hour, sep=':'))
             self.dec_dms = str(
-                Angle(self.dec, unit=u.deg).to_string(unit=u.deg,  sep=':'))
+                Angle(self.dec, unit=u.deg).to_string(unit=u.deg, sep=':'))
         logger.debug(f"Trig position: {self.ra} {self.dec} {self.err}")
 
         # Get observed time as UTC
@@ -581,9 +590,9 @@ class parsed_VOEvent:
                 self.dec = float(dec.deg)
 
                 self.ra_hms = str(
-                    Angle(self.ra,  unit=u.deg).to_string(unit=u.hour, sep=':'))
+                    Angle(self.ra, unit=u.deg).to_string(unit=u.hour, sep=':'))
                 self.dec_dms = str(
-                    Angle(self.dec,  unit=u.deg).to_string(unit=u.deg, sep=':'))
+                    Angle(self.dec, unit=u.deg).to_string(unit=u.deg, sep=':'))
 
                 os.remove("skymap.fits")
 
