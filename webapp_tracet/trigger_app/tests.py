@@ -4,7 +4,7 @@ import pytest
 
 import requests
 
-from .models import EventGroup, Event, PossibleEventAssociation, ProposalDecision, Observations
+from .models import EventGroup, Event, ProposalDecision, Observations
 from yaml import load, Loader, safe_load
 
 from tracet.parse_xml import parsed_VOEvent
@@ -88,11 +88,6 @@ class test_grb_group_01(TestCase):
             trig = parsed_VOEvent(xml)
             create_voevent_wrapper(trig, ra_dec)
 
-    def test_possible_event_association(self):
-        # Check there are three Events that were grouped as one PossibleEventAssociation
-        self.assertEqual(len(Event.objects.all()), 3)
-        self.assertEqual(len(PossibleEventAssociation.objects.all()), 1)
-
     def test_mwa_proposal_decision(self):
         print(
             f"\n\ntest_grb_group_01 MWA proposal decison:\n{ProposalDecision.objects.filter(proposal__telescope__name='MWA_VCS').first().decision_reason}\n\n")
@@ -146,7 +141,15 @@ class test_grb_group_02(TestCase):
     def test_trigger_groups(self):
         # Check there are three Events that were grouped as one by the trigger ID
         self.assertEqual(len(Event.objects.all()), 3)
-        self.assertEqual(len(EventGroup.objects.all()), 1)
+
+        eventgroups = EventGroup.objects.all()
+        self.assertEqual(len(eventgroups), 1)
+
+        source_type = eventgroups.first().source_type
+        source_name = eventgroups.first().source_name
+
+        self.assertEqual(source_type, "GRB")
+        self.assertEqual(source_name, "GRB 170912")
 
     def test_mwa_proposal_decision(self):
         print(ProposalDecision.objects.all())

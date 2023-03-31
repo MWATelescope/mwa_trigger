@@ -2,7 +2,7 @@
 from trigger_app.signals import startup_signal
 from django.views.generic.list import ListView
 from django.conf import settings
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, QueryDict
 from django.db import transaction
 from django.db import models as dj_model
 from django.shortcuts import render, redirect
@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, InvalidPage
 import django_filters
 from django_filters.views import FilterView
-
+from django.utils.datastructures import MultiValueDict
 from django.forms import DateTimeInput, Select
 from django.core.files.base import ContentFile
 from itertools import chain
@@ -91,7 +91,7 @@ class EventFilter(django_filters.FilterSet):
 
         # Django-filter cannot hanlde django FileField so exclude from filters
         fields = ('recieved_data_after', 'recieved_data_before', 'event_observed_after', 'event_observed_before', 'duration__lte', 'duration__gte', 'ra__lte', 'ra__gte', 'dec__lte', 'dec__gte', 'pos_error__lte', 'pos_error__gte',
-                  'fermi_detection_prob__lte', 'fermi_detection_prob__gte', 'swift_rate_signif__lte', 'swift_rate_signif__gte', 'ignored', 'associated_event_id', 'source_type', 'trig_id', 'telescope', 'source_name', 'sequence_num', 'event_type', 'telescopes')
+                  'fermi_detection_prob__lte', 'fermi_detection_prob__gte', 'swift_rate_signif__lte', 'swift_rate_signif__gte', 'ignored', 'source_type', 'trig_id', 'telescope', 'source_name', 'sequence_num', 'event_type', 'telescopes')
         filter_overrides = {
             dj_model.CharField: {
                 'filter_class': django_filters.CharFilter,
@@ -226,7 +226,11 @@ class EventGroupFilter(django_filters.FilterSet):
 
 def EventGroupList(request):
     # Apply filters
-    f = EventGroupFilter(request.GET, queryset=models.EventGroup.objects.all())
+    req = request.GET
+    if(not req.dict()):
+        req = QueryDict("ignored=False&source_type=GRB&telescope=SWIFT")
+
+    f = EventGroupFilter(req, queryset=models.EventGroup.objects.all())
     eventgroups = f.qs
 
     prop_settings = models.ProposalSettings.objects.all()
@@ -285,10 +289,14 @@ def home_page(request):
 
     prop_settings = models.ProposalSettings.objects.all()
 
-    # Filter out ignored event groups and show only the 5 most recent
-    recent_event_groups = models.EventGroup.objects.filter(ignored=False)[:5]
+    # Filter out ignored event groups and telescope=swift and show only the 5 most recent
+    recent_event_groups = models.EventGroup.objects.filter(
+        ignored=False, source_type="GRB")
     recent_event_group_info, _ = grab_decisions_for_event_groups(
         recent_event_groups)
+
+    recent_event_group_info = filter(
+        lambda x: x[1] == "SWIFT", recent_event_group_info)
 
     context = {
         'twistd_comet_status': comet_status,
@@ -299,70 +307,6 @@ def home_page(request):
         "recent_event_groups": recent_event_group_info
     }
     return render(request, 'trigger_app/home_page.html', context)
-
-
-def PossibleEventAssociationList(request):
-    # Find all telescopes for each trigger event
-    events = models.Event.objects.filter(ignored=False)
-    event_associations = models.PossibleEventAssociation.objects.all()
-
-    # Loop over the trigger events and grab all the telescopes of the Events
-    aevent_telescope_list = []
-    for aevent in event_associations:
-        aevent_telescope_list.append(
-            ' '.join(
-                set(events.filter(associated_event_id=aevent).values_list(
-                    'telescope', flat=True))
-            )
-        )
-
-    # Paginate
-    page = request.GET.get('page', 1)
-    # zip the trigger event and the tevent_telescope_list together so I can loop over both in the html
-    paginator = Paginator(
-        list(zip(event_associations, aevent_telescope_list)), 100)
-    try:
-        object_list = paginator.page(page)
-    except InvalidPage:
-        object_list = paginator.page(1)
-    return render(request, 'trigger_app/possible_event_association_list.html', {'object_list': object_list})
-
-
-def PossibleEventAssociation_details(request, tid):
-    event_association = models.PossibleEventAssociation.objects.get(id=tid)
-
-    # covert ra and dec to HH:MM:SS.SS format
-    c = SkyCoord(event_association.ra, event_association.dec,
-                 frame='icrs', unit=(u.deg, u.deg))
-    event_association.ra = c.ra.to_string(unit=u.hour, sep=':')
-    event_association.dec = c.dec.to_string(unit=u.degree, sep=':')
-
-    # grab telescope names
-    events = models.Event.objects.filter(associated_event_id=event_association)
-    telescopes = ' '.join(set(events.values_list('telescope', flat=True)))
-
-    # grab trig ID
-    trig_event_id = list(dict.fromkeys(events.values_list('trig_id')))[0][0]
-
-    # list all voevents with the same id
-    if trig_event_id:
-        event_id_events = models.Event.objects.filter(trig_id=trig_event_id)
-    else:
-        event_id_events = []
-
-    # Get position error units
-    poserr_unit = request.GET.get('poserr_unit', 'deg')
-
-    context = {
-        'event_association': event_association,
-        'events': events,
-        'telescopes': telescopes,
-        'trig_event_id': trig_event_id,
-        'event_id_events': event_id_events,
-        'poserr_unit': poserr_unit,
-    }
-
-    return render(request, 'trigger_app/possible_event_association_details.html', context)
 
 
 def strip_time_stamp(prop_decs):

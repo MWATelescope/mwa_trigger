@@ -3,10 +3,11 @@ from django.dispatch import receiver, Signal
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
+from pyparsing import MutableMapping
 
-from .models import UserAlerts, AlertPermission, Event, PossibleEventAssociation, Status, ProposalSettings, ProposalDecision, Observations, EventGroup
+from .models import UserAlerts, AlertPermission, Event, Status, ProposalSettings, ProposalDecision, Observations, EventGroup
 from .telescope_observe import trigger_observation
-
+from operator import itemgetter
 from tracet.trigger_logic import worth_observing_grb, worth_observing_nu, worth_observing_gw
 
 import os
@@ -35,18 +36,33 @@ def group_trigger(sender, instance, **kwargs):
     # ------------------------------------------------------------------------------
     # Look for other events with the same Trig ID
     # ------------------------------------------------------------------------------
-    event_group = EventGroup.objects.get_or_create(
-        trig_id=instance.trig_id,
-        defaults={
+    instanceData = {
+        "ra": instance.ra,
+        "dec": instance.dec,
+        "ra_hms": instance.ra_hms,
+        "dec_dms": instance.dec_dms,
+        "pos_error": instance.pos_error,
+        "earliest_event_observed": instance.event_observed,
+        "latest_event_observed": instance.event_observed,
+    }
+
+    if(instance.source_name and instance.source_type):
+        instanceData = {
             "ra": instance.ra,
             "dec": instance.dec,
             "ra_hms": instance.ra_hms,
             "dec_dms": instance.dec_dms,
             "pos_error": instance.pos_error,
             "source_type": instance.source_type,
+            "source_name": instance.source_name,
             "earliest_event_observed": instance.event_observed,
             "latest_event_observed": instance.event_observed,
-        },
+        }
+
+    # cleanInstanceData = dict(filter(itemgetter(1), instanceData))
+    event_group = EventGroup.objects.update_or_create(
+        trig_id=instance.trig_id,
+        defaults=instanceData,
     )[0]
     # Link the Event (have to update this way to prevent save() triggering this function again)
     logger.info(f'Linking event ({instance.id}) to group {event_group}')
@@ -177,68 +193,6 @@ def group_trigger(sender, instance, **kwargs):
         event_group.ignored = False
         logger.info('Mark as unignored event')
         event_group.save()
-
-    # ------------------------------------------------------------------------------
-    # Look for associated events (in time and space) which includes other telescopes
-    # ------------------------------------------------------------------------------
-
-    # Time range to considered the same event (in seconds)
-    dt = 100
-    early_dt = instance.event_observed - datetime.timedelta(seconds=dt)
-    late_dt = instance.event_observed + datetime.timedelta(seconds=dt)
-
-    # Check if the Event was observed after the earliest event observed - 100s
-    #                               and before the latest  event observed + 100s
-    association_exists = False
-    poss_events = PossibleEventAssociation.objects.filter(earliest_event_observed__lt=late_dt,
-                                                          latest_event_observed__gt=early_dt)
-    if poss_events.exists() and instance.pos_error:
-        for trig_event in poss_events:
-            # Calculate 95% confidence interval seperation
-            combined_err = np.sqrt(instance.pos_error **
-                                   2 + trig_event.pos_error**2)
-            c95_sep = norm.interval(0.95, scale=combined_err)[1]
-
-            # Now make sure they're spacially similar
-            trigger_coord = SkyCoord(
-                ra=trig_event.ra * u.degree, dec=trig_event.dec * u.degree)
-            if event_coord.separation(trigger_coord).deg < c95_sep:
-                # Event is within the 95% confidence interval so consider them the same source/event
-                association_exists = True
-                prev_trig = trig_event
-
-    if association_exists:
-        # Trigger event already exists so link the Event (have to update this way to prevent save() triggering this function again)
-        logger.info(
-            f'Trigger event already exists so link the Event id ({instance.id}) prev event id ({prev_trig})')
-        Event.objects.filter(id=instance.id).update(
-            associated_event_id=prev_trig)
-
-        # TODO update the PossibleEventAssociation ra and dec if the position is better.
-        # Update latest_event_observed
-        for trig_event in poss_events:
-            trig_event.latest_event_observed = instance.event_observed
-            trig_event.save()
-
-    else:
-        # Make a new trigger event
-        logger.info('Make a new trigger event')
-        new_trig = PossibleEventAssociation.objects.create(
-            ra=instance.ra,
-            dec=instance.dec,
-            ra_hms=instance.ra_hms,
-            dec_dms=instance.dec_dms,
-            pos_error=instance.pos_error,
-            source_type=instance.source_type,
-            earliest_event_observed=instance.event_observed,
-            latest_event_observed=instance.event_observed,
-        )
-        logger.info(f'Created trigger event {new_trig}')
-        # Link the Event (have to update this way to prevent save() triggering this function again)
-        logger.info(
-            'Link the Event id={instance.id}(have to update this way to prevent save() triggering this function again)')
-        Event.objects.filter(id=instance.id).update(
-            associated_event_id=new_trig)
 
 
 def proposal_worth_observing(

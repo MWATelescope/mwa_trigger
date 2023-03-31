@@ -55,11 +55,7 @@
       {% endif %}
       <td scope="row">{{ event_group.source_type }}</td>
       <td scope="row">
-        {% if event_group.source_type == "FS" %}
-          {{ source_name }}
-        {% elif event_group.source_type %}
-          {{ event_group.source_type }}{{ event_group.earliest_event_observed|date:"ymd" }}
-        {% endif %}
+        {{ event_group.source_name }}
       </td>
       {% for setting in settings %}
         {% if prop_decisions|index:forloop.counter0 == "Ignored" %}

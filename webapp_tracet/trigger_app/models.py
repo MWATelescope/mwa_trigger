@@ -211,27 +211,6 @@ class ProposalSettings(models.Model):
         return f"{self.proposal_id}"
 
 
-class PossibleEventAssociation(models.Model):
-    id = models.AutoField(primary_key=True)
-    earliest_event_observed = models.DateTimeField(blank=True, null=True)
-    latest_event_observed = models.DateTimeField(blank=True, null=True)
-    ra = models.FloatField(blank=True, null=True)
-    dec = models.FloatField(blank=True, null=True)
-    ra_hms = models.CharField(max_length=64, blank=True, null=True)
-    dec_dms = models.CharField(max_length=64, blank=True, null=True)
-    pos_error = models.FloatField(blank=True, null=True)
-    recieved_data = models.DateTimeField(auto_now_add=True, blank=True)
-    source_type = models.CharField(
-        max_length=3, choices=SOURCE_CHOICES, null=True)
-    event_observed = models.DateTimeField(blank=True, null=True)
-
-    def __str__(self):
-        return str(self.id)
-
-    class Meta:
-        ordering = ['-id']
-
-
 class EventGroup(models.Model):
     id = models.AutoField(primary_key=True)
     trig_id = models.CharField(max_length=64, unique=True)
@@ -247,6 +226,7 @@ class EventGroup(models.Model):
         max_length=3, choices=SOURCE_CHOICES, null=True)
     ignored = models.BooleanField(default=True)
     event_observed = models.DateTimeField(blank=True, null=True)
+    source_name = models.CharField(max_length=128, blank=True, null=True)
 
     def __str__(self):
         return str(self.id)
@@ -273,7 +253,6 @@ class ProposalDecision(models.Model):
     decision_reason = models.CharField(max_length=2056, blank=True, null=True)
     proposal = models.ForeignKey(
         ProposalSettings, on_delete=models.SET_NULL, blank=True, null=True)
-    # associated_event_id = models.ForeignKey(PossibleEventAssociation, on_delete=models.SET_NULL, blank=True, null=True)
     event_group_id = models.ForeignKey(
         EventGroup, on_delete=models.SET_NULL, blank=True, null=True)
     trig_id = models.CharField(max_length=64, blank=True, null=True)
@@ -296,13 +275,6 @@ class ProposalDecision(models.Model):
 
 class Event(models.Model):
     id = models.AutoField(primary_key=True)
-    associated_event_id = models.ForeignKey(
-        PossibleEventAssociation,
-        on_delete=models.SET_NULL,
-        related_name="voevent",
-        blank=True,
-        null=True,
-    )
     event_group_id = models.ForeignKey(
         EventGroup,
         on_delete=models.SET_NULL,
