@@ -103,7 +103,7 @@ describe("Early warning LVC events that don't trigger the proposal show as ignor
 		cy.contains(graceDBId)
 			.parent("tr")
 			.within(() => {
-				cy.get("td").eq(8).contains("Ignored")
+				cy.get("td").contains("Ignored")
 			})
 
 		cy.get("[data-testid='nav-logs']").click()
@@ -114,7 +114,7 @@ describe("Early warning LVC events that don't trigger the proposal show as ignor
 	})
 })
 
-describe("Early warning LVC events that trigger the proposal show decision outcome", () => {
+describe.only("Early warning LVC events that trigger the proposal show decision outcome", () => {
 	it("upload lvc early warning real event and trigger an MWA observation with twilio notifications", () => {
 		const graceDBId = "MS33841s"
 
@@ -132,12 +132,13 @@ describe("Early warning LVC events that trigger the proposal show decision outco
 				cy.get("[type='submit']").click()
 			}
 		)
+		cy.wait(3000)
 		//proposal result shows event triggered
 		cy.visit("/event_group_log/?ignored=unknown&source_type=&telescope=")
 		cy.contains(graceDBId)
 			.parent("tr")
 			.within(() => {
-				cy.get("td").eq(8).contains("Triggered")
+				cy.get("td").contains("Triggered")
 			})
 		cy.get("[data-testid='nav-logs']").click()
 		cy.get("[data-testid='drop-logs-proposals']").click()

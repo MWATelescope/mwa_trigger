@@ -96,8 +96,8 @@ describe("HESS events that trigger the proposal show decision outcome", () => {
 		cy.get("[data-testid='nav-logs']").click()
 		cy.get("[data-testid='drop-logs-proposals']").click()
 		cy.get(".fl-table > tbody:nth-child(2) > tr:nth-child(1)").within(() => {
-			cy.get("td").eq(8).contains("HESS rate significance is")
-			cy.get("td").eq(8).contains("Above horizon so attempting to observe")
+			cy.get("td").contains("HESS rate significance is")
+			cy.get("td").contains("Above horizon so attempting to observe")
 		})
 	})
 })

@@ -271,7 +271,7 @@ def proposal_worth_observing(
                 )
                 proj_source_bool = True
 
-            elif prop_dec.proposal.source_type == "GW" and voevent.event_group_id.source_type == "GW":
+            elif prop_dec.proposal.source_type == "GW" and prop_dec.event_group_id.source_type == "GW":
                 # This proposal wants to observe GRBs so check if it is worth observing
                 trigger_bool, debug_bool, pending_bool, decision_reason_log = worth_observing_gw(
                     # Event values

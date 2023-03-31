@@ -79,9 +79,9 @@
     const rda = document.getElementsByName("recieved_data_after")[0];
     const rdb = document.getElementsByName("recieved_data_before")[0];
 
-    // Don't let users select dates in the future
-    rda.max = datetimeLocal(Date.now());
-    rdb.max = datetimeLocal(Date.now());
+    // // Don't let users select dates in the future
+    // rda.max = datetimeLocal(Date.now());
+    // rdb.max = datetimeLocal(Date.now());
 
     // If no date value for max range, set to current date (when we got the data)
     if(!rdb.value) {
