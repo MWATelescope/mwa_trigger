@@ -69,7 +69,8 @@ describe("Test can create proposals to do observations off HESS events", () => {
 	})
 })
 
-describe("HESS events that trigger the proposal show decision outcome", () => {
+// Not using HESS so skipping for now...
+describe.skip("HESS events that trigger the proposal show decision outcome", () => {
 	it("upload HESS real event and trigger an MWA observation with twilio notifications", () => {
 		cy.login()
 		cy.visit("/")

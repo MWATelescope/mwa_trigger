@@ -114,7 +114,7 @@ describe("Early warning LVC events that don't trigger the proposal show as ignor
 	})
 })
 
-describe.only("Early warning LVC events that trigger the proposal show decision outcome", () => {
+describe("Early warning LVC events that trigger the proposal show decision outcome", () => {
 	it("upload lvc early warning real event and trigger an MWA observation with twilio notifications", () => {
 		const graceDBId = "MS33841s"
 
