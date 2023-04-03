@@ -211,13 +211,13 @@ class ProposalSettings(models.Model):
                                          help_text="Only observe within this range", default=-90)
 
     atca_dec_max_1 = models.IntegerField(verbose_name="Declination max limit 1 (deg)",
-                                         help_text="Only observe within this range", default=-10)
+                                         help_text="Only observe within this range", default=-5)
 
     atca_dec_min_2 = models.IntegerField(verbose_name="Declination min limit 2 (deg)",
-                                         help_text="Only observe within this range", default=-90)
+                                         help_text="Only observe within this range", default=5)
 
     atca_dec_max_2 = models.IntegerField(verbose_name="Declination max limit 2 (deg)",
-                                         help_text="Only observe within this range", default=90)
+                                         help_text="Only observe within this range", default=20)
 
     def __str__(self):
         return f"{self.proposal_id}"
