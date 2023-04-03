@@ -53,9 +53,13 @@
       {% else %}
         <td>{{ event_group.trig_id }}</td>
       {% endif %}
-      <td scope="row">{{ event_group.source_type }}</td>
+      <td scope="row">{% if event_group.source_type %} {{ event_group.source_type }}{% endif %}</td>
       <td scope="row">
+        {% if event_group.source_name %}
         {{ event_group.source_name }}
+        {% elif source_name %}
+        {{ source_name }}
+        {% endif %}
       </td>
       {% for setting in settings %}
         {% if prop_decisions|index:forloop.counter0 == "Ignored" %}

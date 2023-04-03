@@ -197,7 +197,13 @@
                 {{ event.trig_id }}
               {% endif %}
             {% endif %}</td>
-        <td>{% if event_group.source_name is not None %} {{ event_group.source_name }} {% endif %}</td>
+        <td>
+          {% if event.source_name is not None %}
+          {{ event.source_name }}
+          {% elif event_group.source_name is not None %} 
+          {{ event_group.source_name }}  
+          {% endif %}
+        </td>
         <td>{% if event.sequence_num is not None %} {{ event.sequence_num }} {% endif %}</td>
         <td>{% if event.duration     is not None %} {{ event.duration }}     {% endif %}</td>
         <td>{% if event.ra_hms          is not None %} {{ event.ra_hms }}          {% endif %}</td>

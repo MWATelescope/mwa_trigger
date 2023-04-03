@@ -19,8 +19,17 @@
       <td>{{ telescopes }}</td>
     </tr>
     <tr>
+    <tr>
       <td>Event Type(s)</td>
       <td>{{ event_types }}</td>
+    </tr>
+    <tr>
+      <td>Proposal</td>
+      <td><a href="/proposal_edit/{{ prop_dec.proposal.id }}" style="text-decoration:None">{{ prop_dec.proposal.id }}</a></td>
+    </tr>
+    <tr>
+      <td>Proposal ID</td>
+      <td>{{ prop_dec.proposal.proposal_id }}</td>
     </tr>
     <tr>
       <td>Decision</td>
@@ -131,6 +140,9 @@
           <th>Observation ID</th>
           <th>Telescope</th>
           <th>Proposal Decision ID</th>
+          <th>Proposal</th>
+          <th>Proposal ID</th>
+          <th>Proposal Project</th>
           <th>Reason</th>
           <th>Cancel Obs?</th>
         </tr>
@@ -146,6 +158,9 @@
         {% endif %}
         <td>{{ ob.telescope.name }}</td>
         <td><a href="/proposal_decision_details/{{ ob.proposal_decision_id.id }}" style="text-decoration:None">{{ ob.proposal_decision_id.id }}</a</td>
+        <td><a href="/proposal_edit/{{ ob.proposal_decision_id.proposal.id }}" style="text-decoration:None">{{ ob.proposal_decision_id.proposal.id }}</a</td>
+        <td>{{ ob.proposal_decision_id.proposal.proposal_id }}</td>
+        <td>{{ ob.proposal_decision_id.proposal.project_id }}</td>
         <td>{{ ob.reason }}</td>
         <td>
           {% if ob.telescope.name == "ATCA" and ob.proposal_decision_id.decision != 'C' %}

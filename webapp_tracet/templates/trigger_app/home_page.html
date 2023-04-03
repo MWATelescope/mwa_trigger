@@ -82,11 +82,7 @@
       {% endif %}
       <td scope="row">{{ trig.source_type }}</td>
       <td scope="row">
-        {% if trig.source_type == "FS" %}
-          {{ trig.source_name }}
-        {% else %}
-          {{ trig.source_type }}{{ trig.earliest_event_observed|date:"ymd" }}
-        {% endif %}
+        {{ trig.source_name }}
       </td>
       {% for setting in settings %}
         {% if prop_decisions|index:forloop.counter0 == "Ignored" %}
