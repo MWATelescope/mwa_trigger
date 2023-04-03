@@ -228,13 +228,50 @@ class test_grb_group_03(TestCase):
             proposal__telescope__name='ATCA').first().decision, 'T')
 
 
-class test_grb_observation_fail(TestCase):
+class test_grb_observation_fail_atca(TestCase):
     """Tests ignored observations during an event
     """
     # Load default fixtures
     fixtures = [
         "default_data.yaml",
         "trigger_app/test_yamls/atca_grb_proposal_settings.yaml",
+    ]
+
+    with open('trigger_app/test_yamls/atca_test_api_response.yaml', 'r') as file:
+        atca_test_api_response = safe_load(file)
+
+    @patch('atca_rapid_response_api.api.send', return_value=atca_test_api_response)
+    def setUp(self, fake_atca_api):
+        xml_paths = [
+            "../tests/test_events/Swift_BAT_GRB_Pos_fail.xml"
+        ]
+
+        # NOT USED
+        MWA = EarthLocation(lat='-26:42:11.95',
+                            lon='116:40:14.93', height=377.8 * u.m)
+        mwa_coord = SkyCoord(az=0., alt=90., unit=(
+            u.deg, u.deg), frame='altaz', obstime=Time.now(), location=MWA)
+        ra_dec = mwa_coord.icrs
+
+        # Parse and upload the xml file group
+        for xml in xml_paths:
+            trig = parsed_VOEvent(xml)
+            create_voevent_wrapper(trig, ra_dec, False)
+
+    def test_trigger_groups(self):
+        acta_decision = ProposalDecision.objects.filter(
+            proposal__telescope__name='ATCA').first()
+        print(vars(acta_decision))
+
+        self.assertEqual(acta_decision.decision, 'I')
+
+
+class test_grb_observation_fail_mwa(TestCase):
+    """Tests ignored observations during an event
+    """
+    # Load default fixtures
+    fixtures = [
+        "default_data.yaml",
         "trigger_app/test_yamls/mwa_grb_proposal_settings.yaml",
         "trigger_app/test_yamls/mwa_short_grb_proposal_settings.yaml",
     ]
@@ -242,17 +279,10 @@ class test_grb_observation_fail(TestCase):
     with open('trigger_app/test_yamls/trigger_mwa_test.yaml', 'r') as file:
         trigger_mwa_test = safe_load(file)
 
-    with open('trigger_app/test_yamls/atca_test_api_response.yaml', 'r') as file:
-        atca_test_api_response = safe_load(file)
-
     @patch('trigger_app.telescope_observe.trigger_mwa', return_value=trigger_mwa_test)
-    @patch('atca_rapid_response_api.api.send', return_value=atca_test_api_response)
-    def setUp(self, fake_atca_api, fake_mwa_api):
-        fake_atca_api.side_effect = requests.exceptions.ConnectionError()
-        fake_mwa_api.side_effect = requests.exceptions.ConnectionError()
+    def setUp(self, fake_mwa_api):
         xml_paths = [
-            "../tests/test_events/SWIFT_BAT_Lightcurve.xml",
-            "../tests/test_events/SWIFT_BAT_POS.xml"
+            "../tests/test_events/Swift_BAT_GRB_Pos_fail.xml"
         ]
 
         # Setup current RA and Dec at zenith for the MWA
@@ -265,17 +295,12 @@ class test_grb_observation_fail(TestCase):
         # Parse and upload the xml file group
         for xml in xml_paths:
             trig = parsed_VOEvent(xml)
-            try:
-                create_voevent_wrapper(trig, ra_dec)
-            except ConnectionError as err:
-                self.assertTrue(err.__contains__("ConnectionError"))
-            except:
-                print("Request error")
+            create_voevent_wrapper(trig, ra_dec, False)
 
     def test_trigger_groups(self):
-        # Check there are three Events that were grouped as one by the trigger ID
-        self.assertEqual(len(Event.objects.all()), 2)
-        self.assertEqual(len(EventGroup.objects.all()), 1)
+
+        self.assertEqual(ProposalDecision.objects.filter(
+            proposal__telescope__name='MWA_VCS').first().decision, 'I')
 
 
 class test_nu(TestCase):

@@ -42,6 +42,10 @@
         "atca_max_exptime": 600,
         "atca_min_exptime": 60,
         "atca_prioritise_source": false,
+        "atca_dec_max_1": -10,
+        "atca_dec_min_1": -90,
+        "atca_dec_max_2": 5,
+        "atca_dec_min_2": -5,
     }
 },
 ]

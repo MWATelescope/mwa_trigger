@@ -209,7 +209,6 @@ def proposal_worth_observing(
     # Defaults if not worth observing
     trigger_bool = debug_bool = pending_bool = False
     decision_reason_log = prop_dec.decision_reason
-
     # Check if event has an accurate enough position
     if prop_dec.pos_error == 0.0:
         # Ignore the inaccurate event
@@ -217,7 +216,7 @@ def proposal_worth_observing(
     elif voevent.pos_error and (voevent.pos_error > prop_dec.proposal.maximum_position_uncertainty):
         # Ignore the inaccurate event
         decision_reason_log = f"{decision_reason_log}{datetime.datetime.utcnow()}: Event ID {voevent.id}: The Events positions uncertainty ({voevent.pos_error:.4f} deg) is greater than {prop_dec.proposal.maximum_position_uncertainty:.4f} so not observing. \n"
-    elif prop_dec.proposal.telescope_id == "ATCA" and (prop_dec.dec > prop_dec.proposal.atca_dec_max_1 or prop_dec.dec > prop_dec.proposal.atca_dec_max_2 or prop_dec.dec < prop_dec.proposal.atca_dec_min_1 or prop_dec.dec < prop_dec.proposal.atca_dec_min_2):
+    elif prop_dec.proposal.telescope_id == "ATCA" and not (prop_dec.dec > prop_dec.proposal.atca_dec_min_1 and prop_dec.dec < prop_dec.proposal.atca_dec_max_1) and not (prop_dec.dec > prop_dec.proposal.atca_dec_min_2 and prop_dec.dec < prop_dec.proposal.atca_dec_max_2):
         # Ignore the inaccurate event
         decision_reason_log = f"{decision_reason_log}{datetime.datetime.utcnow()}: Event ID {voevent.id}: The Events declination ({ prop_dec.dec }) is outside limit 1 ({ prop_dec.proposal.atca_dec_min_1 } < dec < {prop_dec.proposal.atca_dec_max_1}) or limit 2 ({ prop_dec.proposal.atca_dec_min_2 } < dec < {prop_dec.proposal.atca_dec_max_2}). \n"
     else:
