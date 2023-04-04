@@ -231,8 +231,9 @@ def EventGroupList(request):
     if(not req.dict()):
         req = QueryDict("ignored=False&source_type=GRB&telescope=SWIFT")
 
-    f = EventGroupFilter(req, queryset=models.EventGroup.objects.all())
+    f = EventGroupFilter(req, queryset=models.EventGroup.objects.distinct())
     eventgroups = f.qs
+
 
     prop_settings = models.ProposalSettings.objects.all()
     # Paginate
@@ -247,14 +248,7 @@ def EventGroupList(request):
     recent_triggers_info, page_obj = grab_decisions_for_event_groups(
         event_group_ids_paged)
 
-    unique_recent_triggers_info = []
-    for element in recent_triggers_info:
-        res = filter(lambda x: x[0].id == element[0].id,
-                     unique_recent_triggers_info)
-        if (len(list(res)) == 0):
-            unique_recent_triggers_info.append(element)
-
-    return render(request, 'trigger_app/event_group_list.html', {'filter': f, "trigger_info": unique_recent_triggers_info, "settings": prop_settings, "page_obj": page_obj})
+    return render(request, 'trigger_app/event_group_list.html', {'filter': f, "trigger_info": recent_triggers_info, "settings": prop_settings, "page_obj": page_obj})
 
 
 class CometLogFilter(django_filters.FilterSet):
