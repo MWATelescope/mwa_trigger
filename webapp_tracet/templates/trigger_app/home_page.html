@@ -87,8 +87,9 @@
 
       {% elif source_name %}
       <td scope="row">{{ source_name }}</td>
+      {% else %}
+      <td scope="row"></td>
       {% endif %}
-
       </td>
       {% for setting in settings %}
         {% if prop_decisions|index:forloop.counter0 == "Ignored" %}

@@ -185,7 +185,11 @@ def grab_decisions_for_event_groups(event_groups):
         telescope_list.append(
             ' '.join(set(event_group_events.values_list('telescope', flat=True)))
         )
-        source_name_list.append(event_group_events.first().source_name)
+        event_with_source_name = list(filter(lambda x: x.source_name is not None, list(event_group_events)))
+        if(len(event_with_source_name) > 0):
+            source_name_list.append(event_with_source_name[0].source_name)
+        else:
+            source_name_list.append(event_group_events.first().source_name)
         # grab decision for each proposal
         decision_list = []
         decision_id_list = []
