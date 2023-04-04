@@ -81,8 +81,14 @@
         <td>{{ trig.trig_id }}</td>
       {% endif %}
       <td scope="row">{{ trig.source_type }}</td>
-      <td scope="row">
-        {{ trig.source_name }}
+     
+      {% if trig.source_name %}
+      <td scope="row">{{ trig.source_name }}</td>
+
+      {% elif source_name %}
+      <td scope="row">{{ source_name }}</td>
+      {% endif %}
+
       </td>
       {% for setting in settings %}
         {% if prop_decisions|index:forloop.counter0 == "Ignored" %}
