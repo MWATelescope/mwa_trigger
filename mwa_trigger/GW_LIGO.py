@@ -56,7 +56,7 @@ SECURE_KEY = handlers.get_secure_key(PROJECT_ID)
 
 
 # Email these addresses when we trigger on an event
-NOTIFY_LIST = ['ddob1600@uni.sydney.edu.au', 'kaplan@uwm.edu', 'tara@physics.usyd.edu.au', "Andrew.Williams@curtin.edu.au"]
+NOTIFY_LIST = ['Gemma.Anderson@curtin.edu.au', "Andrew.Williams@curtin.edu.au"]
 
 # Email these addresses when we handle an event that is a GRB, but we don't trigger on it.
 DEBUG_NOTIFY_LIST = ["Andrew.Williams@curtin.edu.au"]
