@@ -48,7 +48,7 @@ HAS_NS_THRESH = 0.5
 MAX_RESPONSE_TIME = 600
 OBS_LENGTH = 1800     # length of the observation in seconds
 MIN_PROB = 0.1
-PROJECT_ID = 'D0011'
+PROJECT_ID = 'G0094'
 TEST_PROB = 0.01      # Roughly one test event every four days will generate a 'pretend' trigger
 
 
