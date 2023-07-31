@@ -1,6 +1,8 @@
 __version__ = "0.1.1"
 __author__ = ["Dougal Dobie", "David Kaplan"]
 
+import traceback
+
 import logging
 import os
 import random
@@ -209,7 +211,8 @@ class GW(handlers.TriggerEvent):
             self.debug('Read in GW map %s' % self.gwfile)
         except:
             self.error('Unable to read GW sky probability map %s' % self.gwfile)
-            return
+            self.error('Error: %s' % traceback.format_exc())
+            return False
 
         self.header = {}
         for i in range(len(gwheader)):
@@ -242,6 +245,7 @@ class GW(handlers.TriggerEvent):
         self.debug('Downsampled to NSIDE=%d' % self.nside_down)
 
         self.compute_coords()
+        return True
 
     ##################################################
     def compute_coords(self):
@@ -527,12 +531,6 @@ def handle_gw(v, pretend=False, calc_time=None):
         else:
             log.info('Test event, not triggering.')
             return
-        
-        event_debug_list = DEBUG_NOTIFY_LIST
-        
-    else:
-        # This is a real event, send debug email to entire mailing list
-        event_debug_list = NOTIFY_LIST
 
     params = {elem.attrib['name']:elem.attrib['value'] for elem in v.iterfind('.//Param')}
     
@@ -555,7 +553,7 @@ def handle_gw(v, pretend=False, calc_time=None):
     if params['Packet_Type'] == "164":
         gw.info("Alert is an event retraction. Not triggering.")
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
-                            to_addresses=event_debug_list,
+                            to_addresses=DEBUG_NOTIFY_LIST,
                             subject=debug_email_subject,
                             msg_text=DEBUG_EMAIL_TEMPLATE % "Alert is an event retraction. Not triggering.",
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
@@ -565,7 +563,7 @@ def handle_gw(v, pretend=False, calc_time=None):
         msg = "HasNS not in params. Not triggering."
         gw.debug(msg)
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
-                            to_addresses=event_debug_list,
+                            to_addresses=DEBUG_NOTIFY_LIST,
                             subject=debug_email_subject,
                             msg_text=DEBUG_EMAIL_TEMPLATE % msg,
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
@@ -574,7 +572,7 @@ def handle_gw(v, pretend=False, calc_time=None):
         msg = "P_HasNS (%.2f) below threshold (%.2f). Not triggering." % (float(params['HasNS']), HAS_NS_THRESH)
         gw.debug(msg)
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
-                            to_addresses=event_debug_list,
+                            to_addresses=DEBUG_NOTIFY_LIST,
                             subject=debug_email_subject,
                             msg_text=DEBUG_EMAIL_TEMPLATE % msg,
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
@@ -583,7 +581,7 @@ def handle_gw(v, pretend=False, calc_time=None):
     if 'skymap_fits' not in params:
         gw.debug("No skymap in VOEvent. Not triggering.")
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
-                            to_addresses=event_debug_list,
+                            to_addresses=DEBUG_NOTIFY_LIST,
                             subject=debug_email_subject,
                             msg_text=DEBUG_EMAIL_TEMPLATE % "No skymap in VOEvent. Not triggering.",
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
@@ -601,7 +599,7 @@ def handle_gw(v, pretend=False, calc_time=None):
     if RADecgrid is None:
         gw.info("No pointing from skymap, not triggering")
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
-                            to_addresses=event_debug_list,
+                            to_addresses=DEBUG_NOTIFY_LIST,
                             subject=debug_email_subject,
                             msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in gw.loglist]),
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
@@ -636,7 +634,7 @@ def handle_gw(v, pretend=False, calc_time=None):
             if (abs(ra.deg - last_ra) < 5.0) and (abs(dec.deg - last_dec) < 5.0):
                 gw.info("New pointing very close to old pointing. Not triggering.")
                 handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
-                                    to_addresses=event_debug_list,
+                                    to_addresses=DEBUG_NOTIFY_LIST,
                                     subject=debug_email_subject,
                                     msg_text=DEBUG_EMAIL_TEMPLATE % "New pointing same as old pointing. Not triggering.",
                                     attachments=[('voevent.xml', voeventparse.dumps(v))])
@@ -657,7 +655,7 @@ def handle_gw(v, pretend=False, calc_time=None):
             log_message = "Time since merger (%d s) greater than max response time (%d s). Not triggering" % (delta_T_sec, MAX_RESPONSE_TIME)
             gw.info(log_message)
             handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
-                                to_addresses=event_debug_list,
+                                to_addresses=DEBUG_NOTIFY_LIST,
                                 subject=debug_email_subject,
                                 msg_text=DEBUG_EMAIL_TEMPLATE % log_message,
                                 attachments=[('voevent.xml', voeventparse.dumps(v))])
@@ -699,7 +697,7 @@ def handle_gw(v, pretend=False, calc_time=None):
                                     voevent=voeventparse.dumps(v))
     if result is None:
         handlers.send_email(from_address='mwa@telemetry.mwa128t.org',
-                            to_addresses=event_debug_list,
+                            to_addresses=DEBUG_NOTIFY_LIST,
                             subject=debug_email_subject,
                             msg_text=DEBUG_EMAIL_TEMPLATE % '\n'.join([str(x) for x in gw.loglist]),
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
