@@ -586,6 +586,8 @@ def handle_gw(v, pretend=False, calc_time=None):
                             msg_text=DEBUG_EMAIL_TEMPLATE % "No skymap in VOEvent. Not triggering.",
                             attachments=[('voevent.xml', voeventparse.dumps(v))])
         return
+
+    gw.debug('Skymap given as %s' % params['skymap_fits'])
         
     try:
         gw.load_skymap(params['skymap_fits'], calc_time=calc_time)
